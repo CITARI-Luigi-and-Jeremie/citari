@@ -1,59 +1,102 @@
 import type { ReactNode } from "react";
 import { BOOKING_URL } from "./constants";
 
-/** Mise en page commune des pages de contenu (format « réponse directe »). */
+/**
+ * Mise en page des pages éditoriales (DESIGN.md §5) : grille asymétrique,
+ * rail de métadonnées à gauche, colonne de texte étroite et lisible.
+ */
 export function ArticleLayout({
   title,
   answer,
   updated,
+  kicker,
   children,
 }: {
   title: string;
   answer: string;
   updated: string;
+  kicker?: string;
   children: ReactNode;
 }) {
   return (
-    <main className="mx-auto max-w-3xl px-4 py-12">
-      <a href="/" className="text-sm text-slate-500 hover:text-accent">← GEO Sprint</a>
-      <h1 className="mt-4 text-4xl font-extrabold leading-tight">{title}</h1>
-      {/* Réponse directe en tête : les 2 premières phrases répondent à la requête. */}
-      <p className="mt-4 rounded-xl border-l-4 border-accent bg-accent-light/50 p-4 text-lg">{answer}</p>
-      <p className="mt-3 text-xs text-slate-400">Mis à jour le {updated} · GEO Sprint</p>
-      <div className="prose-geo mt-8 space-y-6">{children}</div>
+    <div className="mx-auto max-w-shell px-4 lg:px-8">
+      <header className="flex items-baseline justify-between border-b border-rule py-6">
+        <a href="/" className="font-mono text-sm tracking-wider text-bone transition-colors duration-150 ease-sharp hover:text-signal">
+          GEO&nbsp;SPRINT
+        </a>
+        <a href="/" className="label transition-colors duration-150 ease-sharp hover:text-bone">
+          Scan gratuit
+        </a>
+      </header>
 
-      <section className="mt-12 rounded-2xl bg-accent p-8 text-center text-white">
-        <h2 className="text-2xl font-bold">Testez votre visibilité IA gratuitement</h2>
-        <p className="mx-auto mt-2 max-w-xl text-sm text-indigo-100">
-          Score 0-100 sur ChatGPT, Claude, Gemini et Perplexity, part de voix face à vos concurrents et réponses
-          réelles. 90 secondes, sans inscription.
-        </p>
-        <div className="mt-4 flex flex-wrap justify-center gap-3">
-          <a href="/" className="rounded-lg bg-white px-6 py-3 font-semibold text-accent">Lancer mon scan gratuit</a>
-          <a href={BOOKING_URL} className="rounded-lg border border-white/60 px-6 py-3 font-semibold">Réserver un call</a>
+      <div className="py-16 lg:py-24">
+        <p className="label">{kicker ?? "Guide"}</p>
+        <h1 className="mt-6 max-w-[18ch] font-editorial text-hero text-bone">{title}</h1>
+        {/* Réponse directe en tête : les deux premières phrases répondent à la requête. */}
+        <p className="mt-8 max-w-prose border-l-2 border-signal pl-6 text-lg text-bone">{answer}</p>
+        <p className="label mt-6">Mis à jour le {updated}</p>
+      </div>
+
+      <div className="grid gap-12 border-t border-rule pt-16 lg:grid-cols-[180px_minmax(0,1fr)] lg:gap-16">
+        <div className="label lg:sticky lg:top-8 lg:self-start">GEO Sprint · analyse</div>
+        <article className="min-w-0 space-y-6">{children}</article>
+      </div>
+
+      <section className="mt-24 border border-signal">
+        <div className="grid gap-8 p-8 lg:grid-cols-[1fr_auto] lg:items-center lg:p-12">
+          <div>
+            <h2 className="font-editorial text-2xl text-bone">Testez votre visibilité IA</h2>
+            <p className="mt-3 max-w-prose text-sm text-bone-dim">
+              Score 0-100 sur ChatGPT, Claude, Gemini et Perplexity, part de voix face à vos concurrents et réponses
+              réelles. Quatre-vingt-dix secondes, sans inscription.
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-3">
+            <a href="/" className="btn-signal whitespace-nowrap">Lancer le scan</a>
+            <a href={BOOKING_URL} className="btn-ghost whitespace-nowrap">Réserver un call</a>
+          </div>
         </div>
       </section>
-    </main>
+
+      <footer className="border-t border-rule py-12">
+        <nav className="flex flex-wrap gap-x-6 gap-y-2">
+          {[
+            ["/guide-geo", "Guide GEO"],
+            ["/geo-vs-seo", "GEO vs SEO"],
+            ["/alternatives-agence-seo", "Alternatives aux agences SEO"],
+            ["/mentions-legales", "Mentions légales"],
+            ["/confidentialite", "Confidentialité"],
+          ].map(([href, label]) => (
+            <a key={href} href={href} className="label transition-colors duration-150 ease-sharp hover:text-bone">
+              {label}
+            </a>
+          ))}
+        </nav>
+      </footer>
+    </div>
   );
 }
 
 export function H2({ children }: { children: ReactNode }) {
-  return <h2 className="pt-4 text-2xl font-bold">{children}</h2>;
+  return <h2 className="border-t border-rule pt-8 font-editorial text-2xl text-bone">{children}</h2>;
 }
 
 export function H3({ children }: { children: ReactNode }) {
-  return <h3 className="pt-2 text-lg font-semibold">{children}</h3>;
+  return <h3 className="pt-2 font-mono text-sm uppercase tracking-wider text-bone">{children}</h3>;
 }
 
 export function P({ children }: { children: ReactNode }) {
-  return <p className="text-slate-700">{children}</p>;
+  return <p className="max-w-prose text-bone-dim">{children}</p>;
 }
 
 export function UL({ items }: { items: ReactNode[] }) {
   return (
-    <ul className="ml-5 list-disc space-y-1.5 text-slate-700">
+    <ul className="max-w-prose border-t border-rule">
       {items.map((it, i) => (
-        <li key={i}>{it}</li>
+        <li key={i} className="flex gap-4 border-b border-rule py-3 text-bone-dim">
+          <span className="font-mono text-signal">{String(i + 1).padStart(2, "0")}</span>
+          <span>{it}</span>
+        </li>
       ))}
     </ul>
   );
@@ -61,20 +104,20 @@ export function UL({ items }: { items: ReactNode[] }) {
 
 export function Table({ head, rows }: { head: string[]; rows: ReactNode[][] }) {
   return (
-    <div className="overflow-x-auto">
-      <table className="w-full min-w-[520px] border-collapse text-sm">
+    <div className="overflow-x-auto border border-rule">
+      <table className="w-full min-w-[560px] border-collapse text-left">
         <thead>
-          <tr className="border-b-2 border-slate-300 text-left">
-            {head.map((h) => (
-              <th key={h} className="py-2 pr-4 font-semibold">{h}</th>
+          <tr className="bg-ink-raised">
+            {head.map((h, i) => (
+              <th key={i} className="label border-b border-rule px-4 py-3 font-normal">{h}</th>
             ))}
           </tr>
         </thead>
         <tbody>
           {rows.map((r, i) => (
-            <tr key={i} className="border-b border-slate-100 align-top">
+            <tr key={i} className={i % 2 ? "bg-ink-sunken" : undefined}>
               {r.map((c, j) => (
-                <td key={j} className="py-2 pr-4 text-slate-700">{c}</td>
+                <td key={j} className="border-b border-rule px-4 py-3 align-top text-sm text-bone-dim">{c}</td>
               ))}
             </tr>
           ))}
@@ -99,11 +142,14 @@ export function Faq({ items }: { items: { q: string; a: string }[] }) {
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <H2>Questions fréquentes</H2>
-      <div className="space-y-3">
+      <div className="border-t border-rule">
         {items.map((f) => (
-          <details key={f.q} className="rounded-xl border border-slate-200 p-4">
-            <summary className="cursor-pointer font-semibold">{f.q}</summary>
-            <p className="mt-2 text-slate-700">{f.a}</p>
+          <details key={f.q} className="group border-b border-rule py-4">
+            <summary className="flex cursor-pointer items-baseline gap-4 font-mono text-sm text-bone marker:content-['']">
+              <span className="text-signal transition-transform duration-150 ease-sharp group-open:rotate-45">+</span>
+              {f.q}
+            </summary>
+            <p className="mt-3 max-w-prose pl-8 text-sm text-bone-dim">{f.a}</p>
           </details>
         ))}
       </div>
@@ -129,13 +175,21 @@ export function Sources({ items }: { items: { label: string; url: string }[] }) 
   return (
     <>
       <H2>Sources</H2>
-      <ul className="ml-5 list-disc space-y-1 text-sm text-slate-600">
-        {items.map((s) => (
-          <li key={s.url}>
-            <a className="text-accent underline" href={s.url} target="_blank" rel="noopener noreferrer">{s.label}</a>
+      <ol className="border-t border-rule">
+        {items.map((s, i) => (
+          <li key={s.url} className="flex gap-4 border-b border-rule py-3">
+            <span className="tnum font-mono text-xs text-bone-faint">{String(i + 1).padStart(2, "0")}</span>
+            <a
+              className="text-sm text-bone-dim transition-colors duration-150 ease-sharp hover:text-signal"
+              href={s.url}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {s.label}
+            </a>
           </li>
         ))}
-      </ul>
+      </ol>
     </>
   );
 }

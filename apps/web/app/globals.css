@@ -2,15 +2,205 @@
 @tailwind components;
 @tailwind utilities;
 
-body {
-  @apply bg-white text-ink antialiased;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+/* ─────────────────────────────────────────────────────────────
+   Jetons — source unique. Aucune couleur en dur dans un composant.
+   Palette validée CVD : voir DESIGN.md §11.
+   ───────────────────────────────────────────────────────────── */
+@layer base {
+  :root {
+    --ink: #07090b;
+    --ink-raised: #0e1216;
+    --ink-sunken: #050708;
+
+    --rule: #242a31;
+    --rule-strong: #39424c;
+    /* Piste des jauges : doit rester lisible sous une barre vide */
+    --track: #1b2128;
+
+    --bone: #ede7da;
+    --bone-dim: #9ba3ac;
+    --bone-faint: #646c75;
+
+    --signal: #f0501f;
+    --valid: #2cab74;
+
+    /* Rythme d'animation : sec, jamais flottant */
+    --ease-sharp: cubic-bezier(0.2, 0.9, 0.25, 1);
+    --dur-fast: 120ms;
+    --dur-base: 180ms;
+  }
+
+  * {
+    border-color: var(--rule);
+  }
+
+  html {
+    background: var(--ink);
+    /* Empêche le "flash" clair au chargement */
+    color-scheme: dark;
+  }
+
+  body {
+    background: var(--ink);
+    color: var(--bone);
+    font-family: var(--font-body), system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  ::selection {
+    background: var(--signal);
+    color: var(--ink);
+  }
+
+  /* Focus visible sobre mais net — accessibilité non négociable */
+  :focus-visible {
+    outline: 2px solid var(--signal);
+    outline-offset: 2px;
+  }
 }
 
-mark {
-  @apply bg-amber-200 rounded px-0.5;
+@layer components {
+  /* Étiquette technique : petites capitales espacées, monospace */
+  .label {
+    font-family: var(--font-mono), monospace;
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--bone-faint);
+  }
+
+  /* Filet horizontal éditorial */
+  .rule-h {
+    border-top: 1px solid var(--rule);
+  }
+
+  /* Bouton principal — bloc plein, angle net, pas d'ombre */
+  .btn-signal {
+    background: var(--signal);
+    color: var(--ink);
+    font-family: var(--font-mono), monospace;
+    font-size: 13px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 14px 24px;
+    border: 1px solid var(--signal);
+    transition: background var(--dur-fast) var(--ease-sharp), color var(--dur-fast) var(--ease-sharp);
+  }
+  .btn-signal:hover {
+    background: transparent;
+    color: var(--signal);
+  }
+  .btn-signal:disabled {
+    opacity: 0.45;
+    pointer-events: none;
+  }
+
+  /* Bouton secondaire — contour seulement */
+  .btn-ghost {
+    background: transparent;
+    color: var(--bone);
+    font-family: var(--font-mono), monospace;
+    font-size: 13px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 14px 24px;
+    border: 1px solid var(--rule-strong);
+    transition: border-color var(--dur-fast) var(--ease-sharp), color var(--dur-fast) var(--ease-sharp);
+  }
+  .btn-ghost:hover {
+    border-color: var(--bone);
+  }
+
+  /* Champ de formulaire — filet bas uniquement, façon formulaire imprimé */
+  .field {
+    width: 100%;
+    background: transparent;
+    border: 1px solid var(--rule);
+    color: var(--bone);
+    font-family: var(--font-mono), monospace;
+    font-size: 14px;
+    padding: 12px 14px;
+    transition: border-color var(--dur-fast) var(--ease-sharp);
+  }
+  .field::placeholder {
+    color: var(--bone-faint);
+  }
+  .field:hover {
+    border-color: var(--rule-strong);
+  }
+  .field:focus {
+    border-color: var(--signal);
+    outline: none;
+  }
+
+  /* Surlignage d'une marque dans un verbatim */
+  .mark-brand {
+    background: color-mix(in srgb, var(--signal) 22%, transparent);
+    border-bottom: 1px solid var(--signal);
+    color: var(--bone);
+    padding: 0 2px;
+  }
+  .mark-rival {
+    background: color-mix(in srgb, var(--bone) 12%, transparent);
+    border-bottom: 1px solid var(--rule-strong);
+    padding: 0 2px;
+  }
 }
 
+/* Chiffres tabulaires partout où l'on compare des valeurs */
+.tnum {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+}
+
+/* ── Motion : chorégraphie réservée au scan et à la révélation du score ── */
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.animate-rise {
+  animation: rise var(--dur-base) var(--ease-sharp) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ── Impression / PDF : fond clair, typographie éditoriale ── */
 @media print {
-  .no-print { display: none !important; }
+  :root {
+    --ink: #ffffff;
+    --ink-raised: #ffffff;
+    --ink-sunken: #f6f4ef;
+    --bone: #14171a;
+    --bone-dim: #4b5259;
+    --bone-faint: #6d757d;
+    --rule: #d5d0c6;
+    --rule-strong: #a8a296;
+  }
+  html,
+  body {
+    background: #fff;
+    color: #14171a;
+  }
+  .no-print {
+    display: none !important;
+  }
+  section {
+    break-inside: avoid;
+  }
 }

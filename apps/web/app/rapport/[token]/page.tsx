@@ -2,28 +2,48 @@ import { notFound } from "next/navigation";
 import { getDb, ENGINES, ENGINE_LABELS, type EngineId } from "@geo/core";
 import { getReportData, type ScanRow } from "@/lib/scan-data";
 import { BOOKING_URL } from "@/lib/constants";
+import { scoreTone, TONE_VAR } from "@/lib/score";
+import ScoreHero from "@/components/viz/ScoreHero";
+import ShareOfVoice from "@/components/viz/ShareOfVoice";
+import EngineBars from "@/components/viz/EngineBars";
 
 export const dynamic = "force-dynamic";
 
-/** Surligne les marques dans un texte (rendu React, pas de HTML injecté). */
-function Highlighted({ text, brands }: { text: string; brands: string[] }) {
-  if (brands.length === 0) return <>{text}</>;
-  const escaped = brands.map((b) => b.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|");
+const SECTIONS = [
+  { id: "score", n: "01", label: "Score" },
+  { id: "voix", n: "02", label: "Part de voix" },
+  { id: "requetes", n: "03", label: "Requêtes" },
+  { id: "verbatims", n: "04", label: "Verbatims" },
+  { id: "sources", n: "05", label: "Sources" },
+  { id: "actions", n: "06", label: "Actions" },
+];
+
+/** Surlignage des marques dans un verbatim — la cible et les rivaux se distinguent. */
+function Highlighted({ text, target, rivals }: { text: string; target: string; rivals: string[] }) {
+  const all = [target, ...rivals].filter(Boolean);
+  if (all.length === 0) return <>{text}</>;
+  const escaped = all.map((b) => b.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|");
   const parts = text.split(new RegExp(`(${escaped})`, "gi"));
   return (
     <>
-      {parts.map((p, i) =>
-        brands.some((b) => b.toLowerCase() === p.toLowerCase()) ? <mark key={i}>{p}</mark> : <span key={i}>{p}</span>
-      )}
+      {parts.map((p, i) => {
+        const low = p.toLowerCase();
+        if (low === target.toLowerCase()) return <mark key={i} className="mark-brand">{p}</mark>;
+        if (rivals.some((r) => r.toLowerCase() === low)) return <mark key={i} className="mark-rival">{p}</mark>;
+        return <span key={i}>{p}</span>;
+      })}
     </>
   );
 }
 
-function Delta({ now, before }: { now: number; before: number | null | undefined }) {
-  if (before == null) return null;
-  const d = Math.round(now - before);
-  if (d === 0) return <span className="ml-2 text-sm text-slate-400">=</span>;
-  return <span className={`ml-2 text-sm font-semibold ${d > 0 ? "text-emerald-600" : "text-red-600"}`}>{d > 0 ? `+${d}` : d}</span>;
+function SectionHead({ n, title, sub }: { n: string; title: string; sub?: string }) {
+  return (
+    <div className="mb-6 flex items-baseline gap-4 border-b border-rule pb-3">
+      <span className="tnum font-mono text-micro text-signal">{n}</span>
+      <h2 className="font-editorial text-2xl text-bone">{title}</h2>
+      {sub && <span className="ml-auto hidden font-mono text-xs text-bone-faint sm:block">{sub}</span>}
+    </div>
+  );
 }
 
 export default async function ReportPage({ params }: { params: Promise<{ token: string }> }) {
@@ -33,187 +53,276 @@ export default async function ReportPage({ params }: { params: Promise<{ token: 
   if (!scan || scan.status !== "done") notFound();
 
   const { queryTable, verbatims, perplexitySources, previous } = await getReportData(scan);
-  const detail = scan.score_detail;
-  const sov = scan.share_of_voice;
-  const maxShare = Math.max(...Object.values(sov?.share ?? { x: 0.01 }), 0.01);
   const isComparison = previous != null;
+  const score = scan.score ?? 0;
+  const sov = scan.share_of_voice?.share ?? {};
+  const rivals = Object.keys(sov).filter((b) => b !== scan.brand);
+
+  const engineData = ENGINES.map((e: EngineId) => {
+    const s = scan.score_detail?.byEngine?.[e];
+    return {
+      key: e,
+      label: ENGINE_LABELS[e],
+      score: s?.score ?? null,
+      mentioned: s?.mentionedCount,
+      total: s?.responses,
+      previous: previous?.score_detail?.byEngine?.[e]?.score ?? null,
+    };
+  });
+
+  const shareData = Object.entries(sov).map(([brand, share]) => ({
+    brand,
+    share: share as number,
+    isTarget: brand === scan.brand,
+    previous: previous?.share_of_voice?.share?.[brand] ?? null,
+  }));
+
+  const dateStr = new Date(scan.created_at).toLocaleDateString("fr-FR", { day: "2-digit", month: "long", year: "numeric" });
 
   return (
-    <main className="mx-auto max-w-4xl px-4 py-12">
-      <header className="border-b border-slate-200 pb-8">
-        <p className="text-sm uppercase tracking-wide text-slate-500">
-          Rapport de visibilité IA{isComparison ? " — comparaison avant / après (J+90)" : ""}
-        </p>
-        <h1 className="mt-1 text-3xl font-extrabold">{scan.brand}</h1>
-        <p className="mt-1 text-sm text-slate-500">
-          {scan.sector} · scan du {new Date(scan.created_at).toLocaleDateString("fr-FR")}
-          {isComparison && previous && ` · comparé au scan du ${new Date(previous.created_at).toLocaleDateString("fr-FR")}`}
-        </p>
-      </header>
-
-      {/* 1. Score global + par moteur */}
-      <section className="mt-10">
-        <h2 className="text-xl font-bold">1. Score de Visibilité IA</h2>
-        <div className="mt-4 flex items-baseline">
-          <span className="text-6xl font-extrabold text-accent">{scan.score}</span>
-          <span className="text-2xl text-slate-400">/100</span>
-          {isComparison && <Delta now={scan.score ?? 0} before={previous?.score} />}
+    <div className="mx-auto max-w-shell px-4 lg:px-8">
+      {/* ── Masthead éditorial, calé à gauche ── */}
+      <header className="border-b border-rule-strong pb-8 pt-12">
+        <div className="flex flex-wrap items-baseline gap-x-4 gap-y-2">
+          <span className="label">Rapport de visibilité IA</span>
+          {isComparison && (
+            <span className="border border-signal px-2 py-px font-mono text-micro uppercase text-signal">
+              Comparaison J+90
+            </span>
+          )}
         </div>
-        <div className="mt-4 grid gap-3 sm:grid-cols-4">
-          {ENGINES.map((e: EngineId) => {
-            const s = detail?.byEngine?.[e];
-            const prev = previous?.score_detail?.byEngine?.[e];
-            return (
-              <div key={e} className="rounded-xl border border-slate-200 p-4 text-center">
-                <p className="text-sm text-slate-500">{ENGINE_LABELS[e]}</p>
-                <p className="text-2xl font-bold">
-                  {s?.score ?? "—"}
-                  {isComparison && s && <Delta now={s.score} before={prev?.score} />}
-                </p>
-                <p className="text-xs text-slate-400">{s ? `${s.mentionedCount}/${s.responses} mentions` : "aucune donnée"}</p>
-              </div>
-            );
-          })}
-        </div>
-      </section>
-
-      {/* 2. Part de voix */}
-      <section className="mt-10">
-        <h2 className="text-xl font-bold">2. Part de voix face aux concurrents</h2>
-        <div className="mt-4 space-y-2">
-          {Object.entries(sov?.share ?? {})
-            .sort(([, a], [, b]) => (b as number) - (a as number))
-            .map(([brand, share]) => {
-              const prevShare = previous?.share_of_voice?.share?.[brand];
-              return (
-                <div key={brand} className="flex items-center gap-3">
-                  <span className={`w-40 truncate text-sm ${brand === scan.brand ? "font-bold" : ""}`}>{brand}</span>
-                  <div className="h-5 flex-1 overflow-hidden rounded bg-slate-100">
-                    <div
-                      className={`h-full rounded ${brand === scan.brand ? "bg-accent" : "bg-slate-400"}`}
-                      style={{ width: `${((share as number) / maxShare) * 100}%` }}
-                    />
-                  </div>
-                  <span className="w-24 text-right text-sm">
-                    {Math.round((share as number) * 100)} %
-                    {isComparison && prevShare != null && (
-                      <Delta now={(share as number) * 100} before={prevShare * 100} />
-                    )}
-                  </span>
-                </div>
-              );
-            })}
-        </div>
-      </section>
-
-      {/* 3. Tableau requête par requête */}
-      <section className="mt-10">
-        <h2 className="text-xl font-bold">3. Détail requête par requête</h2>
-        <p className="mt-1 text-sm text-slate-500">Qui est cité, dans quel ordre, pour chaque question posée aux 4 moteurs.</p>
-        <div className="mt-4 overflow-x-auto">
-          <table className="w-full min-w-[720px] border-collapse text-sm">
-            <thead>
-              <tr className="border-b-2 border-slate-300 text-left">
-                <th className="py-2 pr-3">Requête</th>
-                {ENGINES.map((e) => (
-                  <th key={e} className="px-2 py-2">{ENGINE_LABELS[e]}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {queryTable.map((row) => (
-                <tr key={row.query} className="border-b border-slate-100 align-top">
-                  <td className="py-2 pr-3">{row.query}</td>
-                  {ENGINES.map((e) => {
-                    const brands = row.engines[e];
-                    const hasBrand = (brands ?? []).includes(scan.brand);
-                    return (
-                      <td key={e} className={`px-2 py-2 text-xs ${hasBrand ? "text-emerald-700" : "text-slate-500"}`}>
-                        {brands == null ? "—" : brands.length === 0 ? "aucune marque" : brands.map((b, i) => (
-                          <span key={b}>{i > 0 && " → "}{b === scan.brand ? <strong>{b}</strong> : b}</span>
-                        ))}
-                      </td>
-                    );
-                  })}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </section>
-
-      {/* 4. Verbatims */}
-      <section className="mt-10">
-        <h2 className="text-xl font-bold">4. Ce que répondent réellement les IA</h2>
-        <div className="mt-4 space-y-4">
-          {verbatims.map((v, i) => (
-            <div key={i} className={`rounded-xl border p-4 ${v.competitorOnly ? "border-amber-300 bg-amber-50" : "border-slate-200"}`}>
-              <p className="text-sm font-semibold">
-                {ENGINE_LABELS[v.engine]} — « {v.query} »
-                {v.competitorOnly && <span className="ml-2 rounded bg-amber-200 px-2 py-0.5 text-xs">concurrent cité, pas vous</span>}
-              </p>
-              <blockquote className="mt-2 whitespace-pre-wrap text-sm text-slate-700">
-                <Highlighted text={v.excerpt} brands={v.brands} />
-              </blockquote>
+        <h1 className="mt-4 font-editorial text-hero text-bone">{scan.brand}</h1>
+        <dl className="mt-6 grid grid-cols-2 gap-x-8 gap-y-3 font-mono text-xs sm:grid-cols-4">
+          {[
+            ["Secteur", scan.sector],
+            ["Site", scan.url.replace(/^https?:\/\//, "")],
+            ["Mesuré le", dateStr],
+            ["Échantillon", `${queryTable.length} requêtes × 4 moteurs`],
+          ].map(([k, v]) => (
+            <div key={k as string}>
+              <dt className="label">{k}</dt>
+              <dd className="mt-1 truncate text-bone-dim">{v}</dd>
             </div>
           ))}
-        </div>
-      </section>
+        </dl>
+      </header>
 
-      {/* 5. Sources Perplexity */}
-      <section className="mt-10">
-        <h2 className="text-xl font-bold">5. Les sources qui font gagner vos concurrents</h2>
-        <p className="mt-1 text-sm text-slate-500">
-          Sites cités par Perplexity dans les réponses où vos concurrents apparaissent. Voilà où il faut être.
-        </p>
-        <ul className="mt-4 space-y-2 text-sm">
-          {perplexitySources.length === 0 && <li className="text-slate-500">Aucune source concurrente détectée sur ce scan.</li>}
-          {perplexitySources.map((s) => (
-            <li key={s.url} className="flex items-baseline justify-between gap-4 border-b border-slate-100 pb-2">
-              <a href={s.url} className="break-all text-accent underline" target="_blank" rel="noopener noreferrer">{s.url}</a>
-              <span className="shrink-0 text-xs text-slate-500">{s.competitors.join(", ")} · cité {s.count}×</span>
-            </li>
-          ))}
-        </ul>
-      </section>
+      <div className="lg:flex lg:gap-16">
+        {/* ── Rail de navigation, colonne étroite ── */}
+        <nav className="no-print hidden w-40 shrink-0 lg:block">
+          <ol className="sticky top-8 border-l border-rule pt-16">
+            {SECTIONS.map((s) => (
+              <li key={s.id}>
+                <a
+                  href={`#${s.id}`}
+                  className="-ml-px flex items-baseline gap-3 border-l border-transparent py-2 pl-4 font-mono text-xs text-bone-faint transition-colors duration-150 ease-sharp hover:border-signal hover:text-bone"
+                >
+                  <span className="tnum">{s.n}</span>
+                  <span>{s.label}</span>
+                </a>
+              </li>
+            ))}
+          </ol>
+        </nav>
 
-      {/* 6. Actions prioritaires */}
-      <section className="mt-10">
-        <h2 className="text-xl font-bold">6. Vos 10 actions prioritaires</h2>
-        <ol className="mt-4 space-y-3">
-          {(scan.actions ?? []).map((a, i) => (
-            <li key={i} className="flex gap-3 text-sm">
-              <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-accent text-xs font-bold text-white">{i + 1}</span>
-              <span>
-                <span className="mr-2 rounded bg-slate-100 px-1.5 py-0.5 text-xs text-slate-600">
-                  Chantier {a.chantier} — {a.chantier === 1 ? "Technique" : a.chantier === 2 ? "Contenu" : "Citations"}
-                </span>
-                {a.action}
-              </span>
-            </li>
-          ))}
-        </ol>
-      </section>
+        <main className="min-w-0 flex-1">
+          {/* ── 01 · Score ── */}
+          <section id="score" className="scroll-mt-8 pt-16">
+            <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_320px] lg:items-end">
+              <ScoreHero score={score} previous={isComparison ? previous?.score : null} />
+              <p className="border-l-2 pl-4 text-sm text-bone-dim" style={{ borderColor: TONE_VAR[scoreTone(score)] }}>
+                {score < 40
+                  ? `Sur ${queryTable.length} questions d'achat posées aux quatre moteurs, ${scan.brand} n'est presque jamais cité. Vos concurrents occupent l'espace de recommandation à votre place.`
+                  : score < 70
+                    ? `${scan.brand} apparaît dans une partie des réponses, sans s'imposer. La marge de progression porte surtout sur les requêtes comparatives.`
+                    : `${scan.brand} est régulièrement cité et recommandé. L'enjeu devient la défense de cette position.`}
+              </p>
+            </div>
+            <div className="mt-12">
+              <p className="label mb-3">Détail par moteur</p>
+              <EngineBars data={engineData} />
+            </div>
+          </section>
 
-      {/* 7. CTA */}
-      <section className="no-print mt-12 rounded-2xl bg-accent p-8 text-center text-white">
-        <h2 className="text-2xl font-bold">On regarde ces résultats ensemble ?</h2>
-        <p className="mx-auto mt-2 max-w-xl text-sm text-indigo-100">
-          Call de restitution gratuit de 30 minutes : on commente votre rapport, requête par requête, et on vous dit
-          exactement ce que ferait un Sprint GEO pour {scan.brand}. Sans engagement.
-        </p>
-        <a href={BOOKING_URL} className="mt-4 inline-block rounded-lg bg-white px-6 py-3 font-semibold text-accent">
-          Réserver mon call de restitution
-        </a>
-      </section>
+          {/* ── 02 · Part de voix ── */}
+          <section id="voix" className="scroll-mt-8 pt-24">
+            <SectionHead n="02" title="Part de voix" sub="mentions de la marque / mentions totales" />
+            <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_280px]">
+              <ShareOfVoice data={shareData} />
+              <p className="text-sm text-bone-dim lg:pt-3">
+                Chaque point de part de voix est une recommandation qui va à quelqu'un. Les barres neutres sont vos
+                concurrents ; la barre en {""}
+                <span style={{ color: "var(--signal)" }}>orange</span> est vous.
+              </p>
+            </div>
+          </section>
 
-      <footer className="mt-10 border-t border-slate-200 pt-6 text-xs text-slate-400">
-        <p>
-          Méthodologie : mesure via les API officielles des 4 moteurs (ChatGPT, Claude, Gemini, Perplexity). Les
-          réponses des interfaces grand public peuvent différer légèrement — la mesure est identique à chaque scan,
-          donc strictement comparable dans le temps. Coût et requêtes archivés pour le re-scan J+90.
-        </p>
-      </footer>
-    </main>
+          {/* ── 03 · Tableau dense ── */}
+          <section id="requetes" className="scroll-mt-8 pt-24">
+            <SectionHead n="03" title="Requête par requête" sub="ordre de citation dans chaque réponse" />
+            <div className="overflow-x-auto border border-rule">
+              <table className="w-full min-w-[760px] border-collapse text-left">
+                <thead>
+                  <tr className="bg-ink-raised">
+                    <th className="label border-b border-rule px-4 py-3 font-normal">Requête</th>
+                    {ENGINES.map((e) => (
+                      <th key={e} className="label border-b border-l border-rule px-3 py-3 font-normal">
+                        {ENGINE_LABELS[e]}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {queryTable.map((row, i) => {
+                    const absent = ENGINES.every((e) => !(row.engines[e] ?? []).includes(scan.brand));
+                    return (
+                      <tr key={row.query} className={i % 2 ? "bg-ink-sunken" : undefined}>
+                        <td className="border-b border-rule px-4 py-3 align-top">
+                          <span className="font-mono text-xs text-bone">{row.query}</span>
+                          {absent && (
+                            <span className="ml-2 whitespace-nowrap font-mono text-micro uppercase text-signal">
+                              absent
+                            </span>
+                          )}
+                        </td>
+                        {ENGINES.map((e) => {
+                          const brands = row.engines[e];
+                          return (
+                            <td key={e} className="border-b border-l border-rule px-3 py-3 align-top">
+                              {brands == null ? (
+                                <span className="font-mono text-xs text-bone-faint">—</span>
+                              ) : brands.length === 0 ? (
+                                <span className="font-mono text-xs text-bone-faint">aucune</span>
+                              ) : (
+                                <ol className="space-y-0.5">
+                                  {brands.map((b, idx) => (
+                                    <li key={b} className="flex gap-2 font-mono text-xs">
+                                      <span className="tnum text-bone-faint">{idx + 1}</span>
+                                      <span className={b === scan.brand ? "" : "text-bone-dim"}
+                                        style={b === scan.brand ? { color: "var(--signal)" } : undefined}>
+                                        {b}
+                                      </span>
+                                    </li>
+                                  ))}
+                                </ol>
+                              )}
+                            </td>
+                          );
+                        })}
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          {/* ── 04 · Verbatims ── */}
+          <section id="verbatims" className="scroll-mt-8 pt-24">
+            <SectionHead n="04" title="Ce que répondent les moteurs" sub="extraits bruts, non retouchés" />
+            <div className="space-y-px bg-rule">
+              {verbatims.map((v, i) => (
+                <figure key={i} className="bg-ink px-4 py-6 sm:px-6">
+                  <figcaption className="mb-3 flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                    <span className="font-mono text-micro uppercase text-bone-faint">{ENGINE_LABELS[v.engine]}</span>
+                    <span className="font-mono text-xs text-bone">« {v.query} »</span>
+                    {v.competitorOnly && (
+                      <span className="border border-signal px-2 font-mono text-micro uppercase text-signal">
+                        concurrent cité, pas vous
+                      </span>
+                    )}
+                  </figcaption>
+                  <blockquote className="border-l border-rule-strong pl-4 text-sm leading-relaxed text-bone-dim">
+                    <Highlighted text={v.excerpt} target={scan.brand} rivals={rivals} />
+                  </blockquote>
+                </figure>
+              ))}
+              {verbatims.length === 0 && (
+                <p className="bg-ink px-4 py-6 text-sm text-bone-faint">Aucun verbatim exploitable sur ce scan.</p>
+              )}
+            </div>
+          </section>
+
+          {/* ── 05 · Sources ── */}
+          <section id="sources" className="scroll-mt-8 pt-24">
+            <SectionHead n="05" title="Les sources qui font gagner vos concurrents" sub="citées par Perplexity" />
+            <p className="mb-6 max-w-prose text-sm text-bone-dim">
+              Sites sur lesquels Perplexity s'appuie dans les réponses où vos concurrents apparaissent. C'est la
+              liste des endroits où il faut exister.
+            </p>
+            {perplexitySources.length === 0 ? (
+              <p className="font-mono text-sm text-bone-faint">Aucune source concurrente détectée sur ce scan.</p>
+            ) : (
+              <ol className="border-t border-rule">
+                {perplexitySources.map((s, i) => (
+                  <li key={s.url} className="flex items-baseline gap-4 border-b border-rule py-3">
+                    <span className="tnum font-mono text-xs text-bone-faint">{String(i + 1).padStart(2, "0")}</span>
+                    <a
+                      href={s.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="min-w-0 flex-1 break-all font-mono text-xs text-bone transition-colors duration-150 ease-sharp hover:text-signal"
+                    >
+                      {s.url.replace(/^https?:\/\//, "")}
+                    </a>
+                    <span className="tnum shrink-0 font-mono text-micro text-bone-faint">
+                      {s.competitors.join(" · ")} — {s.count}×
+                    </span>
+                  </li>
+                ))}
+              </ol>
+            )}
+          </section>
+
+          {/* ── 06 · Actions ── */}
+          <section id="actions" className="scroll-mt-8 pt-24">
+            <SectionHead n="06" title="Dix actions prioritaires" sub="classées par chantier" />
+            <ol className="border-t border-rule">
+              {(scan.actions ?? []).map((a, i) => (
+                <li key={i} className="grid grid-cols-[40px_1fr] gap-4 border-b border-rule py-4 sm:grid-cols-[40px_180px_1fr]">
+                  <span className="tnum font-mono text-sm text-bone-faint">{String(i + 1).padStart(2, "0")}</span>
+                  <span className="whitespace-nowrap font-mono text-micro uppercase text-bone-faint sm:pt-1">
+                    Ch. {a.chantier} · {a.chantier === 1 ? "Technique" : a.chantier === 2 ? "Contenu" : "Citations"}
+                  </span>
+                  <span className="col-span-2 text-sm text-bone-dim sm:col-span-1">{a.action}</span>
+                </li>
+              ))}
+              {(scan.actions ?? []).length === 0 && (
+                <li className="py-4 text-sm text-bone-faint">Actions non générées pour ce scan.</li>
+              )}
+            </ol>
+          </section>
+
+          {/* ── CTA ── */}
+          <section className="no-print mt-24 border border-signal">
+            <div className="grid gap-8 p-8 lg:grid-cols-[1fr_auto] lg:items-center lg:p-12">
+              <div>
+                <h2 className="font-editorial text-3xl text-bone">On regarde ces résultats ensemble ?</h2>
+                <p className="mt-3 max-w-prose text-sm text-bone-dim">
+                  Trente minutes, gratuit, sans engagement. On commente votre rapport requête par requête et on vous
+                  dit exactement ce qu'un Sprint GEO changerait pour {scan.brand} — y compris si la réponse est
+                  « rien, gardez votre argent ».
+                </p>
+              </div>
+              <a href={BOOKING_URL} className="btn-signal inline-block whitespace-nowrap text-center">
+                Réserver le call
+              </a>
+            </div>
+          </section>
+
+          <footer className="mt-16 border-t border-rule py-8 text-xs leading-relaxed text-bone-faint">
+            <p className="max-w-prose">
+              <strong className="text-bone-dim">Méthodologie.</strong> Mesure via les API officielles de ChatGPT,
+              Claude, Gemini et Perplexity. Les réponses des interfaces grand public peuvent différer légèrement —
+              la mesure est identique à chaque scan, donc strictement comparable dans le temps. Les requêtes sont
+              archivées pour le re-scan J+90.
+            </p>
+            <p className="mt-4 font-mono text-micro uppercase">
+              GEO Sprint · rapport généré le {dateStr}
+            </p>
+          </footer>
+        </main>
+      </div>
+    </div>
   );
 }

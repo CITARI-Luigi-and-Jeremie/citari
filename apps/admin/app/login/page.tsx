@@ -22,7 +22,7 @@ async function login(formData: FormData) {
 export default async function LoginPage({ searchParams }: { searchParams: Promise<{ error?: string }> }) {
   const { error } = await searchParams;
   return (
-    <div className="mx-auto mt-24 max-w-sm rounded-2xl border border-slate-200 bg-white p-8">
+    <div className="mx-auto mt-24 max-w-sm border border-rule bg-ink-raised p-8">
       <h1 className="text-xl font-bold">Admin GEO Sprint</h1>
       <form action={login} className="mt-4 space-y-3">
         <input
@@ -30,10 +30,10 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
           name="password"
           placeholder="Mot de passe"
           required
-          className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm focus:border-accent focus:outline-none"
+          className="field"
         />
-        {error && <p className="text-sm text-red-600">Mot de passe incorrect.</p>}
-        <button className="w-full rounded-lg bg-accent px-4 py-2.5 font-semibold text-white hover:bg-accent-dark">
+        {error && <p className="text-sm text-signal">Mot de passe incorrect.</p>}
+        <button className="btn-signal w-full">
           Entrer
         </button>
       </form>

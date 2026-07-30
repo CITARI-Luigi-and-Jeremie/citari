@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getDb } from "@geo/core";
 import { getScan, findVerbatims } from "@/lib/scan-data";
 
 export async function GET(_req: NextRequest, ctx: { params: Promise<{ id: string }> }) {
@@ -7,7 +8,20 @@ export async function GET(_req: NextRequest, ctx: { params: Promise<{ id: string
   if (!scan) return NextResponse.json({ error: "Scan introuvable" }, { status: 404 });
 
   if (scan.status !== "done") {
-    return NextResponse.json({ status: scan.status, progress: scan.progress, error: scan.error });
+    // Compteurs réels : l'écran de progression n'affiche jamais de chiffre inventé
+    const db = getDb();
+    const [{ count: queries }, { count: responses }] = await Promise.all([
+      db.from("queries").select("id", { count: "exact", head: true }).eq("scan_id", id),
+      db.from("responses").select("id", { count: "exact", head: true }).eq("scan_id", id),
+    ]);
+    return NextResponse.json({
+      status: scan.status,
+      progress: scan.progress,
+      error: scan.error,
+      queries: queries ?? 0,
+      responses: responses ?? 0,
+      expected: (queries ?? 0) * 4,
+    });
   }
 
   // Teaser : score + part de voix + UN verbatim où un concurrent est cité et pas la marque.

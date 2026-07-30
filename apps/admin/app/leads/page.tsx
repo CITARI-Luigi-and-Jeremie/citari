@@ -30,10 +30,10 @@ function priority(lead: any, scan: any): { level: "chaud" | "tiède" | "froid" |
 }
 
 const PRIORITY_STYLES: Record<string, string> = {
-  chaud: "bg-red-100 text-red-700",
-  tiède: "bg-amber-100 text-amber-700",
-  froid: "bg-slate-100 text-slate-500",
-  traité: "bg-emerald-100 text-emerald-700",
+  chaud: "bg-ink-raised text-signal",
+  tiède: "bg-ink-raised text-bone",
+  froid: "bg-ink-raised text-bone-faint",
+  traité: "bg-ink-raised text-valid",
 };
 
 export default async function LeadsPage() {
@@ -54,27 +54,27 @@ export default async function LeadsPage() {
   return (
     <div>
       {dueFollowUps.length > 0 && (
-        <section className="mb-8 rounded-xl border-2 border-accent bg-white p-5">
+        <section className="mb-8 border-2 border-signal bg-ink-raised p-5">
           <h2 className="font-bold">
-            À envoyer aujourd'hui <span className="ml-2 rounded-full bg-accent px-2 py-0.5 text-xs text-white">{dueFollowUps.length}</span>
+            À envoyer aujourd'hui <span className="ml-2 bg-signal px-2 py-0.5 text-xs text-ink">{dueFollowUps.length}</span>
           </h2>
-          <p className="mt-1 text-sm text-slate-500">
+          <p className="mt-1 text-sm text-bone-faint">
             Relances générées par <code>pnpm toolkit relance</code>. Copiez le texte, envoyez depuis votre boîte, puis marquez comme envoyé.
           </p>
           <div className="mt-4 space-y-3">
             {dueFollowUps.map((f) => {
               const lead = leadById.get(f.lead_id);
               return (
-                <details key={f.id} className="rounded-lg border border-slate-200 p-3">
+                <details key={f.id} className="border border-rule p-3">
                   <summary className="cursor-pointer text-sm">
                     <span className="font-semibold">{lead?.brand ?? "?"}</span>
-                    <span className="text-slate-500"> · {lead?.email ?? ""} · relance {f.step}</span>
-                    {f.scheduled_for < today && <span className="ml-2 rounded bg-red-100 px-1.5 py-0.5 text-xs text-red-700">en retard</span>}
+                    <span className="text-bone-faint"> · {lead?.email ?? ""} · relance {f.step}</span>
+                    {f.scheduled_for < today && <span className="ml-2 bg-ink-raised px-1.5 py-0.5 text-xs text-signal">en retard</span>}
                   </summary>
                   <p className="mt-2 text-sm"><strong>Objet :</strong> {f.subject}</p>
-                  <pre className="mt-2 whitespace-pre-wrap rounded bg-slate-50 p-3 text-xs text-slate-700">{f.body}</pre>
+                  <pre className="mt-2 whitespace-pre-wrap bg-ink-raised p-3 text-xs text-bone-dim">{f.body}</pre>
                   <form action={markFollowUpSent.bind(null, f.id, f.lead_id)} className="mt-2">
-                    <button className="rounded bg-accent px-3 py-1.5 text-xs font-semibold text-white hover:bg-accent-dark">
+                    <button className="bg-signal px-3 py-1.5 text-xs font-semibold text-ink hover:opacity-80">
                       Marquer comme envoyé
                     </button>
                   </form>
@@ -88,7 +88,7 @@ export default async function LeadsPage() {
       <h1 className="text-2xl font-bold">Leads</h1>
       <table className="mt-4 w-full border-collapse text-sm">
         <thead>
-          <tr className="border-b-2 border-slate-300 text-left text-slate-500">
+          <tr className="border-b-2 border-rule-strong text-left text-bone-faint">
             <th className="py-2">Priorité</th><th>Email</th><th>Marque</th><th>Secteur</th><th>Score</th><th>Date</th><th>Statut</th>
           </tr>
         </thead>
@@ -96,23 +96,23 @@ export default async function LeadsPage() {
           {leads.map((l) => {
             const p = priority(l, scanById.get(l.scan_id));
             return (
-              <tr key={l.id} className="border-b border-slate-200 hover:bg-white">
+              <tr key={l.id} className="border-b border-rule hover:bg-ink-raised">
                 <td className="py-2">
-                  <span className={`rounded px-2 py-0.5 text-xs font-semibold ${PRIORITY_STYLES[p.level]}`} title={p.reason}>
+                  <span className={`px-2 py-0.5 text-xs font-semibold ${PRIORITY_STYLES[p.level]}`} title={p.reason}>
                     {p.level}
                   </span>
                 </td>
-                <td><a className="text-accent underline" href={`/leads/${l.id}`}>{l.email}</a></td>
+                <td><a className="text-signal underline" href={`/leads/${l.id}`}>{l.email}</a></td>
                 <td>{l.brand}</td>
-                <td className="text-slate-500">{l.sector}</td>
+                <td className="text-bone-faint">{l.sector}</td>
                 <td className="font-semibold">{l.score ?? "—"}</td>
-                <td className="text-slate-500">{new Date(l.created_at).toLocaleDateString("fr-FR")}</td>
-                <td><span className="rounded bg-slate-100 px-2 py-0.5 text-xs">{STATUS_LABELS[l.status] ?? l.status}</span></td>
+                <td className="text-bone-faint">{new Date(l.created_at).toLocaleDateString("fr-FR")}</td>
+                <td><span className="bg-ink-raised px-2 py-0.5 text-xs">{STATUS_LABELS[l.status] ?? l.status}</span></td>
               </tr>
             );
           })}
           {leads.length === 0 && (
-            <tr><td colSpan={7} className="py-6 text-center text-slate-400">Aucun lead pour l'instant.</td></tr>
+            <tr><td colSpan={7} className="py-6 text-center text-bone-faint">Aucun lead pour l'instant.</td></tr>
           )}
         </tbody>
       </table>
@@ -120,19 +120,19 @@ export default async function LeadsPage() {
       <h2 className="mt-12 text-lg font-bold">50 derniers scans (avec ou sans email)</h2>
       <table className="mt-3 w-full border-collapse text-sm">
         <thead>
-          <tr className="border-b-2 border-slate-300 text-left text-slate-500">
+          <tr className="border-b-2 border-rule-strong text-left text-bone-faint">
             <th className="py-2">Marque</th><th>Secteur</th><th>Score</th><th>Statut</th><th>Email</th><th>Date</th>
           </tr>
         </thead>
         <tbody>
           {scans.map((s) => (
-            <tr key={s.id} className="border-b border-slate-200">
+            <tr key={s.id} className="border-b border-rule">
               <td className="py-2">{s.brand}</td>
-              <td className="text-slate-500">{s.sector}</td>
+              <td className="text-bone-faint">{s.sector}</td>
               <td className="font-semibold">{s.score ?? "—"}</td>
-              <td className="text-xs text-slate-500">{s.status}</td>
-              <td className="text-slate-500">{s.email ?? <span className="text-slate-300">non capturé</span>}</td>
-              <td className="text-slate-500">{new Date(s.created_at).toLocaleDateString("fr-FR")}</td>
+              <td className="text-xs text-bone-faint">{s.status}</td>
+              <td className="text-bone-faint">{s.email ?? <span className="text-bone-faint">non capturé</span>}</td>
+              <td className="text-bone-faint">{new Date(s.created_at).toLocaleDateString("fr-FR")}</td>
             </tr>
           ))}
         </tbody>

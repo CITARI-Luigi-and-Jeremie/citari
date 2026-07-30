@@ -141,7 +141,7 @@ export default function AlternativesPage() {
           ]}
         />
         <P>
-          Tout est détaillé dans notre <a className="text-accent underline" href="/guide-geo">guide GEO</a>, en accès
+          Tout est détaillé dans notre <a className="text-signal underline" href="/guide-geo">guide GEO</a>, en accès
           libre. Si vous préférez déléguer, c'est précisément notre métier.
         </P>
 

@@ -1,6 +1,9 @@
 "use client";
 
-import { use, useEffect, useState } from "react";
+import { use, useEffect, useRef, useState } from "react";
+import ScoreHero from "@/components/viz/ScoreHero";
+import ShareOfVoice from "@/components/viz/ShareOfVoice";
+import { BOOKING_URL } from "@/lib/constants";
 
 const ENGINE_LABELS: Record<string, string> = {
   openai: "ChatGPT",
@@ -9,12 +12,13 @@ const ENGINE_LABELS: Record<string, string> = {
   perplexity: "Perplexity",
 };
 
-const STAGES: Record<string, string> = {
-  pending: "Préparation du scan…",
-  generating_queries: "Génération des questions que posent vos prospects…",
-  running: "Interrogation de ChatGPT, Claude, Gemini et Perplexity…",
-  scoring: "Analyse des mentions et calcul du score…",
-};
+const PHASES: { key: string; label: string }[] = [
+  { key: "pending", label: "Initialisation" },
+  { key: "generating_queries", label: "Génération des questions d'achat" },
+  { key: "running", label: "Interrogation des 4 moteurs" },
+  { key: "scoring", label: "Analyse des mentions et scoring" },
+  { key: "done", label: "Terminé" },
+];
 
 interface Teaser {
   brand: string;
@@ -25,10 +29,17 @@ interface Teaser {
   emailCaptured: boolean;
 }
 
+interface Progress {
+  status: string;
+  progress: number;
+  queries: number;
+  responses: number;
+  expected: number;
+}
+
 export default function ScanPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
-  const [progress, setProgress] = useState(0);
-  const [status, setStatus] = useState("pending");
+  const [p, setP] = useState<Progress>({ status: "pending", progress: 0, queries: 0, responses: 0, expected: 0 });
   const [scanError, setScanError] = useState<string | null>(null);
   const [teaser, setTeaser] = useState<Teaser | null>(null);
 
@@ -40,50 +51,142 @@ export default function ScanPage({ params }: { params: Promise<{ id: string }> }
         const data = await res.json();
         if (!res.ok) throw new Error(data.error);
         consecutiveErrors = 0;
-        setStatus(data.status);
-        setProgress(data.progress ?? 0);
         if (data.status === "error") {
           setScanError(data.error ?? "Erreur pendant le scan");
           clearInterval(timer);
+          return;
         }
         if (data.status === "done") {
           setTeaser(data.teaser);
+          setP((prev) => ({ ...prev, status: "done", progress: 100 }));
           clearInterval(timer);
+          return;
         }
+        setP({
+          status: data.status,
+          progress: data.progress ?? 0,
+          queries: data.queries ?? 0,
+          responses: data.responses ?? 0,
+          expected: data.expected ?? 0,
+        });
       } catch (e) {
-        // Un hoquet réseau ne doit pas tuer la page — on abandonne après 5 échecs d'affilée
         if (++consecutiveErrors >= 5) {
           setScanError(e instanceof Error ? e.message : "Erreur réseau");
           clearInterval(timer);
         }
       }
-    }, 2000);
+    }, 1500);
     return () => clearInterval(timer);
   }, [id]);
 
   return (
-    <main className="mx-auto max-w-2xl px-4 py-16">
-      {!teaser && !scanError && (
-        <div className="text-center">
-          <h1 className="text-2xl font-bold">Scan en cours</h1>
-          <p className="mt-2 text-slate-600">{STAGES[status] ?? "…"}</p>
-          <div className="mt-8 h-3 w-full overflow-hidden rounded-full bg-slate-200">
-            <div className="h-full rounded-full bg-accent transition-all duration-700" style={{ width: `${Math.max(progress, 3)}%` }} />
-          </div>
-          <p className="mt-2 text-sm text-slate-500">{progress} %</p>
-        </div>
-      )}
-
+    <div className="mx-auto max-w-shell px-4 lg:px-8">
+      {!teaser && !scanError && <Progress p={p} />}
       {scanError && (
-        <div className="rounded-xl border border-red-200 bg-red-50 p-6 text-center">
-          <h1 className="text-xl font-bold text-red-700">Le scan a échoué</h1>
-          <p className="mt-2 text-sm text-red-600">{scanError}</p>
-          <a href="/" className="mt-4 inline-block text-sm underline">Réessayer</a>
+        <div className="border-l-2 border-signal py-24 pl-6">
+          <p className="label">Échec</p>
+          <h1 className="mt-4 font-editorial text-3xl text-bone">Le scan n'a pas abouti</h1>
+          <p className="mt-3 max-w-prose font-mono text-sm text-signal">{scanError}</p>
+          <a href="/" className="btn-ghost mt-8 inline-block">Relancer un scan</a>
         </div>
       )}
-
       {teaser && <TeaserView id={id} teaser={teaser} />}
-    </main>
+    </div>
+  );
+}
+
+/** Le moment de théâtre : compteur réel de réponses collectées, phases qui s'allument. */
+function Progress({ p }: { p: Progress }) {
+  const phaseIndex = PHASES.findIndex((x) => x.key === p.status);
+  const engines = Object.keys(ENGINE_LABELS);
+  const [tick, setTick] = useState(0);
+
+  useEffect(() => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const t = setInterval(() => setTick((v) => v + 1), 420);
+    return () => clearInterval(t);
+  }, []);
+
+  return (
+    <div className="py-24 lg:py-32">
+      <p className="label">Scan en cours</p>
+
+      <div className="mt-8 flex items-start gap-4">
+        <span className="tnum font-mono text-score font-medium text-bone">{p.progress}</span>
+        <span className="mt-6 font-mono text-lg text-bone-faint">%</span>
+      </div>
+
+      {/* Filet de progression pleine largeur */}
+      <div className="mt-8 h-px w-full bg-track">
+        <div
+          className="h-px bg-signal transition-all duration-500 ease-sharp"
+          style={{ width: `${Math.max(2, p.progress)}%` }}
+        />
+      </div>
+
+      <div className="mt-16 grid gap-16 lg:grid-cols-[1fr_360px]">
+        {/* Phases réelles */}
+        <ol className="border-t border-rule">
+          {PHASES.slice(0, 4).map((phase, i) => {
+            const state = i < phaseIndex ? "done" : i === phaseIndex ? "running" : "pending";
+            return (
+              <li key={phase.key} className="flex items-baseline gap-4 border-b border-rule py-4">
+                <span
+                  className="tnum font-mono text-xs"
+                  style={{ color: state === "pending" ? "var(--bone-faint)" : "var(--signal)" }}
+                >
+                  {String(i + 1).padStart(2, "0")}
+                </span>
+                <span
+                  className={`font-mono text-sm ${state === "pending" ? "text-bone-faint" : "text-bone"}`}
+                >
+                  {phase.label}
+                </span>
+                <span className="ml-auto font-mono text-micro uppercase" style={{ color: state === "done" ? "var(--valid)" : state === "running" ? "var(--signal)" : "var(--bone-faint)" }}>
+                  {state === "done" ? "ok" : state === "running" ? "en cours" : "—"}
+                </span>
+              </li>
+            );
+          })}
+        </ol>
+
+        {/* Compteurs réels, aucun chiffre simulé */}
+        <div className="border border-rule p-6">
+          <p className="label">Collecte</p>
+          <p className="tnum mt-4 font-mono text-3xl text-bone">
+            {p.responses}
+            <span className="text-bone-faint">{p.expected > 0 ? ` / ${p.expected}` : ""}</span>
+          </p>
+          <p className="mt-1 font-mono text-xs text-bone-faint">réponses enregistrées</p>
+
+          <div className="mt-8 space-y-2">
+            {engines.map((e, i) => {
+              const active = p.status === "running" && tick % engines.length === i;
+              return (
+                <div key={e} className="flex items-center gap-3">
+                  <span
+                    className="h-px flex-1 transition-colors duration-200 ease-sharp"
+                    style={{ background: active ? "var(--signal)" : "var(--rule)" }}
+                  />
+                  <span
+                    className="w-24 text-right font-mono text-xs transition-colors duration-200 ease-sharp"
+                    style={{ color: active ? "var(--signal)" : "var(--bone-faint)" }}
+                  >
+                    {ENGINE_LABELS[e]}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+
+          <p className="mt-8 border-t border-rule pt-4 text-xs leading-relaxed text-bone-faint">
+            {p.queries > 0
+              ? `${p.queries} questions d'intention d'achat sont posées à chacun des quatre moteurs, via leurs API officielles.`
+              : "Génération des questions à partir de votre secteur et du contenu de votre site."}
+          </p>
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -92,8 +195,13 @@ function TeaserView({ id, teaser }: { id: string; teaser: Teaser }) {
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const top = useRef<HTMLDivElement>(null);
 
-  const maxShare = Math.max(...Object.values(teaser.shareOfVoice), 0.01);
+  const shareData = Object.entries(teaser.shareOfVoice).map(([brand, share]) => ({
+    brand,
+    share,
+    isTarget: brand === teaser.brand,
+  }));
 
   async function submitEmail(e: React.FormEvent) {
     e.preventDefault();
@@ -116,90 +224,94 @@ function TeaserView({ id, teaser }: { id: string; teaser: Teaser }) {
   }
 
   return (
-    <div>
-      <div className="text-center">
-        <p className="text-sm uppercase tracking-wide text-slate-500">Score de Visibilité IA</p>
-        <p className={`mt-1 text-7xl font-extrabold ${teaser.score < 40 ? "text-red-600" : teaser.score < 70 ? "text-amber-500" : "text-emerald-600"}`}>
-          {teaser.score}<span className="text-3xl text-slate-400">/100</span>
-        </p>
-        <p className="mt-2 text-slate-600">
-          {teaser.brand} — mesuré sur ChatGPT, Claude, Gemini et Perplexity
-        </p>
-        <div className="mt-4 flex justify-center gap-4 text-sm text-slate-500">
-          {Object.entries(teaser.byEngine).map(([e, s]) => (
-            <span key={e}>{ENGINE_LABELS[e] ?? e} : <strong>{s}</strong></span>
-          ))}
-        </div>
-      </div>
+    <div ref={top} className="animate-rise py-16 lg:py-24">
+      <p className="label">Résultat · {teaser.brand}</p>
 
-      <div className="mt-10">
-        <h2 className="font-semibold">Part de voix face à vos concurrents</h2>
-        <div className="mt-3 space-y-2">
-          {Object.entries(teaser.shareOfVoice)
-            .sort(([, a], [, b]) => b - a)
-            .map(([brand, share]) => (
-              <div key={brand} className="flex items-center gap-3">
-                <span className={`w-36 truncate text-sm ${brand === teaser.brand ? "font-bold" : ""}`}>{brand}</span>
-                <div className="h-5 flex-1 overflow-hidden rounded bg-slate-100">
-                  <div
-                    className={`h-full rounded ${brand === teaser.brand ? "bg-accent" : "bg-slate-400"}`}
-                    style={{ width: `${(share / maxShare) * 100}%` }}
-                  />
-                </div>
-                <span className="w-12 text-right text-sm">{Math.round(share * 100)} %</span>
+      <div className="mt-8 grid gap-12 lg:grid-cols-[minmax(0,1fr)_380px] lg:gap-16">
+        <div>
+          <ScoreHero score={teaser.score} />
+          <div className="mt-12 grid grid-cols-2 border-l border-t border-rule sm:grid-cols-4">
+            {Object.entries(teaser.byEngine).map(([e, s]) => (
+              <div key={e} className="border-b border-r border-rule p-4">
+                <p className="label">{ENGINE_LABELS[e] ?? e}</p>
+                <p className="tnum mt-2 font-mono text-2xl text-bone">{s}</p>
               </div>
             ))}
+          </div>
+        </div>
+
+        <div>
+          <p className="label">Part de voix</p>
+          <div className="mt-4">
+            <ShareOfVoice data={shareData} />
+          </div>
         </div>
       </div>
 
       {teaser.verbatim && (
-        <div className="mt-10 rounded-xl border border-amber-300 bg-amber-50 p-5">
-          <p className="text-sm font-semibold text-amber-800">
+        <figure className="mt-16 border-l-2 border-signal pl-6">
+          <figcaption className="label">
             {teaser.verbatim.competitorOnly
-              ? `Quand on demande à ${ENGINE_LABELS[teaser.verbatim.engine] ?? teaser.verbatim.engine} : « ${teaser.verbatim.query} » — un concurrent est cité, pas vous :`
-              : `Réponse de ${ENGINE_LABELS[teaser.verbatim.engine] ?? teaser.verbatim.engine} à « ${teaser.verbatim.query} » :`}
-          </p>
-          <blockquote className="mt-2 whitespace-pre-wrap text-sm text-slate-700">{teaser.verbatim.excerpt}</blockquote>
-        </div>
+              ? `${ENGINE_LABELS[teaser.verbatim.engine] ?? teaser.verbatim.engine} — concurrent cité, pas vous`
+              : ENGINE_LABELS[teaser.verbatim.engine] ?? teaser.verbatim.engine}
+          </figcaption>
+          <p className="mt-3 font-mono text-sm text-bone">« {teaser.verbatim.query} »</p>
+          <blockquote className="mt-4 max-w-prose text-sm leading-relaxed text-bone-dim">
+            {teaser.verbatim.excerpt}
+          </blockquote>
+        </figure>
       )}
 
-      <div className="mt-10 rounded-2xl border-2 border-accent p-6">
+      {/* Capture email */}
+      <section className="mt-24 border border-rule-strong">
         {!sent ? (
-          <>
-            <h2 className="text-lg font-bold">Recevez le rapport complet gratuit</h2>
-            <p className="mt-1 text-sm text-slate-600">
-              Détail requête par requête, verbatims complets, sources citées par Perplexity pour vos concurrents, et
-              vos 10 actions prioritaires. Par email, avec le PDF.
-            </p>
-            <form onSubmit={submitEmail} className="mt-4 flex gap-2">
-              <input
-                type="email"
-                required
-                placeholder="votre@email.fr"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="flex-1 rounded-lg border border-slate-300 px-3 py-2.5 text-sm focus:border-accent focus:outline-none"
-              />
-              <button disabled={sending} className="rounded-lg bg-accent px-5 py-2.5 font-semibold text-white hover:bg-accent-dark disabled:opacity-50">
-                {sending ? "Envoi…" : "Recevoir"}
+          <div className="grid gap-8 p-8 lg:grid-cols-[1fr_400px] lg:items-center lg:p-12">
+            <div>
+              <h2 className="font-editorial text-2xl text-bone">Le rapport complet, gratuit</h2>
+              <p className="mt-3 max-w-prose text-sm text-bone-dim">
+                Détail requête par requête sur les quatre moteurs, verbatims complets, sources citées par Perplexity
+                pour vos concurrents, et vos dix actions prioritaires. Envoyé par email avec le PDF.
+              </p>
+            </div>
+            <form onSubmit={submitEmail} className="space-y-3">
+              <label className="block">
+                <span className="label">Votre email</span>
+                <input
+                  type="email"
+                  required
+                  placeholder="vous@entreprise.fr"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="field mt-2"
+                />
+              </label>
+              <button disabled={sending} className="btn-signal w-full">
+                {sending ? "Envoi…" : "Recevoir le rapport"}
               </button>
+              {error && <p className="font-mono text-xs text-signal">{error}</p>}
+              <p className="text-xs leading-relaxed text-bone-faint">
+                Votre email sert à vous envoyer ce rapport et, éventuellement, un suivi commercial. Désinscription en
+                un clic.{" "}
+                <a className="underline hover:text-bone" href="/confidentialite" target="_blank">
+                  Politique de confidentialité
+                </a>
+                .
+              </p>
             </form>
-            {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
-            <p className="mt-2 text-xs text-slate-500">
-              Votre email sert à vous envoyer ce rapport et, éventuellement, un suivi commercial. Désinscription en
-              un clic. Voir la <a className="underline" href="/confidentialite" target="_blank">politique de confidentialité</a>.
-            </p>
-          </>
+          </div>
         ) : (
-          <div className="text-center">
-            <h2 className="text-lg font-bold text-emerald-700">Rapport envoyé ✓</h2>
-            <p className="mt-1 text-sm text-slate-600">Vérifiez votre boîte mail — ou consultez-le directement :</p>
-            <a href={sent} className="mt-3 inline-block rounded-lg bg-accent px-5 py-2.5 font-semibold text-white hover:bg-accent-dark">
-              Voir mon rapport complet
-            </a>
+          <div className="flex flex-wrap items-center justify-between gap-6 p-8 lg:p-12">
+            <div>
+              <p className="label" style={{ color: "var(--valid)" }}>Rapport envoyé</p>
+              <h2 className="mt-3 font-editorial text-2xl text-bone">Vérifiez votre boîte mail</h2>
+            </div>
+            <div className="flex flex-wrap gap-3">
+              <a href={sent} className="btn-signal">Ouvrir le rapport</a>
+              <a href={BOOKING_URL} className="btn-ghost">Réserver un call</a>
+            </div>
           </div>
         )}
-      </div>
+      </section>
     </div>
   );
 }
