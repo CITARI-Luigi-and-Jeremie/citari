@@ -8,19 +8,22 @@ export async function GET(_req: NextRequest, ctx: { params: Promise<{ id: string
   if (!scan) return NextResponse.json({ error: "Scan introuvable" }, { status: 404 });
 
   if (scan.status !== "done") {
-    // Compteurs réels : l'écran de progression n'affiche jamais de chiffre inventé
+    // Données réelles : l'écran de progression n'affiche jamais rien d'inventé.
+    // On renvoie les questions effectivement générées pour les faire défiler.
     const db = getDb();
-    const [{ count: queries }, { count: responses }] = await Promise.all([
-      db.from("queries").select("id", { count: "exact", head: true }).eq("scan_id", id),
+    const [{ data: queryRows }, { count: responses }] = await Promise.all([
+      db.from("queries").select("text").eq("scan_id", id).order("position"),
       db.from("responses").select("id", { count: "exact", head: true }).eq("scan_id", id),
     ]);
+    const texts = ((queryRows as { text: string }[] | null) ?? []).map((q) => q.text);
     return NextResponse.json({
       status: scan.status,
       progress: scan.progress,
       error: scan.error,
-      queries: queries ?? 0,
+      queries: texts.length,
+      queryTexts: texts,
       responses: responses ?? 0,
-      expected: (queries ?? 0) * 4,
+      expected: texts.length * 4,
     });
   }
 

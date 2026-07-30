@@ -59,35 +59,54 @@ export default function LandingPage() {
           </nav>
         </header>
 
-        {/* ── Promesse + instrument ── */}
-        <section id="top" className="grid scroll-mt-8 gap-12 py-16 lg:grid-cols-[1.05fr_450px] lg:gap-16 lg:py-24">
-          <div>
-            <p className="label">Agence GEO · PME et ETI francophones</p>
-            <h1 className="mt-6 font-editorial text-hero text-ink">
-              Votre marque est-elle <em className="not-italic" style={{ color: "var(--signal)" }}>invisible</em>{" "}
-              dans ChatGPT&#8239;?
-            </h1>
-            <p className="mt-8 max-w-[46ch] text-lg text-ink-dim">
-              {fr(
-                "Mesurez-le gratuitement en 90 secondes, sur les quatre moteurs. Vous verrez les réponses réelles, telles que vos prospects les reçoivent."
-              )}
-            </p>
+        {/* ── Premier écran : la promesse, l’instrument, et surtout la preuve.
+             Le geste signature doit être visible sans défiler. ── */}
+        <section id="top" className="scroll-mt-8 pb-24 pt-12">
+          <div className="grid gap-8 lg:grid-cols-[1.05fr_450px] lg:gap-16">
+            <div className="stagger">
+              <p className="label">Agence GEO · PME et ETI francophones</p>
+              <h1 className="mt-4 max-w-[16ch] font-editorial text-hero text-ink">
+                Votre marque est-elle <em className="not-italic" style={{ color: "var(--signal)" }}>invisible</em>{" "}
+                {/* Instrument Serif n’a pas le glyphe U+202F : l’espace fine y
+                    tombe à zéro. On retombe sur l’insécable classique, seule
+                    solution qui rende dans cette police. */}
+                dans ChatGPT&nbsp;?
+              </h1>
+              <p className="mt-6 max-w-[44ch] text-ink-dim">
+                {fr(
+                  "Mesurez-le gratuitement en 90 secondes, sur les quatre moteurs. Vous verrez les réponses réelles, telles que vos prospects les reçoivent."
+                )}
+              </p>
+
+              {/* Ce que le visiteur repart avec — équilibre la colonne face au formulaire */}
+              <dl className="mt-12 max-w-[44ch] border-t border-rule">
+                {[
+                  ["Score de Visibilité IA", "sur 100, moteur par moteur"],
+                  ["Part de voix", "face aux concurrents que vous nommez"],
+                  ["Verbatims", "les réponses brutes, non retouchées"],
+                ].map(([k, v]) => (
+                  <div key={k} className="flex flex-wrap items-baseline gap-x-4 border-b border-rule py-3">
+                    <dt className="font-mono text-sm text-ink">{k}</dt>
+                    <dd className="text-sm text-ink-faint">{v}</dd>
+                  </div>
+                ))}
+              </dl>
+            </div>
+
+            <div>
+              <ScanForm />
+            </div>
           </div>
 
-          <div className="lg:pt-12">
-            <ScanForm />
+          <div className="mt-12">
+            <ProofBlock />
           </div>
-        </section>
-
-        {/* ── Le geste : l’absence rendue visible ── */}
-        <section className="pb-24">
-          <ProofBlock />
         </section>
 
         {/* ── Pourquoi maintenant : traitement éditorial, pas bandeau de stats ── */}
         <section className="border-t border-rule-strong py-24">
           <blockquote className="max-w-[24ch] font-editorial text-4xl leading-none text-ink lg:max-w-[20ch] lg:text-5xl">
-            <span style={{ color: "var(--signal)" }}>46&#8239;%</span> des utilisateurs d’IA démarrent leur
+            <span style={{ color: "var(--signal)" }}>46&nbsp;%</span> des utilisateurs d’IA démarrent leur
             recherche d’achat directement sur une IA.
           </blockquote>
           <p className="mt-8 max-w-prose text-lg text-ink-dim">

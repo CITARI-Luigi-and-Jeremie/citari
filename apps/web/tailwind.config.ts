@@ -68,7 +68,9 @@ export default {
         "3xl": ["44px", { lineHeight: "48px" }],
         "4xl": ["64px", { lineHeight: "64px" }],
         "5xl": ["80px", { lineHeight: "76px" }],
-        hero: ["clamp(56px, 9vw, 104px)", { lineHeight: "0.94", letterSpacing: "-0.02em" }],
+        // Assez grand pour porter la page, assez contenu pour que la preuve
+        // reste visible au premier écran (mesuré à 1440×900).
+        hero: ["clamp(38px, 4.4vw, 62px)", { lineHeight: "1.02", letterSpacing: "-0.015em" }],
         score: ["clamp(96px, 18vw, 200px)", { lineHeight: "0.82", letterSpacing: "-0.04em" }],
       },
       maxWidth: {

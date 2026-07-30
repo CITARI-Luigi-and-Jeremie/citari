@@ -23,8 +23,12 @@ export default function BlankLine({
           {filled ? (
             <p className="truncate border-b border-ink pb-2 font-editorial text-3xl text-ink">{filled}</p>
           ) : (
-            /* La ligne vide : haute, pour qu’on voie qu’il manque quelque chose */
-            <div className="h-12 border-b-2 border-signal" aria-hidden />
+            /* La ligne vide : haute, pour qu’on voie qu’il manque quelque chose.
+               Elle se trace à l’arrivée — c’est le seul moment de mouvement
+               que s’autorise le premier écran. */
+            <div className="h-12" aria-hidden>
+              <div className="animate-draw h-full border-b-2 border-signal" />
+            </div>
           )}
         </div>
         {!filled && (

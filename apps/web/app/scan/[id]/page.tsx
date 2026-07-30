@@ -33,13 +33,21 @@ interface Progress {
   status: string;
   progress: number;
   queries: number;
+  queryTexts: string[];
   responses: number;
   expected: number;
 }
 
 export default function ScanPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
-  const [p, setP] = useState<Progress>({ status: "pending", progress: 0, queries: 0, responses: 0, expected: 0 });
+  const [p, setP] = useState<Progress>({
+    status: "pending",
+    progress: 0,
+    queries: 0,
+    queryTexts: [],
+    responses: 0,
+    expected: 0,
+  });
   const [scanError, setScanError] = useState<string | null>(null);
   const [teaser, setTeaser] = useState<Teaser | null>(null);
 
@@ -66,6 +74,7 @@ export default function ScanPage({ params }: { params: Promise<{ id: string }> }
           status: data.status,
           progress: data.progress ?? 0,
           queries: data.queries ?? 0,
+          queryTexts: data.queryTexts ?? [],
           responses: data.responses ?? 0,
           expected: data.expected ?? 0,
         });
@@ -125,30 +134,57 @@ function Progress({ p }: { p: Progress }) {
       </div>
 
       <div className="mt-16 grid gap-16 lg:grid-cols-[1fr_360px]">
-        {/* Phases réelles */}
-        <ol className="border-t border-rule">
-          {PHASES.slice(0, 4).map((phase, i) => {
-            const state = i < phaseIndex ? "done" : i === phaseIndex ? "running" : "pending";
-            return (
-              <li key={phase.key} className="flex items-baseline gap-4 border-b border-rule py-4">
-                <span
-                  className="tnum font-mono text-xs"
-                  style={{ color: state === "pending" ? "var(--ink-faint)" : "var(--signal)" }}
-                >
-                  {String(i + 1).padStart(2, "0")}
-                </span>
-                <span
-                  className={`font-mono text-sm ${state === "pending" ? "text-ink-faint" : "text-ink"}`}
-                >
-                  {phase.label}
-                </span>
-                <span className="ml-auto font-mono text-micro uppercase" style={{ color: state === "done" ? "var(--valid)" : state === "running" ? "var(--signal)" : "var(--ink-faint)" }}>
-                  {state === "done" ? "ok" : state === "running" ? "en cours" : "—"}
-                </span>
-              </li>
-            );
-          })}
-        </ol>
+        <div>
+          {/* Phases réelles */}
+          <ol className="border-t border-rule">
+            {PHASES.slice(0, 4).map((phase, i) => {
+              const state = i < phaseIndex ? "done" : i === phaseIndex ? "running" : "pending";
+              return (
+                <li key={phase.key} className="flex items-baseline gap-4 border-b border-rule py-4">
+                  <span
+                    className="tnum font-mono text-xs"
+                    style={{ color: state === "pending" ? "var(--ink-faint)" : "var(--signal)" }}
+                  >
+                    {String(i + 1).padStart(2, "0")}
+                  </span>
+                  <span className={`font-mono text-sm ${state === "pending" ? "text-ink-faint" : "text-ink"}`}>
+                    {phase.label}
+                  </span>
+                  <span
+                    className="ml-auto font-mono text-micro uppercase"
+                    style={{
+                      color:
+                        state === "done" ? "var(--valid)" : state === "running" ? "var(--signal)" : "var(--ink-faint)",
+                    }}
+                  >
+                    {state === "done" ? "ok" : state === "running" ? "en cours" : "—"}
+                  </span>
+                </li>
+              );
+            })}
+          </ol>
+
+          {/* Les VRAIES questions générées pour ce scan. Rien n'est simulé :
+              elles apparaissent au fur et à mesure que la base les enregistre,
+              et c'est ce qui rend l'attente intéressante. */}
+          {p.queryTexts.length > 0 && (
+            <div className="mt-12">
+              <p className="label">Questions posées à vos quatre moteurs</p>
+              <ol className="mt-4 border-t border-rule">
+                {p.queryTexts.map((q, i) => (
+                  <li
+                    key={q}
+                    className="animate-rise flex items-baseline gap-4 border-b border-rule py-3"
+                    style={{ animationDelay: `${Math.min(i, 12) * 45}ms` }}
+                  >
+                    <span className="tnum font-mono text-xs text-ink-faint">{String(i + 1).padStart(2, "0")}</span>
+                    <span className="font-mono text-xs text-ink-dim">{q}</span>
+                  </li>
+                ))}
+              </ol>
+            </div>
+          )}
+        </div>
 
         {/* Compteurs réels, aucun chiffre simulé */}
         <div className="border border-rule p-6">
