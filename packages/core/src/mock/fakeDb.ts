@@ -12,7 +12,10 @@ import { join } from "node:path";
 type Row = Record<string, any>;
 
 // Fichier partagé entre les process web (:3000) et admin (:3001) en mode démo.
-const STORE_FILE = join(tmpdir(), "geo-sprint-mock-db.json");
+// GEO_MOCK_STORE permet d'isoler les tests pour ne pas écraser une démo en cours.
+function storeFile(): string {
+  return process.env.GEO_MOCK_STORE || join(tmpdir(), "geo-sprint-mock-db.json");
+}
 
 const TABLE_DEFAULTS: Record<string, Row> = {
   scans: { status: "pending", progress: 0, cost_cents: 0, competitors: [], lang: "fr", email: null, error: null, score: null, score_detail: null, share_of_voice: null, actions: null, report_token: null, previous_scan_id: null, client_id: null },
@@ -35,10 +38,10 @@ function getStore(): Map<string, Row[]> {
   g.__geoMockStore ??= new Map<string, Row[]>();
   // Recharge depuis le fichier si un autre process l'a modifié
   try {
-    if (existsSync(STORE_FILE)) {
-      const mtime = statSync(STORE_FILE).mtimeMs;
+    if (existsSync(storeFile())) {
+      const mtime = statSync(storeFile()).mtimeMs;
       if (mtime !== g.__geoMockMtime) {
-        const parsed = JSON.parse(readFileSync(STORE_FILE, "utf8")) as Record<string, Row[]>;
+        const parsed = JSON.parse(readFileSync(storeFile(), "utf8")) as Record<string, Row[]>;
         g.__geoMockStore = new Map(Object.entries(parsed));
         g.__geoMockMtime = mtime;
       }
@@ -50,15 +53,15 @@ function getStore(): Map<string, Row[]> {
 function persistStore(): void {
   const g = globalThis as any;
   try {
-    writeFileSync(STORE_FILE, JSON.stringify(Object.fromEntries(g.__geoMockStore ?? new Map())), "utf8");
-    g.__geoMockMtime = statSync(STORE_FILE).mtimeMs;
+    writeFileSync(storeFile(), JSON.stringify(Object.fromEntries(g.__geoMockStore ?? new Map())), "utf8");
+    g.__geoMockMtime = statSync(storeFile()).mtimeMs;
   } catch { /* démo uniquement */ }
 }
 
 export function resetMockDb(): void {
   (globalThis as any).__geoMockStore = new Map<string, Row[]>();
   (globalThis as any).__geoMockMtime = undefined;
-  try { unlinkSync(STORE_FILE); } catch { /* absent */ }
+  try { unlinkSync(storeFile()); } catch { /* absent */ }
 }
 
 type Filter = (row: Row) => boolean;

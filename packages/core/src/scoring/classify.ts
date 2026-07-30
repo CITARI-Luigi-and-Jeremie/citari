@@ -3,6 +3,7 @@ import type { BrandRef, MentionResult } from "../types";
 import { askClaudeJson, type LLMUsage } from "../llm/json";
 import { detectMentions } from "./detect";
 import { isMock, mockClassify } from "../mock/mockLlm";
+import { mapLimit } from "../util/mapLimit";
 
 const ClassificationSchema = z.object({
   results: z.array(
@@ -18,6 +19,7 @@ const ClassificationSchema = z.object({
 });
 
 const BATCH_SIZE = 5;
+const BATCH_CONCURRENCY = 5; // les batches sont indépendants → parallèles (cible < 90 s)
 
 /**
  * Étape 2 (LLM, en batch) : raffine la détection déterministe —
@@ -33,7 +35,10 @@ export async function classifyMentions(
   if (isMock()) return mockClassify(deterministic);
   const merged: MentionResult[][] = deterministic.map((ms) => ms.map((m) => ({ ...m })));
 
-  for (let start = 0; start < responses.length; start += BATCH_SIZE) {
+  const starts: number[] = [];
+  for (let s = 0; s < responses.length; s += BATCH_SIZE) starts.push(s);
+
+  await mapLimit(starts, BATCH_CONCURRENCY, async (start) => {
     const batch = responses.slice(start, start + BATCH_SIZE);
     const prompt = `Analyse ces réponses d'assistants IA. Pour CHAQUE réponse et CHAQUE marque de la liste, indique :
 - mentioned : la marque est-elle citée (même indirectement, ex. "le leader français du secteur" identifiable) ?
@@ -61,6 +66,6 @@ Format : {"results": [{"response_index": ${start}, "brand": "...", "mentioned": 
       target.is_recommended = r.is_recommended;
       if (!wasDeterministic && r.mentioned) target.method = "llm";
     }
-  }
+  });
   return merged;
 }

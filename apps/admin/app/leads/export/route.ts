@@ -13,7 +13,8 @@ export async function GET() {
   const rows = leads.map((l) =>
     [l.email, l.brand, l.sector, l.score, l.status, l.created_at, l.notes].map(csvEscape).join(";")
   );
-  return new Response([header.join(";"), ...rows].join("\n"), {
+  // BOM UTF-8 : Excel (FR) ouvre les accents correctement
+  return new Response("﻿" + [header.join(";"), ...rows].join("\n"), {
     headers: {
       "Content-Type": "text/csv; charset=utf-8",
       "Content-Disposition": `attachment; filename="leads-geo-sprint.csv"`,

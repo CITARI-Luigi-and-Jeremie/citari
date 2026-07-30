@@ -4,6 +4,8 @@ import { resetMockDb } from "../src/mock/fakeDb";
 import { runScan, createRescan } from "../src/scan/runScan";
 
 process.env.GEO_MOCK = "1";
+// Store isolé : les tests ne doivent pas écraser une démo en cours dans l'autre fichier
+process.env.GEO_MOCK_STORE = `${process.env.TMPDIR || "/tmp"}/geo-test-${process.pid}.json`;
 
 async function seedScan() {
   const db = getDb();

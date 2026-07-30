@@ -27,6 +27,20 @@ Tout le code est prêt et testé en mode démo. Voici ce qu'il reste à faire, d
 - [ ] Vérifier manuellement la détection de mentions sur 5 scans réels
 - [ ] Vérifier le coût loggé (< 1,50 €/scan) dans la table `cost_log`
 
+## ⚠ Durée réelle d'un scan et hébergement
+
+Un scan réel = ~96 appels moteurs (24 requêtes × 4) + ~20 appels de classification, soit **1,5 à 4 minutes**
+selon la latence des APIs (la classification est parallélisée, mais la cible < 90 s dépend des moteurs).
+Le scan tourne en tâche de fond après la réponse HTTP (`after()`), donc l'utilisateur voit la progression
+sans bloquer — mais la fonction serverless doit vivre assez longtemps :
+
+- **Vercel** : nécessite le plan Pro avec Fluid Compute (le `maxDuration = 300` est déjà configuré
+  dans `apps/web/app/api/scan/route.ts`). Sur le plan Hobby (60 s max), les scans seront tués en plein vol.
+- **Alternative simple** : héberger `apps/web` sur un serveur long-running (Railway, Fly.io, VPS) —
+  aucun changement de code nécessaire.
+- Premier scan réel : surveiller la table `cost_log` et le champ `scans.status` pour vérifier
+  qu'aucun scan ne reste bloqué en `running`.
+
 ## 6. Déploiement Vercel
 - [ ] 2 projets Vercel (root `apps/web` et `apps/admin`), toutes les env vars, `NEXT_PUBLIC_SITE_URL` = domaine public du site
 - [ ] Turnstile (anti-bot) : https://dash.cloudflare.com → `TURNSTILE_SECRET` + `NEXT_PUBLIC_TURNSTILE_SITE_KEY`

@@ -21,6 +21,10 @@ classifyMentions, generatePriorityActions. Ne jamais laisser GEO_MOCK en product
 - `pnpm install` puis `pnpm dev` (turbo), `pnpm test` (vitest dans core), `pnpm typecheck`.
 - Scan en CLI (validation Phase 1) : `pnpm --filter @geo/core scan:cli -- --brand "X" --url https://x.fr --sector "..." --competitors "A,B"`.
 
+## Pièges connus
+- Ne JAMAIS lancer `pnpm build` pendant que les serveurs dev tournent : ils partagent `.next` et le cache se corrompt (MODULE_NOT_FOUND sur vendor-chunks). Stopper les dev servers d'abord, ou `rm -rf apps/*/.next` puis redémarrer.
+- Le projet est sur le Bureau (synchronisé iCloud) : des doublons « fichier 2.ts » peuvent apparaître — exclus des tsconfig, mais y penser si un build casse bizarrement.
+
 ## Règles métier à ne pas casser
 - Scoring : mention 50 %, position 20 %, recommandation explicite 20 %, sentiment 10 %.
 - Mix de requêtes : 40 % comparatives, 25 % problème, 20 % locales, 15 % confiance.

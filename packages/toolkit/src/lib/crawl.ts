@@ -52,27 +52,37 @@ export async function fetchText(url: string): Promise<string | null> {
   return res.text();
 }
 
-/** Analyse robots.txt : quels crawlers IA sont bloqués ? */
+/**
+ * Analyse robots.txt : quels crawlers IA sont bloqués ?
+ * Un groupe = lignes User-agent consécutives puis ses règles ; un nouveau
+ * User-agent après des règles ouvre un nouveau groupe (standard robots).
+ */
 export function analyzeRobots(robotsTxt: string | null): { exists: boolean; blockedAiBots: string[]; blocksAll: boolean } {
   if (robotsTxt == null) return { exists: false, blockedAiBots: [], blocksAll: false };
   const blocked: string[] = [];
   let currentAgents: string[] = [];
+  let inRules = false;
   let blocksAll = false;
-  for (const line of robotsTxt.split("\n")) {
+  for (const rawLine of robotsTxt.split("\n")) {
+    const line = rawLine.split("#")[0] ?? "";
     const [rawKey, ...rest] = line.split(":");
     const key = rawKey?.trim().toLowerCase();
     const value = rest.join(":").trim();
     if (key === "user-agent") {
-      currentAgents.push(value);
-    } else if (key === "disallow" && value === "/") {
-      for (const agent of currentAgents) {
-        if (agent === "*") blocksAll = true;
-        const match = AI_CRAWLERS.find((b) => b.toLowerCase() === agent.toLowerCase());
-        if (match) blocked.push(match);
+      if (inRules) {
+        currentAgents = [];
+        inRules = false;
       }
-      currentAgents = [];
+      currentAgents.push(value);
     } else if (key === "allow" || key === "disallow") {
-      currentAgents = [];
+      inRules = true;
+      if (key === "disallow" && value === "/") {
+        for (const agent of currentAgents) {
+          if (agent === "*") blocksAll = true;
+          const match = AI_CRAWLERS.find((b) => b.toLowerCase() === agent.toLowerCase());
+          if (match) blocked.push(match);
+        }
+      }
     }
   }
   return { exists: true, blockedAiBots: [...new Set(blocked)], blocksAll };

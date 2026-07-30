@@ -28,7 +28,9 @@ export function brandVariants(brand: BrandRef): string[] {
       // URL invalide → on ignore
     }
   }
-  return [...variants].filter((v) => v.length > 2);
+  // >= 2 : les marques courtes (HP, 3M, EY…) doivent rester détectables ;
+  // les frontières de mot évitent l'essentiel des faux positifs.
+  return [...variants].filter((v) => v.length >= 2);
 }
 
 function escapeRe(s: string): string {

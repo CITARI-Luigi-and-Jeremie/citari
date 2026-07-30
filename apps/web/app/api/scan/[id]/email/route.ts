@@ -24,7 +24,11 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ id: string
 
   const db = getDb();
   await db.from("scans").update({ email }).eq("id", id);
-  await db.from("leads").insert({ scan_id: id, email, brand: scan.brand, sector: scan.sector, score: scan.score });
+  // Renvoyer le rapport est permis, dupliquer le lead non
+  const { data: existingLead } = await db.from("leads").select("id").eq("scan_id", id).eq("email", email).maybeSingle();
+  if (!existingLead) {
+    await db.from("leads").insert({ scan_id: id, email, brand: scan.brand, sector: scan.sector, score: scan.score });
+  }
 
   const reportUrl = `${SITE_URL}/rapport/${scan.report_token}`;
   const pdf = await renderReportPdf(reportUrl);

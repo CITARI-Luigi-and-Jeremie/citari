@@ -33,21 +33,29 @@ export default function ScanPage({ params }: { params: Promise<{ id: string }> }
   const [teaser, setTeaser] = useState<Teaser | null>(null);
 
   useEffect(() => {
+    let consecutiveErrors = 0;
     const timer = setInterval(async () => {
       try {
         const res = await fetch(`/api/scan/${id}`);
         const data = await res.json();
         if (!res.ok) throw new Error(data.error);
+        consecutiveErrors = 0;
         setStatus(data.status);
         setProgress(data.progress ?? 0);
-        if (data.status === "error") setScanError(data.error ?? "Erreur pendant le scan");
+        if (data.status === "error") {
+          setScanError(data.error ?? "Erreur pendant le scan");
+          clearInterval(timer);
+        }
         if (data.status === "done") {
           setTeaser(data.teaser);
           clearInterval(timer);
         }
       } catch (e) {
-        setScanError(e instanceof Error ? e.message : "Erreur réseau");
-        clearInterval(timer);
+        // Un hoquet réseau ne doit pas tuer la page — on abandonne après 5 échecs d'affilée
+        if (++consecutiveErrors >= 5) {
+          setScanError(e instanceof Error ? e.message : "Erreur réseau");
+          clearInterval(timer);
+        }
       }
     }, 2000);
     return () => clearInterval(timer);

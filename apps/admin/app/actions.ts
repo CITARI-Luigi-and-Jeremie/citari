@@ -22,6 +22,9 @@ export async function convertLeadToClient(leadId: string) {
   const lead = unwrap(await db.from("leads").select("*").eq("id", leadId).single()) as any;
   const scan = unwrap(await db.from("scans").select("*").eq("id", lead.scan_id).single()) as any;
 
+  const today = new Date();
+  const plusDays = (n: number) => new Date(today.getTime() + n * 86400_000).toISOString().slice(0, 10);
+
   const client = unwrap(
     await db
       .from("clients")
@@ -33,6 +36,7 @@ export async function convertLeadToClient(leadId: string) {
         competitors: scan.competitors,
         contact_email: lead.email,
         initial_scan_id: scan.id,
+        rescan_due_at: plusDays(90), // re-scan offert à J+90, planifié d'office
       })
       .select("id")
       .single()
@@ -41,7 +45,7 @@ export async function convertLeadToClient(leadId: string) {
   const sprint = unwrap(
     await db
       .from("sprints")
-      .insert({ client_id: client.id, starts_at: new Date().toISOString().slice(0, 10) })
+      .insert({ client_id: client.id, starts_at: plusDays(0), ends_at: plusDays(30) })
       .select("id")
       .single()
   ) as { id: string };

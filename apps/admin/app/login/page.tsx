@@ -12,6 +12,7 @@ async function login(formData: FormData) {
   store.set(SESSION_COOKIE, await sha256Hex(password), {
     httpOnly: true,
     sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
     maxAge: 60 * 60 * 24 * 30,
     path: "/",
   });

@@ -33,6 +33,18 @@ describe("analyzeRobots", () => {
   it("Disallow partiel ne compte pas comme blocage", () => {
     expect(analyzeRobots("User-agent: GPTBot\nDisallow: /admin").blockedAiBots).toEqual([]);
   });
+
+  it("Disallow / après un Disallow partiel dans le même groupe est détecté", () => {
+    const r = analyzeRobots("User-agent: GPTBot\nDisallow: /admin\nDisallow: /");
+    expect(r.blockedAiBots).toEqual(["GPTBot"]);
+  });
+
+  it("groupes successifs indépendants + commentaires ignorés", () => {
+    const robots = `User-agent: GPTBot\nDisallow: /admin\n\nUser-agent: ClaudeBot # bloqué\nDisallow: /\n\nUser-agent: *\nAllow: /`;
+    const r = analyzeRobots(robots);
+    expect(r.blockedAiBots).toEqual(["ClaudeBot"]);
+    expect(r.blocksAll).toBe(false);
+  });
 });
 
 describe("auditHtml", () => {

@@ -7,6 +7,7 @@ import { computeScoreDetail, computeShareOfVoice, type MentionForScoring } from 
 import { generatePriorityActions } from "../report/actions";
 import { costCents, MAX_SCAN_COST_CENTS } from "../cost";
 import { ENGINES, type BrandRef, type EngineId, type Lang, type MentionResult } from "../types";
+import { mapLimit } from "../util/mapLimit";
 
 const CONCURRENCY = 8;
 
@@ -20,19 +21,6 @@ interface ScanRow {
   previous_scan_id: string | null;
 }
 
-/** Petit limiteur de concurrence sans dépendance. */
-async function mapLimit<T, R>(items: T[], limit: number, fn: (item: T, i: number) => Promise<R>): Promise<R[]> {
-  const results: R[] = new Array(items.length);
-  let next = 0;
-  const workers = Array.from({ length: Math.min(limit, items.length) }, async () => {
-    while (next < items.length) {
-      const i = next++;
-      results[i] = await fn(items[i] as T, i);
-    }
-  });
-  await Promise.all(workers);
-  return results;
-}
 
 /**
  * Exécute un scan de bout en bout : génération de requêtes (sauf rescan : requêtes

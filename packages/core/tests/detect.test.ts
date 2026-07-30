@@ -34,6 +34,12 @@ describe("firstMentionIndex", () => {
   it("matche via le domaine", () => {
     expect(firstMentionIndex("Voir payfit.com pour la paie.", { name: "PayFit SAS", url: "https://payfit.com" })).toBeGreaterThanOrEqual(0);
   });
+
+  it("détecte les marques courtes (HP, 3M) sans faux positif sous-chaîne", () => {
+    expect(firstMentionIndex("Les imprimantes HP sont fiables.", { name: "HP" })).toBeGreaterThanOrEqual(0);
+    expect(firstMentionIndex("Le ruban 3M tient bien.", { name: "3M" })).toBeGreaterThanOrEqual(0);
+    expect(firstMentionIndex("Un hippopotame passe.", { name: "HP" })).toBe(-1);
+  });
 });
 
 describe("detectMentions", () => {
