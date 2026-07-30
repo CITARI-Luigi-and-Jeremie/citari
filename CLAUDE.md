@@ -11,6 +11,12 @@ Le cahier des charges complet est dans `SPEC.md`. À lire avant toute modificati
 - `packages/toolkit` — CLI interne de livraison des sprints : `pnpm toolkit <commande>` (audit-technique, generate-fixes, content-brief, draft-content, citation-targets, rescan). Sorties dans `deliverables/<client>/`.
 - `supabase/migrations` — schéma Postgres.
 
+## Mode démo
+`GEO_MOCK=1` (env) remplace les 4 providers ET la base Supabase par des simulations
+(`packages/core/src/mock/`) — base en mémoire persistée dans un fichier du dossier temporaire,
+partagée entre web et admin. Les guards sont dans getDb, getProviders, generateQueries,
+classifyMentions, generatePriorityActions. Ne jamais laisser GEO_MOCK en production.
+
 ## Commandes
 - `pnpm install` puis `pnpm dev` (turbo), `pnpm test` (vitest dans core), `pnpm typecheck`.
 - Scan en CLI (validation Phase 1) : `pnpm --filter @geo/core scan:cli -- --brand "X" --url https://x.fr --sector "..." --competitors "A,B"`.

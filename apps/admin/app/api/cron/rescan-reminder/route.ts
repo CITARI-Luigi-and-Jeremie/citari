@@ -10,7 +10,11 @@ export const dynamic = "force-dynamic";
  */
 export async function GET(req: Request) {
   const secret = process.env.CRON_SECRET;
-  if (secret && new URL(req.url).searchParams.get("secret") !== secret) {
+  const authorized =
+    !secret ||
+    new URL(req.url).searchParams.get("secret") === secret ||
+    req.headers.get("authorization") === `Bearer ${secret}`; // format des crons Vercel
+  if (!authorized) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
   const founderEmail = process.env.FOUNDER_EMAIL;

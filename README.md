@@ -2,6 +2,13 @@
 
 Agence GEO (Generative Engine Optimization) : scanner de visibilité IA (lead magnet), landing de vente du Sprint GEO, back-office et usine de livraison CLI. Cahier des charges complet : [SPEC.md](SPEC.md).
 
+## Mode démo (aucune clé requise)
+
+`GEO_MOCK=1` (déjà actif dans `apps/*/.env.local`) simule les 4 moteurs IA et la base de données
+(fichier partagé entre web et admin). Tout le parcours fonctionne : scan → teaser → rapport →
+lead → client → checklist → re-scan J+90 avec comparaison. Un bandeau jaune signale le mode démo.
+Mot de passe admin démo : `demo`. Pour passer en réel : suivre [SETUP.md](SETUP.md).
+
 ## Démarrage
 
 ```bash

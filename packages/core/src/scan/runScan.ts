@@ -77,7 +77,7 @@ export async function runScan(scanId: string): Promise<void> {
 
     // 2. Interrogation des 4 moteurs
     await setScan({ status: "running", progress: 10 });
-    const providers = getProviders();
+    const providers = getProviders(allBrands);
     const jobs = queryRows.flatMap((q) => ENGINES.map((engine) => ({ query: q, engine })));
     let done = 0;
     let aborted = false;

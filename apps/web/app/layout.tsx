@@ -23,6 +23,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="fr">
       <body>
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(orgJsonLd) }} />
+        {process.env.GEO_MOCK === "1" && (
+          <div className="bg-amber-400 px-4 py-1.5 text-center text-xs font-semibold text-amber-950">
+            Mode démonstration — moteurs IA et base de données simulés (GEO_MOCK=1). Les scores ne sont pas réels.
+          </div>
+        )}
         {children}
       </body>
     </html>

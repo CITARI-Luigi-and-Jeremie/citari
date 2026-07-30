@@ -1,6 +1,7 @@
 import { z } from "zod";
 import type { BrandRef, GeneratedQuery, Lang } from "../types";
 import { askClaudeJson, type LLMUsage } from "../llm/json";
+import { isMock, mockQueries } from "../mock/mockLlm";
 
 const QuerySchema = z.object({
   queries: z
@@ -53,6 +54,7 @@ export async function generateQueries(
   onUsage?: (u: LLMUsage) => void
 ): Promise<GeneratedQuery[]> {
   const count = Math.min(30, Math.max(20, input.count ?? 24));
+  if (isMock()) return mockQueries(input.sector, input.brand.name, count);
   const homeText = input.brand.url ? await fetchHomeText(input.brand.url) : "";
 
   const prompt = `Tu génères des requêtes que de VRAIS acheteurs potentiels taperaient dans ChatGPT/Claude/Gemini/Perplexity, pour mesurer la visibilité IA d'une marque.

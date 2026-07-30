@@ -11,3 +11,5 @@ export { classifyMentions } from "./scoring/classify";
 export { computeScore, computeScoreDetail, computeShareOfVoice, type MentionForScoring } from "./scoring/score";
 export { generatePriorityActions } from "./report/actions";
 export { runScan, createRescan } from "./scan/runScan";
+export { isMock } from "./mock/mockLlm";
+export { resetMockDb } from "./mock/fakeDb";

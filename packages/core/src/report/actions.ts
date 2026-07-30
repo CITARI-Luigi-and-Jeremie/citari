@@ -1,6 +1,7 @@
 import { z } from "zod";
 import type { PriorityAction } from "../types";
 import { askClaudeJson, type LLMUsage } from "../llm/json";
+import { isMock, mockActions } from "../mock/mockLlm";
 
 const ActionsSchema = z.object({
   actions: z
@@ -19,6 +20,7 @@ export async function generatePriorityActions(
   },
   onUsage?: (u: LLMUsage) => void
 ): Promise<PriorityAction[]> {
+  if (isMock()) return mockActions(input.brand, input.missedQueries);
   const prompt = `Tu es consultant GEO (Generative Engine Optimization). Génère exactement 10 actions prioritaires, concrètes et spécifiques, pour améliorer la visibilité de "${input.brand}" (secteur : ${input.sector}, score actuel : ${input.score}/100) dans les réponses de ChatGPT, Claude, Gemini et Perplexity.
 
 Chaque action est mappée sur un chantier :

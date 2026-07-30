@@ -2,6 +2,7 @@ import { z } from "zod";
 import type { BrandRef, MentionResult } from "../types";
 import { askClaudeJson, type LLMUsage } from "../llm/json";
 import { detectMentions } from "./detect";
+import { isMock, mockClassify } from "../mock/mockLlm";
 
 const ClassificationSchema = z.object({
   results: z.array(
@@ -29,6 +30,7 @@ export async function classifyMentions(
   onUsage?: (u: LLMUsage) => void
 ): Promise<MentionResult[][]> {
   const deterministic = responses.map((r) => detectMentions(r.text, brands));
+  if (isMock()) return mockClassify(deterministic);
   const merged: MentionResult[][] = deterministic.map((ms) => ms.map((m) => ({ ...m })));
 
   for (let start = 0; start < responses.length; start += BATCH_SIZE) {
