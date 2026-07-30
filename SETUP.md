@@ -4,7 +4,7 @@ Tout le code est prêt et testé en mode démo. Voici ce qu'il reste à faire, d
 
 ## 1. Supabase (~10 min)
 - [ ] Créer un projet sur https://supabase.com
-- [ ] SQL Editor → coller et exécuter `supabase/migrations/0001_init.sql`
+- [ ] SQL Editor → exécuter **dans l'ordre** `supabase/migrations/0001_init.sql`, `0002_seed_directories.sql`, `0003_follow_ups.sql`
 - [ ] Récupérer `SUPABASE_URL` et `SUPABASE_SERVICE_ROLE_KEY` (Settings → API)
 
 ## 2. Clés API des 4 moteurs

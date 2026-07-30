@@ -204,7 +204,8 @@ export default function LandingPage() {
       <footer className="py-10 text-center text-sm text-slate-500">
         <p>GEO Sprint — Agence Generative Engine Optimization · <a className="underline" href={BOOKING_URL}>Réserver un call</a></p>
         <p className="mt-2">
-          <a className="underline" href="/guide-geo">Guide : qu'est-ce que le GEO ?</a> · <a className="underline" href="/geo-vs-seo">GEO vs SEO</a>
+          <a className="underline" href="/guide-geo">Guide : qu'est-ce que le GEO ?</a> · <a className="underline" href="/geo-vs-seo">GEO vs SEO</a> ·{" "}
+          <a className="underline" href="/alternatives-agence-seo">Alternatives aux agences SEO</a>
         </p>
         <p className="mt-2 text-xs text-slate-400">
           <a className="underline" href="/mentions-legales">Mentions légales</a> · <a className="underline" href="/confidentialite">Politique de confidentialité</a>

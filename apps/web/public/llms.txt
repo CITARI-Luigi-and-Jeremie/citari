@@ -23,3 +23,4 @@ Score de Visibilité IA sur 100 : taux de mention (50 %), position moyenne dans 
 - [Accueil et scanner gratuit](/) : lancer un scan de visibilité IA en 90 secondes.
 - [Guide : qu'est-ce que le GEO ?](/guide-geo) : définition, fonctionnement des moteurs génératifs, les 3 chantiers, méthode de mesure, erreurs fréquentes.
 - [GEO vs SEO](/geo-vs-seo) : comparatif factuel des objectifs, leviers, délais et budgets.
+- [Alternatives aux agences SEO](/alternatives-agence-seo) : comparatif agence SEO, agence GEO, freelance, recrutement interne et autonomie outillée — budgets et délais indicatifs.

@@ -34,12 +34,27 @@ pnpm --filter @geo/core scan:cli -- --brand "Acme" --url https://acme.fr --secto
 
 ## Livraison d'un sprint (toolkit)
 
+### Cycle commercial (avant la vente)
+
+```bash
+pnpm toolkit relance --all                    # 3 relances personnalisées (J+2/J+7/J+21) pour tous les leads non traités
+pnpm toolkit relance "contact@prospect.fr"    # ou un lead précis
+pnpm toolkit proposition "Prospect"           # proposition post-call avec ses chiffres réels
+pnpm toolkit proposition "Prospect" -o domination
+```
+
+Les relances apparaissent dans l'admin (`/leads`) le jour où elles sont dues : copier, envoyer depuis votre boîte,
+marquer comme envoyé. La séquence s'arrête d'un clic dès que le prospect répond.
+
+### Livraison du sprint
+
 ```bash
 pnpm toolkit audit-technique https://client.fr --client "Client"   # Chantier 1 : audit
 pnpm toolkit generate-fixes "Client"                               # Chantier 1 : robots.txt, llms.txt, JSON-LD, specs
 pnpm toolkit content-brief "Client"                                # Chantier 2 : 4-6 briefs
 pnpm toolkit draft-content "Client" <brief-id>                     # Chantier 2 : rédaction (relecture obligatoire)
 pnpm toolkit citation-targets "Client"                             # Chantier 3 : cibles + pitchs
+pnpm toolkit sprint-report "Client"                                # Semaine 4 : rapport de fin de sprint
 pnpm toolkit rescan "Client"                                       # J+90 : mêmes requêtes, rapport avant/après
 ```
 

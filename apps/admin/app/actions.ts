@@ -110,6 +110,29 @@ export async function launchRescan(clientId: string) {
   revalidatePath(`/clients/${clientId}`);
 }
 
+/** Marque une relance comme envoyée (et met à jour la date de dernier contact du lead). */
+export async function markFollowUpSent(followUpId: string, leadId: string) {
+  const db = getDb();
+  const now = new Date().toISOString();
+  await db.from("follow_ups").update({ status: "sent", sent_at: now }).eq("id", followUpId);
+  await db.from("leads").update({ last_contacted_at: now }).eq("id", leadId);
+  const { data: lead } = await db.from("leads").select("status").eq("id", leadId).maybeSingle();
+  if (lead?.status === "new") await db.from("leads").update({ status: "contacted" }).eq("id", leadId);
+  revalidatePath("/leads");
+  revalidatePath(`/leads/${leadId}`);
+}
+
+/** Le prospect a répondu / réservé : on arrête la séquence. */
+export async function stopFollowUps(leadId: string, reason: "replied" | "skipped") {
+  const db = getDb();
+  await db.from("follow_ups").update({ status: reason }).eq("lead_id", leadId).eq("status", "draft");
+  if (reason === "replied") {
+    await db.from("leads").update({ status: "call_booked", call_booked_at: new Date().toISOString() }).eq("id", leadId);
+  }
+  revalidatePath("/leads");
+  revalidatePath(`/leads/${leadId}`);
+}
+
 export async function updateCitationStatus(targetId: string, clientId: string, status: string) {
   await getDb().from("citation_targets").update({ status }).eq("id", targetId);
   revalidatePath(`/clients/${clientId}`);

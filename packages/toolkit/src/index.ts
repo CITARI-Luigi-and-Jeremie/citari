@@ -10,6 +10,8 @@ import { contentBrief } from "./commands/content-brief.js";
 import { draftContent } from "./commands/draft-content.js";
 import { citationTargets } from "./commands/citation-targets.js";
 import { sprintReport } from "./commands/sprint-report.js";
+import { relance } from "./commands/relance.js";
+import { proposition } from "./commands/proposition.js";
 import { rescan } from "./commands/rescan.js";
 
 const program = new Command()
@@ -47,6 +49,26 @@ program
   .argument("<client>", "nom ou id du client")
   .description("Chantier 3 — cibles de citation priorisées + brouillons de pitchs presse")
   .action((client: string) => run(citationTargets(client)));
+
+program
+  .command("relance")
+  .argument("[lead]", "id, email ou marque du lead")
+  .option("-a, --all", "générer la séquence pour tous les leads au statut « new »")
+  .description("Commercial — séquence de 3 relances personnalisées (J+2, J+7, J+21) à partir des données du scan")
+  .action((lead: string | undefined, opts: { all?: boolean }) => {
+    if (!lead && !opts.all) {
+      console.error("Précisez un lead, ou utilisez --all pour tous les leads non traités.");
+      process.exit(1);
+    }
+    run(relance(lead ?? "", opts));
+  });
+
+program
+  .command("proposition")
+  .argument("<cible>", "client, lead, email ou id de scan")
+  .option("-o, --offer <offre>", "sprint (2 900 €) ou domination (4 900 €)", "sprint")
+  .description("Commercial — proposition post-call personnalisée avec les chiffres réels du scan")
+  .action((cible: string, opts: { offer?: string }) => run(proposition(cible, opts)));
 
 program
   .command("sprint-report")

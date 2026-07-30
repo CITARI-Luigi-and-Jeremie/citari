@@ -19,7 +19,8 @@ function storeFile(): string {
 
 const TABLE_DEFAULTS: Record<string, Row> = {
   scans: { status: "pending", progress: 0, cost_cents: 0, competitors: [], lang: "fr", email: null, error: null, score: null, score_detail: null, share_of_voice: null, actions: null, report_token: null, previous_scan_id: null, client_id: null },
-  leads: { status: "new", notes: null },
+  leads: { status: "new", notes: null, last_contacted_at: null, call_booked_at: null },
+  follow_ups: { status: "draft", sent_at: null },
   clients: { competitors: [], rescan_reminder_sent: false, rescan_due_at: null, contact_name: null, contact_email: null, site_access: null, initial_scan_id: null, lead_id: null },
   sprints: { status: "active", kind: "sprint" },
   sprint_tasks: { done: false, notes: null, deliverable_id: null },

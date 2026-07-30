@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { getDb, unwrap } from "@geo/core";
-import { convertLeadToClient, saveLeadNotes, updateLeadStatus } from "@/app/actions";
+import { convertLeadToClient, markFollowUpSent, saveLeadNotes, stopFollowUps, updateLeadStatus } from "@/app/actions";
 
 export const dynamic = "force-dynamic";
 
@@ -14,6 +14,7 @@ export default async function LeadDetail({ params }: { params: Promise<{ id: str
   const scan = unwrap(await db.from("scans").select("*").eq("id", lead.scan_id).single()) as any;
   const { count: nQueries } = await db.from("queries").select("id", { count: "exact", head: true }).eq("scan_id", scan.id);
   const { count: nResponses } = await db.from("responses").select("id", { count: "exact", head: true }).eq("scan_id", scan.id);
+  const followUps = unwrap(await db.from("follow_ups").select("*").eq("lead_id", lead.id).order("step")) as any[];
 
   return (
     <div>
@@ -59,6 +60,49 @@ export default async function LeadDetail({ params }: { params: Promise<{ id: str
             <button className="mt-2 rounded bg-slate-800 px-3 py-1.5 text-xs font-semibold text-white">Enregistrer</button>
           </form>
         </div>
+      </div>
+
+      <div className="mt-6 rounded-xl border border-slate-200 bg-white p-5">
+        <div className="flex items-center justify-between">
+          <h2 className="font-semibold">Séquence de relance</h2>
+          {followUps.some((f) => f.status === "draft") && (
+            <form action={stopFollowUps.bind(null, lead.id, "replied")}>
+              <button className="rounded bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white">
+                Il a répondu / call réservé — arrêter la séquence
+              </button>
+            </form>
+          )}
+        </div>
+        {followUps.length === 0 ? (
+          <p className="mt-2 text-sm text-slate-500">
+            Aucune relance générée. Lancez <code className="rounded bg-slate-100 px-1">pnpm toolkit relance &quot;{lead.email}&quot;</code>
+          </p>
+        ) : (
+          <div className="mt-3 space-y-2">
+            {followUps.map((f) => (
+              <details key={f.id} className="rounded-lg border border-slate-200 p-3">
+                <summary className="cursor-pointer text-sm">
+                  <strong>Relance {f.step}</strong>
+                  <span className="text-slate-500"> · prévue le {new Date(f.scheduled_for).toLocaleDateString("fr-FR")}</span>
+                  <span className={`ml-2 rounded px-1.5 py-0.5 text-xs ${
+                    f.status === "sent" ? "bg-emerald-100 text-emerald-700"
+                    : f.status === "replied" ? "bg-accent text-white"
+                    : f.status === "skipped" ? "bg-slate-100 text-slate-400"
+                    : "bg-amber-100 text-amber-700"}`}>
+                    {f.status === "sent" ? `envoyée le ${new Date(f.sent_at).toLocaleDateString("fr-FR")}` : f.status}
+                  </span>
+                </summary>
+                <p className="mt-2 text-sm"><strong>Objet :</strong> {f.subject}</p>
+                <pre className="mt-2 whitespace-pre-wrap rounded bg-slate-50 p-3 text-xs text-slate-700">{f.body}</pre>
+                {f.status === "draft" && (
+                  <form action={markFollowUpSent.bind(null, f.id, lead.id)} className="mt-2">
+                    <button className="rounded bg-accent px-3 py-1.5 text-xs font-semibold text-white">Marquer comme envoyé</button>
+                  </form>
+                )}
+              </details>
+            ))}
+          </div>
+        )}
       </div>
 
       <details className="mt-6 rounded-xl border border-slate-200 bg-white p-5">
