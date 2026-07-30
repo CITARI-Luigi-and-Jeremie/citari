@@ -20,6 +20,6 @@ export const SPRINT_CHECKLIST: { week: number; label: string }[] = [
   // Semaine 4
   { week: 4, label: "Relances citations externes" },
   { week: 4, label: "Vérification technique finale" },
-  { week: 4, label: "Rapport de fin de sprint (liste complète des actions livrées)" },
+  { week: 4, label: "Lancer `pnpm toolkit sprint-report <client>` (rapport de fin de sprint) puis l'envoyer au client" },
   { week: 4, label: "Programmation du re-scan J+90" },
 ];

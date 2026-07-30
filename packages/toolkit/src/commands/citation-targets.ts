@@ -49,10 +49,16 @@ export async function citationTargets(clientRef: string): Promise<void> {
     .slice(0, 25)
     .map(([host, v]) => `${host} (cité ${v.count}×, pour : ${[...v.competitors].join(", ")})`);
 
-  // Base interne d'annuaires par secteur — actif réutilisable alimenté au fil des sprints
-  const directories = unwrap(
-    await db.from("directories").select("name,url,type,notes").ilike("sector", `%${client.sector ?? ""}%`)
-  ) as { name: string; url: string; type: string; notes: string | null }[];
+  // Base interne d'annuaires — actif réutilisable alimenté au fil des sprints.
+  // On croise les entrées du secteur ET les incontournables « tous secteurs ».
+  type DirectoryRow = { name: string; url: string; type: string; notes: string | null };
+  const sectorDirs = client.sector
+    ? (unwrap(await db.from("directories").select("name,url,type,notes").ilike("sector", `%${client.sector}%`)) as DirectoryRow[])
+    : [];
+  const generalDirs = unwrap(await db.from("directories").select("name,url,type,notes").eq("sector", "tous")) as DirectoryRow[];
+  const directories = [...sectorDirs, ...generalDirs].filter(
+    (d, i, arr) => arr.findIndex((x) => x.url === d.url) === i
+  );
 
   console.log(`${perplexitySources.length} sources Perplexity, ${directories.length} annuaires en base — priorisation…`);
   const out = await askClaudeJson(
@@ -61,8 +67,8 @@ export async function citationTargets(clientRef: string): Promise<void> {
 Sources citées par Perplexity dans les réponses où les concurrents apparaissent (LES endroits où il faut être) :
 ${perplexitySources.map((s) => `- ${s}`).join("\n") || "- (aucune détectée sur ce scan)"}
 
-Annuaires sectoriels déjà connus en interne :
-${directories.map((d) => `- ${d.name} (${d.url}) [${d.type}]`).join("\n") || "- (aucun)"}
+Annuaires, comparateurs et plateformes d'avis déjà connus en interne (à intégrer en priorité s'ils sont pertinents pour ce secteur) :
+${directories.map((d) => `- ${d.name} (${d.url}) [${d.type}]${d.notes ? ` — ${d.notes}` : ""}`).join("\n") || "- (aucun)"}
 
 Produis une liste priorisée de cibles de citation (les sources Perplexity d'abord, complétées par les annuaires/comparateurs/presse évidents du secteur en francophonie). Pour chaque cible :
 - "source" : nom, "url" : URL si connue sinon null, "type" : annuaire|comparateur|presse|forum|fiche|autre

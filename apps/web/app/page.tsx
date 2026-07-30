@@ -80,6 +80,58 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* Preuves marché */}
+      <section className="border-y border-slate-100 bg-white">
+        <div className="mx-auto grid max-w-6xl gap-6 px-4 py-10 text-center sm:grid-cols-3">
+          <div>
+            <p className="text-3xl font-extrabold text-accent">~900 M</p>
+            <p className="mt-1 text-sm text-slate-600">d'utilisateurs hebdomadaires sur ChatGPT début 2026 — vos clients y sont déjà.</p>
+          </div>
+          <div>
+            <p className="text-3xl font-extrabold text-accent">46 %</p>
+            <p className="mt-1 text-sm text-slate-600">des utilisateurs d'IA démarrent leur recherche d'achat sur ChatGPT, Gemini ou Perplexity (25 % en 2024).</p>
+          </div>
+          <div>
+            <p className="text-3xl font-extrabold text-accent">1 sur 2</p>
+            <p className="mt-1 text-sm text-slate-600">acheteur B2B de logiciels commence désormais sa recherche par un chatbot IA (étude G2).</p>
+          </div>
+        </div>
+        <p className="pb-6 text-center text-xs text-slate-400">
+          Sources : Reuters (fév. 2026), Alchemer 2026 Retail Report, G2 Research 2026 — détails dans notre <a className="underline" href="/guide-geo">guide GEO</a>.
+        </p>
+      </section>
+
+      {/* Comment ça marche */}
+      <section className="mx-auto max-w-6xl px-4 py-16">
+        <h2 className="text-center text-3xl font-bold">Comment ça marche</h2>
+        <div className="mt-8 grid gap-6 md:grid-cols-3">
+          <div className="rounded-2xl bg-slate-50 p-6">
+            <p className="text-sm font-bold text-accent">Étape 1 — aujourd'hui</p>
+            <h3 className="mt-1 font-semibold">Scannez votre visibilité (gratuit)</h3>
+            <p className="mt-2 text-sm text-slate-600">
+              20 à 30 questions d'intention d'achat de votre secteur, posées aux 4 moteurs via leurs API officielles.
+              Score 0-100, part de voix, réponses réelles. En 90 secondes, sans inscription.
+            </p>
+          </div>
+          <div className="rounded-2xl bg-slate-50 p-6">
+            <p className="text-sm font-bold text-accent">Étape 2 — cette semaine</p>
+            <h3 className="mt-1 font-semibold">Call de restitution (gratuit, 30 min)</h3>
+            <p className="mt-2 text-sm text-slate-600">
+              On commente vos résultats requête par requête : où vos concurrents gagnent, quelles sources les font
+              citer, et ce qu'un sprint changerait. Sans engagement.
+            </p>
+          </div>
+          <div className="rounded-2xl bg-slate-50 p-6">
+            <p className="text-sm font-bold text-accent">Étape 3 — 30 jours</p>
+            <h3 className="mt-1 font-semibold">Sprint GEO, puis preuve à J+90</h3>
+            <p className="mt-2 text-sm text-slate-600">
+              Nous exécutons les 3 chantiers, vous recevez chaque livrable. À J+90, re-scan offert avec les mêmes
+              questions : la progression se mesure, elle ne se promet pas.
+            </p>
+          </div>
+        </div>
+      </section>
+
       {/* Offre Sprint GEO */}
       <section className="mx-auto max-w-6xl px-4 py-20">
         <h2 className="text-center text-3xl font-bold">Le Sprint GEO — 30 jours pour devenir visible</h2>
@@ -150,7 +202,13 @@ export default function LandingPage() {
       </section>
 
       <footer className="py-10 text-center text-sm text-slate-500">
-        GEO Sprint — Agence Generative Engine Optimization · <a className="underline" href={BOOKING_URL}>Réserver un call</a>
+        <p>GEO Sprint — Agence Generative Engine Optimization · <a className="underline" href={BOOKING_URL}>Réserver un call</a></p>
+        <p className="mt-2">
+          <a className="underline" href="/guide-geo">Guide : qu'est-ce que le GEO ?</a> · <a className="underline" href="/geo-vs-seo">GEO vs SEO</a>
+        </p>
+        <p className="mt-2 text-xs text-slate-400">
+          <a className="underline" href="/mentions-legales">Mentions légales</a> · <a className="underline" href="/confidentialite">Politique de confidentialité</a>
+        </p>
       </footer>
     </main>
   );

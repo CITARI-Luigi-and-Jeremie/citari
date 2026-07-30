@@ -22,6 +22,12 @@ Tout le code est prêt et testé en mode démo. Voici ce qu'il reste à faire, d
 - [ ] Remplir `apps/web/.env.local` et `apps/admin/.env.local` avec les vraies valeurs et **supprimer `GEO_MOCK=1`**
 - [ ] PDF : `pnpm --filter web exec playwright install chromium`
 
+## 4 bis. Obligations légales (bloquant pour la mise en ligne)
+- [ ] Remplir tous les `[À COMPLÉTER]` de `apps/web/app/mentions-legales/page.tsx` (dénomination, SIRET, RCS, TVA, hébergeur) — obligatoire, art. 6 III LCEN
+- [ ] Remplir les `[À COMPLÉTER]` de `apps/web/app/confidentialite/page.tsx` (responsable de traitement, email de contact)
+- [ ] Souscrire à un médiateur de la consommation agréé si vous vendez à des non-professionnels
+- [ ] Vérifier que le lien de désinscription est bien présent dans les emails Resend
+
 ## 5. Validation Phase 1 (obligatoire avant tout prospect)
 - [ ] 3 scans CLI sur de vraies marques : `pnpm --filter @geo/core scan:cli -- --brand … --url … --sector … --competitors …`
 - [ ] Vérifier manuellement la détection de mentions sur 5 scans réels

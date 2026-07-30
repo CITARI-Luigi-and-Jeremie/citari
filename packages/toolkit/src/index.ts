@@ -9,6 +9,7 @@ import { generateFixes } from "./commands/generate-fixes.js";
 import { contentBrief } from "./commands/content-brief.js";
 import { draftContent } from "./commands/draft-content.js";
 import { citationTargets } from "./commands/citation-targets.js";
+import { sprintReport } from "./commands/sprint-report.js";
 import { rescan } from "./commands/rescan.js";
 
 const program = new Command()
@@ -46,6 +47,12 @@ program
   .argument("<client>", "nom ou id du client")
   .description("Chantier 3 — cibles de citation priorisées + brouillons de pitchs presse")
   .action((client: string) => run(citationTargets(client)));
+
+program
+  .command("sprint-report")
+  .argument("<client>", "nom ou id du client")
+  .description("Semaine 4 — rapport de fin de sprint : actions livrées, citations, re-scan J+90")
+  .action((client: string) => run(sprintReport(client)));
 
 program
   .command("rescan")

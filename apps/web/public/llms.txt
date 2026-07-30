@@ -14,6 +14,12 @@
 - Engagement d'honnêteté : nous garantissons les actions livrées, pas un score — les moteurs intègrent les changements en 4 à 12 semaines.
 - 3 sprints par mois maximum, exécution par le fondateur.
 
+## Méthode de mesure
+
+Score de Visibilité IA sur 100 : taux de mention (50 %), position moyenne dans la réponse (20 %), recommandation explicite (20 %), sentiment (10 %). Part de voix = mentions de la marque / mentions totales (marque + concurrents). Mesure via les API officielles des 4 moteurs, sur un échantillon figé de 20 à 30 questions d'intention d'achat, rejoué à l'identique lors du re-scan J+90.
+
 ## Pages
 
-- [Accueil et scanner gratuit](/) : lancer un scan de visibilité IA.
+- [Accueil et scanner gratuit](/) : lancer un scan de visibilité IA en 90 secondes.
+- [Guide : qu'est-ce que le GEO ?](/guide-geo) : définition, fonctionnement des moteurs génératifs, les 3 chantiers, méthode de mesure, erreurs fréquentes.
+- [GEO vs SEO](/geo-vs-seo) : comparatif factuel des objectifs, leviers, délais et budgets.

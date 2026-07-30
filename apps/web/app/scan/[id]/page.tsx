@@ -185,6 +185,10 @@ function TeaserView({ id, teaser }: { id: string; teaser: Teaser }) {
               </button>
             </form>
             {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
+            <p className="mt-2 text-xs text-slate-500">
+              Votre email sert à vous envoyer ce rapport et, éventuellement, un suivi commercial. Désinscription en
+              un clic. Voir la <a className="underline" href="/confidentialite" target="_blank">politique de confidentialité</a>.
+            </p>
           </>
         ) : (
           <div className="text-center">
