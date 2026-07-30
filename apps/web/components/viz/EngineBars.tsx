@@ -11,9 +11,9 @@ export interface EngineDatum {
 
 /**
  * Score par moteur. Barre horizontale pleine largeur sous le chiffre : à des
- * scores bas, une jauge verticale n'est qu'une piste vide — la barre horizontale
+ * scores bas, une jauge verticale n’est qu’une piste vide — la barre horizontale
  * reste lisible comme une mesure. Le chiffre est toujours présent (encodage
- * secondaire : la couleur n'est jamais seule).
+ * secondaire : la couleur n’est jamais seule).
  */
 export default function EngineBars({ data }: { data: EngineDatum[] }) {
   return (

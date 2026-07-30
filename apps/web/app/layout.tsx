@@ -2,11 +2,23 @@ import type { Metadata } from "next";
 import { fontVariables } from "./fonts";
 import "./globals.css";
 
+const TITLE = "GEO Sprint — Votre marque est-elle invisible dans ChatGPT ?";
+const DESCRIPTION =
+  "Mesurez gratuitement votre visibilité dans ChatGPT, Claude, Gemini et Perplexity en 90 secondes. Puis rendez votre marque citable avec le Sprint GEO de 30 jours.";
+
 export const metadata: Metadata = {
-  title: "GEO Sprint — Votre marque est-elle invisible dans ChatGPT ?",
-  description:
-    "Testez gratuitement votre visibilité dans ChatGPT, Claude, Gemini et Perplexity en 90 secondes. Puis rendez votre marque visible avec le Sprint GEO de 30 jours.",
+  title: { default: TITLE, template: "%s — GEO Sprint" },
+  description: DESCRIPTION,
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"),
+  openGraph: {
+    title: TITLE,
+    description: DESCRIPTION,
+    type: "website",
+    locale: "fr_FR",
+    siteName: "GEO Sprint",
+    images: [{ url: "/og.png", width: 1200, height: 630, alt: TITLE }],
+  },
+  twitter: { card: "summary_large_image", title: TITLE, description: DESCRIPTION, images: ["/og.png"] },
 };
 
 const orgJsonLd = {

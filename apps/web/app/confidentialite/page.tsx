@@ -50,15 +50,15 @@ export default function ConfidentialitePage() {
           </tbody>
         </table>
         <p className="text-ink-dim">
-          Aucun cookie publicitaire ni traceur analytique tiers n'est déposé. Aucun profilage n'est réalisé au-delà
-          de l'analyse de visibilité demandée.
+          Aucun cookie publicitaire ni traceur analytique tiers n’est déposé. Aucun profilage n’est réalisé au-delà
+          de l’analyse de visibilité demandée.
         </p>
       </section>
 
       <section className="space-y-2">
         <h2 className="font-editorial text-xl text-ink">Sous-traitants et transferts</h2>
         <p className="text-ink-dim">
-          La réalisation du scan implique l'envoi des questions générées (contenant le nom de la marque et de ses
+          La réalisation du scan implique l’envoi des questions générées (contenant le nom de la marque et de ses
           concurrents) aux fournisseurs suivants, via leurs API professionnelles :
         </p>
         <ul className="ml-5 list-disc space-y-1 text-ink-dim">
@@ -68,7 +68,7 @@ export default function ConfidentialitePage() {
           <li><strong>Cloudflare Turnstile</strong> — protection anti-robot du formulaire.</li>
         </ul>
         <p className="text-ink-dim">
-          Aucune donnée personnelle au-delà de ce qui est nécessaire à la mesure n'est transmise. Les API
+          Aucune donnée personnelle au-delà de ce qui est nécessaire à la mesure n’est transmise. Les API
           professionnelles utilisées ne réutilisent pas les données transmises pour entraîner les modèles.
         </p>
       </section>
@@ -86,8 +86,8 @@ export default function ConfidentialitePage() {
       <section className="space-y-2">
         <h2 className="font-editorial text-xl text-ink">Vos droits</h2>
         <p className="text-ink-dim">
-          Vous disposez d'un droit d'accès, de rectification, d'effacement, de limitation, d'opposition et de
-          portabilité. Pour l'exercer, écrivez à{" "}
+          Vous disposez d’un droit d’accès, de rectification, d’effacement, de limitation, d’opposition et de
+          portabilité. Pour l’exercer, écrivez à{" "}
           <a className="text-signal underline" href="mailto:[À COMPLÉTER]">[À COMPLÉTER : email]</a> — réponse sous
           un mois. Vous pouvez également introduire une réclamation auprès de la{" "}
           <a className="text-signal underline" href="https://www.cnil.fr" target="_blank" rel="noopener noreferrer">CNIL</a>.

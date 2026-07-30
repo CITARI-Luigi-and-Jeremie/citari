@@ -51,6 +51,15 @@
     text-rendering: optimizeLegibility;
   }
 
+  /* Détail de composition : évite les titres à mot orphelin et les rivières
+     dans les paragraphes. Invisible quand c'est bien fait. */
+  h1, h2, h3, figcaption, blockquote {
+    text-wrap: balance;
+  }
+  p, li, dd {
+    text-wrap: pretty;
+  }
+
   ::selection {
     background: var(--signal);
     color: var(--paper);

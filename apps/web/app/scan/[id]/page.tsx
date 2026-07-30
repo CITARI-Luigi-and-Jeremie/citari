@@ -14,7 +14,7 @@ const ENGINE_LABELS: Record<string, string> = {
 
 const PHASES: { key: string; label: string }[] = [
   { key: "pending", label: "Initialisation" },
-  { key: "generating_queries", label: "Génération des questions d'achat" },
+  { key: "generating_queries", label: "Génération des questions d’achat" },
   { key: "running", label: "Interrogation des 4 moteurs" },
   { key: "scoring", label: "Analyse des mentions et scoring" },
   { key: "done", label: "Terminé" },
@@ -85,7 +85,7 @@ export default function ScanPage({ params }: { params: Promise<{ id: string }> }
       {scanError && (
         <div className="border-l-2 border-signal py-24 pl-6">
           <p className="label">Échec</p>
-          <h1 className="mt-4 font-editorial text-3xl text-ink">Le scan n'a pas abouti</h1>
+          <h1 className="mt-4 font-editorial text-3xl text-ink">Le scan n’a pas abouti</h1>
           <p className="mt-3 max-w-prose font-mono text-sm text-signal">{scanError}</p>
           <a href="/" className="btn-ghost mt-8 inline-block">Relancer un scan</a>
         </div>
@@ -95,7 +95,7 @@ export default function ScanPage({ params }: { params: Promise<{ id: string }> }
   );
 }
 
-/** Le moment de théâtre : compteur réel de réponses collectées, phases qui s'allument. */
+/** Le moment de théâtre : compteur réel de réponses collectées, phases qui s’allument. */
 function Progress({ p }: { p: Progress }) {
   const phaseIndex = PHASES.findIndex((x) => x.key === p.status);
   const engines = Object.keys(ENGINE_LABELS);
@@ -181,7 +181,7 @@ function Progress({ p }: { p: Progress }) {
 
           <p className="mt-8 border-t border-rule pt-4 text-xs leading-relaxed text-ink-faint">
             {p.queries > 0
-              ? `${p.queries} questions d'intention d'achat sont posées à chacun des quatre moteurs, via leurs API officielles.`
+              ? `${p.queries} questions d’intention d’achat sont posées à chacun des quatre moteurs, via leurs API officielles.`
               : "Génération des questions à partir de votre secteur et du contenu de votre site."}
           </p>
         </div>

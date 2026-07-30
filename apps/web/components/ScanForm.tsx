@@ -7,7 +7,7 @@ import { SECTORS } from "@/lib/constants";
 
 const TURNSTILE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
 
-/** Formulaire de scan — traité comme un formulaire d'instrument : champs à filet, labels techniques. */
+/** Formulaire de scan — traité comme un formulaire d’instrument : champs à filet, labels techniques. */
 export default function ScanForm() {
   const router = useRouter();
   const [brand, setBrand] = useState("");

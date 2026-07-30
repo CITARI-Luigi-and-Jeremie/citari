@@ -4,9 +4,9 @@ import { useEffect, useState } from "react";
 import { scoreTone, scoreVerdict, TONE_VAR } from "@/lib/score";
 
 /**
- * Chiffre héros : le score n'est pas un graphique, c'est un titre.
+ * Chiffre héros : le score n’est pas un graphique, c’est un titre.
  * Le compteur monte une fois (chorégraphie autorisée, DESIGN.md §6),
- * jamais en boucle, et se fige immédiatement si l'utilisateur réduit les animations.
+ * jamais en boucle, et se fige immédiatement si l’utilisateur réduit les animations.
  */
 export default function ScoreHero({
   score,

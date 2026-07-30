@@ -11,9 +11,9 @@ export interface ShareDatum {
 
 /**
  * Part de voix — barres horizontales, encodage « focus + contexte » :
- * la marque du client porte l'accent, les concurrents restent neutres.
- * Extrémités franches (DESIGN.md §5 : pas d'arrondi mou), étiquetage direct
- * systématique — l'identité ne repose jamais sur la seule couleur.
+ * la marque du client porte l’accent, les concurrents restent neutres.
+ * Extrémités franches (DESIGN.md §5 : pas d’arrondi mou), étiquetage direct
+ * systématique — l’identité ne repose jamais sur la seule couleur.
  */
 export default function ShareOfVoice({ data, animate = true }: { data: ShareDatum[]; animate?: boolean }) {
   const ref = useRef<HTMLDivElement>(null);
@@ -39,7 +39,7 @@ export default function ShareOfVoice({ data, animate = true }: { data: ShareDatu
     );
     io.observe(el);
     // Filet de sécurité : hors écran (impression, PDF Playwright, capture),
-    // l'observateur ne se déclenche jamais — les barres doivent quand même exister.
+    // l’observateur ne se déclenche jamais — les barres doivent quand même exister.
     const fallback = setTimeout(() => setShown(true), 900);
     return () => {
       io.disconnect();

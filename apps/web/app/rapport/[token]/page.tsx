@@ -132,10 +132,10 @@ export default async function ReportPage({ params }: { params: Promise<{ token: 
               <ScoreHero score={score} previous={isComparison ? previous?.score : null} />
               <p className="border-l-2 pl-4 text-sm text-ink-dim" style={{ borderColor: TONE_VAR[scoreTone(score)] }}>
                 {score < 40
-                  ? `Sur ${queryTable.length} questions d'achat posées aux quatre moteurs, ${scan.brand} n'est presque jamais cité. Vos concurrents occupent l'espace de recommandation à votre place.`
+                  ? `Sur ${queryTable.length} questions d’achat posées aux quatre moteurs, ${scan.brand} n’est presque jamais cité. Vos concurrents occupent l’espace de recommandation à votre place.`
                   : score < 70
-                    ? `${scan.brand} apparaît dans une partie des réponses, sans s'imposer. La marge de progression porte surtout sur les requêtes comparatives.`
-                    : `${scan.brand} est régulièrement cité et recommandé. L'enjeu devient la défense de cette position.`}
+                    ? `${scan.brand} apparaît dans une partie des réponses, sans s’imposer. La marge de progression porte surtout sur les requêtes comparatives.`
+                    : `${scan.brand} est régulièrement cité et recommandé. L’enjeu devient la défense de cette position.`}
               </p>
             </div>
             <div className="mt-12">
@@ -150,7 +150,7 @@ export default async function ReportPage({ params }: { params: Promise<{ token: 
             <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_280px]">
               <ShareOfVoice data={shareData} />
               <p className="text-sm text-ink-dim lg:pt-3">
-                Chaque point de part de voix est une recommandation qui va à quelqu'un. Les barres neutres sont vos
+                Chaque point de part de voix est une recommandation qui va à quelqu’un. Les barres neutres sont vos
                 concurrents ; la vôtre est marquée{" "}
                 <span className="font-mono" style={{ color: "var(--signal)" }}>▸</span>.
               </p>
@@ -247,7 +247,7 @@ export default async function ReportPage({ params }: { params: Promise<{ token: 
           <section id="sources" className="scroll-mt-8 pt-24">
             <SectionHead n="05" title="Les sources qui font gagner vos concurrents" sub="citées par Perplexity" />
             <p className="mb-6 max-w-prose text-sm text-ink-dim">
-              Sites sur lesquels Perplexity s'appuie dans les réponses où vos concurrents apparaissent. C'est la
+              Sites sur lesquels Perplexity s’appuie dans les réponses où vos concurrents apparaissent. C’est la
               liste des endroits où il faut exister.
             </p>
             {perplexitySources.length === 0 ? (
@@ -300,7 +300,7 @@ export default async function ReportPage({ params }: { params: Promise<{ token: 
                 <h2 className="font-editorial text-3xl text-ink">On regarde ces résultats ensemble ?</h2>
                 <p className="mt-3 max-w-prose text-sm text-ink-dim">
                   Trente minutes, gratuit, sans engagement. On commente votre rapport requête par requête et on vous
-                  dit exactement ce qu'un Sprint GEO changerait pour {scan.brand} — y compris si la réponse est
+                  dit exactement ce qu’un Sprint GEO changerait pour {scan.brand} — y compris si la réponse est
                   « rien, gardez votre argent ».
                 </p>
               </div>
