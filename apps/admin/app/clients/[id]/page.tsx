@@ -44,13 +44,13 @@ export default async function ClientDetail({ params }: { params: Promise<{ id: s
 
   return (
     <div>
-      <a href="/clients" className="text-sm text-bone-faint">← Clients</a>
+      <a href="/clients" className="text-sm text-ink-faint">← Clients</a>
       <h1 className="mt-2 text-2xl font-bold">{client.brand}</h1>
-      <p className="text-sm text-bone-faint">{client.sector} · {client.url}</p>
+      <p className="text-sm text-ink-faint">{client.sector} · {client.url}</p>
 
       <div className="mt-6 grid gap-6 lg:grid-cols-2">
         {/* Fiche client */}
-        <div className="border border-rule bg-ink-raised p-5">
+        <div className="border border-rule bg-paper-raised p-5">
           <h2 className="font-semibold">Fiche client</h2>
           <form action={updateClient.bind(null, client.id)} className="mt-3 space-y-2 text-sm">
             <input name="contact_name" defaultValue={client.contact_name ?? ""} placeholder="Nom du contact" className="field" />
@@ -68,12 +68,12 @@ export default async function ClientDetail({ params }: { params: Promise<{ id: s
           <form action={addClientData.bind(null, client.id)} className="mt-2 flex gap-2 text-sm">
             <input name="key" placeholder="Clé (ex. prix)" className="field" />
             <input name="value" placeholder="Valeur" className="field" />
-            <button className="bg-ink-raised px-3 text-xs font-semibold text-ink">+</button>
+            <button className="bg-paper-raised px-3 text-xs font-semibold text-ink">+</button>
           </form>
         </div>
 
         {/* Re-scan J+90 */}
-        <div className="border border-rule bg-ink-raised p-5">
+        <div className="border border-rule bg-paper-raised p-5">
           <h2 className="font-semibold">Scans & re-scan J+90</h2>
           <ul className="mt-3 space-y-1 text-sm">
             {initialScan && (
@@ -90,7 +90,7 @@ export default async function ClientDetail({ params }: { params: Promise<{ id: s
             ))}
           </ul>
           <form action={scheduleRescan.bind(null, client.id)} className="mt-4 flex items-center gap-2 text-sm">
-            <label className="text-bone-faint">Planifié le</label>
+            <label className="text-ink-faint">Planifié le</label>
             <input type="date" name="rescan_due_at" defaultValue={client.rescan_due_at ?? ""} className="field" />
             <button className="btn-ghost">Planifier</button>
           </form>
@@ -103,31 +103,31 @@ export default async function ClientDetail({ params }: { params: Promise<{ id: s
       </div>
 
       {/* Checklist de sprint */}
-      <div className="mt-6 border border-rule bg-ink-raised p-5">
+      <div className="mt-6 border border-rule bg-paper-raised p-5">
         <h2 className="font-semibold">
           Checklist du sprint {sprint ? `(démarré le ${new Date(sprint.starts_at ?? sprint.created_at).toLocaleDateString("fr-FR")})` : ""}
-          <span className="ml-2 text-sm font-normal text-bone-faint">
+          <span className="ml-2 text-sm font-normal text-ink-faint">
             {tasks.filter((t) => t.done).length}/{tasks.length} faites
           </span>
         </h2>
         {[1, 2, 3, 4].map((week) => (
           <div key={week} className="mt-4">
-            <h3 className="text-sm font-bold text-bone-faint">Semaine {week}</h3>
+            <h3 className="text-sm font-bold text-ink-faint">Semaine {week}</h3>
             <ul className="mt-1 space-y-1">
               {tasks.filter((t) => t.week === week).map((t) => (
                 <li key={t.id} className="flex items-start gap-2 text-sm">
                   <form action={toggleTask.bind(null, t.id, client.id, !t.done)}>
-                    <button className={`mt-0.5 flex h-5 w-5 items-center justify-center border text-xs ${t.done ? "border-valid bg-valid text-ink" : "border-rule-strong bg-ink-raised"}`}>
+                    <button className={`mt-1 flex h-5 w-5 items-center justify-center border text-xs ${t.done ? "border-valid bg-valid text-paper" : "border-rule-strong bg-paper-raised"}`}>
                       {t.done ? "✓" : ""}
                     </button>
                   </form>
                   <div className="flex-1">
-                    <span className={t.done ? "text-bone-faint line-through" : ""}>{t.label}</span>
-                    <details className="mt-0.5">
-                      <summary className="cursor-pointer text-xs text-bone-faint">notes{t.notes ? " ·" : ""} {t.notes ? t.notes.slice(0, 60) : ""}</summary>
+                    <span className={t.done ? "text-ink-faint line-through" : ""}>{t.label}</span>
+                    <details className="mt-1">
+                      <summary className="cursor-pointer text-xs text-ink-faint">notes{t.notes ? " ·" : ""} {t.notes ? t.notes.slice(0, 60) : ""}</summary>
                       <form action={saveTaskNotes.bind(null, t.id, client.id)} className="mt-1 flex gap-2">
                         <input name="notes" defaultValue={t.notes ?? ""} className="field" />
-                        <button className="bg-ink-raised px-2 text-xs text-ink">OK</button>
+                        <button className="bg-paper-raised px-2 text-xs text-ink">OK</button>
                       </form>
                     </details>
                   </div>
@@ -139,39 +139,39 @@ export default async function ClientDetail({ params }: { params: Promise<{ id: s
       </div>
 
       {/* Livrables */}
-      <div className="mt-6 border border-rule bg-ink-raised p-5">
+      <div className="mt-6 border border-rule bg-paper-raised p-5">
         <h2 className="font-semibold">Livrables générés par le toolkit</h2>
         <ul className="mt-3 space-y-1 text-sm">
           {deliverables.map((d) => (
             <li key={d.id}>
-              <span className="mr-2 bg-ink-raised px-1.5 py-0.5 text-xs">{d.kind}</span>
-              {d.title} {d.path && <code className="text-xs text-bone-faint">{d.path}</code>}
+              <span className="mr-2 bg-paper-raised px-2 py-1 text-xs">{d.kind}</span>
+              {d.title} {d.path && <code className="text-xs text-ink-faint">{d.path}</code>}
             </li>
           ))}
-          {deliverables.length === 0 && <li className="text-bone-faint">Aucun livrable — utilisez `pnpm toolkit …`.</li>}
+          {deliverables.length === 0 && <li className="text-ink-faint">Aucun livrable — utilisez `pnpm toolkit …`.</li>}
         </ul>
       </div>
 
       {/* Citations externes */}
-      <div className="mt-6 border border-rule bg-ink-raised p-5">
+      <div className="mt-6 border border-rule bg-paper-raised p-5">
         <h2 className="font-semibold">Citations externes (Chantier 3)</h2>
         <table className="mt-3 w-full border-collapse text-sm">
           <thead>
-            <tr className="border-b border-rule-strong text-left text-xs text-bone-faint">
+            <tr className="border-b border-rule-strong text-left text-xs text-ink-faint">
               <th className="py-1">Source</th><th>Type</th><th>Difficulté</th><th>Statut</th>
             </tr>
           </thead>
           <tbody>
             {citations.map((c) => (
               <tr key={c.id} className="border-b border-rule">
-                <td className="py-1.5">{c.url ? <a className="text-signal underline" target="_blank" href={c.url}>{c.source}</a> : c.source}</td>
-                <td className="text-bone-faint">{c.type}</td>
-                <td className="text-bone-faint">{c.difficulty}</td>
+                <td className="py-2">{c.url ? <a className="text-signal underline" target="_blank" href={c.url}>{c.source}</a> : c.source}</td>
+                <td className="text-ink-faint">{c.type}</td>
+                <td className="text-ink-faint">{c.difficulty}</td>
                 <td>
                   <div className="flex gap-1">
                     {Object.entries(CITATION_STATUSES).map(([value, label]) => (
                       <form key={value} action={updateCitationStatus.bind(null, c.id, client.id, value)}>
-                        <button className={`px-2 py-0.5 text-xs ${c.status === value ? "bg-signal text-ink" : "border border-rule bg-transparent hover:border-bone"}`}>
+                        <button className={`px-2 py-1 text-xs ${c.status === value ? "bg-signal text-paper" : "border border-rule bg-transparent hover:border-ink"}`}>
                           {label}
                         </button>
                       </form>
@@ -181,7 +181,7 @@ export default async function ClientDetail({ params }: { params: Promise<{ id: s
               </tr>
             ))}
             {citations.length === 0 && (
-              <tr><td colSpan={4} className="py-3 text-bone-faint">Aucune cible — lancez `pnpm toolkit citation-targets`.</td></tr>
+              <tr><td colSpan={4} className="py-3 text-ink-faint">Aucune cible — lancez `pnpm toolkit citation-targets`.</td></tr>
             )}
           </tbody>
         </table>

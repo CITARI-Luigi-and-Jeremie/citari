@@ -4,27 +4,31 @@
 
 /* ─────────────────────────────────────────────────────────────
    Jetons — source unique. Aucune couleur en dur dans un composant.
-   Palette validée CVD : voir DESIGN.md §11.
+   Direction « papier & encre » : l'écran et le PDF partagent le même
+   traitement, parce que le livrable qui justifie la facture est un
+   document imprimable. Palette validée : voir DESIGN.md §11.
    ───────────────────────────────────────────────────────────── */
 @layer base {
   :root {
-    --ink: #07090b;
-    --ink-raised: #0e1216;
-    --ink-sunken: #050708;
+    /* Fonds — papier gris-vert pâle, jamais blanc pur */
+    --paper: #e9e8e3;
+    --paper-raised: #f2f1ed;
+    --paper-sunken: #e1e0da;
 
-    --rule: #242a31;
-    --rule-strong: #39424c;
-    /* Piste des jauges : doit rester lisible sous une barre vide */
-    --track: #1b2128;
+    /* Filets — la séparation se fait par le trait, jamais par l'ombre */
+    --rule: #c9c7c0;
+    --rule-strong: #a8a59c;
+    --track: #d6d4cd;
 
-    --bone: #ede7da;
-    --bone-dim: #9ba3ac;
-    --bone-faint: #646c75;
+    /* Encres — contrastes vérifiés WCAG sur --paper */
+    --ink: #17191c;       /* 14,4:1 */
+    --ink-dim: #4e5257;   /*  6,4:1 */
+    --ink-faint: #5f6368; /*  4,9:1 — lisible même en label 11px */
 
-    --signal: #f0501f;
-    --valid: #2cab74;
+    /* Sémantique. Un seul accent porte l'alerte ET l'action. */
+    --signal: #a33449;    /* bordeaux — 5,4:1 */
+    --valid: #175fb4;     /* bleu encre — 5,1:1 */
 
-    /* Rythme d'animation : sec, jamais flottant */
     --ease-sharp: cubic-bezier(0.2, 0.9, 0.25, 1);
     --dur-fast: 120ms;
     --dur-base: 180ms;
@@ -35,14 +39,13 @@
   }
 
   html {
-    background: var(--ink);
-    /* Empêche le "flash" clair au chargement */
-    color-scheme: dark;
+    background: var(--paper);
+    color-scheme: light;
   }
 
   body {
-    background: var(--ink);
-    color: var(--bone);
+    background: var(--paper);
+    color: var(--ink);
     font-family: var(--font-body), system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
@@ -50,10 +53,9 @@
 
   ::selection {
     background: var(--signal);
-    color: var(--ink);
+    color: var(--paper);
   }
 
-  /* Focus visible sobre mais net — accessibilité non négociable */
   :focus-visible {
     outline: 2px solid var(--signal);
     outline-offset: 2px;
@@ -65,23 +67,18 @@
   .label {
     font-family: var(--font-mono), monospace;
     font-size: 11px;
-    letter-spacing: 0.14em;
+    letter-spacing: 0.12em;
     text-transform: uppercase;
-    color: var(--bone-faint);
-  }
-
-  /* Filet horizontal éditorial */
-  .rule-h {
-    border-top: 1px solid var(--rule);
+    color: var(--ink-faint);
   }
 
   /* Bouton principal — bloc plein, angle net, pas d'ombre */
   .btn-signal {
     background: var(--signal);
-    color: var(--ink);
+    color: var(--paper);
     font-family: var(--font-mono), monospace;
     font-size: 13px;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.06em;
     text-transform: uppercase;
     padding: 14px 24px;
     border: 1px solid var(--signal);
@@ -99,52 +96,54 @@
   /* Bouton secondaire — contour seulement */
   .btn-ghost {
     background: transparent;
-    color: var(--bone);
+    color: var(--ink);
     font-family: var(--font-mono), monospace;
     font-size: 13px;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.06em;
     text-transform: uppercase;
     padding: 14px 24px;
     border: 1px solid var(--rule-strong);
-    transition: border-color var(--dur-fast) var(--ease-sharp), color var(--dur-fast) var(--ease-sharp);
+    transition: border-color var(--dur-fast) var(--ease-sharp);
   }
   .btn-ghost:hover {
-    border-color: var(--bone);
+    border-color: var(--ink);
   }
 
-  /* Champ de formulaire — filet bas uniquement, façon formulaire imprimé */
+  /* Champ — cadre fin sur papier légèrement plus clair, façon formulaire imprimé */
   .field {
     width: 100%;
-    background: transparent;
-    border: 1px solid var(--rule);
-    color: var(--bone);
+    background: var(--paper-raised);
+    border: 1px solid var(--rule-strong);
+    color: var(--ink);
     font-family: var(--font-mono), monospace;
     font-size: 14px;
     padding: 12px 14px;
     transition: border-color var(--dur-fast) var(--ease-sharp);
   }
   .field::placeholder {
-    color: var(--bone-faint);
+    color: var(--ink-faint);
   }
   .field:hover {
-    border-color: var(--rule-strong);
+    border-color: var(--ink-faint);
   }
   .field:focus {
     border-color: var(--signal);
     outline: none;
   }
 
-  /* Surlignage d'une marque dans un verbatim */
+  /* Annotation d'un document : la marque du client est marquée au bordeaux,
+     les concurrents simplement soulignés. */
   .mark-brand {
-    background: color-mix(in srgb, var(--signal) 22%, transparent);
+    background: color-mix(in srgb, var(--signal) 16%, transparent);
     border-bottom: 1px solid var(--signal);
-    color: var(--bone);
+    color: var(--ink);
     padding: 0 2px;
   }
   .mark-rival {
-    background: color-mix(in srgb, var(--bone) 12%, transparent);
+    background: transparent;
     border-bottom: 1px solid var(--rule-strong);
-    padding: 0 2px;
+    color: var(--ink);
+    padding-bottom: 1px;
   }
 }
 
@@ -154,16 +153,9 @@
   font-feature-settings: "tnum";
 }
 
-/* ── Motion : chorégraphie réservée au scan et à la révélation du score ── */
 @keyframes rise {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: none; }
 }
 
 .animate-rise {
@@ -171,36 +163,25 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
+  *, *::before, *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
 }
 
-/* ── Impression / PDF : fond clair, typographie éditoriale ── */
+/* ── Impression : même système, papier blanc pour économiser l'encre ── */
 @media print {
   :root {
-    --ink: #ffffff;
-    --ink-raised: #ffffff;
-    --ink-sunken: #f6f4ef;
-    --bone: #14171a;
-    --bone-dim: #4b5259;
-    --bone-faint: #6d757d;
-    --rule: #d5d0c6;
-    --rule-strong: #a8a296;
+    --paper: #ffffff;
+    --paper-raised: #ffffff;
+    --paper-sunken: #f4f3ef;
   }
-  html,
-  body {
-    background: #fff;
-    color: #14171a;
-  }
-  .no-print {
-    display: none !important;
-  }
-  section {
-    break-inside: avoid;
+  .no-print { display: none !important; }
+  section, figure, tr { break-inside: avoid; }
+  a[href^="http"]::after {
+    content: " (" attr(href) ")";
+    font-size: 9px;
+    color: var(--ink-faint);
   }
 }

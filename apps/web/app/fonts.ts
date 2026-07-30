@@ -1,4 +1,4 @@
-import { Instrument_Serif, Public_Sans, JetBrains_Mono } from "next/font/google";
+import { Instrument_Serif, Public_Sans, IBM_Plex_Mono } from "next/font/google";
 
 /** Titres : serif éditoriale à fort caractère. Un seul poids, assumé. */
 export const editorial = Instrument_Serif({
@@ -16,9 +16,14 @@ export const body = Public_Sans({
   display: "swap",
 });
 
-/** Données : toute valeur mesurée passe par cette monospace. Signature du produit. */
-export const mono = JetBrains_Mono({
+/**
+ * Données : toute valeur mesurée passe par cette monospace — signature du produit.
+ * IBM Plex Mono plutôt qu'une mono d'éditeur de code : sur papier, elle évoque
+ * la machine à écrire et le relevé, pas le terminal.
+ */
+export const mono = IBM_Plex_Mono({
   subsets: ["latin"],
+  weight: ["400", "500"],
   variable: "--font-mono",
   display: "swap",
 });

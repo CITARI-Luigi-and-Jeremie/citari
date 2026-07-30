@@ -13,13 +13,13 @@ export function scoreTone(score: number): ScoreTone {
 
 export const TONE_VAR: Record<ScoreTone, string> = {
   signal: "var(--signal)",
-  neutral: "var(--bone)",
+  neutral: "var(--ink)",
   valid: "var(--valid)",
 };
 
 export const TONE_TEXT: Record<ScoreTone, string> = {
   signal: "text-signal",
-  neutral: "text-bone",
+  neutral: "text-ink",
   valid: "text-valid",
 };
 

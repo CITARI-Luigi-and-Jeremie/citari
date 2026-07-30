@@ -22,7 +22,7 @@ async function login(formData: FormData) {
 export default async function LoginPage({ searchParams }: { searchParams: Promise<{ error?: string }> }) {
   const { error } = await searchParams;
   return (
-    <div className="mx-auto mt-24 max-w-sm border border-rule bg-ink-raised p-8">
+    <div className="mx-auto mt-24 max-w-sm border border-rule bg-paper-raised p-8">
       <h1 className="text-xl font-bold">Admin GEO Sprint</h1>
       <form action={login} className="mt-4 space-y-3">
         <input

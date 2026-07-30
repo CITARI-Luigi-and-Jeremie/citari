@@ -50,7 +50,7 @@ export default function ScoreHero({
         >
           {value}
         </span>
-        <span className="mt-6 font-mono text-lg text-bone-faint">/100</span>
+        <span className="mt-6 font-mono text-lg text-ink-faint">/100</span>
       </div>
       <p className="mt-2 font-editorial text-2xl" style={{ color: TONE_VAR[tone] }}>
         {scoreVerdict(score)}

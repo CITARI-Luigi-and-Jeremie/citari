@@ -25,7 +25,9 @@ Ne jamais utiliser, sous aucun prétexte :
 
 Ton : sérieux, précis, un peu austère, avec des moments de tension visuelle forts quand la donnée est mauvaise (un score de 12/100 doit se voir, pas être joliment arrondi).
 
-Références mentales (ne pas copier, s'en inspirer) : les thèmes d'IDE sombres à fort contraste, la presse économique imprimée, la data-visualisation du Financial Times, les interfaces de terminal.
+Références mentales (ne pas copier, s'en inspirer) : la presse économique imprimée, la data-visualisation du Financial Times, le rapport d'expertise relié, le document administratif français.
+
+⚠ **Ne pas confondre posture et look.** « Terminal Bloomberg » décrit une *rigueur*, pas une palette. Traduire cette référence en noir + orange revient à produire exactement le cliché que le §0 interdit.
 
 ## 3. Typographie
 
@@ -41,33 +43,48 @@ Références mentales (ne pas copier, s'en inspirer) : les thèmes d'IDE sombres
 |---|---|---|
 | Titres | **Instrument Serif** | H1/H2 éditoriaux, chiffres héros |
 | Corps | **Public Sans** | texte courant, UI |
-| Données | **JetBrains Mono** | scores, pourcentages, requêtes, moteurs, labels techniques |
+| Données | **IBM Plex Mono** | scores, pourcentages, requêtes, moteurs, labels techniques |
 
 ## 4. Couleur
 
-- Base sombre : fond quasi-noir légèrement teinté (jamais #000 pur, jamais gris neutre plat).
+> **Révision du 30/07/2026 — direction « papier & encre ».** La première version
+> (fond quasi-noir + accent vermillon) a été abandonnée : c'est un cluster
+> explicitement identifié comme signature d'IA (« near-black with a lone
+> acid-green or vermilion pop »). Trois raisons de la bascule :
+> 1. le livrable qui justifie la facture est un **document imprimable** — l'écran
+>    et le PDF doivent partager le même traitement, et le papier est clair ;
+> 2. l'audience (dirigeants de PME françaises) lit le noir + orange comme
+>    « outil dev », pas comme « conseil premium » ;
+> 3. bordeaux et bleu encre sur papier ancrent la marque dans le vocabulaire du
+>    document professionnel français sans jamais être littéraux.
+>
+> Le §2 (« terminal Bloomberg ») reste valable comme **posture** — autorité d'un
+> instrument de mesure, densité, rigueur — mais pas comme référence chromatique.
+
+- Base papier : fond clair légèrement teinté (jamais blanc pur, jamais gris neutre plat). L écran et le PDF partagent le même traitement.
 - Une couleur dominante qui porte l'identité + un accent unique et tranchant utilisé avec parcimonie pour l'alerte et l'action. Pas de palette arc-en-ciel.
 - Sémantique des scores (cohérente partout) : un score bas utilise l'accent d'alerte de façon franche, un score haut une couleur de validation sobre.
 - Tout en variables CSS définies une seule fois dans `globals.css`. **Aucune couleur en dur dans un composant, jamais.**
 
 ### Palette engagée (validée CVD — voir §11)
 
-| Token | Valeur | Rôle |
-|---|---|---|
-| `--ink` | `#07090B` | fond, encre quasi-noire bleutée |
-| `--ink-raised` | `#0E1216` | surfaces surélevées |
-| `--ink-sunken` | `#050708` | creux, fonds de tableau |
-| `--rule` | `#242A31` | filets 1px |
-| `--rule-strong` | `#39424C` | filets accentués |
-| `--bone` | `#EDE7DA` | texte principal (papier éditorial) |
-| `--bone-dim` | `#9BA3AC` | texte secondaire |
-| `--bone-faint` | `#646C75` | texte tertiaire, labels |
-| `--signal` | `#F0501F` | accent unique : alerte + action |
-| `--valid` | `#2CAB74` | score élevé, validation sobre |
+| Token | Valeur | Rôle | Contraste sur `--paper` |
+|---|---|---|---|
+| `--paper` | `#E9E8E3` | fond, papier gris-vert pâle (jamais blanc pur) | — |
+| `--paper-raised` | `#F2F1ED` | surfaces surélevées, champs | — |
+| `--paper-sunken` | `#E1E0DA` | lignes alternées de tableau | — |
+| `--rule` | `#C9C7C0` | filets 1px | — |
+| `--rule-strong` | `#A8A59C` | filets accentués, cadres de champ | — |
+| `--track` | `#D6D4CD` | piste des jauges (lisible même à 0 %) | — |
+| `--ink` | `#17191C` | texte principal | 14,4:1 |
+| `--ink-dim` | `#4E5257` | texte secondaire | 6,4:1 |
+| `--ink-faint` | `#5F6368` | labels, texte tertiaire | 4,9:1 |
+| `--signal` | `#A33449` | bordeaux — accent unique : alerte + action | 5,4:1 |
+| `--valid` | `#175FB4` | bleu encre — score élevé | 5,1:1 |
 
-Le `--signal` est la seule couleur « chaude vive » du système. Il sert à l'action (CTA) **et** à l'alerte (score bas). Cette double fonction est volontaire : chez nous, la mauvaise nouvelle *est* l'appel à l'action.
+Le `--signal` est la seule couleur saturée du système. Il sert à l'action (CTA) **et** à l'alerte (score bas). Cette double fonction est volontaire : chez nous, la mauvaise nouvelle *est* l'appel à l'action.
 
-**Il n'y a délibérément que deux couleurs sémantiques, pas trois.** Un score intermédiaire s'affiche en `--bone` (neutre). Deux raisons : une étape ambre entrait en collision avec l'orange en vision deutan (ΔE 0,1 — indistinguable), et un score moyen ne mérite ni alarme ni félicitation. Le neutre est le bon signal.
+**Il n'y a délibérément que deux couleurs sémantiques, pas trois.** Un score intermédiaire s'affiche en `--ink` (neutre) : un score moyen ne mérite ni alarme ni félicitation, et toute troisième teinte se serait heurtée aux deux autres en vision daltonienne.
 
 ## 5. Layout
 
@@ -94,7 +111,7 @@ Le `--signal` est la seule couleur « chaude vive » du système. Il sert à l'a
 
 - Mobile-first sur la landing et le formulaire de scan.
 - Le rapport complet peut être optimisé desktop, avec une version mobile lisible mais simplifiée.
-- Le PDF a sa propre feuille de style print : fond clair, typographie éditoriale, pensé pour être imprimé.
+- Le PDF **partage le système de l'écran** : seule différence, le fond passe au blanc pur pour économiser l'encre et les URL des liens sont imprimées. C'est le même document, pas deux traitements à maintenir.
 
 ## 9. Méthode de travail imposée
 
@@ -114,12 +131,16 @@ Avant de considérer un écran comme terminé :
 
 ## 11. Validation de la palette (data-viz)
 
-Les couleurs sémantiques (`--signal` / `--valid`) sont validées contre le fond `#07090B` — **tous les tests passent** : bande de luminosité dark (L 0,48-0,67), plancher de chroma, séparation deutan ΔE 9,5, vision normale ΔE 30,2, contraste ≥ 3:1.
+Les couleurs sémantiques (`--signal` / `--valid`) sont validées contre le papier `#E9E8E3` — **tous les tests passent**.
+
+Deux enseignements payés par l'erreur, à ne pas refaire :
+- **Rouge contre vert est la pire paire en deutéranopie.** Un bordeaux et un vert forêt donnaient ΔE 5,4 : indistinguables. Le pôle positif est donc un **bleu encre**, pas un vert — contre-intuitif, mais le chiffre et le verdict textuel accompagnent toujours la couleur.
+- **Un contraste de 3:1 ne suffit pas au texte.** Les marques graphiques exigent 3:1, le texte 4,5:1. Les labels 11px imposaient de foncer `--ink-faint` jusqu'à 4,9:1.
 
 Revalider après toute modification :
 
 ```bash
-node scripts/validate_palette.js "#F0501F,#2CAB74" --mode dark --surface "#07090B"
+node scripts/validate_palette.js "#A33449,#175FB4" --mode light --surface "#E9E8E3"
 ```
 
 Encodage secondaire systématique : une couleur de score n'apparaît jamais seule, le chiffre en monospace l'accompagne toujours.

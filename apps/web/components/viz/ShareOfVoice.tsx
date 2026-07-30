@@ -59,13 +59,13 @@ export default function ShareOfVoice({ data, animate = true }: { data: ShareDatu
           <div key={d.brand} className="border-t border-rule py-3 first:border-t-0">
             <div className="flex items-baseline justify-between gap-4">
               <span
-                className={`truncate font-mono text-sm ${d.isTarget ? "text-bone" : "text-bone-dim"}`}
+                className={`truncate font-mono text-sm ${d.isTarget ? "text-ink" : "text-ink-dim"}`}
                 style={d.isTarget ? { color: "var(--signal)" } : undefined}
               >
                 {d.isTarget && <span aria-hidden className="mr-2">▸</span>}
                 {d.brand}
               </span>
-              <span className="tnum shrink-0 font-mono text-sm text-bone">
+              <span className="tnum shrink-0 font-mono text-sm text-ink">
                 {Math.round(d.share * 100)}%
                 {delta != null && delta !== 0 && (
                   <span className={delta > 0 ? "ml-2 text-valid" : "ml-2 text-signal"}>
@@ -80,7 +80,7 @@ export default function ShareOfVoice({ data, animate = true }: { data: ShareDatu
                 className="h-full"
                 style={{
                   width: shown ? `${width}%` : "0%",
-                  background: d.isTarget ? "var(--signal)" : "var(--bone-faint)",
+                  background: d.isTarget ? "var(--signal)" : "var(--ink-faint)",
                   transition: `width 640ms var(--ease-sharp) ${i * 70}ms`,
                 }}
                 role="img"

@@ -29,21 +29,25 @@ export default {
     },
     extend: {
       colors: {
-        ink: {
-          DEFAULT: "var(--ink)",
-          raised: "var(--ink-raised)",
-          sunken: "var(--ink-sunken)",
+        // Fonds
+        paper: {
+          DEFAULT: "var(--paper)",
+          raised: "var(--paper-raised)",
+          sunken: "var(--paper-sunken)",
         },
+        // Filets
         rule: {
           DEFAULT: "var(--rule)",
           strong: "var(--rule-strong)",
         },
         track: "var(--track)",
-        bone: {
-          DEFAULT: "var(--bone)",
-          dim: "var(--bone-dim)",
-          faint: "var(--bone-faint)",
+        // Encres
+        ink: {
+          DEFAULT: "var(--ink)",
+          dim: "var(--ink-dim)",
+          faint: "var(--ink-faint)",
         },
+        // Sémantique
         signal: "var(--signal)",
         valid: "var(--valid)",
       },

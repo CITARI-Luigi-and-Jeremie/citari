@@ -1,26 +1,27 @@
 import ScanForm from "@/components/ScanForm";
+import ProofBlock from "@/components/ProofBlock";
 import { BOOKING_URL } from "@/lib/constants";
 
 const FAQ = [
   {
-    q: "Qu'est-ce que le GEO (Generative Engine Optimization) ?",
-    a: "Le GEO consiste à optimiser la présence d'une marque dans les réponses des IA génératives (ChatGPT, Claude, Gemini, Perplexity). Quand un prospect demande « quel est le meilleur prestataire pour X », ces moteurs recommandent des marques : le GEO fait en sorte que la vôtre en fasse partie.",
-  },
-  {
     q: "Comment est calculé le Score de Visibilité IA ?",
     a: "Nous posons 20 à 30 questions d'intention d'achat de votre secteur aux 4 moteurs via leurs API officielles. Le score (0-100) combine votre taux de mention (50 %), votre position moyenne dans les réponses (20 %), le taux de recommandation explicite (20 %) et le sentiment (10 %).",
-  },
-  {
-    q: "Que contient le Sprint GEO à 2 900 € ?",
-    a: "Une mission de 30 jours sur 3 chantiers : technique (robots.txt, llms.txt, schema.org, pages en format réponse directe), contenu (4 à 6 pages comparatives, alternatives, FAQ et guides ciblés sur les requêtes où vous êtes absent) et citations externes (annuaires, comparateurs, pitchs presse). Livrables exacts listés avant le démarrage, paiement 50 % au début, 50 % à la livraison.",
   },
   {
     q: "Garantissez-vous un résultat ?",
     a: "Nous garantissons les actions livrées, pas un score exact : les moteurs IA intègrent les changements en 4 à 12 semaines. C'est pourquoi chaque sprint inclut un re-scan offert à J+90, avec les mêmes requêtes, pour mesurer objectivement la progression.",
   },
   {
+    q: "Le GEO remplace-t-il le SEO ?",
+    a: "Non, il le complète. Les moteurs génératifs s'appuient largement sur des pages web indexées et des sources tierces bien référencées : un bon SEO facilite le GEO. Ce que le SEO ne couvre pas, c'est l'autorisation des crawlers IA, le format « réponse directe » et la mesure dans les réponses elles-mêmes.",
+  },
+  {
     q: "Comment mesurez-vous sans scraper ChatGPT ?",
     a: "Uniquement via les API officielles des 4 moteurs. Les réponses des interfaces grand public peuvent différer légèrement — limite assumée, mentionnée dans chaque rapport, et identique à chaque mesure donc parfaitement comparable dans le temps.",
+  },
+  {
+    q: "Que se passe-t-il après le scan ?",
+    a: "Vous recevez votre rapport complet, gratuitement, que nous travaillions ensemble ou non. Si vous le souhaitez, nous le commentons ensemble lors d'un call de 30 minutes. Nous ne prenons que 3 sprints par mois : si votre situation ne justifie pas le nôtre, nous vous le disons.",
   },
 ];
 
@@ -34,31 +35,19 @@ const faqJsonLd = {
   })),
 };
 
-const CHANTIERS = [
-  {
-    n: "01",
-    title: "Technique",
-    auto: "~90 % automatisable",
-    desc: "Crawlers IA débloqués (GPTBot, ClaudeBot, PerplexityBot…), fichier llms.txt, balisage schema.org, pages restructurées en format « réponse directe ».",
-  },
-  {
-    n: "02",
-    title: "Contenu",
-    auto: "~70 % automatisable",
-    desc: "Comparatifs « vous vs concurrent », pages « alternatives à », FAQ balisée, guides d'achat factuels — ciblés sur les requêtes où vous êtes aujourd'hui absent.",
-  },
-  {
-    n: "03",
-    title: "Citations externes",
-    auto: "~20 % automatisable",
-    desc: "Nous identifions les sources qui font gagner vos concurrents dans les données Perplexity, puis nous vous y installons : annuaires, comparateurs, presse spécialisée.",
-  },
+/** Inventaire précis : c'est ce qui rend un prix de 2 900 € lisible. */
+const LIVRABLES = [
+  ["01", "Audit technique", "Rapport complet + fichiers prêts à poser (robots.txt, llms.txt, schema.org)"],
+  ["02", "Contenus rédigés", "5 pages : comparatifs, « alternatives à », FAQ balisée, guides d'achat"],
+  ["03", "Citations externes", "8 cibles travaillées : inscriptions réalisées, pitchs presse envoyés"],
+  ["04", "Rapport de fin de sprint", "Chaque action livrée, listée et datée"],
+  ["05", "Re-scan à J+90", "Mêmes questions, mêmes moteurs — rapport avant / après"],
 ];
 
 const STATS = [
-  { v: "900 M", l: "utilisateurs hebdomadaires de ChatGPT début 2026", s: "Reuters" },
-  { v: "46 %", l: "des utilisateurs d'IA démarrent leur recherche d'achat sur une IA (25 % en 2024)", s: "Alchemer 2026" },
-  { v: "1 / 2", l: "acheteur B2B de logiciel commence sa recherche par un chatbot", s: "G2 Research 2026" },
+  ["900 M", "utilisateurs hebdomadaires de ChatGPT début 2026", "Reuters"],
+  ["46 %", "des utilisateurs d'IA démarrent leur recherche d'achat sur une IA — 25 % en 2024", "Alchemer 2026"],
+  ["1 sur 2", "acheteurs B2B de logiciel commencent par un chatbot", "G2 Research 2026"],
 ];
 
 export default function LandingPage() {
@@ -67,43 +56,26 @@ export default function LandingPage() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
 
       <div className="mx-auto max-w-shell px-4 lg:px-8">
-        {/* ── En-tête ── */}
         <header className="flex items-baseline justify-between border-b border-rule py-6">
-          <span className="font-mono text-sm tracking-wider text-bone">GEO&nbsp;SPRINT</span>
+          <span className="font-mono text-sm tracking-wider text-ink">GEO&nbsp;SPRINT</span>
           <nav className="flex gap-6">
-            <a href="/guide-geo" className="label transition-colors duration-150 ease-sharp hover:text-bone">Guide</a>
-            <a href="#offre" className="label transition-colors duration-150 ease-sharp hover:text-bone">Offre</a>
+            <a href="#offre" className="label transition-colors duration-150 ease-sharp hover:text-ink">Offre</a>
+            <a href="/guide-geo" className="label transition-colors duration-150 ease-sharp hover:text-ink">Guide</a>
           </nav>
         </header>
 
-        {/* ── Hero asymétrique : la promesse à gauche, l'instrument à droite ── */}
-        <section className="grid gap-12 py-16 lg:grid-cols-[1.1fr_460px] lg:gap-16 lg:py-24">
+        {/* ── 1. La promesse, en une phrase, et l'instrument ── */}
+        <section id="top" className="grid scroll-mt-8 gap-12 py-16 lg:grid-cols-[1.05fr_450px] lg:gap-16 lg:py-24">
           <div>
             <p className="label">Agence GEO · PME et ETI francophones</p>
-            <h1 className="mt-6 font-editorial text-hero text-bone">
-              Votre marque est-elle{" "}
-              <em className="not-italic" style={{ color: "var(--signal)" }}>
-                invisible dans ChatGPT
-              </em>{" "}
-              ?
+            <h1 className="mt-6 font-editorial text-hero text-ink">
+              Votre marque est-elle <em className="not-italic" style={{ color: "var(--signal)" }}>invisible</em>{" "}
+              dans ChatGPT ?
             </h1>
-            <p className="mt-8 max-w-prose text-lg text-bone-dim">
-              Testez gratuitement votre visibilité dans ChatGPT, Claude, Gemini et Perplexity en 90 secondes.
-              Vous verrez les réponses réelles — y compris celles où vos concurrents sont recommandés à votre place.
+            <p className="mt-8 max-w-[46ch] text-lg text-ink-dim">
+              Mesurez-le gratuitement en 90 secondes, sur les quatre moteurs.
+              Vous verrez les réponses réelles, telles que vos prospects les reçoivent.
             </p>
-
-            <dl className="mt-12 border-t border-rule">
-              {[
-                ["Score de Visibilité IA", "0-100, mesuré sur les 4 moteurs"],
-                ["Part de voix", "face aux concurrents que vous nommez"],
-                ["Verbatims", "les réponses brutes, non retouchées"],
-              ].map(([k, v]) => (
-                <div key={k} className="flex flex-wrap items-baseline gap-x-6 border-b border-rule py-3">
-                  <dt className="font-mono text-sm text-bone">{k}</dt>
-                  <dd className="text-sm text-bone-faint">{v}</dd>
-                </div>
-              ))}
-            </dl>
           </div>
 
           <div className="lg:pt-12">
@@ -111,143 +83,151 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* ── Preuves marché — bandeau de chiffres, filets verticaux ── */}
+        {/* ── 2. Le moment de compréhension ── */}
+        <section className="pb-24">
+          <ProofBlock />
+          <p className="mt-6 max-w-prose text-lg text-ink">
+            Le prospect a sa réponse. Il ne fera pas de deuxième recherche, et vous ne saurez jamais que cette
+            occasion a existé.
+          </p>
+        </section>
+
+        {/* ── 3. Pourquoi maintenant ── */}
         <section className="grid border-y border-rule-strong sm:grid-cols-3">
-          {STATS.map((s) => (
-            <div key={s.v} className="border-b border-rule px-4 py-8 last:border-b-0 sm:border-b-0 sm:border-r sm:last:border-r-0">
-              <p className="tnum font-mono text-3xl text-bone">{s.v}</p>
-              <p className="mt-3 max-w-[34ch] text-sm text-bone-dim">{s.l}</p>
-              <p className="label mt-3">{s.s}</p>
+          {STATS.map(([v, l, s]) => (
+            <div key={v} className="border-b border-rule px-4 py-8 last:border-b-0 sm:border-b-0 sm:border-r sm:px-6 sm:last:border-r-0">
+              <p className="tnum font-mono text-3xl text-ink">{v}</p>
+              <p className="mt-3 max-w-[32ch] text-sm text-ink-dim">{l}</p>
+              <p className="label mt-4">{s}</p>
             </div>
           ))}
         </section>
 
-        {/* ── Déroulé en 3 temps ── */}
+        {/* ── 4. Ce que fait le scan gratuit ── */}
         <section className="py-24">
-          <h2 className="font-editorial text-3xl text-bone">Comment ça se passe</h2>
-          <ol className="mt-12 grid gap-px bg-rule lg:grid-cols-3">
-            {[
-              ["Aujourd'hui", "Le scan, gratuit", "20 à 30 questions d'intention d'achat de votre secteur, posées aux 4 moteurs via leurs API officielles. Sans inscription."],
-              ["Cette semaine", "Le call de restitution", "Trente minutes. On commente vos résultats requête par requête et on vous dit ce qu'un sprint changerait — y compris si la réponse est « rien »."],
-              ["Sous 30 jours", "Le sprint, puis la preuve", "Nous exécutons les 3 chantiers. À J+90, re-scan offert avec les mêmes questions : la progression se mesure, elle ne se promet pas."],
-            ].map(([when, title, desc], i) => (
-              <li key={title} className="bg-ink p-6 lg:p-8">
-                <div className="flex items-baseline gap-3">
-                  <span className="tnum font-mono text-sm text-signal">{String(i + 1).padStart(2, "0")}</span>
-                  <span className="label">{when}</span>
-                </div>
-                <h3 className="mt-4 font-editorial text-xl text-bone">{title}</h3>
-                <p className="mt-3 text-sm text-bone-dim">{desc}</p>
-              </li>
-            ))}
-          </ol>
-        </section>
-
-        {/* ── Les 3 chantiers ── */}
-        <section id="offre" className="scroll-mt-8 border-t border-rule-strong py-24">
-          <div className="grid gap-8 lg:grid-cols-[1fr_1.4fr]">
+          <div className="grid gap-12 lg:grid-cols-[1fr_1.3fr] lg:gap-16">
             <div>
-              <h2 className="font-editorial text-3xl text-bone">Le Sprint GEO</h2>
-              <p className="label mt-3">30 jours · 3 chantiers</p>
+              <p className="label">Étape 1 — gratuit</p>
+              <h2 className="mt-4 font-editorial text-3xl text-ink">La mesure</h2>
             </div>
-            <p className="max-w-prose text-lg text-bone-dim">
-              Quand vos prospects demandent une recommandation à une IA, elle cite vos concurrents. En trente jours,
-              nous exécutons les trois chantiers qui la font changer d'avis.
-            </p>
-          </div>
-
-          <div className="mt-16 border-t border-rule">
-            {CHANTIERS.map((c) => (
-              <div key={c.n} className="grid gap-4 border-b border-rule py-8 lg:grid-cols-[80px_240px_1fr] lg:gap-8">
-                <span className="tnum font-mono text-2xl text-signal">{c.n}</span>
-                <div>
-                  <h3 className="font-editorial text-xl text-bone">{c.title}</h3>
-                  <p className="label mt-2">{c.auto}</p>
-                </div>
-                <p className="max-w-prose text-sm text-bone-dim">{c.desc}</p>
-              </div>
-            ))}
-          </div>
-
-          {/* Tarifs : deux blocs à filets, largeurs inégales */}
-          <div className="mt-16 grid gap-px bg-rule lg:grid-cols-[1.3fr_1fr]">
-            <div className="bg-ink p-8 lg:p-12" style={{ borderTop: "2px solid var(--signal)" }}>
-              <div className="flex items-baseline justify-between">
-                <h3 className="font-editorial text-2xl text-bone">Sprint GEO</h3>
-                <p className="tnum font-mono text-3xl text-bone">2 900 €</p>
-              </div>
-              <p className="label mt-2">Paiement unique · 50 % au démarrage, 50 % à la livraison</p>
-              <ul className="mt-8 border-t border-rule">
+            <div>
+              <dl className="border-t border-rule">
                 {[
-                  "Audit technique complet et pose des correctifs",
-                  "4 à 6 contenus stratégiques rédigés et livrés",
-                  "Plan de citations, inscriptions et pitchs presse",
-                  "Rapport de fin de sprint : chaque action, listée",
-                  "Re-scan offert à J+90, mêmes requêtes",
-                ].map((li) => (
-                  <li key={li} className="flex gap-4 border-b border-rule py-3 text-sm text-bone-dim">
-                    <span className="font-mono text-signal">+</span>
-                    {li}
-                  </li>
+                  ["24", "questions d'intention d'achat de votre secteur, générées puis figées"],
+                  ["4", "moteurs interrogés via leurs API officielles : ChatGPT, Claude, Gemini, Perplexity"],
+                  ["1", "score sur 100, une part de voix, et les réponses brutes"],
+                ].map(([n, txt]) => (
+                  <div key={n} className="flex items-baseline gap-6 border-b border-rule py-5">
+                    <dt className="tnum w-12 shrink-0 font-mono text-2xl text-signal">{n}</dt>
+                    <dd className="text-ink-dim">{txt}</dd>
+                  </div>
                 ))}
-              </ul>
-            </div>
-            <div className="bg-ink p-8 lg:p-12">
-              <div className="flex items-baseline justify-between">
-                <h3 className="font-editorial text-2xl text-bone-dim">Sprint Domination</h3>
-                <p className="tnum font-mono text-3xl text-bone-dim">4 900 €</p>
-              </div>
-              <p className="label mt-2">Pour les marchés disputés</p>
-              <p className="mt-8 text-sm text-bone-dim">
-                Tout le Sprint GEO, plus : couverture élargie (deux langues ou deux segments), le double de contenus,
-                campagne presse approfondie et session stratégique dédiée.
+              </dl>
+              <p className="mt-6 text-sm text-ink-faint">
+                Sans inscription. Le rapport est à vous, que nous travaillions ensemble ou non.
               </p>
             </div>
           </div>
+        </section>
 
-          {/* Engagement d'honnêteté — bloc à filet signal, pas une carte molle */}
-          <div className="mt-16 border-l-2 border-signal pl-6 lg:pl-8">
-            <p className="label">Ce que nous ne promettons pas</p>
-            <p className="mt-4 max-w-prose text-lg text-bone">
-              Nous garantissons les actions livrées, pas un score exact. Les moteurs intègrent les changements en 4 à
-              12 semaines et leurs réponses varient par nature. Quiconque vous vend « la première place dans
-              ChatGPT » vous vend quelque chose qu'il ne contrôle pas.
-            </p>
-            <p className="mt-4 max-w-prose text-sm text-bone-dim">
-              Ce que nous garantissons, c'est la mesure : le re-scan à J+90 rejoue exactement les mêmes questions.
-              Vous voyez la progression réelle, quelle qu'elle soit. Trois sprints par mois maximum.
-            </p>
-          </div>
+        {/* ── 5. L'offre : inventaire précis, puis prix ── */}
+        <section id="offre" className="scroll-mt-8 border-t border-rule-strong py-24">
+          <div className="grid gap-12 lg:grid-cols-[1fr_1.3fr] lg:gap-16">
+            <div>
+              <p className="label">Étape 2 — 30 jours</p>
+              <h2 className="mt-4 font-editorial text-3xl text-ink">Le Sprint GEO</h2>
+              <p className="mt-6 max-w-prose text-ink-dim">
+                Nous rendons votre site lisible par les IA, nous écrivons les pages qu'elles citent, et nous vous
+                installons sur les sources qui font gagner vos concurrents.
+              </p>
+            </div>
 
-          <div className="mt-12 flex flex-wrap gap-4">
-            <a href={BOOKING_URL} className="btn-signal">Réserver un call de restitution</a>
-            <a href="/guide-geo" className="btn-ghost">Lire le guide GEO</a>
+            <div>
+              <p className="label">Ce que vous recevez</p>
+              <ol className="mt-4 border-t border-rule">
+                {LIVRABLES.map(([n, title, desc]) => (
+                  <li key={n} className="grid grid-cols-[32px_1fr] gap-4 border-b border-rule py-5">
+                    <span className="tnum font-mono text-sm text-ink-faint">{n}</span>
+                    <div>
+                      <p className="font-mono text-sm text-ink">{title}</p>
+                      <p className="mt-1 text-sm text-ink-dim">{desc}</p>
+                    </div>
+                  </li>
+                ))}
+              </ol>
+
+              <div className="mt-12 flex flex-wrap items-end justify-between gap-6 border-t-2 border-signal pt-6">
+                <div>
+                  <p className="tnum font-mono text-4xl text-ink">2 900 €</p>
+                  <p className="label mt-2">Paiement unique · 50 % / 50 % · sans abonnement</p>
+                </div>
+                <a href={BOOKING_URL} className="btn-signal">Réserver un call</a>
+              </div>
+              <p className="mt-4 text-sm text-ink-faint">
+                Option <span className="text-ink-dim">Sprint Domination — 4 900 €</span> : deux langues ou deux
+                segments, le double de contenus, campagne presse approfondie.
+              </p>
+            </div>
           </div>
         </section>
 
-        {/* ── FAQ ── */}
+        {/* ── 6. L'engagement d'honnêteté ── */}
         <section className="border-t border-rule-strong py-24">
-          <div className="grid gap-8 lg:grid-cols-[280px_1fr] lg:gap-16">
-            <h2 className="font-editorial text-3xl text-bone lg:sticky lg:top-8 lg:self-start">
-              Questions fréquentes
-            </h2>
+          <div className="grid gap-12 lg:grid-cols-[1fr_1.3fr] lg:gap-16">
+            <div>
+              <p className="label">Étape 3 — J+90</p>
+              <h2 className="mt-4 font-editorial text-3xl text-ink">La preuve</h2>
+            </div>
+            <div className="border-l-2 border-signal pl-6 lg:pl-8">
+              <p className="max-w-prose text-lg text-ink">
+                Nous garantissons les actions livrées, pas un score. Les moteurs intègrent les changements en 4 à 12
+                semaines et leurs réponses varient. Qui vous vend « la première place dans ChatGPT » vous vend
+                quelque chose qu'il ne contrôle pas.
+              </p>
+              <p className="mt-6 max-w-prose text-ink-dim">
+                Ce que nous garantissons, c'est la mesure. À J+90, nous rejouons exactement les mêmes questions, sur
+                les mêmes moteurs, avec la même méthode de calcul. Vous voyez la progression réelle — quelle
+                qu'elle soit.
+              </p>
+              <p className="label mt-8">Trois sprints par mois maximum</p>
+            </div>
+          </div>
+        </section>
+
+        {/* ── 7. FAQ ── */}
+        <section className="border-t border-rule-strong py-24">
+          <div className="grid gap-12 lg:grid-cols-[1fr_1.3fr] lg:gap-16">
+            <h2 className="font-editorial text-3xl text-ink lg:sticky lg:top-8 lg:self-start">Questions</h2>
             <div className="border-t border-rule">
               {FAQ.map((f) => (
                 <details key={f.q} className="group border-b border-rule py-4">
-                  <summary className="flex cursor-pointer items-baseline gap-4 font-mono text-sm text-bone marker:content-['']">
+                  <summary className="flex cursor-pointer items-baseline gap-4 font-mono text-sm text-ink marker:content-['']">
                     <span className="text-signal transition-transform duration-150 ease-sharp group-open:rotate-45">+</span>
                     {f.q}
                   </summary>
-                  <p className="mt-3 max-w-prose pl-8 text-sm text-bone-dim">{f.a}</p>
+                  <p className="mt-3 max-w-prose pl-8 text-sm text-ink-dim">{f.a}</p>
                 </details>
               ))}
             </div>
           </div>
         </section>
 
+        {/* ── 8. Rappel du scan ── */}
+        <section className="border border-signal">
+          <div className="grid gap-8 p-8 lg:grid-cols-[1fr_auto] lg:items-center lg:p-12">
+            <div>
+              <h2 className="font-editorial text-3xl text-ink">Commencez par mesurer</h2>
+              <p className="mt-3 max-w-prose text-ink-dim">
+                Quatre-vingt-dix secondes, sans inscription. Vous saurez exactement où vous en êtes.
+              </p>
+            </div>
+            <a href="#top" className="btn-signal whitespace-nowrap text-center">Lancer le scan</a>
+          </div>
+        </section>
+
         <footer className="border-t border-rule py-12">
           <div className="flex flex-wrap items-baseline justify-between gap-6">
-            <span className="font-mono text-sm tracking-wider text-bone">GEO&nbsp;SPRINT</span>
+            <span className="font-mono text-sm tracking-wider text-ink">GEO&nbsp;SPRINT</span>
             <nav className="flex flex-wrap gap-x-6 gap-y-2">
               {[
                 ["/guide-geo", "Guide GEO"],
@@ -256,7 +236,7 @@ export default function LandingPage() {
                 ["/mentions-legales", "Mentions légales"],
                 ["/confidentialite", "Confidentialité"],
               ].map(([href, label]) => (
-                <a key={href} href={href} className="label transition-colors duration-150 ease-sharp hover:text-bone">
+                <a key={href} href={href} className="label transition-colors duration-150 ease-sharp hover:text-ink">
                   {label}
                 </a>
               ))}

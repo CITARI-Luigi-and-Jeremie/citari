@@ -25,7 +25,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(orgJsonLd) }} />
         {process.env.GEO_MOCK === "1" && (
-          <div className="border-b border-signal bg-signal px-4 py-1 text-center font-mono text-micro uppercase text-ink">
+          <div className="border-b border-signal bg-signal px-4 py-1 text-center font-mono text-micro uppercase text-paper">
             Mode démonstration — moteurs et base simulés · les scores ne sont pas réels
           </div>
         )}

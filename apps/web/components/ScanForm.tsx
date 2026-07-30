@@ -48,7 +48,7 @@ export default function ScanForm() {
   }
 
   return (
-    <form onSubmit={submit} className="border border-rule-strong bg-ink-raised">
+    <form onSubmit={submit} className="border border-rule-strong bg-paper-raised">
       <div className="flex items-baseline justify-between border-b border-rule px-4 py-3">
         <span className="label">Scan de visibilité</span>
         <span className="label">Gratuit · 90 s</span>
@@ -103,7 +103,7 @@ export default function ScanForm() {
         )}
 
         <div>
-          <span className="label">Concurrents — jusqu'à 3, fortement recommandé</span>
+          <span className="label">Concurrents (recommandé)</span>
           <div className="mt-2 grid gap-2 sm:grid-cols-3">
             {competitors.map((c, i) => (
               <input
@@ -141,8 +141,8 @@ export default function ScanForm() {
         <button type="submit" disabled={loading} className="btn-signal w-full">
           {loading ? "Lancement…" : "Lancer le scan"}
         </button>
-        <p className="font-mono text-micro uppercase text-bone-faint">
-          Sans inscription · 3 scans/jour/IP · API officielles des 4 moteurs
+        <p className="font-mono text-micro uppercase text-ink-faint">
+          Sans inscription · API officielles
         </p>
       </div>
     </form>

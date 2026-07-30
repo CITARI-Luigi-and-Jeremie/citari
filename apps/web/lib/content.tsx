@@ -21,19 +21,19 @@ export function ArticleLayout({
   return (
     <div className="mx-auto max-w-shell px-4 lg:px-8">
       <header className="flex items-baseline justify-between border-b border-rule py-6">
-        <a href="/" className="font-mono text-sm tracking-wider text-bone transition-colors duration-150 ease-sharp hover:text-signal">
+        <a href="/" className="font-mono text-sm tracking-wider text-ink transition-colors duration-150 ease-sharp hover:text-signal">
           GEO&nbsp;SPRINT
         </a>
-        <a href="/" className="label transition-colors duration-150 ease-sharp hover:text-bone">
+        <a href="/" className="label transition-colors duration-150 ease-sharp hover:text-ink">
           Scan gratuit
         </a>
       </header>
 
       <div className="py-16 lg:py-24">
         <p className="label">{kicker ?? "Guide"}</p>
-        <h1 className="mt-6 max-w-[18ch] font-editorial text-hero text-bone">{title}</h1>
+        <h1 className="mt-6 max-w-[18ch] font-editorial text-hero text-ink">{title}</h1>
         {/* Réponse directe en tête : les deux premières phrases répondent à la requête. */}
-        <p className="mt-8 max-w-prose border-l-2 border-signal pl-6 text-lg text-bone">{answer}</p>
+        <p className="mt-8 max-w-prose border-l-2 border-signal pl-6 text-lg text-ink">{answer}</p>
         <p className="label mt-6">Mis à jour le {updated}</p>
       </div>
 
@@ -45,8 +45,8 @@ export function ArticleLayout({
       <section className="mt-24 border border-signal">
         <div className="grid gap-8 p-8 lg:grid-cols-[1fr_auto] lg:items-center lg:p-12">
           <div>
-            <h2 className="font-editorial text-2xl text-bone">Testez votre visibilité IA</h2>
-            <p className="mt-3 max-w-prose text-sm text-bone-dim">
+            <h2 className="font-editorial text-2xl text-ink">Testez votre visibilité IA</h2>
+            <p className="mt-3 max-w-prose text-sm text-ink-dim">
               Score 0-100 sur ChatGPT, Claude, Gemini et Perplexity, part de voix face à vos concurrents et réponses
               réelles. Quatre-vingt-dix secondes, sans inscription.
             </p>
@@ -67,7 +67,7 @@ export function ArticleLayout({
             ["/mentions-legales", "Mentions légales"],
             ["/confidentialite", "Confidentialité"],
           ].map(([href, label]) => (
-            <a key={href} href={href} className="label transition-colors duration-150 ease-sharp hover:text-bone">
+            <a key={href} href={href} className="label transition-colors duration-150 ease-sharp hover:text-ink">
               {label}
             </a>
           ))}
@@ -78,22 +78,22 @@ export function ArticleLayout({
 }
 
 export function H2({ children }: { children: ReactNode }) {
-  return <h2 className="border-t border-rule pt-8 font-editorial text-2xl text-bone">{children}</h2>;
+  return <h2 className="border-t border-rule pt-8 font-editorial text-2xl text-ink">{children}</h2>;
 }
 
 export function H3({ children }: { children: ReactNode }) {
-  return <h3 className="pt-2 font-mono text-sm uppercase tracking-wider text-bone">{children}</h3>;
+  return <h3 className="pt-2 font-mono text-sm uppercase tracking-wider text-ink">{children}</h3>;
 }
 
 export function P({ children }: { children: ReactNode }) {
-  return <p className="max-w-prose text-bone-dim">{children}</p>;
+  return <p className="max-w-prose text-ink-dim">{children}</p>;
 }
 
 export function UL({ items }: { items: ReactNode[] }) {
   return (
     <ul className="max-w-prose border-t border-rule">
       {items.map((it, i) => (
-        <li key={i} className="flex gap-4 border-b border-rule py-3 text-bone-dim">
+        <li key={i} className="flex gap-4 border-b border-rule py-3 text-ink-dim">
           <span className="font-mono text-signal">{String(i + 1).padStart(2, "0")}</span>
           <span>{it}</span>
         </li>
@@ -107,7 +107,7 @@ export function Table({ head, rows }: { head: string[]; rows: ReactNode[][] }) {
     <div className="overflow-x-auto border border-rule">
       <table className="w-full min-w-[560px] border-collapse text-left">
         <thead>
-          <tr className="bg-ink-raised">
+          <tr className="bg-paper-raised">
             {head.map((h, i) => (
               <th key={i} className="label border-b border-rule px-4 py-3 font-normal">{h}</th>
             ))}
@@ -115,9 +115,9 @@ export function Table({ head, rows }: { head: string[]; rows: ReactNode[][] }) {
         </thead>
         <tbody>
           {rows.map((r, i) => (
-            <tr key={i} className={i % 2 ? "bg-ink-sunken" : undefined}>
+            <tr key={i} className={i % 2 ? "bg-paper-sunken" : undefined}>
               {r.map((c, j) => (
-                <td key={j} className="border-b border-rule px-4 py-3 align-top text-sm text-bone-dim">{c}</td>
+                <td key={j} className="border-b border-rule px-4 py-3 align-top text-sm text-ink-dim">{c}</td>
               ))}
             </tr>
           ))}
@@ -145,11 +145,11 @@ export function Faq({ items }: { items: { q: string; a: string }[] }) {
       <div className="border-t border-rule">
         {items.map((f) => (
           <details key={f.q} className="group border-b border-rule py-4">
-            <summary className="flex cursor-pointer items-baseline gap-4 font-mono text-sm text-bone marker:content-['']">
+            <summary className="flex cursor-pointer items-baseline gap-4 font-mono text-sm text-ink marker:content-['']">
               <span className="text-signal transition-transform duration-150 ease-sharp group-open:rotate-45">+</span>
               {f.q}
             </summary>
-            <p className="mt-3 max-w-prose pl-8 text-sm text-bone-dim">{f.a}</p>
+            <p className="mt-3 max-w-prose pl-8 text-sm text-ink-dim">{f.a}</p>
           </details>
         ))}
       </div>
@@ -178,9 +178,9 @@ export function Sources({ items }: { items: { label: string; url: string }[] }) 
       <ol className="border-t border-rule">
         {items.map((s, i) => (
           <li key={s.url} className="flex gap-4 border-b border-rule py-3">
-            <span className="tnum font-mono text-xs text-bone-faint">{String(i + 1).padStart(2, "0")}</span>
+            <span className="tnum font-mono text-xs text-ink-faint">{String(i + 1).padStart(2, "0")}</span>
             <a
-              className="text-sm text-bone-dim transition-colors duration-150 ease-sharp hover:text-signal"
+              className="text-sm text-ink-dim transition-colors duration-150 ease-sharp hover:text-signal"
               href={s.url}
               target="_blank"
               rel="noopener noreferrer"

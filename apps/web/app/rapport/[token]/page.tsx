@@ -40,8 +40,8 @@ function SectionHead({ n, title, sub }: { n: string; title: string; sub?: string
   return (
     <div className="mb-6 flex items-baseline gap-4 border-b border-rule pb-3">
       <span className="tnum font-mono text-micro text-signal">{n}</span>
-      <h2 className="font-editorial text-2xl text-bone">{title}</h2>
-      {sub && <span className="ml-auto hidden font-mono text-xs text-bone-faint sm:block">{sub}</span>}
+      <h2 className="font-editorial text-2xl text-ink">{title}</h2>
+      {sub && <span className="ml-auto hidden font-mono text-xs text-ink-faint sm:block">{sub}</span>}
     </div>
   );
 }
@@ -91,7 +91,7 @@ export default async function ReportPage({ params }: { params: Promise<{ token: 
             </span>
           )}
         </div>
-        <h1 className="mt-4 font-editorial text-hero text-bone">{scan.brand}</h1>
+        <h1 className="mt-4 font-editorial text-hero text-ink">{scan.brand}</h1>
         <dl className="mt-6 grid grid-cols-2 gap-x-8 gap-y-3 font-mono text-xs sm:grid-cols-4">
           {[
             ["Secteur", scan.sector],
@@ -101,7 +101,7 @@ export default async function ReportPage({ params }: { params: Promise<{ token: 
           ].map(([k, v]) => (
             <div key={k as string}>
               <dt className="label">{k}</dt>
-              <dd className="mt-1 truncate text-bone-dim">{v}</dd>
+              <dd className="mt-1 truncate text-ink-dim">{v}</dd>
             </div>
           ))}
         </dl>
@@ -115,7 +115,7 @@ export default async function ReportPage({ params }: { params: Promise<{ token: 
               <li key={s.id}>
                 <a
                   href={`#${s.id}`}
-                  className="-ml-px flex items-baseline gap-3 border-l border-transparent py-2 pl-4 font-mono text-xs text-bone-faint transition-colors duration-150 ease-sharp hover:border-signal hover:text-bone"
+                  className="-ml-px flex items-baseline gap-3 border-l border-transparent py-2 pl-4 font-mono text-xs text-ink-faint transition-colors duration-150 ease-sharp hover:border-signal hover:text-ink"
                 >
                   <span className="tnum">{s.n}</span>
                   <span>{s.label}</span>
@@ -130,7 +130,7 @@ export default async function ReportPage({ params }: { params: Promise<{ token: 
           <section id="score" className="scroll-mt-8 pt-16">
             <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_320px] lg:items-end">
               <ScoreHero score={score} previous={isComparison ? previous?.score : null} />
-              <p className="border-l-2 pl-4 text-sm text-bone-dim" style={{ borderColor: TONE_VAR[scoreTone(score)] }}>
+              <p className="border-l-2 pl-4 text-sm text-ink-dim" style={{ borderColor: TONE_VAR[scoreTone(score)] }}>
                 {score < 40
                   ? `Sur ${queryTable.length} questions d'achat posées aux quatre moteurs, ${scan.brand} n'est presque jamais cité. Vos concurrents occupent l'espace de recommandation à votre place.`
                   : score < 70
@@ -149,10 +149,10 @@ export default async function ReportPage({ params }: { params: Promise<{ token: 
             <SectionHead n="02" title="Part de voix" sub="mentions de la marque / mentions totales" />
             <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_280px]">
               <ShareOfVoice data={shareData} />
-              <p className="text-sm text-bone-dim lg:pt-3">
+              <p className="text-sm text-ink-dim lg:pt-3">
                 Chaque point de part de voix est une recommandation qui va à quelqu'un. Les barres neutres sont vos
-                concurrents ; la barre en {""}
-                <span style={{ color: "var(--signal)" }}>orange</span> est vous.
+                concurrents ; la vôtre est marquée{" "}
+                <span className="font-mono" style={{ color: "var(--signal)" }}>▸</span>.
               </p>
             </div>
           </section>
@@ -163,7 +163,7 @@ export default async function ReportPage({ params }: { params: Promise<{ token: 
             <div className="overflow-x-auto border border-rule">
               <table className="w-full min-w-[760px] border-collapse text-left">
                 <thead>
-                  <tr className="bg-ink-raised">
+                  <tr className="bg-paper-raised">
                     <th className="label border-b border-rule px-4 py-3 font-normal">Requête</th>
                     {ENGINES.map((e) => (
                       <th key={e} className="label border-b border-l border-rule px-3 py-3 font-normal">
@@ -176,9 +176,9 @@ export default async function ReportPage({ params }: { params: Promise<{ token: 
                   {queryTable.map((row, i) => {
                     const absent = ENGINES.every((e) => !(row.engines[e] ?? []).includes(scan.brand));
                     return (
-                      <tr key={row.query} className={i % 2 ? "bg-ink-sunken" : undefined}>
+                      <tr key={row.query} className={i % 2 ? "bg-paper-sunken" : undefined}>
                         <td className="border-b border-rule px-4 py-3 align-top">
-                          <span className="font-mono text-xs text-bone">{row.query}</span>
+                          <span className="font-mono text-xs text-ink">{row.query}</span>
                           {absent && (
                             <span className="ml-2 whitespace-nowrap font-mono text-micro uppercase text-signal">
                               absent
@@ -190,15 +190,15 @@ export default async function ReportPage({ params }: { params: Promise<{ token: 
                           return (
                             <td key={e} className="border-b border-l border-rule px-3 py-3 align-top">
                               {brands == null ? (
-                                <span className="font-mono text-xs text-bone-faint">—</span>
+                                <span className="font-mono text-xs text-ink-faint">—</span>
                               ) : brands.length === 0 ? (
-                                <span className="font-mono text-xs text-bone-faint">aucune</span>
+                                <span className="font-mono text-xs text-ink-faint">aucune</span>
                               ) : (
-                                <ol className="space-y-0.5">
+                                <ol className="space-y-1">
                                   {brands.map((b, idx) => (
                                     <li key={b} className="flex gap-2 font-mono text-xs">
-                                      <span className="tnum text-bone-faint">{idx + 1}</span>
-                                      <span className={b === scan.brand ? "" : "text-bone-dim"}
+                                      <span className="tnum text-ink-faint">{idx + 1}</span>
+                                      <span className={b === scan.brand ? "" : "text-ink-dim"}
                                         style={b === scan.brand ? { color: "var(--signal)" } : undefined}>
                                         {b}
                                       </span>
@@ -224,21 +224,21 @@ export default async function ReportPage({ params }: { params: Promise<{ token: 
               {verbatims.map((v, i) => (
                 <figure key={i} className="bg-ink px-4 py-6 sm:px-6">
                   <figcaption className="mb-3 flex flex-wrap items-baseline gap-x-3 gap-y-1">
-                    <span className="font-mono text-micro uppercase text-bone-faint">{ENGINE_LABELS[v.engine]}</span>
-                    <span className="font-mono text-xs text-bone">« {v.query} »</span>
+                    <span className="font-mono text-micro uppercase text-ink-faint">{ENGINE_LABELS[v.engine]}</span>
+                    <span className="font-mono text-xs text-ink">« {v.query} »</span>
                     {v.competitorOnly && (
                       <span className="border border-signal px-2 font-mono text-micro uppercase text-signal">
                         concurrent cité, pas vous
                       </span>
                     )}
                   </figcaption>
-                  <blockquote className="border-l border-rule-strong pl-4 text-sm leading-relaxed text-bone-dim">
+                  <blockquote className="border-l border-rule-strong pl-4 text-sm leading-relaxed text-ink-dim">
                     <Highlighted text={v.excerpt} target={scan.brand} rivals={rivals} />
                   </blockquote>
                 </figure>
               ))}
               {verbatims.length === 0 && (
-                <p className="bg-ink px-4 py-6 text-sm text-bone-faint">Aucun verbatim exploitable sur ce scan.</p>
+                <p className="bg-ink px-4 py-6 text-sm text-ink-faint">Aucun verbatim exploitable sur ce scan.</p>
               )}
             </div>
           </section>
@@ -246,26 +246,26 @@ export default async function ReportPage({ params }: { params: Promise<{ token: 
           {/* ── 05 · Sources ── */}
           <section id="sources" className="scroll-mt-8 pt-24">
             <SectionHead n="05" title="Les sources qui font gagner vos concurrents" sub="citées par Perplexity" />
-            <p className="mb-6 max-w-prose text-sm text-bone-dim">
+            <p className="mb-6 max-w-prose text-sm text-ink-dim">
               Sites sur lesquels Perplexity s'appuie dans les réponses où vos concurrents apparaissent. C'est la
               liste des endroits où il faut exister.
             </p>
             {perplexitySources.length === 0 ? (
-              <p className="font-mono text-sm text-bone-faint">Aucune source concurrente détectée sur ce scan.</p>
+              <p className="font-mono text-sm text-ink-faint">Aucune source concurrente détectée sur ce scan.</p>
             ) : (
               <ol className="border-t border-rule">
                 {perplexitySources.map((s, i) => (
                   <li key={s.url} className="flex items-baseline gap-4 border-b border-rule py-3">
-                    <span className="tnum font-mono text-xs text-bone-faint">{String(i + 1).padStart(2, "0")}</span>
+                    <span className="tnum font-mono text-xs text-ink-faint">{String(i + 1).padStart(2, "0")}</span>
                     <a
                       href={s.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="min-w-0 flex-1 break-all font-mono text-xs text-bone transition-colors duration-150 ease-sharp hover:text-signal"
+                      className="min-w-0 flex-1 break-all font-mono text-xs text-ink transition-colors duration-150 ease-sharp hover:text-signal"
                     >
                       {s.url.replace(/^https?:\/\//, "")}
                     </a>
-                    <span className="tnum shrink-0 font-mono text-micro text-bone-faint">
+                    <span className="tnum shrink-0 font-mono text-micro text-ink-faint">
                       {s.competitors.join(" · ")} — {s.count}×
                     </span>
                   </li>
@@ -280,15 +280,15 @@ export default async function ReportPage({ params }: { params: Promise<{ token: 
             <ol className="border-t border-rule">
               {(scan.actions ?? []).map((a, i) => (
                 <li key={i} className="grid grid-cols-[40px_1fr] gap-4 border-b border-rule py-4 sm:grid-cols-[40px_180px_1fr]">
-                  <span className="tnum font-mono text-sm text-bone-faint">{String(i + 1).padStart(2, "0")}</span>
-                  <span className="whitespace-nowrap font-mono text-micro uppercase text-bone-faint sm:pt-1">
+                  <span className="tnum font-mono text-sm text-ink-faint">{String(i + 1).padStart(2, "0")}</span>
+                  <span className="whitespace-nowrap font-mono text-micro uppercase text-ink-faint sm:pt-1">
                     Ch. {a.chantier} · {a.chantier === 1 ? "Technique" : a.chantier === 2 ? "Contenu" : "Citations"}
                   </span>
-                  <span className="col-span-2 text-sm text-bone-dim sm:col-span-1">{a.action}</span>
+                  <span className="col-span-2 text-sm text-ink-dim sm:col-span-1">{a.action}</span>
                 </li>
               ))}
               {(scan.actions ?? []).length === 0 && (
-                <li className="py-4 text-sm text-bone-faint">Actions non générées pour ce scan.</li>
+                <li className="py-4 text-sm text-ink-faint">Actions non générées pour ce scan.</li>
               )}
             </ol>
           </section>
@@ -297,8 +297,8 @@ export default async function ReportPage({ params }: { params: Promise<{ token: 
           <section className="no-print mt-24 border border-signal">
             <div className="grid gap-8 p-8 lg:grid-cols-[1fr_auto] lg:items-center lg:p-12">
               <div>
-                <h2 className="font-editorial text-3xl text-bone">On regarde ces résultats ensemble ?</h2>
-                <p className="mt-3 max-w-prose text-sm text-bone-dim">
+                <h2 className="font-editorial text-3xl text-ink">On regarde ces résultats ensemble ?</h2>
+                <p className="mt-3 max-w-prose text-sm text-ink-dim">
                   Trente minutes, gratuit, sans engagement. On commente votre rapport requête par requête et on vous
                   dit exactement ce qu'un Sprint GEO changerait pour {scan.brand} — y compris si la réponse est
                   « rien, gardez votre argent ».
@@ -310,9 +310,9 @@ export default async function ReportPage({ params }: { params: Promise<{ token: 
             </div>
           </section>
 
-          <footer className="mt-16 border-t border-rule py-8 text-xs leading-relaxed text-bone-faint">
+          <footer className="mt-16 border-t border-rule py-8 text-xs leading-relaxed text-ink-faint">
             <p className="max-w-prose">
-              <strong className="text-bone-dim">Méthodologie.</strong> Mesure via les API officielles de ChatGPT,
+              <strong className="text-ink-dim">Méthodologie.</strong> Mesure via les API officielles de ChatGPT,
               Claude, Gemini et Perplexity. Les réponses des interfaces grand public peuvent différer légèrement —
               la mesure est identique à chaque scan, donc strictement comparable dans le temps. Les requêtes sont
               archivées pour le re-scan J+90.

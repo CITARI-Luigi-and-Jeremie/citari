@@ -85,7 +85,7 @@ export default function ScanPage({ params }: { params: Promise<{ id: string }> }
       {scanError && (
         <div className="border-l-2 border-signal py-24 pl-6">
           <p className="label">Échec</p>
-          <h1 className="mt-4 font-editorial text-3xl text-bone">Le scan n'a pas abouti</h1>
+          <h1 className="mt-4 font-editorial text-3xl text-ink">Le scan n'a pas abouti</h1>
           <p className="mt-3 max-w-prose font-mono text-sm text-signal">{scanError}</p>
           <a href="/" className="btn-ghost mt-8 inline-block">Relancer un scan</a>
         </div>
@@ -112,8 +112,8 @@ function Progress({ p }: { p: Progress }) {
       <p className="label">Scan en cours</p>
 
       <div className="mt-8 flex items-start gap-4">
-        <span className="tnum font-mono text-score font-medium text-bone">{p.progress}</span>
-        <span className="mt-6 font-mono text-lg text-bone-faint">%</span>
+        <span className="tnum font-mono text-score font-medium text-ink">{p.progress}</span>
+        <span className="mt-6 font-mono text-lg text-ink-faint">%</span>
       </div>
 
       {/* Filet de progression pleine largeur */}
@@ -133,16 +133,16 @@ function Progress({ p }: { p: Progress }) {
               <li key={phase.key} className="flex items-baseline gap-4 border-b border-rule py-4">
                 <span
                   className="tnum font-mono text-xs"
-                  style={{ color: state === "pending" ? "var(--bone-faint)" : "var(--signal)" }}
+                  style={{ color: state === "pending" ? "var(--ink-faint)" : "var(--signal)" }}
                 >
                   {String(i + 1).padStart(2, "0")}
                 </span>
                 <span
-                  className={`font-mono text-sm ${state === "pending" ? "text-bone-faint" : "text-bone"}`}
+                  className={`font-mono text-sm ${state === "pending" ? "text-ink-faint" : "text-ink"}`}
                 >
                   {phase.label}
                 </span>
-                <span className="ml-auto font-mono text-micro uppercase" style={{ color: state === "done" ? "var(--valid)" : state === "running" ? "var(--signal)" : "var(--bone-faint)" }}>
+                <span className="ml-auto font-mono text-micro uppercase" style={{ color: state === "done" ? "var(--valid)" : state === "running" ? "var(--signal)" : "var(--ink-faint)" }}>
                   {state === "done" ? "ok" : state === "running" ? "en cours" : "—"}
                 </span>
               </li>
@@ -153,11 +153,11 @@ function Progress({ p }: { p: Progress }) {
         {/* Compteurs réels, aucun chiffre simulé */}
         <div className="border border-rule p-6">
           <p className="label">Collecte</p>
-          <p className="tnum mt-4 font-mono text-3xl text-bone">
+          <p className="tnum mt-4 font-mono text-3xl text-ink">
             {p.responses}
-            <span className="text-bone-faint">{p.expected > 0 ? ` / ${p.expected}` : ""}</span>
+            <span className="text-ink-faint">{p.expected > 0 ? ` / ${p.expected}` : ""}</span>
           </p>
-          <p className="mt-1 font-mono text-xs text-bone-faint">réponses enregistrées</p>
+          <p className="mt-1 font-mono text-xs text-ink-faint">réponses enregistrées</p>
 
           <div className="mt-8 space-y-2">
             {engines.map((e, i) => {
@@ -170,7 +170,7 @@ function Progress({ p }: { p: Progress }) {
                   />
                   <span
                     className="w-24 text-right font-mono text-xs transition-colors duration-200 ease-sharp"
-                    style={{ color: active ? "var(--signal)" : "var(--bone-faint)" }}
+                    style={{ color: active ? "var(--signal)" : "var(--ink-faint)" }}
                   >
                     {ENGINE_LABELS[e]}
                   </span>
@@ -179,7 +179,7 @@ function Progress({ p }: { p: Progress }) {
             })}
           </div>
 
-          <p className="mt-8 border-t border-rule pt-4 text-xs leading-relaxed text-bone-faint">
+          <p className="mt-8 border-t border-rule pt-4 text-xs leading-relaxed text-ink-faint">
             {p.queries > 0
               ? `${p.queries} questions d'intention d'achat sont posées à chacun des quatre moteurs, via leurs API officielles.`
               : "Génération des questions à partir de votre secteur et du contenu de votre site."}
@@ -234,7 +234,7 @@ function TeaserView({ id, teaser }: { id: string; teaser: Teaser }) {
             {Object.entries(teaser.byEngine).map(([e, s]) => (
               <div key={e} className="border-b border-r border-rule p-4">
                 <p className="label">{ENGINE_LABELS[e] ?? e}</p>
-                <p className="tnum mt-2 font-mono text-2xl text-bone">{s}</p>
+                <p className="tnum mt-2 font-mono text-2xl text-ink">{s}</p>
               </div>
             ))}
           </div>
@@ -255,8 +255,8 @@ function TeaserView({ id, teaser }: { id: string; teaser: Teaser }) {
               ? `${ENGINE_LABELS[teaser.verbatim.engine] ?? teaser.verbatim.engine} — concurrent cité, pas vous`
               : ENGINE_LABELS[teaser.verbatim.engine] ?? teaser.verbatim.engine}
           </figcaption>
-          <p className="mt-3 font-mono text-sm text-bone">« {teaser.verbatim.query} »</p>
-          <blockquote className="mt-4 max-w-prose text-sm leading-relaxed text-bone-dim">
+          <p className="mt-3 font-mono text-sm text-ink">« {teaser.verbatim.query} »</p>
+          <blockquote className="mt-4 max-w-prose text-sm leading-relaxed text-ink-dim">
             {teaser.verbatim.excerpt}
           </blockquote>
         </figure>
@@ -267,8 +267,8 @@ function TeaserView({ id, teaser }: { id: string; teaser: Teaser }) {
         {!sent ? (
           <div className="grid gap-8 p-8 lg:grid-cols-[1fr_400px] lg:items-center lg:p-12">
             <div>
-              <h2 className="font-editorial text-2xl text-bone">Le rapport complet, gratuit</h2>
-              <p className="mt-3 max-w-prose text-sm text-bone-dim">
+              <h2 className="font-editorial text-2xl text-ink">Le rapport complet, gratuit</h2>
+              <p className="mt-3 max-w-prose text-sm text-ink-dim">
                 Détail requête par requête sur les quatre moteurs, verbatims complets, sources citées par Perplexity
                 pour vos concurrents, et vos dix actions prioritaires. Envoyé par email avec le PDF.
               </p>
@@ -289,10 +289,10 @@ function TeaserView({ id, teaser }: { id: string; teaser: Teaser }) {
                 {sending ? "Envoi…" : "Recevoir le rapport"}
               </button>
               {error && <p className="font-mono text-xs text-signal">{error}</p>}
-              <p className="text-xs leading-relaxed text-bone-faint">
+              <p className="text-xs leading-relaxed text-ink-faint">
                 Votre email sert à vous envoyer ce rapport et, éventuellement, un suivi commercial. Désinscription en
                 un clic.{" "}
-                <a className="underline hover:text-bone" href="/confidentialite" target="_blank">
+                <a className="underline hover:text-ink" href="/confidentialite" target="_blank">
                   Politique de confidentialité
                 </a>
                 .
@@ -303,7 +303,7 @@ function TeaserView({ id, teaser }: { id: string; teaser: Teaser }) {
           <div className="flex flex-wrap items-center justify-between gap-6 p-8 lg:p-12">
             <div>
               <p className="label" style={{ color: "var(--valid)" }}>Rapport envoyé</p>
-              <h2 className="mt-3 font-editorial text-2xl text-bone">Vérifiez votre boîte mail</h2>
+              <h2 className="mt-3 font-editorial text-2xl text-ink">Vérifiez votre boîte mail</h2>
             </div>
             <div className="flex flex-wrap gap-3">
               <a href={sent} className="btn-signal">Ouvrir le rapport</a>
