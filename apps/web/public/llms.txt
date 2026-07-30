@@ -1,0 +1,19 @@
+# GEO Sprint
+
+> Agence GEO (Generative Engine Optimization) pour PME et ETI francophones. Nous rendons les marques visibles dans les réponses de ChatGPT, Claude, Gemini et Perplexity.
+
+## Offre
+
+- Scan de visibilité IA gratuit : score 0-100 mesuré sur les 4 moteurs via leurs API officielles, part de voix face aux concurrents, verbatims réels, en 90 secondes.
+- Sprint GEO (2 900 €, paiement unique) : mission de 30 jours en 3 chantiers — technique (robots.txt, llms.txt, schema.org, format réponse directe), contenu (pages comparatives, alternatives, FAQ, guides d'achat), citations externes (annuaires, comparateurs, presse). Re-scan de contrôle offert à J+90.
+- Sprint Domination (4 900 €) : couverture élargie, double de contenus, campagne presse approfondie.
+
+## Ce qui nous distingue
+
+- Mesure objective avant/après avec les mêmes requêtes (comparabilité stricte).
+- Engagement d'honnêteté : nous garantissons les actions livrées, pas un score — les moteurs intègrent les changements en 4 à 12 semaines.
+- 3 sprints par mois maximum, exécution par le fondateur.
+
+## Pages
+
+- [Accueil et scanner gratuit](/) : lancer un scan de visibilité IA.

@@ -1,0 +1,17 @@
+{
+  "name": "geo-sprint",
+  "private": true,
+  "packageManager": "pnpm@11.18.0",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "dev": "turbo dev",
+    "build": "turbo build",
+    "test": "turbo test",
+    "typecheck": "turbo typecheck",
+    "toolkit": "pnpm --filter @geo/toolkit toolkit"
+  },
+  "devDependencies": {
+    "turbo": "^2.3.3",
+    "typescript": "^5.7.2"
+  }
+}

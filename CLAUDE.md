@@ -1,0 +1,23 @@
+# GEO Sprint — plateforme d'agence GEO
+
+Agence GEO (Generative Engine Optimization) pour PME/ETI francophones : faire apparaître les marques clientes dans ChatGPT, Claude, Gemini et Perplexity.
+
+Le cahier des charges complet est dans `SPEC.md`. À lire avant toute modification structurante.
+
+## Monorepo (Turborepo + pnpm)
+- `packages/core` — logique partagée : 4 providers LLM (`LLMProvider.ask`), génération de requêtes, détection de mentions (déterministe + LLM), scoring 0-100, runner de scan asynchrone, client Supabase, log de coûts.
+- `apps/web` — landing + scanner public + rapports (Next.js 15 App Router, port 3000).
+- `apps/admin` — back-office leads/clients/sprints (Next.js 15, port 3001, auth mot de passe env).
+- `packages/toolkit` — CLI interne de livraison des sprints : `pnpm toolkit <commande>` (audit-technique, generate-fixes, content-brief, draft-content, citation-targets, rescan). Sorties dans `deliverables/<client>/`.
+- `supabase/migrations` — schéma Postgres.
+
+## Commandes
+- `pnpm install` puis `pnpm dev` (turbo), `pnpm test` (vitest dans core), `pnpm typecheck`.
+- Scan en CLI (validation Phase 1) : `pnpm --filter @geo/core scan:cli -- --brand "X" --url https://x.fr --sector "..." --competitors "A,B"`.
+
+## Règles métier à ne pas casser
+- Scoring : mention 50 %, position 20 %, recommandation explicite 20 %, sentiment 10 %.
+- Mix de requêtes : 40 % comparatives, 25 % problème, 20 % locales, 15 % confiance.
+- Re-scan = strictement les MÊMES requêtes que le scan initial.
+- Coût par scan loggé, cible < 1,50 €. Rate limit 3 scans/jour/IP + Turnstile.
+- Non-objectifs (refuser) : comptes prospects, paiement en ligne, scraping des UIs de chatbots, multi-tenant, dashboard de monitoring continu.
