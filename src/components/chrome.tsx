@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import type { ReactNode } from "react";
+import { Logo, LogoLien } from "@/components/logo";
 import { Label } from "@/components/kit";
 
 const LIENS = [
