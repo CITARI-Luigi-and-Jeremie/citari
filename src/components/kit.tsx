@@ -27,12 +27,15 @@ export function Btn({ variant = "encre", size = "md", className, ...props }: Btn
     <button
       {...props}
       className={cn(
-        "inline-flex items-center justify-center gap-2 border transition-colors duration-[140ms] ease-linear disabled:opacity-40 disabled:cursor-not-allowed",
-        "font-mono text-[12px] uppercase tracking-[0.14em]",
-        size === "lg" ? "px-6 py-4" : "px-4 py-2.5",
-        variant === "encre" && "bg-ink text-paper border-ink hover:bg-bordeaux hover:border-bordeaux",
-        variant === "ligne" && "bg-transparent text-ink border-rule-strong hover:border-ink hover:bg-paper-2",
-        variant === "nu" && "border-transparent px-0 text-ink-3 hover:text-ink",
+        "inline-flex items-center justify-center gap-2 rounded-sm border",
+        "text-[13px] font-medium tracking-[0.02em]",
+        "transition-[background-color,border-color,color,box-shadow,transform] duration-300 ease-[cubic-bezier(0.2,0.7,0.2,1)]",
+        "disabled:cursor-not-allowed disabled:opacity-40",
+        size === "lg" ? "px-7 py-3.5" : "px-5 py-2.5",
+        variant === "encre" &&
+          "border-ink bg-ink text-paper shadow-soft hover:-translate-y-px hover:bg-bordeaux hover:border-bordeaux hover:shadow-lift",
+        variant === "ligne" && "border-rule-strong bg-transparent text-ink hover:border-ink hover:bg-paper-2",
+        variant === "nu" && "border-transparent px-0 text-ink-3 hover:text-bordeaux",
         className,
       )}
     />
@@ -52,15 +55,15 @@ export function Field({
 }) {
   return (
     <label className={cn("block", className)}>
-      <span className="label-xs block pb-1.5">{label}</span>
+      <span className="label-xs block pb-2">{label}</span>
       {children}
-      {hint ? <span className="mt-1 block font-mono text-[11px] text-ink-3">{hint}</span> : null}
+      {hint ? <span className="mt-1.5 block text-[12px] text-ink-3">{hint}</span> : null}
     </label>
   );
 }
 
 const champBase =
-  "w-full border-0 border-b border-rule-strong bg-transparent px-0 py-2 text-[16px] outline-none transition-colors duration-[140ms] ease-linear placeholder:text-ink-3/70 focus:border-bordeaux";
+  "w-full rounded-sm border border-rule bg-card px-3.5 py-2.5 text-[15px] outline-none transition-[border-color,box-shadow] duration-300 ease-[cubic-bezier(0.2,0.7,0.2,1)] placeholder:text-ink-3/70 hover:border-rule-strong focus:border-bordeaux focus:shadow-[0_0_0_3px_var(--accent-wash)]";
 
 export function Champ({ className, ...props }: InputHTMLAttributes<HTMLInputElement>) {
   return <input {...props} className={cn(champBase, className)} />;
@@ -68,7 +71,7 @@ export function Champ({ className, ...props }: InputHTMLAttributes<HTMLInputElem
 
 export function Choix({ className, children, ...props }: SelectHTMLAttributes<HTMLSelectElement>) {
   return (
-    <select {...props} className={cn(champBase, "appearance-none pr-6", className)}>
+    <select {...props} className={cn(champBase, "appearance-none pr-8", className)}>
       {children}
     </select>
   );
@@ -77,12 +80,12 @@ export function Choix({ className, children, ...props }: SelectHTMLAttributes<HT
 /** Le geste signature : la ligne restée vide, et « RIEN » au bout. */
 export function LigneVide({ legende, className }: { legende?: string; className?: string }) {
   return (
-    <div className={cn("flex items-end gap-4", className)}>
+    <div className={cn("flex items-end gap-5", className)}>
       <div className="flex-1">
-        {legende ? <span className="label-xs block pb-2">{legende}</span> : null}
-        <div className="h-px w-full bg-ink" />
+        {legende ? <span className="label-xs block pb-2.5">{legende}</span> : null}
+        <div className="h-px w-full bg-rule-strong" />
       </div>
-      <span className="num shrink-0 pb-[-2px] text-[13px] tracking-[0.3em] text-bordeaux">RIEN</span>
+      <span className="shrink-0 font-display text-[17px] italic leading-none text-bordeaux">rien</span>
     </div>
   );
 }
@@ -91,8 +94,8 @@ export function Etiquette({ children, ton = "neutre" }: { children: ReactNode; t
   return (
     <span
       className={cn(
-        "inline-block border px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-[0.16em]",
-        ton === "bordeaux" ? "border-bordeaux text-bordeaux" : "border-rule-strong text-ink-3",
+        "inline-flex items-center rounded-full border px-2.5 py-0.5 text-[11px] font-medium tracking-[0.04em]",
+        ton === "bordeaux" ? "border-bordeaux/40 bg-bordeaux-wash text-bordeaux" : "border-rule bg-paper-2 text-ink-3",
       )}
     >
       {children}
