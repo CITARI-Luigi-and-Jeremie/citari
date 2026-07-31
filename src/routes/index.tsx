@@ -301,8 +301,11 @@ function Formulaire() {
 
 function StatistiqueExergue() {
   return (
-    <section className="mt-32 grid gap-8 border-t border-rule-strong pt-8 lg:grid-cols-[1fr_260px] lg:gap-20">
-      <p className="font-display text-[40px] leading-[1.06] sm:text-[62px]">
+    <Apparition
+      as="section"
+      className="mt-32 grid gap-8 border-t border-rule pt-10 lg:grid-cols-[1fr_240px] lg:gap-20"
+    >
+      <p className="text-balance font-display text-[34px] font-light leading-[1.1] sm:text-[56px]">
         <span className="num text-bordeaux">46{NBSP}%</span> des utilisateurs d’IA démarrent leur
         recherche d’achat directement sur une IA.
       </p>
@@ -314,7 +317,7 @@ function StatistiqueExergue() {
           <li>Reuters</li>
         </ul>
       </div>
-    </section>
+    </Apparition>
   );
 }
 
@@ -322,23 +325,27 @@ function StatistiqueExergue() {
 
 function LaMesure() {
   return (
-    <section className="mt-28">
-      <h2 className="text-[38px] leading-none sm:text-[48px]">La mesure</h2>
-      <div className="mt-6 flex flex-wrap items-baseline gap-x-8 gap-y-4 border-y border-rule-strong py-6">
-        <span className="num text-[52px] leading-none">24</span>
-        <span className="text-[16px] text-ink-2">questions d’intention d’achat, figées</span>
-        <span className="num text-[52px] leading-none">4</span>
-        <span className="text-[16px] text-ink-2">moteurs : ChatGPT, Claude, Gemini, Perplexity</span>
-        <span className="num text-[52px] leading-none">1</span>
-        <span className="text-[16px] text-ink-2">score de 0 à 100</span>
-      </div>
-      <div className="mt-8 grid gap-x-16 gap-y-6 md:grid-cols-[minmax(0,42ch)_1fr]">
+    <Apparition as="section" className="mt-28">
+      <h2 className="text-[34px] leading-none sm:text-[46px]">La mesure</h2>
+      <dl className="mt-8 grid gap-x-10 gap-y-6 border-y border-rule py-8 sm:grid-cols-3">
+        {[
+          ["24", "questions d’intention d’achat, figées"],
+          ["4", "moteurs : ChatGPT, Claude, Gemini, Perplexity"],
+          ["1", "score de 0 à 100"],
+        ].map(([n, t]) => (
+          <div key={n} className="flex items-baseline gap-4">
+            <dt className="font-display text-[46px] font-light leading-none">{n}</dt>
+            <dd className="max-w-[26ch] text-[14px] leading-snug text-ink-2">{t}</dd>
+          </div>
+        ))}
+      </dl>
+      <div className="mt-10 grid gap-x-16 gap-y-8 md:grid-cols-[minmax(0,42ch)_1fr]">
         <p className="text-[15px] leading-relaxed text-ink-2">
           {fr(
             "L’échantillon se répartit en 40 % de questions comparatives, 25 % de questions problème, 20 % de questions locales et 15 % de questions de confiance. Il est généré une fois, puis figé : le re-scan à J+90 rejoue exactement les mêmes, sinon la comparaison ne vaut rien.",
           )}
         </p>
-        <dl className="grid grid-cols-2 gap-y-4 self-start sm:grid-cols-4">
+        <dl className="grid grid-cols-2 gap-y-6 self-start sm:grid-cols-4">
           {[
             ["taux de mention", "50 %"],
             ["position moyenne", "20 %"],
@@ -347,12 +354,12 @@ function LaMesure() {
           ].map(([k, v]) => (
             <div key={k}>
               <dt className="label-xs">{k}</dt>
-              <dd className="num text-[24px]">{v.replace(" ", NBSP)}</dd>
+              <dd className="num mt-1.5 text-[22px]">{v.replace(" ", NBSP)}</dd>
             </div>
           ))}
         </dl>
       </div>
-    </section>
+    </Apparition>
   );
 }
 
