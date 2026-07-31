@@ -202,6 +202,9 @@ function Teaser({ id }: { id: string }) {
 
       <header className="mt-14 border-b border-rule pb-8">
         <Label>score de visibilité IA · {data.marque}</Label>
+        <p className="mt-3 text-[15px] text-ink-2">
+          Sur 24 questions posées par vos acheteurs potentiels
+        </p>
         <div className="mt-5 flex flex-wrap items-end gap-x-14 gap-y-4">
           <div className="font-display text-[130px] font-light leading-[0.76] tracking-[-0.03em] sm:text-[196px]">
             {affiche}
