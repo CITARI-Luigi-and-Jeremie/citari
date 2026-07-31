@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import type { ReactNode } from "react";
+import { Logo, LogoLien } from "@/components/logo";
 import { Label } from "@/components/kit";
 
 const LIENS = [
@@ -11,10 +12,8 @@ const LIENS = [
 export function Chrome({ children }: { children: ReactNode }) {
   return (
     <div className="mx-auto max-w-[1240px] px-6 lg:px-10">
-      <header className="flex flex-wrap items-baseline justify-between gap-4 border-b border-rule-strong py-4">
-        <Link to="/" className="font-display text-[22px] leading-none">
-          GEO&nbsp;Sprint
-        </Link>
+      <header className="flex flex-wrap items-center justify-between gap-4 border-b border-rule-strong py-4">
+        <LogoLien hauteur={20} />
         <nav className="flex flex-wrap gap-6">
           {LIENS.map(([to, label]) => (
             <Link key={to} to={to} className="label-xs hover:text-ink">
@@ -26,7 +25,7 @@ export function Chrome({ children }: { children: ReactNode }) {
       {children}
       <footer className="mt-28 border-t border-rule-strong py-8">
         <div className="flex flex-wrap items-baseline justify-between gap-6">
-          <span className="font-display text-[20px]">GEO&nbsp;Sprint</span>
+          <Logo hauteur={19} />
           <nav className="flex flex-wrap gap-6">
             {[...LIENS, ["/mentions-legales", "Mentions légales"], ["/confidentialite", "Confidentialité"]].map(
               ([to, label]) => (
@@ -126,8 +125,8 @@ export function jsonLdArticle(titre: string, description: string, url: string, f
       headline: titre,
       description,
       inLanguage: "fr",
-      author: { "@type": "Organization", name: "GEO Sprint" },
-      publisher: { "@type": "Organization", name: "GEO Sprint" },
+      author: { "@type": "Organization", name: "Citari" },
+      publisher: { "@type": "Organization", name: "Citari" },
       mainEntityOfPage: url,
     },
     {

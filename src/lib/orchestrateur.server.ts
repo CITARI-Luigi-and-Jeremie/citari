@@ -380,10 +380,10 @@ export async function enregistrerLead(input: {
         subject: `${scan.brand_name} — votre score de visibilité IA`,
         body:
           i === 0
-            ? `Bonjour,\n\nVotre rapport est en ligne : score ${Math.round(score)}/100.\nJe vous propose 30 minutes pour le passer en revue ensemble.\n\n— GEO Sprint`
+            ? `Bonjour,\n\nVotre rapport est en ligne : score ${Math.round(score)}/100.\nJe vous propose 30 minutes pour le passer en revue ensemble.\n\n— Citari`
             : i === 1
-              ? `Bonjour,\n\nUne question rapide : avez-vous regardé les sources citées par Perplexity pour vos concurrents ? C'est là que tout se joue.\n\n— GEO Sprint`
-              : `Bonjour,\n\nJe clôture votre dossier sauf contre-ordre. Le rapport reste accessible par votre lien.\n\n— GEO Sprint`,
+              ? `Bonjour,\n\nUne question rapide : avez-vous regardé les sources citées par Perplexity pour vos concurrents ? C'est là que tout se joue.\n\n— Citari`
+              : `Bonjour,\n\nJe clôture votre dossier sauf contre-ordre. Le rapport reste accessible par votre lien.\n\n— Citari`,
       })),
     );
   }

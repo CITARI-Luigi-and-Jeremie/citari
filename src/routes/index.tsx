@@ -5,6 +5,7 @@ import { useState } from "react";
 import { Apparition } from "@/components/apparition";
 import { ChampTexte } from "@/components/fond";
 
+import { LogoLien, Logo } from "@/components/logo";
 import { Btn, Champ, Choix, Etiquette, Field, Label, LigneVide, Rule } from "@/components/kit";
 import { FAQ, LANGUES, METIERS, SECTEURS, VILLES, exemple, type Metier } from "@/data/contenu";
 import { lancerScan } from "@/lib/scan.functions";
@@ -13,13 +14,13 @@ import { NBSP, euros, fr, frTitre } from "@/lib/typo";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "GEO Sprint — êtes-vous cité par ChatGPT ? Scan gratuit" },
+      { title: "Citari — êtes-vous cité par ChatGPT ? Scan gratuit" },
       {
         name: "description",
         content:
           "Mesurez gratuitement la visibilité de votre marque dans ChatGPT, Claude, Gemini et Perplexity. 24 questions d’achat, 4 moteurs, 1 score. Sprint GEO de 30 jours à 2 900 €.",
       },
-      { property: "og:title", content: "GEO Sprint — êtes-vous cité par ChatGPT ?" },
+      { property: "og:title", content: "Citari — êtes-vous cité par ChatGPT ?" },
       {
         property: "og:description",
         content:
@@ -109,12 +110,7 @@ function EnTete() {
   return (
     <header className="sticky top-0 z-40 border-b border-rule bg-paper/80 backdrop-blur-md">
       <div className="mx-auto grid max-w-[1240px] grid-cols-[minmax(0,1fr)_auto] items-center gap-4 px-6 py-4 lg:px-10">
-        <Link
-          to="/"
-          className="truncate font-display text-[21px] leading-none transition-colors duration-300 hover:text-bordeaux"
-        >
-          GEO&nbsp;Sprint
-        </Link>
+        <LogoLien hauteur={20} />
         <nav className="flex shrink-0 items-center gap-5 sm:gap-7">
           {NAV.map(([to, label]) => (
             <Link key={to} to={to} className="label-xs lien-nav hidden sm:inline-block">
@@ -738,7 +734,7 @@ function PiedDePage() {
   return (
     <footer className="mt-28 border-t border-rule py-10">
       <div className="flex flex-wrap items-baseline justify-between gap-x-8 gap-y-6">
-        <span className="font-display text-[20px]">GEO&nbsp;Sprint</span>
+        <Logo hauteur={19} />
         <nav className="flex flex-wrap gap-x-7 gap-y-3">
           {[
             ["/guide-geo", "Guide du GEO"],

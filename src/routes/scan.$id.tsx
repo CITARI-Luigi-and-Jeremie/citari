@@ -1,4 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { LogoLien } from "@/components/logo";
 import { useServerFn } from "@tanstack/react-start";
 import { useCallback, useEffect, useRef, useState } from "react";
 
@@ -10,14 +11,14 @@ import { NBSP, fr, verdict } from "@/lib/typo";
 export const Route = createFileRoute("/scan/$id")({
   head: () => ({
     meta: [
-      { title: "Mesure en cours — GEO Sprint" },
+      { title: "Mesure en cours — Citari" },
       {
         name: "description",
         content:
           "Interrogation de ChatGPT, Claude, Gemini et Perplexity sur 24 questions d’intention d’achat.",
       },
       { name: "robots", content: "noindex" },
-      { property: "og:title", content: "Mesure en cours — GEO Sprint" },
+      { property: "og:title", content: "Mesure en cours — Citari" },
       { property: "og:description", content: "Votre score de visibilité IA est en cours de calcul." },
     ],
   }),
@@ -84,9 +85,7 @@ function Attente() {
 
   return (
     <div className="mx-auto max-w-[1000px] px-6 py-16 lg:px-10">
-      <Link to="/" className="label-xs">
-        GEO Sprint
-      </Link>
+      <LogoLien hauteur={18} />
 
       <div className="mt-16 flex items-end justify-between gap-6 border-b border-rule pb-5">
         <div className="font-display text-[100px] font-light leading-[0.78] tracking-[-0.03em] sm:text-[156px]">
@@ -196,9 +195,7 @@ function Teaser({ id }: { id: string }) {
 
   return (
     <div className="mx-auto max-w-[1080px] px-6 py-16 lg:px-10">
-      <Link to="/" className="label-xs">
-        GEO Sprint
-      </Link>
+      <LogoLien hauteur={18} />
 
       <header className="mt-14 border-b border-rule pb-8">
         <Label>score de visibilité IA · {data.marque}</Label>

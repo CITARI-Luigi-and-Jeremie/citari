@@ -60,9 +60,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { name: "author", content: "GEO Sprint" },
+      { name: "author", content: "Citari" },
       { property: "og:type", content: "website" },
-      { property: "og:site_name", content: "GEO Sprint" },
+      { property: "og:site_name", content: "Citari" },
       { property: "og:locale", content: "fr_FR" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -74,7 +74,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         href: "https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Manrope:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap",
       },
       { rel: "stylesheet", href: appCss },
-      { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
+      { rel: "icon", href: "/favicon.png", type: "image/png" },
     ],
     scripts: [
       {
@@ -82,7 +82,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         children: JSON.stringify({
           "@context": "https://schema.org",
           "@type": "Organization",
-          name: "GEO Sprint",
+          name: "Citari",
           description:
             "Agence française de GEO (Generative Engine Optimization) : mesure et correction de la visibilité des marques dans ChatGPT, Claude, Gemini et Perplexity.",
           areaServed: "FR",

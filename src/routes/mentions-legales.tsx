@@ -5,14 +5,14 @@ import { fr } from "@/lib/typo";
 export const Route = createFileRoute("/mentions-legales")({
   head: () => ({
     meta: [
-      { title: "Mentions légales — GEO Sprint" },
+      { title: "Mentions légales — Citari" },
       {
         name: "description",
         content:
-          "Éditeur, directeur de la publication, hébergeur et conditions d’utilisation du site GEO Sprint, conformément à l’article 6 III de la LCEN.",
+          "Éditeur, directeur de la publication, hébergeur et conditions d’utilisation du site Citari, conformément à l’article 6 III de la LCEN.",
       },
       { name: "robots", content: "noindex" },
-      { property: "og:title", content: "Mentions légales — GEO Sprint" },
+      { property: "og:title", content: "Mentions légales — Citari" },
       { property: "og:description", content: "Informations légales de l’éditeur du site." },
     ],
   }),
@@ -33,7 +33,7 @@ function Page() {
         <H2 id="editeur">Éditeur du site</H2>
         <Liste
           items={[
-            ["Dénomination", "GEO Sprint — [À COMPLÉTER : forme juridique et raison sociale]"],
+            ["Dénomination", "Citari — [À COMPLÉTER : forme juridique et raison sociale]"],
             ["Adresse du siège", "[À COMPLÉTER]"],
             ["SIRET", "[À COMPLÉTER]"],
             ["RCS", "[À COMPLÉTER : ville et numéro d’immatriculation]"],
