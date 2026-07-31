@@ -48,9 +48,11 @@ function Accueil() {
       <EnTete />
       <div className="mx-auto max-w-[1240px] px-6 lg:px-10">
         {/* Premier écran : titre + formulaire + preuve */}
-        <section className="grid gap-16 pt-14 lg:grid-cols-[1.06fr_0.94fr] lg:gap-20 lg:pt-24">
-          <div>
+        <section className="relative grid gap-16 pt-14 lg:grid-cols-[1.06fr_0.94fr] lg:gap-20 lg:pt-24">
+          <ChampTexte />
+          <div className="relative z-[2]">
             <Apparition>
+
               <Label>visibilité dans les moteurs génératifs</Label>
               <h1 className="mt-6 text-balance text-[46px] leading-[0.95] sm:text-[68px] lg:text-[84px]">
                 Vos clients ne cherchent plus sur{" "}
