@@ -43,58 +43,79 @@ export const Route = createFileRoute("/")({
 
 function Accueil() {
   return (
-    <div className="mx-auto max-w-[1240px] px-6 lg:px-10">
+    <>
       <EnTete />
-
-      {/* Premier écran : titre + formulaire + preuve */}
-      <section className="grid gap-14 pt-10 lg:grid-cols-[1.08fr_0.92fr] lg:gap-20 lg:pt-16">
-        <div>
-          <h1 className="text-[54px] leading-[0.93] sm:text-[72px] lg:text-[86px]">
-            Votre marque est-elle <em className="not-italic text-bordeaux">invisible</em> dans
-            ChatGPT{NBSP}?
-          </h1>
-          <p className="mt-8 max-w-[46ch] text-[17px] leading-relaxed text-ink-2">
-            {fr(
-              "Quand un dirigeant demande conseil à une IA, la réponse cite deux ou trois marques. Il n’y a pas de deuxième page. Si la vôtre n’y figure pas, vous perdez l’affaire sans jamais l’apprendre.",
-            )}
-          </p>
-          <div className="mt-12">
-            <BlocPreuve />
+      <div className="mx-auto max-w-[1240px] px-6 lg:px-10">
+        {/* Premier écran : titre + formulaire + preuve */}
+        <section className="grid gap-16 pt-14 lg:grid-cols-[1.06fr_0.94fr] lg:gap-20 lg:pt-24">
+          <div>
+            <Apparition>
+              <Label>visibilité dans les moteurs génératifs</Label>
+              <h1 className="mt-6 text-balance text-[46px] leading-[0.95] sm:text-[68px] lg:text-[84px]">
+                Votre marque est-elle <em className="not-italic text-bordeaux">invisible</em> dans
+                ChatGPT{NBSP}?
+              </h1>
+            </Apparition>
+            <Apparition delai={90}>
+              <p className="mt-8 max-w-[46ch] text-[16px] leading-[1.72] text-ink-2 sm:text-[17px]">
+                {fr(
+                  "Quand un dirigeant demande conseil à une IA, la réponse cite deux ou trois marques. Il n’y a pas de deuxième page. Si la vôtre n’y figure pas, vous perdez l’affaire sans jamais l’apprendre.",
+                )}
+              </p>
+            </Apparition>
+            <Apparition delai={160} className="mt-14 hidden lg:block">
+              <BlocPreuve />
+            </Apparition>
           </div>
-        </div>
 
-        <div className="lg:pt-3">
-          <Formulaire />
-        </div>
-      </section>
+          <Apparition delai={60} className="lg:pt-2">
+            <Formulaire />
+          </Apparition>
 
-      <StatistiqueExergue />
-      <LaMesure />
-      <Offre />
-      <Engagement />
-      <Faq />
-      <PiedDePage />
-    </div>
+          <Apparition delai={60} className="lg:hidden">
+            <BlocPreuve />
+          </Apparition>
+        </section>
+
+        <StatistiqueExergue />
+        <LaMesure />
+        <Offre />
+        <Engagement />
+        <Faq />
+        <AppelFinal />
+        <PiedDePage />
+      </div>
+    </>
   );
 }
 
+const NAV = [
+  ["/guide-geo", "Guide du GEO"],
+  ["/geo-vs-seo", "GEO vs SEO"],
+  ["/alternatives-agence-seo", "Alternatives"],
+] as const;
+
 function EnTete() {
   return (
-    <header className="flex flex-wrap items-baseline justify-between gap-4 border-b border-rule-strong py-4">
-      <Link to="/" className="font-display text-[22px] leading-none">
-        GEO&nbsp;Sprint
-      </Link>
-      <nav className="flex flex-wrap gap-6">
-        {[
-          ["/guide-geo", "Guide du GEO"],
-          ["/geo-vs-seo", "GEO vs SEO"],
-          ["/alternatives-agence-seo", "Alternatives"],
-        ].map(([to, label]) => (
-          <Link key={to} to={to} className="label-xs hover:text-ink">
-            {label}
-          </Link>
-        ))}
-      </nav>
+    <header className="sticky top-0 z-40 border-b border-rule bg-paper/80 backdrop-blur-md">
+      <div className="mx-auto grid max-w-[1240px] grid-cols-[minmax(0,1fr)_auto] items-center gap-4 px-6 py-4 lg:px-10">
+        <Link
+          to="/"
+          className="truncate font-display text-[21px] leading-none transition-colors duration-300 hover:text-bordeaux"
+        >
+          GEO&nbsp;Sprint
+        </Link>
+        <nav className="flex shrink-0 items-center gap-5 sm:gap-7">
+          {NAV.map(([to, label]) => (
+            <Link key={to} to={to} className="label-xs lien-nav hidden sm:inline-block">
+              {label}
+            </Link>
+          ))}
+          <a href="#scan" className="label-xs lien-nav text-bordeaux sm:hidden">
+            Scan gratuit
+          </a>
+        </nav>
+      </div>
     </header>
   );
 }
@@ -107,18 +128,18 @@ function BlocPreuve() {
   const ex = exemple(metier, ville);
 
   return (
-    <div className="border-t border-rule-strong pt-4">
+    <div className="carte carte-i p-6 sm:p-8">
       <div className="flex flex-wrap items-center gap-2">
         <Etiquette>exemple</Etiquette>
         <Etiquette ton="bordeaux">noms de concurrents fictifs</Etiquette>
       </div>
 
-      <p className="mt-5 font-display text-[30px] leading-tight sm:text-[38px]">
+      <p className="mt-6 font-display text-[27px] leading-[1.2] sm:text-[34px]">
         Je suis{" "}
         <select
           value={metier}
           onChange={(e) => setMetier(e.target.value as Metier)}
-          className="border-b border-bordeaux bg-transparent pb-0.5 font-display text-[30px] text-bordeaux outline-none sm:text-[38px]"
+          className="select-edito font-display text-[27px] sm:text-[34px]"
           aria-label="Choisir un métier"
         >
           {METIERS.map((m) => (
@@ -131,7 +152,7 @@ function BlocPreuve() {
         <select
           value={ville}
           onChange={(e) => setVille(e.target.value)}
-          className="border-b border-bordeaux bg-transparent pb-0.5 font-display text-[30px] text-bordeaux outline-none sm:text-[38px]"
+          className="select-edito font-display text-[27px] sm:text-[34px]"
           aria-label="Choisir une ville"
         >
           {VILLES.map((v) => (
@@ -142,27 +163,31 @@ function BlocPreuve() {
         </select>
       </p>
 
-      <div className="mt-8 grid gap-6 sm:grid-cols-[auto_1fr] sm:gap-8">
+      <div
+        key={`${metier}-${ville}`}
+        className="rise mt-7 grid gap-5 border-t border-rule pt-6 sm:grid-cols-[auto_1fr] sm:gap-x-8 sm:gap-y-6"
+      >
         <Label className="sm:pt-1">question posée</Label>
-        <p className="num text-[14px] leading-snug">{fr(ex.question)}</p>
+        <p className="text-[14px] leading-snug">{fr(ex.question)}</p>
 
         <Label className="sm:pt-1">réponse de l’IA</Label>
         <p className="max-w-[52ch] text-[15px] leading-relaxed text-ink-2">{ex.reponse}</p>
 
         <Label className="sm:pt-1">marques citées</Label>
-        <ol className="num flex flex-wrap gap-x-4 gap-y-1 text-[13px]">
+        <ol className="flex flex-wrap gap-x-5 gap-y-1 text-[14px]">
           {ex.concurrents.map((c, i) => (
             <li key={c}>
-              <span className="text-ink-3">#{i + 1}</span> {c}
+              <span className="num text-[11px] text-ink-3">{String(i + 1).padStart(2, "0")}</span> {c}
             </li>
           ))}
         </ol>
       </div>
 
-      <LigneVide legende="votre marque" className="mt-10" />
+      <LigneVide legende="votre marque" className="mt-9" />
     </div>
   );
 }
+
 
 /* ---------------- Formulaire de scan ---------------- */
 
