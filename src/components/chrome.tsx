@@ -26,7 +26,7 @@ export function Chrome({ children }: { children: ReactNode }) {
       {children}
       <footer className="mt-28 border-t border-rule-strong py-8">
         <div className="flex flex-wrap items-baseline justify-between gap-6">
-          <span className="font-display text-[20px]">GEO&nbsp;Sprint</span>
+          <Logo hauteur={19} />
           <nav className="flex flex-wrap gap-6">
             {[...LIENS, ["/mentions-legales", "Mentions légales"], ["/confidentialite", "Confidentialité"]].map(
               ([to, label]) => (

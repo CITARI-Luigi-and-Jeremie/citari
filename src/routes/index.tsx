@@ -5,6 +5,7 @@ import { useState } from "react";
 import { Apparition } from "@/components/apparition";
 import { ChampTexte } from "@/components/fond";
 
+import { LogoLien, Logo } from "@/components/logo";
 import { Btn, Champ, Choix, Etiquette, Field, Label, LigneVide, Rule } from "@/components/kit";
 import { FAQ, LANGUES, METIERS, SECTEURS, VILLES, exemple, type Metier } from "@/data/contenu";
 import { lancerScan } from "@/lib/scan.functions";
@@ -733,7 +734,7 @@ function PiedDePage() {
   return (
     <footer className="mt-28 border-t border-rule py-10">
       <div className="flex flex-wrap items-baseline justify-between gap-x-8 gap-y-6">
-        <span className="font-display text-[20px]">GEO&nbsp;Sprint</span>
+        <Logo hauteur={19} />
         <nav className="flex flex-wrap gap-x-7 gap-y-3">
           {[
             ["/guide-geo", "Guide du GEO"],
