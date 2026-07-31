@@ -77,10 +77,14 @@ function Accueil() {
             <BlocPreuve />
           </Apparition>
         </section>
-
+        <BandeauConfiance />
         <StatistiqueExergue />
+        <CoutInvisibilite />
         <LaMesure />
+        <ContenuRapport />
         <Offre />
+        <Deroule />
+        <PourQui />
         <Engagement />
         <Faq />
         <AppelFinal />
@@ -89,6 +93,7 @@ function Accueil() {
     </>
   );
 }
+
 
 const NAV = [
   ["/guide-geo", "Guide du GEO"],
@@ -500,7 +505,199 @@ function AppelFinal() {
   );
 }
 
+/* ---------------- Bandeau de confiance ---------------- */
+
+const CONFIANCE = [
+  ["96", "réponses d’IA analysées, une par question et par moteur"],
+  ["90 s", "pour obtenir votre score, sans inscription"],
+  ["J+90", "re-scan offert, mêmes questions, mêmes moteurs"],
+  ["0", "abonnement, 0 engagement, 0 reconduction tacite"],
+];
+
+function BandeauConfiance() {
+  return (
+    <Apparition as="section" className="mt-20 border-y border-rule">
+      <dl className="grid divide-y divide-rule sm:grid-cols-2 sm:divide-y-0 lg:grid-cols-4 lg:divide-x">
+        {CONFIANCE.map(([n, t]) => (
+          <div key={n} className="px-0 py-6 sm:px-6 lg:first:pl-0 lg:last:pr-0">
+            <dt className="font-display text-[38px] font-light leading-none">
+              {n.replace(" ", NBSP)}
+            </dt>
+            <dd className="mt-2 max-w-[28ch] text-[13px] leading-snug text-ink-2">{t}</dd>
+          </div>
+        ))}
+      </dl>
+    </Apparition>
+  );
+}
+
+/* ---------------- Le coût de l’invisibilité ---------------- */
+
+function CoutInvisibilite() {
+  return (
+    <Apparition as="section" className="mt-32">
+      <Label className="pb-4">ce qui se joue</Label>
+      <h2 className="max-w-[20ch] text-balance text-[34px] leading-[1.04] sm:text-[52px]">
+        {frTitre("Une réponse d’IA ne cite jamais dix marques.")}
+      </h2>
+      <div className="mt-10 grid gap-x-16 gap-y-10 lg:grid-cols-[1fr_1fr]">
+        <div className="carte carte-i p-7">
+          <Label>aujourd’hui</Label>
+          <ol className="mt-5 grid gap-3 text-[15px]">
+            {["Concurrent A", "Concurrent B", "Concurrent C"].map((c, i) => (
+              <li key={c} className="flex items-baseline gap-3 border-b border-rule pb-3">
+                <span className="num text-[11px] text-ink-3">{String(i + 1).padStart(2, "0")}</span>
+                <span className="text-ink-2">{c}</span>
+              </li>
+            ))}
+          </ol>
+          <LigneVide legende="votre marque" className="mt-7" />
+        </div>
+        <div className="self-center">
+          <p className="text-[15px] leading-relaxed text-ink-2">
+            {fr(
+              "Le référencement classique vous laissait une chance : la deuxième page, un lien plus bas, une annonce. Un moteur génératif tranche. Il nomme deux ou trois entreprises, et la décision est déjà prise avant que vous soyez consulté.",
+            )}
+          </p>
+          <p className="mt-5 text-[15px] leading-relaxed text-ink-2">
+            {fr(
+              "Un seul dossier signé rembourse le sprint. L’inverse ne se voit jamais : une affaire perdue de cette façon ne laisse aucune trace dans vos statistiques.",
+            )}
+          </p>
+          <div className="mt-8 grid grid-cols-2 gap-6 border-t border-rule pt-6">
+            <div>
+              <Label className="pb-2">coût du sprint</Label>
+              <div className="num text-[22px]">{euros(2900)}</div>
+            </div>
+            <div>
+              <Label className="pb-2">coût d’un scan</Label>
+              <div className="num text-[22px]">0{NBSP}€</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </Apparition>
+  );
+}
+
+/* ---------------- Contenu du rapport ---------------- */
+
+const RAPPORT = [
+  ["Score global", "Un chiffre de 0 à 100, avec son verdict et le détail des quatre composantes."],
+  ["Score par moteur", "ChatGPT, Claude, Gemini et Perplexity notés séparément : ils ne vous voient pas pareil."],
+  ["Part de voix", "Vos mentions rapportées à celles de vos concurrents, question par question."],
+  ["Verbatims", "Les réponses brutes des moteurs, avec les passages qui vous citent — ou pas."],
+  ["Sources citées", "Les pages sur lesquelles les moteurs s’appuient pour recommander vos concurrents."],
+  ["Actions prioritaires", "Ce qu’il faut corriger en premier, classé par impact sur le score."],
+];
+
+function ContenuRapport() {
+  return (
+    <Apparition as="section" className="mt-32">
+      <div className="flex flex-wrap items-baseline justify-between gap-4">
+        <h2 className="text-[34px] leading-none sm:text-[46px]">Ce que contient le rapport</h2>
+        <span className="label-xs">gratuit, envoyé par lien privé</span>
+      </div>
+      <div className="mt-10 grid gap-px border border-rule bg-rule sm:grid-cols-2 lg:grid-cols-3">
+        {RAPPORT.map(([titre, desc], i) => (
+          <div key={titre} className="ligne-i bg-card p-6">
+            <span className="num text-[10px] tracking-[0.14em] text-ink-3">
+              {String(i + 1).padStart(2, "0")}
+            </span>
+            <div className="mt-3 text-[17px] font-medium">{titre}</div>
+            <p className="mt-2 text-[14px] leading-relaxed text-ink-2">{desc}</p>
+          </div>
+        ))}
+      </div>
+    </Apparition>
+  );
+}
+
+/* ---------------- Déroulé du sprint ---------------- */
+
+const ETAPES = [
+  ["J0", "Scan et call de restitution", "On lit le rapport ensemble, 30 minutes. Vous repartez avec le diagnostic, que vous travailliez avec nous ou non."],
+  ["J1 — J7", "Audit et plan de bataille", "Accès des robots d’IA, données structurées, questions perdues : le périmètre exact est arrêté et validé avec vous."],
+  ["J8 — J25", "Production", "Cinq contenus au format réponse directe, publiés. Huit cibles de citation travaillées une à une."],
+  ["J26 — J30", "Livraison", "Rapport de fin de sprint : ce qui a été livré, ce qui reste en cours d’obtention, et pourquoi."],
+  ["J+90", "Re-scan", "Mêmes 24 questions, mêmes moteurs. Comparatif avant/après, sans mise en scène."],
+];
+
+function Deroule() {
+  return (
+    <Apparition as="section" className="mt-32">
+      <h2 className="text-[34px] leading-none sm:text-[46px]">Le déroulé, jour par jour</h2>
+      <ol className="mt-10 border-t border-rule">
+        {ETAPES.map(([jour, titre, desc]) => (
+          <li
+            key={jour}
+            className="ligne-i -mx-3 grid gap-2 border-b border-rule px-3 py-6 md:grid-cols-[110px_minmax(0,26ch)_1fr] md:gap-10"
+          >
+            <span className="num pt-1 text-[11px] tracking-[0.12em] text-bordeaux">
+              {jour.replace(/ /g, NBSP)}
+            </span>
+            <div className="text-[17px] font-medium leading-snug">{titre}</div>
+            <p className="max-w-[58ch] text-[14px] leading-relaxed text-ink-2">{fr(desc)}</p>
+          </li>
+        ))}
+      </ol>
+    </Apparition>
+  );
+}
+
+/* ---------------- Pour qui / pas pour qui ---------------- */
+
+const POUR = [
+  "Vous vendez un service à forte valeur, où une recommandation pèse lourd.",
+  "Vos prospects se renseignent avant de vous appeler.",
+  "Vous avez un site que l’on peut modifier et publier dessus.",
+  "Vous acceptez une mesure honnête, y compris quand elle est mauvaise.",
+];
+
+const PAS_POUR = [
+  "Vous cherchez une garantie de position chiffrée sous 30 jours.",
+  "Vous voulez du volume de contenu plutôt que des réponses utiles.",
+  "Votre marché ne se cherche pas, il se démarche exclusivement.",
+  "Vous ne pouvez rien publier ni modifier sur votre site.",
+];
+
+function PourQui() {
+  return (
+    <Apparition as="section" className="mt-32 border-t border-rule pt-10">
+      <h2 className="text-[34px] leading-none sm:text-[46px]">À qui cela s’adresse</h2>
+      <div className="mt-10 grid gap-10 lg:grid-cols-2 lg:gap-20">
+        <div>
+          <Label className="pb-4">le sprint a du sens si</Label>
+          <ul className="grid gap-4">
+            {POUR.map((t) => (
+              <li key={t} className="flex gap-4 border-b border-rule pb-4 text-[15px] leading-relaxed">
+                <span className="mt-2 h-px w-6 shrink-0 bg-bordeaux" aria-hidden />
+                <span>{fr(t)}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+        <div>
+          <Label className="pb-4">nous vous le déconseillons si</Label>
+          <ul className="grid gap-4">
+            {PAS_POUR.map((t) => (
+              <li
+                key={t}
+                className="flex gap-4 border-b border-rule pb-4 text-[15px] leading-relaxed text-ink-3"
+              >
+                <span className="mt-2 h-px w-6 shrink-0 bg-rule-strong" aria-hidden />
+                <span>{fr(t)}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    </Apparition>
+  );
+}
+
 function PiedDePage() {
+
   return (
     <footer className="mt-28 border-t border-rule py-10">
       <div className="flex flex-wrap items-baseline justify-between gap-x-8 gap-y-6">
