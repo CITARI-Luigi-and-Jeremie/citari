@@ -2,6 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
 
+import { Apparition } from "@/components/apparition";
 import { Btn, Champ, Choix, Etiquette, Field, Label, LigneVide, Rule } from "@/components/kit";
 import { FAQ, LANGUES, METIERS, SECTEURS, VILLES, exemple, type Metier } from "@/data/contenu";
 import { lancerScan } from "@/lib/scan.functions";
@@ -43,58 +44,79 @@ export const Route = createFileRoute("/")({
 
 function Accueil() {
   return (
-    <div className="mx-auto max-w-[1240px] px-6 lg:px-10">
+    <>
       <EnTete />
-
-      {/* Premier écran : titre + formulaire + preuve */}
-      <section className="grid gap-14 pt-10 lg:grid-cols-[1.08fr_0.92fr] lg:gap-20 lg:pt-16">
-        <div>
-          <h1 className="text-[54px] leading-[0.93] sm:text-[72px] lg:text-[86px]">
-            Votre marque est-elle <em className="not-italic text-bordeaux">invisible</em> dans
-            ChatGPT{NBSP}?
-          </h1>
-          <p className="mt-8 max-w-[46ch] text-[17px] leading-relaxed text-ink-2">
-            {fr(
-              "Quand un dirigeant demande conseil à une IA, la réponse cite deux ou trois marques. Il n’y a pas de deuxième page. Si la vôtre n’y figure pas, vous perdez l’affaire sans jamais l’apprendre.",
-            )}
-          </p>
-          <div className="mt-12">
-            <BlocPreuve />
+      <div className="mx-auto max-w-[1240px] px-6 lg:px-10">
+        {/* Premier écran : titre + formulaire + preuve */}
+        <section className="grid gap-16 pt-14 lg:grid-cols-[1.06fr_0.94fr] lg:gap-20 lg:pt-24">
+          <div>
+            <Apparition>
+              <Label>visibilité dans les moteurs génératifs</Label>
+              <h1 className="mt-6 text-balance text-[46px] leading-[0.95] sm:text-[68px] lg:text-[84px]">
+                Votre marque est-elle <em className="not-italic text-bordeaux">invisible</em> dans
+                ChatGPT{NBSP}?
+              </h1>
+            </Apparition>
+            <Apparition delai={90}>
+              <p className="mt-8 max-w-[46ch] text-[16px] leading-[1.72] text-ink-2 sm:text-[17px]">
+                {fr(
+                  "Quand un dirigeant demande conseil à une IA, la réponse cite deux ou trois marques. Il n’y a pas de deuxième page. Si la vôtre n’y figure pas, vous perdez l’affaire sans jamais l’apprendre.",
+                )}
+              </p>
+            </Apparition>
+            <Apparition delai={160} className="mt-14 hidden lg:block">
+              <BlocPreuve />
+            </Apparition>
           </div>
-        </div>
 
-        <div className="lg:pt-3">
-          <Formulaire />
-        </div>
-      </section>
+          <Apparition delai={60} className="lg:pt-2">
+            <Formulaire />
+          </Apparition>
 
-      <StatistiqueExergue />
-      <LaMesure />
-      <Offre />
-      <Engagement />
-      <Faq />
-      <PiedDePage />
-    </div>
+          <Apparition delai={60} className="lg:hidden">
+            <BlocPreuve />
+          </Apparition>
+        </section>
+
+        <StatistiqueExergue />
+        <LaMesure />
+        <Offre />
+        <Engagement />
+        <Faq />
+        <AppelFinal />
+        <PiedDePage />
+      </div>
+    </>
   );
 }
 
+const NAV = [
+  ["/guide-geo", "Guide du GEO"],
+  ["/geo-vs-seo", "GEO vs SEO"],
+  ["/alternatives-agence-seo", "Alternatives"],
+] as const;
+
 function EnTete() {
   return (
-    <header className="flex flex-wrap items-baseline justify-between gap-4 border-b border-rule-strong py-4">
-      <Link to="/" className="font-display text-[22px] leading-none">
-        GEO&nbsp;Sprint
-      </Link>
-      <nav className="flex flex-wrap gap-6">
-        {[
-          ["/guide-geo", "Guide du GEO"],
-          ["/geo-vs-seo", "GEO vs SEO"],
-          ["/alternatives-agence-seo", "Alternatives"],
-        ].map(([to, label]) => (
-          <Link key={to} to={to} className="label-xs hover:text-ink">
-            {label}
-          </Link>
-        ))}
-      </nav>
+    <header className="sticky top-0 z-40 border-b border-rule bg-paper/80 backdrop-blur-md">
+      <div className="mx-auto grid max-w-[1240px] grid-cols-[minmax(0,1fr)_auto] items-center gap-4 px-6 py-4 lg:px-10">
+        <Link
+          to="/"
+          className="truncate font-display text-[21px] leading-none transition-colors duration-300 hover:text-bordeaux"
+        >
+          GEO&nbsp;Sprint
+        </Link>
+        <nav className="flex shrink-0 items-center gap-5 sm:gap-7">
+          {NAV.map(([to, label]) => (
+            <Link key={to} to={to} className="label-xs lien-nav hidden sm:inline-block">
+              {label}
+            </Link>
+          ))}
+          <a href="#scan" className="label-xs lien-nav text-bordeaux sm:hidden">
+            Scan gratuit
+          </a>
+        </nav>
+      </div>
     </header>
   );
 }
@@ -107,18 +129,18 @@ function BlocPreuve() {
   const ex = exemple(metier, ville);
 
   return (
-    <div className="border-t border-rule-strong pt-4">
+    <div className="carte carte-i p-6 sm:p-8">
       <div className="flex flex-wrap items-center gap-2">
         <Etiquette>exemple</Etiquette>
         <Etiquette ton="bordeaux">noms de concurrents fictifs</Etiquette>
       </div>
 
-      <p className="mt-5 font-display text-[30px] leading-tight sm:text-[38px]">
+      <p className="mt-6 font-display text-[27px] leading-[1.2] sm:text-[34px]">
         Je suis{" "}
         <select
           value={metier}
           onChange={(e) => setMetier(e.target.value as Metier)}
-          className="border-b border-bordeaux bg-transparent pb-0.5 font-display text-[30px] text-bordeaux outline-none sm:text-[38px]"
+          className="select-edito font-display text-[27px] sm:text-[34px]"
           aria-label="Choisir un métier"
         >
           {METIERS.map((m) => (
@@ -131,7 +153,7 @@ function BlocPreuve() {
         <select
           value={ville}
           onChange={(e) => setVille(e.target.value)}
-          className="border-b border-bordeaux bg-transparent pb-0.5 font-display text-[30px] text-bordeaux outline-none sm:text-[38px]"
+          className="select-edito font-display text-[27px] sm:text-[34px]"
           aria-label="Choisir une ville"
         >
           {VILLES.map((v) => (
@@ -142,27 +164,31 @@ function BlocPreuve() {
         </select>
       </p>
 
-      <div className="mt-8 grid gap-6 sm:grid-cols-[auto_1fr] sm:gap-8">
+      <div
+        key={`${metier}-${ville}`}
+        className="rise mt-7 grid gap-5 border-t border-rule pt-6 sm:grid-cols-[auto_1fr] sm:gap-x-8 sm:gap-y-6"
+      >
         <Label className="sm:pt-1">question posée</Label>
-        <p className="num text-[14px] leading-snug">{fr(ex.question)}</p>
+        <p className="text-[14px] leading-snug">{fr(ex.question)}</p>
 
         <Label className="sm:pt-1">réponse de l’IA</Label>
         <p className="max-w-[52ch] text-[15px] leading-relaxed text-ink-2">{ex.reponse}</p>
 
         <Label className="sm:pt-1">marques citées</Label>
-        <ol className="num flex flex-wrap gap-x-4 gap-y-1 text-[13px]">
+        <ol className="flex flex-wrap gap-x-5 gap-y-1 text-[14px]">
           {ex.concurrents.map((c, i) => (
             <li key={c}>
-              <span className="text-ink-3">#{i + 1}</span> {c}
+              <span className="num text-[11px] text-ink-3">{String(i + 1).padStart(2, "0")}</span> {c}
             </li>
           ))}
         </ol>
       </div>
 
-      <LigneVide legende="votre marque" className="mt-10" />
+      <LigneVide legende="votre marque" className="mt-9" />
     </div>
   );
 }
+
 
 /* ---------------- Formulaire de scan ---------------- */
 
@@ -205,12 +231,17 @@ function Formulaire() {
   }
 
   return (
-    <form onSubmit={onSubmit} className="carte p-7 sm:p-9">
-      <div className="flex items-baseline justify-between">
-        <h2 className="text-[28px] leading-none">Scan gratuit</h2>
-        <span className="label-xs">sans inscription</span>
+    <form
+      id="scan"
+      onSubmit={onSubmit}
+      className="carte carte-i scroll-mt-24 p-6 sm:p-9"
+    >
+      <div className="flex items-baseline justify-between gap-4">
+        <h2 className="text-[27px] leading-none sm:text-[30px]">Scan gratuit</h2>
+        <span className="label-xs shrink-0">sans inscription</span>
       </div>
-      <Rule className="my-5" strong />
+      <Rule className="my-6" />
+
 
       <div className="grid gap-5">
         <Field label="Marque">
@@ -270,8 +301,11 @@ function Formulaire() {
 
 function StatistiqueExergue() {
   return (
-    <section className="mt-32 grid gap-8 border-t border-rule-strong pt-8 lg:grid-cols-[1fr_260px] lg:gap-20">
-      <p className="font-display text-[40px] leading-[1.06] sm:text-[62px]">
+    <Apparition
+      as="section"
+      className="mt-32 grid gap-8 border-t border-rule pt-10 lg:grid-cols-[1fr_240px] lg:gap-20"
+    >
+      <p className="text-balance font-display text-[34px] font-light leading-[1.1] sm:text-[56px]">
         <span className="num text-bordeaux">46{NBSP}%</span> des utilisateurs d’IA démarrent leur
         recherche d’achat directement sur une IA.
       </p>
@@ -283,7 +317,7 @@ function StatistiqueExergue() {
           <li>Reuters</li>
         </ul>
       </div>
-    </section>
+    </Apparition>
   );
 }
 
@@ -291,23 +325,27 @@ function StatistiqueExergue() {
 
 function LaMesure() {
   return (
-    <section className="mt-28">
-      <h2 className="text-[38px] leading-none sm:text-[48px]">La mesure</h2>
-      <div className="mt-6 flex flex-wrap items-baseline gap-x-8 gap-y-4 border-y border-rule-strong py-6">
-        <span className="num text-[52px] leading-none">24</span>
-        <span className="text-[16px] text-ink-2">questions d’intention d’achat, figées</span>
-        <span className="num text-[52px] leading-none">4</span>
-        <span className="text-[16px] text-ink-2">moteurs : ChatGPT, Claude, Gemini, Perplexity</span>
-        <span className="num text-[52px] leading-none">1</span>
-        <span className="text-[16px] text-ink-2">score de 0 à 100</span>
-      </div>
-      <div className="mt-8 grid gap-x-16 gap-y-6 md:grid-cols-[minmax(0,42ch)_1fr]">
+    <Apparition as="section" className="mt-28">
+      <h2 className="text-[34px] leading-none sm:text-[46px]">La mesure</h2>
+      <dl className="mt-8 grid gap-x-10 gap-y-6 border-y border-rule py-8 sm:grid-cols-3">
+        {[
+          ["24", "questions d’intention d’achat, figées"],
+          ["4", "moteurs : ChatGPT, Claude, Gemini, Perplexity"],
+          ["1", "score de 0 à 100"],
+        ].map(([n, t]) => (
+          <div key={n} className="flex items-baseline gap-4">
+            <dt className="font-display text-[46px] font-light leading-none">{n}</dt>
+            <dd className="max-w-[26ch] text-[14px] leading-snug text-ink-2">{t}</dd>
+          </div>
+        ))}
+      </dl>
+      <div className="mt-10 grid gap-x-16 gap-y-8 md:grid-cols-[minmax(0,42ch)_1fr]">
         <p className="text-[15px] leading-relaxed text-ink-2">
           {fr(
             "L’échantillon se répartit en 40 % de questions comparatives, 25 % de questions problème, 20 % de questions locales et 15 % de questions de confiance. Il est généré une fois, puis figé : le re-scan à J+90 rejoue exactement les mêmes, sinon la comparaison ne vaut rien.",
           )}
         </p>
-        <dl className="grid grid-cols-2 gap-y-4 self-start sm:grid-cols-4">
+        <dl className="grid grid-cols-2 gap-y-6 self-start sm:grid-cols-4">
           {[
             ["taux de mention", "50 %"],
             ["position moyenne", "20 %"],
@@ -316,12 +354,12 @@ function LaMesure() {
           ].map(([k, v]) => (
             <div key={k}>
               <dt className="label-xs">{k}</dt>
-              <dd className="num text-[24px]">{v.replace(" ", NBSP)}</dd>
+              <dd className="num mt-1.5 text-[22px]">{v.replace(" ", NBSP)}</dd>
             </div>
           ))}
         </dl>
       </div>
-    </section>
+    </Apparition>
   );
 }
 
@@ -337,41 +375,48 @@ const LIVRABLES = [
 
 function Offre() {
   return (
-    <section className="mt-32">
-      <h2 className="text-[38px] leading-none sm:text-[48px]">Le Sprint GEO</h2>
-      <div className="mt-8 grid gap-12 lg:grid-cols-[1fr_300px] lg:gap-20">
-        <ol>
+    <Apparition as="section" className="mt-32">
+      <h2 className="text-[34px] leading-none sm:text-[46px]">Le Sprint GEO</h2>
+      <div className="mt-10 grid gap-12 lg:grid-cols-[1fr_320px] lg:gap-20">
+        <ol className="border-t border-rule">
           {LIVRABLES.map(([titre, desc], i) => (
-            <li key={titre} className="grid grid-cols-[28px_1fr] gap-4 border-b border-rule py-4">
-              <span className="num pt-1 text-[11px] text-ink-3">{String(i + 1).padStart(2, "0")}</span>
+            <li
+              key={titre}
+              className="ligne-i -mx-3 grid grid-cols-[30px_1fr] gap-4 border-b border-rule px-3 py-5"
+            >
+              <span className="num pt-1 text-[10px] tracking-[0.14em] text-ink-3">
+                {String(i + 1).padStart(2, "0")}
+              </span>
               <div>
-                <div className="text-[18px] font-medium">{titre}</div>
-                <p className="mt-1 max-w-[54ch] text-[14px] leading-snug text-ink-2">{desc}</p>
+                <div className="text-[17px] font-medium">{titre}</div>
+                <p className="mt-1.5 max-w-[54ch] text-[14px] leading-relaxed text-ink-2">{desc}</p>
               </div>
             </li>
           ))}
         </ol>
 
-        <aside className="carte h-max p-6">
+        <aside className="carte carte-i h-max p-7">
           <Label>mission de 30 jours</Label>
-          <div className="num mt-2 text-[46px] leading-none">{euros(2900)}</div>
-          <p className="mt-3 text-[13px] leading-snug text-ink-2">
+          <div className="mt-3 font-display text-[52px] font-light leading-none">{euros(2900)}</div>
+          <p className="mt-4 text-[13px] leading-relaxed text-ink-2">
             Paiement unique, réparti 50{NBSP}/{NBSP}50 : moitié au lancement, moitié à la livraison.
             Sans abonnement.
           </p>
-          <Rule className="my-5" />
+          <Rule className="my-6" />
           <Label>option</Label>
-          <div className="num mt-1 text-[22px]">Sprint Domination · {euros(4900)}</div>
-          <p className="mt-2 text-[13px] leading-snug text-ink-2">
+          <div className="mt-2 text-[16px] font-medium">
+            Sprint Domination · <span className="num">{euros(4900)}</span>
+          </div>
+          <p className="mt-2 text-[13px] leading-relaxed text-ink-2">
             Périmètre élargi : dix contenus, seize cibles de citation, deux langues.
           </p>
-          <Rule className="my-5" />
-          <p className="text-[13px] leading-snug text-ink-2">
+          <Rule className="my-6" />
+          <p className="text-[13px] leading-relaxed text-ink-2">
             {fr("Le scan et le call de restitution de 30 minutes sont gratuits et sans engagement.")}
           </p>
         </aside>
       </div>
-    </section>
+    </Apparition>
   );
 }
 
@@ -379,7 +424,10 @@ function Offre() {
 
 function Engagement() {
   return (
-    <section className="mt-32 grid gap-10 border-t border-rule-strong pt-8 lg:grid-cols-[minmax(0,34ch)_1fr]">
+    <Apparition
+      as="section"
+      className="mt-32 grid gap-10 border-t border-rule pt-10 lg:grid-cols-[minmax(0,34ch)_1fr]"
+    >
       <div>
         <Label className="pb-3">engagement d’honnêteté</Label>
         <p className="font-display text-[30px] leading-[1.12]">
@@ -399,7 +447,7 @@ function Engagement() {
       <div className="lg:pt-14">
         <LigneVide legende="ce que nous ne promettons pas" />
       </div>
-    </section>
+    </Apparition>
   );
 }
 
@@ -407,26 +455,57 @@ function Engagement() {
 
 function Faq() {
   return (
-    <section className="mt-32">
-      <h2 className="text-[38px] leading-none sm:text-[48px]">Questions fréquentes</h2>
-      <dl className="mt-8 border-t border-rule-strong">
+    <Apparition as="section" className="mt-32">
+      <h2 className="text-[34px] leading-none sm:text-[46px]">Questions fréquentes</h2>
+      <dl className="mt-8 border-t border-rule">
         {FAQ.map((f) => (
-          <div key={f.q} className="grid gap-2 border-b border-rule py-5 md:grid-cols-[minmax(0,34ch)_1fr] md:gap-12">
-            <dt className="text-[17px] font-medium leading-snug">{f.q}</dt>
+          <div
+            key={f.q}
+            className="ligne-i -mx-3 grid gap-2 border-b border-rule px-3 py-6 md:grid-cols-[minmax(0,32ch)_1fr] md:gap-12"
+          >
+            <dt className="text-[16px] font-medium leading-snug">{f.q}</dt>
             <dd className="max-w-[62ch] text-[15px] leading-relaxed text-ink-2">{f.r}</dd>
           </div>
         ))}
       </dl>
-    </section>
+    </Apparition>
+  );
+}
+
+/* ---------------- Appel final ---------------- */
+
+function AppelFinal() {
+  return (
+    <Apparition
+      as="section"
+      className="mt-32 grid items-end gap-8 border-t border-rule pt-10 lg:grid-cols-[1fr_auto] lg:gap-16"
+    >
+      <div>
+        <Label className="pb-4">première étape</Label>
+        <p className="max-w-[24ch] text-balance font-display text-[38px] font-light leading-[1.06] sm:text-[54px]">
+          {frTitre("Commencez par savoir où vous en êtes.")}
+        </p>
+        <p className="mt-5 max-w-[52ch] text-[15px] leading-relaxed text-ink-2">
+          {fr(
+            "Le scan est gratuit, sans inscription et sans relance automatique : 24 questions, 4 moteurs, un score et un rapport complet.",
+          )}
+        </p>
+      </div>
+      <a href="#scan" className="shrink-0">
+        <Btn size="lg" className="w-full sm:w-auto">
+          Lancer le scan gratuit
+        </Btn>
+      </a>
+    </Apparition>
   );
 }
 
 function PiedDePage() {
   return (
-    <footer className="mt-28 border-t border-rule-strong py-8">
-      <div className="flex flex-wrap items-baseline justify-between gap-6">
+    <footer className="mt-28 border-t border-rule py-10">
+      <div className="flex flex-wrap items-baseline justify-between gap-x-8 gap-y-6">
         <span className="font-display text-[20px]">GEO&nbsp;Sprint</span>
-        <nav className="flex flex-wrap gap-6">
+        <nav className="flex flex-wrap gap-x-7 gap-y-3">
           {[
             ["/guide-geo", "Guide du GEO"],
             ["/geo-vs-seo", "GEO vs SEO"],
@@ -434,15 +513,16 @@ function PiedDePage() {
             ["/mentions-legales", "Mentions légales"],
             ["/confidentialite", "Confidentialité"],
           ].map(([to, label]) => (
-            <Link key={to} to={to} className="label-xs hover:text-ink">
+            <Link key={to} to={to} className="label-xs lien-nav">
               {label}
             </Link>
           ))}
         </nav>
       </div>
-      <p className="num mt-6 text-[11px] text-ink-3">
+      <p className="num mt-8 text-[11px] leading-relaxed text-ink-3">
         Mesure par API officielles des éditeurs · aucun scraping des interfaces grand public
       </p>
     </footer>
   );
 }
+
