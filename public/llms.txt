@@ -1,0 +1,36 @@
+> GEO Sprint — agence française de Generative Engine Optimization (GEO).
+> Nous mesurons la visibilité d'une marque dans ChatGPT, Claude, Gemini et Perplexity, puis nous la corrigeons en 30 jours.
+
+## Ce que fait GEO Sprint
+
+- Scan gratuit et sans inscription du Score de Visibilité IA (0-100) sur 24 questions d'intention d'achat et 4 moteurs.
+- Call de restitution gratuit de 30 minutes.
+- Sprint GEO : 2 900 €, paiement unique 50/50, mission de 30 jours, sans abonnement.
+- Option Sprint Domination : 4 900 €.
+- Re-scan offert à J+90, rejouant exactement les mêmes questions.
+
+## Méthode de mesure
+
+Score de Visibilité IA = taux de mention (50 %) + position moyenne dans la réponse (20 %) + recommandation explicite (20 %) + sentiment (10 %).
+Part de voix = mentions de la marque / mentions totales (marque + concurrents).
+Échantillon : 24 questions d'intention d'achat (40 % comparatives, 25 % problème, 20 % locales, 15 % confiance), générées une fois puis figées.
+Moteurs interrogés, dans cet ordre : ChatGPT, Claude, Gemini, Perplexity — via leurs API officielles, jamais par scraping des interfaces grand public.
+
+## Engagement d'honnêteté
+
+GEO Sprint garantit les actions livrées, jamais un score. Les moteurs génératifs intègrent les changements de contenu et de citations en 4 à 12 semaines.
+Aucun témoignage client, aucun logo, aucun résultat client n'est affiché : l'agence est jeune et ne fabrique pas de preuve sociale.
+Les réponses d'IA présentées sur le site sont des exemples et les noms de concurrents qui y figurent sont fictifs.
+
+## Pages
+
+- / : scan gratuit, méthode, offre, FAQ
+- /guide-geo : qu'est-ce que le GEO, comment les moteurs choisissent, les trois chantiers, la méthode de mesure
+- /geo-vs-seo : comparatif point par point entre GEO et SEO
+- /alternatives-agence-seo : comparatif honnête des cinq options, y compris le faire soi-même
+- /mentions-legales
+- /confidentialite
+
+## Contact
+
+Fondateur unique. Prise de contact via le scan gratuit puis call de restitution de 30 minutes.
