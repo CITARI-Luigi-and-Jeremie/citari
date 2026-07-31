@@ -88,14 +88,14 @@ function Attente() {
         GEO Sprint
       </Link>
 
-      <div className="mt-16 flex items-end justify-between gap-6 border-b border-rule-strong pb-4">
-        <div className="num text-[96px] leading-[0.8] sm:text-[150px]">
+      <div className="mt-16 flex items-end justify-between gap-6 border-b border-rule pb-5">
+        <div className="font-display text-[100px] font-light leading-[0.78] tracking-[-0.03em] sm:text-[156px]">
           {etat?.progression ?? 2}
-          <span className="text-[42px]">{NBSP}%</span>
+          <span className="text-[40px] text-ink-3">{NBSP}%</span>
         </div>
         <div className="pb-3 text-right">
           <Label>réponses collectées</Label>
-          <div className="num text-[30px] leading-none">
+          <div className="num mt-1 text-[26px] leading-none">
             {etat?.collectees ?? 0}
             <span className="text-ink-3">/{etat?.total ?? 96}</span>
           </div>
@@ -103,12 +103,13 @@ function Attente() {
       </div>
 
       {/* Filet de progression pleine largeur */}
-      <div className="h-[3px] w-full bg-paper-3">
+      <div className="h-[2px] w-full bg-paper-3">
         <div
-          className="h-[3px] bg-ink transition-[width] duration-200 ease-linear"
+          className="h-[2px] bg-bordeaux transition-[width] duration-500 ease-[cubic-bezier(0.2,0.7,0.2,1)]"
           style={{ width: `${etat?.progression ?? 2}%` }}
         />
       </div>
+
 
       <ol className="mt-10 grid gap-x-10 gap-y-3 sm:grid-cols-4">
         {PHASES.map(([clef, label], i) => {
