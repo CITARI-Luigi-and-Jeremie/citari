@@ -16,6 +16,7 @@ import { Route as ConfidentialiteRouteImport } from './routes/confidentialite'
 import { Route as GeoVsSeoRouteImport } from './routes/geo-vs-seo'
 import { Route as GuideGeoRouteImport } from './routes/guide-geo'
 import { Route as MentionsLegalesRouteImport } from './routes/mentions-legales'
+import { Route as TachesRouteImport } from './routes/taches'
 import { Route as RapportJetonRouteImport } from './routes/rapport.$jeton'
 import { Route as ScanIdRouteImport } from './routes/scan.$id'
 
@@ -54,6 +55,11 @@ const MentionsLegalesRoute = MentionsLegalesRouteImport.update({
   path: '/mentions-legales',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TachesRoute = TachesRouteImport.update({
+  id: '/taches',
+  path: '/taches',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const RapportJetonRoute = RapportJetonRouteImport.update({
   id: '/rapport/$jeton',
   path: '/rapport/$jeton',
@@ -73,6 +79,7 @@ export interface FileRoutesByFullPath {
   '/geo-vs-seo': typeof GeoVsSeoRoute
   '/guide-geo': typeof GuideGeoRoute
   '/mentions-legales': typeof MentionsLegalesRoute
+  '/taches': typeof TachesRoute
   '/rapport/$jeton': typeof RapportJetonRoute
   '/scan/$id': typeof ScanIdRoute
 }
@@ -84,6 +91,7 @@ export interface FileRoutesByTo {
   '/geo-vs-seo': typeof GeoVsSeoRoute
   '/guide-geo': typeof GuideGeoRoute
   '/mentions-legales': typeof MentionsLegalesRoute
+  '/taches': typeof TachesRoute
   '/rapport/$jeton': typeof RapportJetonRoute
   '/scan/$id': typeof ScanIdRoute
 }
@@ -96,6 +104,7 @@ export interface FileRoutesById {
   '/geo-vs-seo': typeof GeoVsSeoRoute
   '/guide-geo': typeof GuideGeoRoute
   '/mentions-legales': typeof MentionsLegalesRoute
+  '/taches': typeof TachesRoute
   '/rapport/$jeton': typeof RapportJetonRoute
   '/scan/$id': typeof ScanIdRoute
 }
@@ -109,6 +118,7 @@ export interface FileRouteTypes {
     | '/geo-vs-seo'
     | '/guide-geo'
     | '/mentions-legales'
+    | '/taches'
     | '/rapport/$jeton'
     | '/scan/$id'
   fileRoutesByTo: FileRoutesByTo
@@ -120,6 +130,7 @@ export interface FileRouteTypes {
     | '/geo-vs-seo'
     | '/guide-geo'
     | '/mentions-legales'
+    | '/taches'
     | '/rapport/$jeton'
     | '/scan/$id'
   id:
@@ -131,6 +142,7 @@ export interface FileRouteTypes {
     | '/geo-vs-seo'
     | '/guide-geo'
     | '/mentions-legales'
+    | '/taches'
     | '/rapport/$jeton'
     | '/scan/$id'
   fileRoutesById: FileRoutesById
@@ -143,6 +155,7 @@ export interface RootRouteChildren {
   GeoVsSeoRoute: typeof GeoVsSeoRoute
   GuideGeoRoute: typeof GuideGeoRoute
   MentionsLegalesRoute: typeof MentionsLegalesRoute
+  TachesRoute: typeof TachesRoute
   RapportJetonRoute: typeof RapportJetonRoute
   ScanIdRoute: typeof ScanIdRoute
 }
@@ -198,6 +211,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MentionsLegalesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/taches': {
+      id: '/taches'
+      path: '/taches'
+      fullPath: '/taches'
+      preLoaderRoute: typeof TachesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/rapport/$jeton': {
       id: '/rapport/$jeton'
       path: '/rapport/$jeton'
@@ -223,6 +243,7 @@ const rootRouteChildren: RootRouteChildren = {
   GeoVsSeoRoute: GeoVsSeoRoute,
   GuideGeoRoute: GuideGeoRoute,
   MentionsLegalesRoute: MentionsLegalesRoute,
+  TachesRoute: TachesRoute,
   RapportJetonRoute: RapportJetonRoute,
   ScanIdRoute: ScanIdRoute,
 }

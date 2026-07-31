@@ -51,6 +51,17 @@
 
   --shadow-soft: var(--elev-1);
   --shadow-lift: var(--elev-2);
+
+  /* Surface « Linear » (to-do) : graphite nuit, accent indigo froid. */
+  --color-lin-bg: var(--lin-bg);
+  --color-lin-panel: var(--lin-panel);
+  --color-lin-panel-2: var(--lin-panel-2);
+  --color-lin-line: var(--lin-line);
+  --color-lin-text: var(--lin-text);
+  --color-lin-text-2: var(--lin-text-2);
+  --color-lin-text-3: var(--lin-text-3);
+  --color-lin-accent: var(--lin-accent);
+  --color-lin-accent-soft: var(--lin-accent-soft);
 }
 
 :root {
@@ -78,6 +89,17 @@
   --elev-2: 0 1px 2px oklch(0.215 0.008 250 / 0.05), 0 22px 48px -24px oklch(0.215 0.008 250 / 0.22);
 
   --radius: 3px;
+
+  /* Palette « Linear » pour la to-do. */
+  --lin-bg: oklch(0.183 0.012 268);
+  --lin-panel: oklch(0.221 0.014 268);
+  --lin-panel-2: oklch(0.262 0.016 268);
+  --lin-line: oklch(0.318 0.016 268);
+  --lin-text: oklch(0.965 0.004 268);
+  --lin-text-2: oklch(0.78 0.012 268);
+  --lin-text-3: oklch(0.63 0.014 268);
+  --lin-accent: oklch(0.66 0.15 279);
+  --lin-accent-soft: oklch(0.66 0.15 279 / 0.16);
 }
 
 @layer base {
