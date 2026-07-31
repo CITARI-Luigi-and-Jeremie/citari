@@ -3,35 +3,32 @@ import logo from "@/assets/citari-logo.png.asset.json";
 import { cn } from "@/lib/utils";
 
 /**
- * Marque Citari — signe + mot.
- * Aucune valeur en dur : couleurs, typographie, écarts et transitions
- * proviennent des variables --marque-* définies dans src/styles.css.
+ * Marque Citari.
+ * Le signe est peint par masque alpha : sa couleur vient de --marque-couleur,
+ * comme tout le reste (hauteur, opacité, écarts, transitions) — voir styles.css.
  */
 export function Logo({
   className,
   hauteur = 20,
-  mot = true,
-  filet = false,
+  point = true,
 }: {
   className?: string;
   hauteur?: number;
-  /** Affiche le mot « Citari » à côté du signe. */
-  mot?: boolean;
-  /** Filet bronze vertical entre le signe et le mot. */
-  filet?: boolean;
+  /** Point bronze final, seul écart de couleur autorisé dans la marque. */
+  point?: boolean;
 }) {
   return (
     <span
+      role="img"
+      aria-label="Citari"
       className={cn("marque", className)}
-      style={{ ["--marque-h" as string]: `${hauteur}px` }}
+      style={{
+        ["--marque-h" as string]: `${hauteur}px`,
+        ["--marque-src" as string]: `url(${logo.url})`,
+      }}
     >
-      <img src={logo.url} alt="Citari" draggable={false} />
-      {filet && mot ? <span aria-hidden="true" className="marque-filet" /> : null}
-      {mot ? (
-        <span aria-hidden="true" className="marque-mot">
-          Citari<span className="marque-point">.</span>
-        </span>
-      ) : null}
+      <span aria-hidden="true" className="marque-signe" />
+      {point ? <span aria-hidden="true" className="marque-point" /> : null}
     </span>
   );
 }
@@ -39,17 +36,15 @@ export function Logo({
 export function LogoLien({
   className,
   hauteur,
-  mot,
-  filet,
+  point,
 }: {
   className?: string;
   hauteur?: number;
-  mot?: boolean;
-  filet?: boolean;
+  point?: boolean;
 }) {
   return (
     <Link to="/" aria-label="Citari — accueil" className={cn("inline-flex items-center", className)}>
-      <Logo hauteur={hauteur} mot={mot} filet={filet} className="marque-i" />
+      <Logo hauteur={hauteur} point={point} className="marque-i" />
     </Link>
   );
 }
