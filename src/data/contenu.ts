@@ -84,8 +84,28 @@ export function exemple(metier: Metier, ville: string) {
 
 export const FAQ = [
   {
-    q: "Qu’est-ce que le GEO exactement ?",
-    r: "Le GEO (Generative Engine Optimization) consiste à faire en sorte qu’une marque soit citée par les IA génératives quand un acheteur leur pose une question d’achat. Là où le SEO vise un classement de liens, le GEO vise une place dans une réponse rédigée qui ne comporte qu’une poignée de noms.",
+    q: "C’est du SEO ?",
+    r: "Non. Le SEO vous place dans une liste de liens. Ici, il s’agit d’être cité dans une réponse rédigée. Les signaux que lisent les IA ne sont pas ceux que lit Google : le travail est différent.",
+  },
+  {
+    q: "Pourquoi maintenant ?",
+    r: "Parce que les places se prennent maintenant. Les modèles apprennent lentement et retiennent longtemps. Ceux qui s’installent aujourd’hui dans les réponses y resteront des années. Ceux qui attendent devront déloger quelqu’un.",
+  },
+  {
+    q: "Vous garantissez un résultat ?",
+    r: "Non, et méfiez-vous de ceux qui le promettent. Nous garantissons des actions précises, listées à l’avance, et une mesure honnête avant/après. Les moteurs mettent 4 à 12 semaines à intégrer les changements.",
+  },
+  {
+    q: "Combien de temps ça me prend, à moi ?",
+    r: "Un call de cadrage d’une heure au départ, un call de validation en cours de route. Le reste, c’est nous.",
+  },
+  {
+    q: "Et si mon site est fait par une agence ?",
+    r: "Nous livrons soit les modifications directement, soit un cahier de spécifications que votre agence applique. Les deux fonctionnent.",
+  },
+  {
+    q: "Vous travaillez avec mes concurrents ?",
+    r: "Un seul client par secteur et par zone. Le premier arrivé bloque la place.",
   },
   {
     q: "Le scan est-il vraiment gratuit et sans inscription ?",
@@ -93,22 +113,6 @@ export const FAQ = [
   },
   {
     q: "Comment le score est-il calculé ?",
-    r: "Sur 100 points : taux de mention pour 50 %, position moyenne dans la réponse pour 20 %, recommandation explicite pour 20 %, sentiment pour 10 %. L’échantillon compte 24 questions d’intention d’achat interrogées sur ChatGPT, Claude, Gemini et Perplexity.",
-  },
-  {
-    q: "Garantissez-vous une amélioration du score ?",
-    r: "Non, et c’est volontaire. Nous garantissons les actions livrées : audit technique, cinq contenus rédigés, huit cibles de citation, rapport de fin de sprint, re-scan à J+90. Les moteurs intègrent les changements en 4 à 12 semaines ; personne ne peut honnêtement garantir un chiffre sur cette fenêtre.",
-  },
-  {
-    q: "Utilisez-vous du scraping de ChatGPT ou de Perplexity ?",
-    r: "Non. Toutes les mesures passent par les API officielles des éditeurs. Cette limite est rappelée dans chaque rapport : les réponses obtenues ne reproduisent pas exactement l’écran d’un utilisateur connecté.",
-  },
-  {
-    q: "Combien coûte le Sprint GEO et comment se passe le paiement ?",
-    r: "2 900 € pour une mission de 30 jours, paiement unique réparti 50 % au lancement et 50 % à la livraison, sans abonnement. L’option Sprint Domination est à 4 900 €.",
-  },
-  {
-    q: "Que se passe-t-il à J+90 ?",
-    r: "Nous rejouons exactement les mêmes 24 questions sur les mêmes moteurs et vous recevez un rapport comparatif avant/après. C’est le seul moyen honnête de mesurer un effet.",
+    r: "Sur 100 points : taux de mention pour 50 %, position moyenne dans la réponse pour 20 %, recommandation explicite pour 20 %, sentiment pour 10 %. L’échantillon compte 24 questions d’intention d’achat interrogées sur ChatGPT, Claude, Gemini et Perplexity, via les API officielles des éditeurs, jamais par scraping.",
   },
 ];
