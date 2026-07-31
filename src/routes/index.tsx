@@ -368,41 +368,48 @@ const LIVRABLES = [
 
 function Offre() {
   return (
-    <section className="mt-32">
-      <h2 className="text-[38px] leading-none sm:text-[48px]">Le Sprint GEO</h2>
-      <div className="mt-8 grid gap-12 lg:grid-cols-[1fr_300px] lg:gap-20">
-        <ol>
+    <Apparition as="section" className="mt-32">
+      <h2 className="text-[34px] leading-none sm:text-[46px]">Le Sprint GEO</h2>
+      <div className="mt-10 grid gap-12 lg:grid-cols-[1fr_320px] lg:gap-20">
+        <ol className="border-t border-rule">
           {LIVRABLES.map(([titre, desc], i) => (
-            <li key={titre} className="grid grid-cols-[28px_1fr] gap-4 border-b border-rule py-4">
-              <span className="num pt-1 text-[11px] text-ink-3">{String(i + 1).padStart(2, "0")}</span>
+            <li
+              key={titre}
+              className="ligne-i -mx-3 grid grid-cols-[30px_1fr] gap-4 border-b border-rule px-3 py-5"
+            >
+              <span className="num pt-1 text-[10px] tracking-[0.14em] text-ink-3">
+                {String(i + 1).padStart(2, "0")}
+              </span>
               <div>
-                <div className="text-[18px] font-medium">{titre}</div>
-                <p className="mt-1 max-w-[54ch] text-[14px] leading-snug text-ink-2">{desc}</p>
+                <div className="text-[17px] font-medium">{titre}</div>
+                <p className="mt-1.5 max-w-[54ch] text-[14px] leading-relaxed text-ink-2">{desc}</p>
               </div>
             </li>
           ))}
         </ol>
 
-        <aside className="carte h-max p-6">
+        <aside className="carte carte-i h-max p-7">
           <Label>mission de 30 jours</Label>
-          <div className="num mt-2 text-[46px] leading-none">{euros(2900)}</div>
-          <p className="mt-3 text-[13px] leading-snug text-ink-2">
+          <div className="mt-3 font-display text-[52px] font-light leading-none">{euros(2900)}</div>
+          <p className="mt-4 text-[13px] leading-relaxed text-ink-2">
             Paiement unique, réparti 50{NBSP}/{NBSP}50 : moitié au lancement, moitié à la livraison.
             Sans abonnement.
           </p>
-          <Rule className="my-5" />
+          <Rule className="my-6" />
           <Label>option</Label>
-          <div className="num mt-1 text-[22px]">Sprint Domination · {euros(4900)}</div>
-          <p className="mt-2 text-[13px] leading-snug text-ink-2">
+          <div className="mt-2 text-[16px] font-medium">
+            Sprint Domination · <span className="num">{euros(4900)}</span>
+          </div>
+          <p className="mt-2 text-[13px] leading-relaxed text-ink-2">
             Périmètre élargi : dix contenus, seize cibles de citation, deux langues.
           </p>
-          <Rule className="my-5" />
-          <p className="text-[13px] leading-snug text-ink-2">
+          <Rule className="my-6" />
+          <p className="text-[13px] leading-relaxed text-ink-2">
             {fr("Le scan et le call de restitution de 30 minutes sont gratuits et sans engagement.")}
           </p>
         </aside>
       </div>
-    </section>
+    </Apparition>
   );
 }
 
