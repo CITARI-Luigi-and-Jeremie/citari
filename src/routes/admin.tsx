@@ -56,7 +56,7 @@ function Page() {
       <div className="mx-auto flex min-h-screen max-w-[420px] flex-col justify-center px-6">
         <h1 className="text-[38px] leading-none">Back-office</h1>
         <form
-          className="mt-8 border-t border-ink pt-6"
+          className="mt-8 border-t border-rule-strong pt-6"
           onSubmit={(e) => {
             e.preventDefault();
             sessionStorage.setItem("geo-admin", motDePasse);
@@ -81,7 +81,7 @@ function Page() {
 
   return (
     <div className="mx-auto max-w-[1240px] px-6 py-10 lg:px-10">
-      <header className="flex items-baseline justify-between border-b border-ink pb-3">
+      <header className="flex items-baseline justify-between border-b border-rule-strong pb-3">
         <h1 className="font-display text-[26px] leading-none">Back-office</h1>
         <button
           className="label-xs hover:text-bordeaux"
@@ -100,7 +100,7 @@ function Page() {
 
       {donnees && (
         <>
-          <dl className="mt-8 grid grid-cols-2 border-t border-ink lg:grid-cols-4">
+          <dl className="mt-8 grid grid-cols-2 border-t border-rule-strong lg:grid-cols-4">
             {[
               ["scans", groupe(donnees.stats.scans)],
               ["prospects", groupe(donnees.stats.leads)],
@@ -121,7 +121,7 @@ function Page() {
           <Section titre="Scans récents">
             <table className="w-full border-collapse text-[13px]">
               <thead>
-                <tr className="border-y border-ink">
+                <tr className="border-y border-rule-strong">
                   {["date", "marque", "secteur", "statut", "score", "rapport"].map((h) => (
                     <th key={h} className="label-xs py-2 pr-4 text-left">
                       {h}
@@ -162,7 +162,7 @@ function Page() {
             ) : (
               <table className="w-full border-collapse text-[13px]">
                 <thead>
-                  <tr className="border-y border-ink">
+                  <tr className="border-y border-rule-strong">
                     {["date", "marque", "contact", "offre", "montant", "facture"].map((h) => (
                       <th key={h} className="label-xs py-2 pr-4 text-left">
                         {h}
@@ -219,7 +219,7 @@ function TableLeads({
   return (
     <table className="w-full border-collapse text-[13px]">
       <thead>
-        <tr className="border-y border-ink">
+        <tr className="border-y border-rule-strong">
           {["date", "email", "marque", "score", "statut", "notes"].map((h) => (
             <th key={h} className="label-xs py-2 pr-4 text-left">
               {h}

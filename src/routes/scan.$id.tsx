@@ -88,14 +88,14 @@ function Attente() {
         GEO Sprint
       </Link>
 
-      <div className="mt-16 flex items-end justify-between gap-6 border-b border-ink pb-4">
-        <div className="num text-[96px] leading-[0.8] sm:text-[150px]">
+      <div className="mt-16 flex items-end justify-between gap-6 border-b border-rule pb-5">
+        <div className="font-display text-[100px] font-light leading-[0.78] tracking-[-0.03em] sm:text-[156px]">
           {etat?.progression ?? 2}
-          <span className="text-[42px]">{NBSP}%</span>
+          <span className="text-[40px] text-ink-3">{NBSP}%</span>
         </div>
         <div className="pb-3 text-right">
           <Label>réponses collectées</Label>
-          <div className="num text-[30px] leading-none">
+          <div className="num mt-1 text-[26px] leading-none">
             {etat?.collectees ?? 0}
             <span className="text-ink-3">/{etat?.total ?? 96}</span>
           </div>
@@ -103,19 +103,20 @@ function Attente() {
       </div>
 
       {/* Filet de progression pleine largeur */}
-      <div className="h-[3px] w-full bg-paper-3">
+      <div className="h-[2px] w-full bg-paper-3">
         <div
-          className="h-[3px] bg-ink transition-[width] duration-200 ease-linear"
+          className="h-[2px] bg-bordeaux transition-[width] duration-500 ease-[cubic-bezier(0.2,0.7,0.2,1)]"
           style={{ width: `${etat?.progression ?? 2}%` }}
         />
       </div>
+
 
       <ol className="mt-10 grid gap-x-10 gap-y-3 sm:grid-cols-4">
         {PHASES.map(([clef, label], i) => {
           const idx = PHASES.findIndex((p) => p[0] === (etat?.phase ?? "init"));
           const etatPhase = i < idx ? "faite" : i === idx ? "encours" : "attente";
           return (
-            <li key={clef} className="border-t border-ink pt-2">
+            <li key={clef} className="border-t border-rule-strong pt-2">
               <div className="num text-[10px] tracking-[0.16em] text-ink-3">
                 {String(i + 1).padStart(2, "0")}
               </div>
@@ -151,15 +152,15 @@ function Attente() {
 
       <div className="mt-16">
         <Label className="pb-3">questions générées</Label>
-        <Rule strong />
+        <Rule />
         {etat?.questions?.length ? (
           <ol>
             {etat.questions.map((q) => (
-              <li key={q.rank} className="rise grid grid-cols-[28px_1fr] gap-3 border-b border-rule py-2">
-                <span className="num pt-0.5 text-[11px] text-ink-3">
+              <li key={q.rank} className="rise grid grid-cols-[32px_1fr] gap-4 border-b border-rule py-2.5">
+                <span className="num pt-1 text-[10px] tracking-[0.14em] text-ink-3">
                   {String(q.rank).padStart(2, "0")}
                 </span>
-                <span className="num text-[13px] leading-snug">{fr(q.text)}</span>
+                <span className="text-[14px] leading-snug text-ink-2">{fr(q.text)}</span>
               </li>
             ))}
           </ol>
@@ -199,15 +200,17 @@ function Teaser({ id }: { id: string }) {
         GEO Sprint
       </Link>
 
-      <header className="mt-14 border-b border-ink pb-6">
+      <header className="mt-14 border-b border-rule pb-8">
         <Label>score de visibilité IA · {data.marque}</Label>
-        <div className="mt-4 flex flex-wrap items-end gap-x-12 gap-y-4">
-          <div className="num text-[120px] leading-[0.78] sm:text-[190px]">{affiche}</div>
-          <div className="pb-4">
-            <div className="font-display text-[44px] leading-none text-bordeaux">
+        <div className="mt-5 flex flex-wrap items-end gap-x-14 gap-y-4">
+          <div className="font-display text-[130px] font-light leading-[0.76] tracking-[-0.03em] sm:text-[196px]">
+            {affiche}
+          </div>
+          <div className="pb-5">
+            <div className="font-display text-[40px] font-light leading-none text-bordeaux">
               {verdict(data.score)}
             </div>
-            <div className="num mt-2 text-[12px] text-ink-3">sur 100</div>
+            <div className="num mt-3 text-[11px] tracking-[0.14em] text-ink-3">sur 100</div>
           </div>
         </div>
       </header>
@@ -227,7 +230,7 @@ function Teaser({ id }: { id: string }) {
         <div>
           <h2 className="text-[30px] leading-none">Ce que l’IA a répondu</h2>
           {data.verbatim ? (
-            <figure className="mt-5 border-t border-ink pt-3">
+            <figure className="mt-5 border-t border-rule-strong pt-3">
               <p className="num text-[12px] text-ink-3">{fr(data.verbatim.question)}</p>
               <blockquote className="mt-3 font-display text-[24px] leading-[1.25]">
                 « {data.verbatim.texte} »
@@ -277,7 +280,7 @@ function Deblocage({ id }: { id: string }) {
   }
 
   return (
-    <section className="mt-20 grid gap-10 border-t border-ink pt-8 lg:grid-cols-[minmax(0,40ch)_1fr] lg:gap-20">
+    <section className="mt-20 grid gap-10 border-t border-rule-strong pt-8 lg:grid-cols-[minmax(0,40ch)_1fr] lg:gap-20">
       <div>
         <h2 className="text-[34px] leading-none">Le rapport complet</h2>
         <p className="mt-4 text-[15px] leading-relaxed text-ink-2">

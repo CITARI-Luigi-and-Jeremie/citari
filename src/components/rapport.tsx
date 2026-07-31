@@ -157,7 +157,7 @@ export function TableauRequetes({
     <div className="overflow-x-auto">
       <table className="w-full border-collapse text-[13px]">
         <thead>
-          <tr className="border-y border-ink">
+          <tr className="border-y border-rule-strong">
             <th className="label-xs w-8 py-2 text-left align-bottom">nº</th>
             <th className="label-xs py-2 text-left align-bottom">question</th>
             <th className="label-xs w-24 py-2 text-left align-bottom">intention</th>
@@ -222,7 +222,7 @@ export function Verbatims({ mentions, marque }: { mentions: Mention[]; marque: s
   return (
     <div className="grid gap-6 md:grid-cols-2">
       {items.map((m) => (
-        <figure key={m.id} className="avoid-break border-t border-ink pt-3">
+        <figure key={m.id} className="avoid-break border-t border-rule-strong pt-3">
           <blockquote className="font-display text-[21px] leading-[1.3]">
             <Surligne texte={m.verbatim ?? ""} marque={m.brand} cible={marque} />
           </blockquote>
@@ -334,7 +334,7 @@ export function Vide({ children }: { children: React.ReactNode }) {
 
 export function LimiteMethodologique() {
   return (
-    <div className="max-w-[62ch] border-t border-ink pt-3">
+    <div className="max-w-[62ch] border-t border-rule-strong pt-3">
       <Etiquette>limite assumée</Etiquette>
       <p className="mt-2 text-[13px] leading-snug text-ink-2">
         Les mesures sont obtenues via les API officielles des quatre moteurs. Elles ne reproduisent pas
