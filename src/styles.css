@@ -207,7 +207,62 @@
   }
 }
 
+/* ——— Logotype : signe + mot, entièrement piloté par les variables --marque-*. ——— */
+@utility marque {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--marque-ecart);
+  color: var(--marque-couleur);
+  opacity: var(--marque-opacite);
+  line-height: 1;
+  user-select: none;
+  transition: opacity var(--marque-transition);
+
+  & img {
+    height: var(--marque-h);
+    width: auto;
+    display: block;
+  }
+}
+
+@utility marque-mot {
+  font-family: var(--marque-mot-famille);
+  font-size: calc(var(--marque-h) * var(--marque-mot-taille));
+  font-weight: var(--marque-mot-graisse);
+  letter-spacing: var(--marque-mot-interlettre);
+  text-transform: var(--marque-mot-casse);
+  line-height: 1;
+  padding-left: 0.02em;
+}
+
+/* Point bronze final : le seul écart de couleur autorisé dans la marque. */
+@utility marque-point {
+  color: var(--marque-accent);
+}
+
+@utility marque-filet {
+  display: block;
+  width: 1px;
+  height: calc(var(--marque-h) * 0.82);
+  background: var(--marque-filet);
+}
+
+@utility marque-i {
+  transition:
+    opacity var(--marque-transition),
+    letter-spacing var(--marque-transition);
+
+  &:hover {
+    opacity: var(--marque-opacite-hover);
+  }
+
+  &:hover .marque-mot {
+    letter-spacing: calc(var(--marque-mot-interlettre) + 0.012em);
+  }
+}
+
 @keyframes geo-rise {
+
   from {
     opacity: 0;
     transform: translateY(10px);
