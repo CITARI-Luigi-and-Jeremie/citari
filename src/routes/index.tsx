@@ -374,17 +374,42 @@ function LaMesure() {
 /* ---------------- Offre ---------------- */
 
 const LIVRABLES = [
-  ["Audit technique", "Accès des robots d’IA, données structurées, pages qui répondent réellement aux questions."],
-  ["Cinq contenus rédigés", "Format réponse directe, publiés sur votre site, sur les questions où vous êtes absent."],
-  ["Huit cibles de citation", "Annuaires, comparateurs et médias sectoriels réellement consultés par les moteurs."],
-  ["Rapport de fin de sprint", "Ce qui a été livré, ce qui reste, et les cibles encore en cours d’obtention."],
-  ["Re-scan à J+90", "Mêmes 24 questions, mêmes moteurs, rapport comparatif avant/après."],
+  [
+    "Nous rendons votre site lisible par les IA.",
+    "La plupart des sites bloquent les robots des IA sans le savoir. Nous ouvrons la porte, nous étiquetons chaque page, nous structurons vos réponses pour qu’une machine puisse les citer.",
+  ],
+  [
+    "Nous créons les pages que les IA citent.",
+    "Comparatifs, alternatives, guides d’achat, questions fréquentes. Des faits, des chiffres, des réponses directes : le seul type de contenu qu’une IA reprend.",
+  ],
+  [
+    "Nous faisons parler de vous ailleurs.",
+    "Une IA ne croit pas ce que vous dites de vous. Elle croit ce que les autres en disent. Annuaires du secteur, presse spécialisée, comparateurs, forums : nous allons chercher les citations là où vos concurrents les ont déjà.",
+  ],
 ];
+
+function Pivot() {
+  return (
+    <Apparition as="section" className="mt-32 border-t border-rule pt-10">
+      <p className="max-w-[22ch] text-balance font-display text-[40px] font-light leading-[1.04] sm:text-[64px]">
+        Le scan vous dit où vous en êtes. Il ne change rien.
+      </p>
+      <p className="mt-6 font-display text-[30px] leading-none text-bordeaux sm:text-[40px]">
+        Le Sprint GEO, si.
+      </p>
+    </Apparition>
+  );
+}
 
 function Offre() {
   return (
-    <Apparition as="section" className="mt-32">
-      <h2 className="text-[34px] leading-none sm:text-[46px]">Le Sprint GEO</h2>
+    <Apparition as="section" className="mt-20">
+      <h2 className="max-w-[18ch] text-balance text-[34px] leading-[1.04] sm:text-[46px]">
+        30 jours pour entrer dans les réponses.
+      </h2>
+      <p className="mt-5 max-w-[46ch] text-[15px] leading-relaxed text-ink-2">
+        Nous ne vous vendons pas un tableau de bord de plus. Nous faisons le travail.
+      </p>
       <div className="mt-10 grid gap-12 lg:grid-cols-[1fr_320px] lg:gap-20">
         <ol className="border-t border-rule">
           {LIVRABLES.map(([titre, desc], i) => (
@@ -397,7 +422,9 @@ function Offre() {
               </span>
               <div>
                 <div className="text-[17px] font-medium">{titre}</div>
-                <p className="mt-1.5 max-w-[54ch] text-[14px] leading-relaxed text-ink-2">{desc}</p>
+                <p className="mt-1.5 max-w-[54ch] text-[14px] leading-relaxed text-ink-2">
+                  {fr(desc)}
+                </p>
               </div>
             </li>
           ))}
@@ -406,9 +433,10 @@ function Offre() {
         <aside className="carte carte-i h-max p-7">
           <Label>mission de 30 jours</Label>
           <div className="mt-3 font-display text-[52px] font-light leading-none">{euros(2900)}</div>
-          <p className="mt-4 text-[13px] leading-relaxed text-ink-2">
-            Paiement unique, réparti 50{NBSP}/{NBSP}50 : moitié au lancement, moitié à la livraison.
-            Sans abonnement.
+          <p className="mt-3 text-[14px] font-medium">Une fois. Pas d’abonnement.</p>
+          <p className="mt-3 text-[13px] leading-relaxed text-ink-2">
+            50{NBSP}% à la commande, 50{NBSP}% à la livraison. Nous garantissons l’exécution
+            intégrale des trois chantiers, détaillée dans un rapport de fin de mission.
           </p>
           <Rule className="my-6" />
           <Label>option</Label>
@@ -419,8 +447,10 @@ function Offre() {
             Périmètre élargi : dix contenus, seize cibles de citation, deux langues.
           </p>
           <Rule className="my-6" />
-          <p className="text-[13px] leading-relaxed text-ink-2">
-            {fr("Le scan et le call de restitution de 30 minutes sont gratuits et sans engagement.")}
+          <Label>disponibilité</Label>
+          <p className="mt-2 text-[13px] leading-relaxed text-ink-2">
+            Trois sprints par mois. Nous n’en prenons pas davantage. Un seul client par secteur et
+            par zone.
           </p>
         </aside>
       </div>
