@@ -51,6 +51,17 @@
 
   --shadow-soft: var(--elev-1);
   --shadow-lift: var(--elev-2);
+
+  /* Surface « Linear » (to-do) : graphite nuit, accent indigo froid. */
+  --color-lin-bg: var(--lin-bg);
+  --color-lin-panel: var(--lin-panel);
+  --color-lin-panel-2: var(--lin-panel-2);
+  --color-lin-line: var(--lin-line);
+  --color-lin-text: var(--lin-text);
+  --color-lin-text-2: var(--lin-text-2);
+  --color-lin-text-3: var(--lin-text-3);
+  --color-lin-accent: var(--lin-accent);
+  --color-lin-accent-soft: var(--lin-accent-soft);
 }
 
 :root {
