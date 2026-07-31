@@ -80,7 +80,7 @@ function Accueil() {
 
 function EnTete() {
   return (
-    <header className="flex flex-wrap items-baseline justify-between gap-4 border-b border-ink py-4">
+    <header className="flex flex-wrap items-baseline justify-between gap-4 border-b border-rule-strong py-4">
       <Link to="/" className="font-display text-[22px] leading-none">
         GEO&nbsp;Sprint
       </Link>
@@ -107,7 +107,7 @@ function BlocPreuve() {
   const ex = exemple(metier, ville);
 
   return (
-    <div className="border-t border-ink pt-4">
+    <div className="border-t border-rule-strong pt-4">
       <div className="flex flex-wrap items-center gap-2">
         <Etiquette>exemple</Etiquette>
         <Etiquette ton="bordeaux">noms de concurrents fictifs</Etiquette>
@@ -205,7 +205,7 @@ function Formulaire() {
   }
 
   return (
-    <form onSubmit={onSubmit} className="border border-ink bg-paper-2/60 p-6 sm:p-8">
+    <form onSubmit={onSubmit} className="carte p-7 sm:p-9">
       <div className="flex items-baseline justify-between">
         <h2 className="text-[28px] leading-none">Scan gratuit</h2>
         <span className="label-xs">sans inscription</span>
@@ -270,7 +270,7 @@ function Formulaire() {
 
 function StatistiqueExergue() {
   return (
-    <section className="mt-32 grid gap-8 border-t border-ink pt-8 lg:grid-cols-[1fr_260px] lg:gap-20">
+    <section className="mt-32 grid gap-8 border-t border-rule-strong pt-8 lg:grid-cols-[1fr_260px] lg:gap-20">
       <p className="font-display text-[40px] leading-[1.06] sm:text-[62px]">
         <span className="num text-bordeaux">46{NBSP}%</span> des utilisateurs d’IA démarrent leur
         recherche d’achat directement sur une IA.
@@ -293,7 +293,7 @@ function LaMesure() {
   return (
     <section className="mt-28">
       <h2 className="text-[38px] leading-none sm:text-[48px]">La mesure</h2>
-      <div className="mt-6 flex flex-wrap items-baseline gap-x-8 gap-y-4 border-y border-ink py-6">
+      <div className="mt-6 flex flex-wrap items-baseline gap-x-8 gap-y-4 border-y border-rule-strong py-6">
         <span className="num text-[52px] leading-none">24</span>
         <span className="text-[16px] text-ink-2">questions d’intention d’achat, figées</span>
         <span className="num text-[52px] leading-none">4</span>
@@ -352,7 +352,7 @@ function Offre() {
           ))}
         </ol>
 
-        <aside className="h-max border border-ink p-6">
+        <aside className="carte h-max p-6">
           <Label>mission de 30 jours</Label>
           <div className="num mt-2 text-[46px] leading-none">{euros(2900)}</div>
           <p className="mt-3 text-[13px] leading-snug text-ink-2">
@@ -379,7 +379,7 @@ function Offre() {
 
 function Engagement() {
   return (
-    <section className="mt-32 grid gap-10 border-t border-ink pt-8 lg:grid-cols-[minmax(0,34ch)_1fr]">
+    <section className="mt-32 grid gap-10 border-t border-rule-strong pt-8 lg:grid-cols-[minmax(0,34ch)_1fr]">
       <div>
         <Label className="pb-3">engagement d’honnêteté</Label>
         <p className="font-display text-[30px] leading-[1.12]">
@@ -409,7 +409,7 @@ function Faq() {
   return (
     <section className="mt-32">
       <h2 className="text-[38px] leading-none sm:text-[48px]">Questions fréquentes</h2>
-      <dl className="mt-8 border-t border-ink">
+      <dl className="mt-8 border-t border-rule-strong">
         {FAQ.map((f) => (
           <div key={f.q} className="grid gap-2 border-b border-rule py-5 md:grid-cols-[minmax(0,34ch)_1fr] md:gap-12">
             <dt className="text-[17px] font-medium leading-snug">{f.q}</dt>
@@ -423,7 +423,7 @@ function Faq() {
 
 function PiedDePage() {
   return (
-    <footer className="mt-28 border-t border-ink py-8">
+    <footer className="mt-28 border-t border-rule-strong py-8">
       <div className="flex flex-wrap items-baseline justify-between gap-6">
         <span className="font-display text-[20px]">GEO&nbsp;Sprint</span>
         <nav className="flex flex-wrap gap-6">

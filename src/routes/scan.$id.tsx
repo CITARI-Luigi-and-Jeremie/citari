@@ -88,7 +88,7 @@ function Attente() {
         GEO Sprint
       </Link>
 
-      <div className="mt-16 flex items-end justify-between gap-6 border-b border-ink pb-4">
+      <div className="mt-16 flex items-end justify-between gap-6 border-b border-rule-strong pb-4">
         <div className="num text-[96px] leading-[0.8] sm:text-[150px]">
           {etat?.progression ?? 2}
           <span className="text-[42px]">{NBSP}%</span>
@@ -115,7 +115,7 @@ function Attente() {
           const idx = PHASES.findIndex((p) => p[0] === (etat?.phase ?? "init"));
           const etatPhase = i < idx ? "faite" : i === idx ? "encours" : "attente";
           return (
-            <li key={clef} className="border-t border-ink pt-2">
+            <li key={clef} className="border-t border-rule-strong pt-2">
               <div className="num text-[10px] tracking-[0.16em] text-ink-3">
                 {String(i + 1).padStart(2, "0")}
               </div>
@@ -199,7 +199,7 @@ function Teaser({ id }: { id: string }) {
         GEO Sprint
       </Link>
 
-      <header className="mt-14 border-b border-ink pb-6">
+      <header className="mt-14 border-b border-rule-strong pb-6">
         <Label>score de visibilité IA · {data.marque}</Label>
         <div className="mt-4 flex flex-wrap items-end gap-x-12 gap-y-4">
           <div className="num text-[120px] leading-[0.78] sm:text-[190px]">{affiche}</div>
@@ -227,7 +227,7 @@ function Teaser({ id }: { id: string }) {
         <div>
           <h2 className="text-[30px] leading-none">Ce que l’IA a répondu</h2>
           {data.verbatim ? (
-            <figure className="mt-5 border-t border-ink pt-3">
+            <figure className="mt-5 border-t border-rule-strong pt-3">
               <p className="num text-[12px] text-ink-3">{fr(data.verbatim.question)}</p>
               <blockquote className="mt-3 font-display text-[24px] leading-[1.25]">
                 « {data.verbatim.texte} »
@@ -277,7 +277,7 @@ function Deblocage({ id }: { id: string }) {
   }
 
   return (
-    <section className="mt-20 grid gap-10 border-t border-ink pt-8 lg:grid-cols-[minmax(0,40ch)_1fr] lg:gap-20">
+    <section className="mt-20 grid gap-10 border-t border-rule-strong pt-8 lg:grid-cols-[minmax(0,40ch)_1fr] lg:gap-20">
       <div>
         <h2 className="text-[34px] leading-none">Le rapport complet</h2>
         <p className="mt-4 text-[15px] leading-relaxed text-ink-2">

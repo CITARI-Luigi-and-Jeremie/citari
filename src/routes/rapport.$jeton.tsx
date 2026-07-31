@@ -100,7 +100,7 @@ function Rapport() {
           </button>
         </div>
         <h1 className="mt-8 text-[64px] leading-[0.92] md:text-[96px]">{marque}</h1>
-        <dl className="mt-6 flex flex-wrap gap-x-10 gap-y-2 border-t border-ink pt-3">
+        <dl className="mt-6 flex flex-wrap gap-x-10 gap-y-2 border-t border-rule-strong pt-3">
           {[
             ["secteur", scan.sector],
             ["site", scan.website_url ?? "—"],
@@ -218,7 +218,7 @@ function Rapport() {
 
           <div className="mt-16 grid gap-8 md:grid-cols-2">
             <LimiteMethodologique />
-            <div className="max-w-[46ch] border-t border-ink pt-3">
+            <div className="max-w-[46ch] border-t border-rule-strong pt-3">
               <Etiquette>engagement</Etiquette>
               <p className="mt-2 text-[13px] leading-snug text-ink-2">
                 {fr(
@@ -232,7 +232,7 @@ function Rapport() {
         </main>
       </div>
 
-      <footer className="mt-24 border-t border-ink pt-4">
+      <footer className="mt-24 border-t border-rule-strong pt-4">
         <p className="num text-[11px] text-ink-3">
           GEO Sprint{NBSP}· rapport {scan.report_token.slice(0, 8)}{NBSP}·{" "}
           {frTitre("mesure par API officielles, sans scraping")}
@@ -250,7 +250,7 @@ function pct(v: unknown) {
 function Section({ id, titre, children }: { id: string; titre: string; children: React.ReactNode }) {
   return (
     <section id={id} className="mb-20 scroll-mt-8">
-      <div className="mb-6 flex items-baseline gap-4 border-b border-ink pb-2">
+      <div className="mb-6 flex items-baseline gap-4 border-b border-rule-strong pb-2">
         <h2 className="text-[34px] leading-none md:text-[42px]">{titre}</h2>
       </div>
       {children}
