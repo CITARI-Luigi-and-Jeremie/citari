@@ -231,7 +231,9 @@ function Teaser({ id }: { id: string }) {
         </div>
 
         <div>
-          <h2 className="text-[30px] leading-none">Ce que l’IA a répondu</h2>
+          <h2 className="text-[30px] leading-none">
+            Voici ce que l’IA a répondu. Mot pour mot.
+          </h2>
           {data.verbatim ? (
             <figure className="mt-5 border-t border-rule-strong pt-3">
               <p className="num text-[12px] text-ink-3">{fr(data.verbatim.question)}</p>
