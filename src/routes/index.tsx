@@ -79,8 +79,9 @@ function Accueil() {
         <BandeauConfiance />
         <StatistiqueExergue />
         <CoutInvisibilite />
+        <ScanRevele />
         <LaMesure />
-        <ContenuRapport />
+        <Pivot />
         <Offre />
         <Deroule />
         <PourQui />
