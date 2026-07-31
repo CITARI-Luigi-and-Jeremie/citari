@@ -287,10 +287,10 @@ function Deblocage({ id }: { id: string }) {
   return (
     <section className="mt-20 grid gap-10 border-t border-rule-strong pt-8 lg:grid-cols-[minmax(0,40ch)_1fr] lg:gap-20">
       <div>
-        <h2 className="text-[34px] leading-none">Le rapport complet</h2>
+        <h2 className="text-[34px] leading-none">Le rapport complet, par email.</h2>
         <p className="mt-4 text-[15px] leading-relaxed text-ink-2">
           {fr(
-            "Tableau requête par requête, verbatims bruts, sources citées par Perplexity pour vos concurrents, et dix actions prioritaires. Accessible par lien, sans compte.",
+            "Le détail moteur par moteur, question par question, les sources qui font gagner vos concurrents, et vos 10 actions prioritaires. Accessible par lien, sans compte.",
           )}
         </p>
       </div>
