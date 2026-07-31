@@ -190,7 +190,7 @@ function BlocPreuve() {
 
         {/* La réponse : trois noms, un classement, rien à lire. */}
         <div className="mt-6 flex items-center gap-2.5">
-          <Logo hauteur={12} point={false} className="opacity-40" />
+          <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-bordeaux" />
           <span className="label-xs">ce que l’IA répond</span>
         </div>
 
