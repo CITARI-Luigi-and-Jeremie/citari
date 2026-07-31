@@ -2,23 +2,54 @@ import { Link } from "@tanstack/react-router";
 import logo from "@/assets/citari-logo.png.asset.json";
 import { cn } from "@/lib/utils";
 
-/** Marque Citari — logotype seul, sans effet, aligné sur la grille typographique. */
-export function Logo({ className, hauteur = 22 }: { className?: string; hauteur?: number }) {
+/**
+ * Marque Citari — signe + mot.
+ * Aucune valeur en dur : couleurs, typographie, écarts et transitions
+ * proviennent des variables --marque-* définies dans src/styles.css.
+ */
+export function Logo({
+  className,
+  hauteur = 20,
+  mot = true,
+  filet = false,
+}: {
+  className?: string;
+  hauteur?: number;
+  /** Affiche le mot « Citari » à côté du signe. */
+  mot?: boolean;
+  /** Filet bronze vertical entre le signe et le mot. */
+  filet?: boolean;
+}) {
   return (
-    <img
-      src={logo.url}
-      alt="Citari"
-      style={{ height: hauteur }}
-      className={cn("w-auto select-none opacity-90 transition-opacity duration-300", className)}
-      draggable={false}
-    />
+    <span
+      className={cn("marque", className)}
+      style={{ ["--marque-h" as string]: `${hauteur}px` }}
+    >
+      <img src={logo.url} alt="Citari" draggable={false} />
+      {filet && mot ? <span aria-hidden="true" className="marque-filet" /> : null}
+      {mot ? (
+        <span aria-hidden="true" className="marque-mot">
+          Citari<span className="marque-point">.</span>
+        </span>
+      ) : null}
+    </span>
   );
 }
 
-export function LogoLien({ className, hauteur }: { className?: string; hauteur?: number }) {
+export function LogoLien({
+  className,
+  hauteur,
+  mot,
+  filet,
+}: {
+  className?: string;
+  hauteur?: number;
+  mot?: boolean;
+  filet?: boolean;
+}) {
   return (
     <Link to="/" aria-label="Citari — accueil" className={cn("inline-flex items-center", className)}>
-      <Logo hauteur={hauteur} className="hover:opacity-100" />
+      <Logo hauteur={hauteur} mot={mot} filet={filet} className="marque-i" />
     </Link>
   );
 }
