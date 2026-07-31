@@ -10,33 +10,128 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AlternativesAgenceSeoRouteImport } from './routes/alternatives-agence-seo'
+import { Route as ConfidentialiteRouteImport } from './routes/confidentialite'
+import { Route as GeoVsSeoRouteImport } from './routes/geo-vs-seo'
+import { Route as GuideGeoRouteImport } from './routes/guide-geo'
+import { Route as MentionsLegalesRouteImport } from './routes/mentions-legales'
+import { Route as RapportJetonRouteImport } from './routes/rapport.$jeton'
+import { Route as ScanIdRouteImport } from './routes/scan.$id'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AlternativesAgenceSeoRoute = AlternativesAgenceSeoRouteImport.update({
+  id: '/alternatives-agence-seo',
+  path: '/alternatives-agence-seo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ConfidentialiteRoute = ConfidentialiteRouteImport.update({
+  id: '/confidentialite',
+  path: '/confidentialite',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GeoVsSeoRoute = GeoVsSeoRouteImport.update({
+  id: '/geo-vs-seo',
+  path: '/geo-vs-seo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GuideGeoRoute = GuideGeoRouteImport.update({
+  id: '/guide-geo',
+  path: '/guide-geo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MentionsLegalesRoute = MentionsLegalesRouteImport.update({
+  id: '/mentions-legales',
+  path: '/mentions-legales',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RapportJetonRoute = RapportJetonRouteImport.update({
+  id: '/rapport/$jeton',
+  path: '/rapport/$jeton',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ScanIdRoute = ScanIdRouteImport.update({
+  id: '/scan/$id',
+  path: '/scan/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/alternatives-agence-seo': typeof AlternativesAgenceSeoRoute
+  '/confidentialite': typeof ConfidentialiteRoute
+  '/geo-vs-seo': typeof GeoVsSeoRoute
+  '/guide-geo': typeof GuideGeoRoute
+  '/mentions-legales': typeof MentionsLegalesRoute
+  '/rapport/$jeton': typeof RapportJetonRoute
+  '/scan/$id': typeof ScanIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/alternatives-agence-seo': typeof AlternativesAgenceSeoRoute
+  '/confidentialite': typeof ConfidentialiteRoute
+  '/geo-vs-seo': typeof GeoVsSeoRoute
+  '/guide-geo': typeof GuideGeoRoute
+  '/mentions-legales': typeof MentionsLegalesRoute
+  '/rapport/$jeton': typeof RapportJetonRoute
+  '/scan/$id': typeof ScanIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/alternatives-agence-seo': typeof AlternativesAgenceSeoRoute
+  '/confidentialite': typeof ConfidentialiteRoute
+  '/geo-vs-seo': typeof GeoVsSeoRoute
+  '/guide-geo': typeof GuideGeoRoute
+  '/mentions-legales': typeof MentionsLegalesRoute
+  '/rapport/$jeton': typeof RapportJetonRoute
+  '/scan/$id': typeof ScanIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/alternatives-agence-seo'
+    | '/confidentialite'
+    | '/geo-vs-seo'
+    | '/guide-geo'
+    | '/mentions-legales'
+    | '/rapport/$jeton'
+    | '/scan/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/alternatives-agence-seo'
+    | '/confidentialite'
+    | '/geo-vs-seo'
+    | '/guide-geo'
+    | '/mentions-legales'
+    | '/rapport/$jeton'
+    | '/scan/$id'
+  id:
+    | '__root__'
+    | '/'
+    | '/alternatives-agence-seo'
+    | '/confidentialite'
+    | '/geo-vs-seo'
+    | '/guide-geo'
+    | '/mentions-legales'
+    | '/rapport/$jeton'
+    | '/scan/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AlternativesAgenceSeoRoute: typeof AlternativesAgenceSeoRoute
+  ConfidentialiteRoute: typeof ConfidentialiteRoute
+  GeoVsSeoRoute: typeof GeoVsSeoRoute
+  GuideGeoRoute: typeof GuideGeoRoute
+  MentionsLegalesRoute: typeof MentionsLegalesRoute
+  RapportJetonRoute: typeof RapportJetonRoute
+  ScanIdRoute: typeof ScanIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,22 +143,68 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/alternatives-agence-seo': {
+      id: '/alternatives-agence-seo'
+      path: '/alternatives-agence-seo'
+      fullPath: '/alternatives-agence-seo'
+      preLoaderRoute: typeof AlternativesAgenceSeoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/confidentialite': {
+      id: '/confidentialite'
+      path: '/confidentialite'
+      fullPath: '/confidentialite'
+      preLoaderRoute: typeof ConfidentialiteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/geo-vs-seo': {
+      id: '/geo-vs-seo'
+      path: '/geo-vs-seo'
+      fullPath: '/geo-vs-seo'
+      preLoaderRoute: typeof GeoVsSeoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/guide-geo': {
+      id: '/guide-geo'
+      path: '/guide-geo'
+      fullPath: '/guide-geo'
+      preLoaderRoute: typeof GuideGeoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/mentions-legales': {
+      id: '/mentions-legales'
+      path: '/mentions-legales'
+      fullPath: '/mentions-legales'
+      preLoaderRoute: typeof MentionsLegalesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/rapport/$jeton': {
+      id: '/rapport/$jeton'
+      path: '/rapport/$jeton'
+      fullPath: '/rapport/$jeton'
+      preLoaderRoute: typeof RapportJetonRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/scan/$id': {
+      id: '/scan/$id'
+      path: '/scan/$id'
+      fullPath: '/scan/$id'
+      preLoaderRoute: typeof ScanIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AlternativesAgenceSeoRoute: AlternativesAgenceSeoRoute,
+  ConfidentialiteRoute: ConfidentialiteRoute,
+  GeoVsSeoRoute: GeoVsSeoRoute,
+  GuideGeoRoute: GuideGeoRoute,
+  MentionsLegalesRoute: MentionsLegalesRoute,
+  RapportJetonRoute: RapportJetonRoute,
+  ScanIdRoute: ScanIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
