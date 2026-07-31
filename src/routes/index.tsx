@@ -2,6 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
 
+import { Apparition } from "@/components/apparition";
 import { Btn, Champ, Choix, Etiquette, Field, Label, LigneVide, Rule } from "@/components/kit";
 import { FAQ, LANGUES, METIERS, SECTEURS, VILLES, exemple, type Metier } from "@/data/contenu";
 import { lancerScan } from "@/lib/scan.functions";
