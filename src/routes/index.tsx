@@ -203,7 +203,7 @@ function BlocPreuve() {
             >
               <span className="num w-6 text-[13px] text-ink-3">{String(i + 1).padStart(2, "0")}</span>
               <span className="min-w-0 flex-1 truncate text-[16px]">{c}</span>
-              <span className="h-px w-8 shrink-0 bg-rule-strong sm:w-14" />
+              <span className="hidden h-px w-14 shrink-0 bg-rule-strong sm:block" />
               <Etiquette>cité</Etiquette>
             </li>
           ))}
@@ -212,7 +212,7 @@ function BlocPreuve() {
             <span className="min-w-0 flex-1 truncate font-display text-[19px] italic text-bordeaux">
               votre marque
             </span>
-            <span className="h-px w-8 shrink-0 bg-bordeaux/40 sm:w-14" />
+            <span className="hidden h-px w-14 shrink-0 bg-bordeaux/40 sm:block" />
             <Etiquette ton="bordeaux">absente</Etiquette>
           </li>
         </ol>
