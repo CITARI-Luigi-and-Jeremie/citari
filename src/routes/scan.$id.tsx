@@ -202,6 +202,9 @@ function Teaser({ id }: { id: string }) {
 
       <header className="mt-14 border-b border-rule pb-8">
         <Label>score de visibilité IA · {data.marque}</Label>
+        <p className="mt-3 text-[15px] text-ink-2">
+          Sur 24 questions posées par vos acheteurs potentiels
+        </p>
         <div className="mt-5 flex flex-wrap items-end gap-x-14 gap-y-4">
           <div className="font-display text-[130px] font-light leading-[0.76] tracking-[-0.03em] sm:text-[196px]">
             {affiche}
@@ -228,7 +231,9 @@ function Teaser({ id }: { id: string }) {
         </div>
 
         <div>
-          <h2 className="text-[30px] leading-none">Ce que l’IA a répondu</h2>
+          <h2 className="text-[30px] leading-none">
+            Voici ce que l’IA a répondu. Mot pour mot.
+          </h2>
           {data.verbatim ? (
             <figure className="mt-5 border-t border-rule-strong pt-3">
               <p className="num text-[12px] text-ink-3">{fr(data.verbatim.question)}</p>
@@ -282,10 +287,10 @@ function Deblocage({ id }: { id: string }) {
   return (
     <section className="mt-20 grid gap-10 border-t border-rule-strong pt-8 lg:grid-cols-[minmax(0,40ch)_1fr] lg:gap-20">
       <div>
-        <h2 className="text-[34px] leading-none">Le rapport complet</h2>
+        <h2 className="text-[34px] leading-none">Le rapport complet, par email.</h2>
         <p className="mt-4 text-[15px] leading-relaxed text-ink-2">
           {fr(
-            "Tableau requête par requête, verbatims bruts, sources citées par Perplexity pour vos concurrents, et dix actions prioritaires. Accessible par lien, sans compte.",
+            "Le détail moteur par moteur, question par question, les sources qui font gagner vos concurrents, et vos 10 actions prioritaires. Accessible par lien, sans compte.",
           )}
         </p>
       </div>

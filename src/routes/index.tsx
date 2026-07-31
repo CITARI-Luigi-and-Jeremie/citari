@@ -53,15 +53,14 @@ function Accueil() {
             <Apparition>
               <Label>visibilité dans les moteurs génératifs</Label>
               <h1 className="mt-6 text-balance text-[46px] leading-[0.95] sm:text-[68px] lg:text-[84px]">
-                Votre marque est-elle <em className="not-italic text-bordeaux">invisible</em> dans
-                ChatGPT{NBSP}?
+                Vos clients ne cherchent plus sur{" "}
+                <em className="not-italic text-ink-3">Google</em>.
               </h1>
             </Apparition>
             <Apparition delai={90}>
-              <p className="mt-8 max-w-[46ch] text-[16px] leading-[1.72] text-ink-2 sm:text-[17px]">
-                {fr(
-                  "Quand un dirigeant demande conseil à une IA, la réponse cite deux ou trois marques. Il n’y a pas de deuxième page. Si la vôtre n’y figure pas, vous perdez l’affaire sans jamais l’apprendre.",
-                )}
+              <p className="mt-8 max-w-[44ch] text-[17px] leading-[1.68] text-ink-2 sm:text-[19px]">
+                Ils demandent à ChatGPT. Et ChatGPT recommande quelqu’un d’autre. Découvrez qui, en
+                90 secondes.
               </p>
             </Apparition>
             <Apparition delai={160} className="mt-14 hidden lg:block">
@@ -80,8 +79,9 @@ function Accueil() {
         <BandeauConfiance />
         <StatistiqueExergue />
         <CoutInvisibilite />
+        <ScanRevele />
         <LaMesure />
-        <ContenuRapport />
+        <Pivot />
         <Offre />
         <Deroule />
         <PourQui />
@@ -291,11 +291,14 @@ function Formulaire() {
       {erreur ? <p className="num mt-5 text-[12px] text-bordeaux">{erreur}</p> : null}
 
       <Btn type="submit" size="lg" className="mt-7 w-full" disabled={envoi}>
-        {envoi ? "Lancement…" : "Mesurer ma visibilité"}
+        {envoi ? "Lancement…" : "Lancer mon scan gratuit"}
       </Btn>
       <p className="mt-4 text-[12px] leading-snug text-ink-3">
+        Gratuit · Sans compte · Sans carte bancaire · Résultat en 90 secondes
+      </p>
+      <p className="mt-2 text-[12px] leading-snug text-ink-3">
         {fr(
-          "Environ 90 secondes. 3 scans par jour et par connexion. Aucune donnée n’est transmise à un tiers en dehors des quatre moteurs interrogés.",
+          "3 scans par jour et par connexion. Aucune donnée n’est transmise à un tiers en dehors des quatre moteurs interrogés.",
         )}
       </p>
     </form>
@@ -371,17 +374,42 @@ function LaMesure() {
 /* ---------------- Offre ---------------- */
 
 const LIVRABLES = [
-  ["Audit technique", "Accès des robots d’IA, données structurées, pages qui répondent réellement aux questions."],
-  ["Cinq contenus rédigés", "Format réponse directe, publiés sur votre site, sur les questions où vous êtes absent."],
-  ["Huit cibles de citation", "Annuaires, comparateurs et médias sectoriels réellement consultés par les moteurs."],
-  ["Rapport de fin de sprint", "Ce qui a été livré, ce qui reste, et les cibles encore en cours d’obtention."],
-  ["Re-scan à J+90", "Mêmes 24 questions, mêmes moteurs, rapport comparatif avant/après."],
+  [
+    "Nous rendons votre site lisible par les IA.",
+    "La plupart des sites bloquent les robots des IA sans le savoir. Nous ouvrons la porte, nous étiquetons chaque page, nous structurons vos réponses pour qu’une machine puisse les citer.",
+  ],
+  [
+    "Nous créons les pages que les IA citent.",
+    "Comparatifs, alternatives, guides d’achat, questions fréquentes. Des faits, des chiffres, des réponses directes : le seul type de contenu qu’une IA reprend.",
+  ],
+  [
+    "Nous faisons parler de vous ailleurs.",
+    "Une IA ne croit pas ce que vous dites de vous. Elle croit ce que les autres en disent. Annuaires du secteur, presse spécialisée, comparateurs, forums : nous allons chercher les citations là où vos concurrents les ont déjà.",
+  ],
 ];
+
+function Pivot() {
+  return (
+    <Apparition as="section" className="mt-32 border-t border-rule pt-10">
+      <p className="max-w-[22ch] text-balance font-display text-[40px] font-light leading-[1.04] sm:text-[64px]">
+        Le scan vous dit où vous en êtes. Il ne change rien.
+      </p>
+      <p className="mt-6 font-display text-[30px] leading-none text-bordeaux sm:text-[40px]">
+        Le Sprint GEO, si.
+      </p>
+    </Apparition>
+  );
+}
 
 function Offre() {
   return (
-    <Apparition as="section" className="mt-32">
-      <h2 className="text-[34px] leading-none sm:text-[46px]">Le Sprint GEO</h2>
+    <Apparition as="section" className="mt-20">
+      <h2 className="max-w-[18ch] text-balance text-[34px] leading-[1.04] sm:text-[46px]">
+        30 jours pour entrer dans les réponses.
+      </h2>
+      <p className="mt-5 max-w-[46ch] text-[15px] leading-relaxed text-ink-2">
+        Nous ne vous vendons pas un tableau de bord de plus. Nous faisons le travail.
+      </p>
       <div className="mt-10 grid gap-12 lg:grid-cols-[1fr_320px] lg:gap-20">
         <ol className="border-t border-rule">
           {LIVRABLES.map(([titre, desc], i) => (
@@ -394,7 +422,9 @@ function Offre() {
               </span>
               <div>
                 <div className="text-[17px] font-medium">{titre}</div>
-                <p className="mt-1.5 max-w-[54ch] text-[14px] leading-relaxed text-ink-2">{desc}</p>
+                <p className="mt-1.5 max-w-[54ch] text-[14px] leading-relaxed text-ink-2">
+                  {fr(desc)}
+                </p>
               </div>
             </li>
           ))}
@@ -403,9 +433,10 @@ function Offre() {
         <aside className="carte carte-i h-max p-7">
           <Label>mission de 30 jours</Label>
           <div className="mt-3 font-display text-[52px] font-light leading-none">{euros(2900)}</div>
-          <p className="mt-4 text-[13px] leading-relaxed text-ink-2">
-            Paiement unique, réparti 50{NBSP}/{NBSP}50 : moitié au lancement, moitié à la livraison.
-            Sans abonnement.
+          <p className="mt-3 text-[14px] font-medium">Une fois. Pas d’abonnement.</p>
+          <p className="mt-3 text-[13px] leading-relaxed text-ink-2">
+            50{NBSP}% à la commande, 50{NBSP}% à la livraison. Nous garantissons l’exécution
+            intégrale des trois chantiers, détaillée dans un rapport de fin de mission.
           </p>
           <Rule className="my-6" />
           <Label>option</Label>
@@ -416,8 +447,10 @@ function Offre() {
             Périmètre élargi : dix contenus, seize cibles de citation, deux langues.
           </p>
           <Rule className="my-6" />
-          <p className="text-[13px] leading-relaxed text-ink-2">
-            {fr("Le scan et le call de restitution de 30 minutes sont gratuits et sans engagement.")}
+          <Label>disponibilité</Label>
+          <p className="mt-2 text-[13px] leading-relaxed text-ink-2">
+            Trois sprints par mois. Nous n’en prenons pas davantage. Un seul client par secteur et
+            par zone.
           </p>
         </aside>
       </div>
@@ -446,6 +479,11 @@ function Engagement() {
         <p className="mt-4 text-[14px] leading-relaxed text-ink-2">
           {fr(
             "Vous ne trouverez sur ce site ni témoignage, ni logo client, ni résultat chiffré présenté comme un cas réel. L’agence est jeune : la crédibilité vient de la clarté de la méthode, pas d’une preuve sociale fabriquée.",
+          )}
+        </p>
+        <p className="mt-6 max-w-[34ch] text-balance font-display text-[26px] leading-[1.15] text-bordeaux">
+          {frTitre(
+            "Si votre score est bon, nous vous le dirons et nous ne vous vendrons rien.",
           )}
         </p>
       </div>
@@ -488,17 +526,17 @@ function AppelFinal() {
       <div>
         <Label className="pb-4">première étape</Label>
         <p className="max-w-[24ch] text-balance font-display text-[38px] font-light leading-[1.06] sm:text-[54px]">
-          {frTitre("Commencez par savoir où vous en êtes.")}
+          {frTitre("Commencez par le scan.")}
         </p>
         <p className="mt-5 max-w-[52ch] text-[15px] leading-relaxed text-ink-2">
           {fr(
-            "Le scan est gratuit, sans inscription et sans relance automatique : 24 questions, 4 moteurs, un score et un rapport complet.",
+            "Il est gratuit, et il vous dira si vous avez un problème. 24 questions, 4 moteurs, un score, un rapport complet.",
           )}
         </p>
       </div>
       <a href="#scan" className="shrink-0">
         <Btn size="lg" className="w-full sm:w-auto">
-          Lancer le scan gratuit
+          Lancer mon scan gratuit
         </Btn>
       </a>
     </Apparition>
@@ -531,18 +569,20 @@ function BandeauConfiance() {
   );
 }
 
-/* ---------------- Le coût de l’invisibilité ---------------- */
+/* ---------------- Le contexte ---------------- */
 
 function CoutInvisibilite() {
   return (
     <Apparition as="section" className="mt-32">
       <Label className="pb-4">ce qui se joue</Label>
-      <h2 className="max-w-[20ch] text-balance text-[34px] leading-[1.04] sm:text-[52px]">
-        {frTitre("Une réponse d’IA ne cite jamais dix marques.")}
+      <h2 className="max-w-[22ch] text-balance text-[34px] leading-[1.04] sm:text-[52px]">
+        {frTitre(
+          "Sur Google, on vous trouve. Dans ChatGPT, on vous recommande — ou pas.",
+        )}
       </h2>
       <div className="mt-10 grid gap-x-16 gap-y-10 lg:grid-cols-[1fr_1fr]">
         <div className="carte carte-i p-7">
-          <Label>aujourd’hui</Label>
+          <Label>la réponse d’une IA</Label>
           <ol className="mt-5 grid gap-3 text-[15px]">
             {["Concurrent A", "Concurrent B", "Concurrent C"].map((c, i) => (
               <li key={c} className="flex items-baseline gap-3 border-b border-rule pb-3">
@@ -556,59 +596,52 @@ function CoutInvisibilite() {
         <div className="self-center">
           <p className="text-[15px] leading-relaxed text-ink-2">
             {fr(
-              "Le référencement classique vous laissait une chance : la deuxième page, un lien plus bas, une annonce. Un moteur génératif tranche. Il nomme deux ou trois entreprises, et la décision est déjà prise avant que vous soyez consulté.",
+              "Un moteur de recherche affiche dix liens et laisse l’acheteur choisir. Une IA donne trois noms. Parfois deux.",
             )}
           </p>
           <p className="mt-5 text-[15px] leading-relaxed text-ink-2">
             {fr(
-              "Un seul dossier signé rembourse le sprint. L’inverse ne se voit jamais : une affaire perdue de cette façon ne laisse aucune trace dans vos statistiques.",
+              "Il n’y a pas de deuxième page. Il n’y a pas de « voir plus de résultats ». Vous êtes dans la réponse, ou vous n’existez pas.",
             )}
           </p>
-          <div className="mt-8 grid grid-cols-2 gap-6 border-t border-rule pt-6">
-            <div>
-              <Label className="pb-2">coût du sprint</Label>
-              <div className="num text-[22px]">{euros(2900)}</div>
-            </div>
-            <div>
-              <Label className="pb-2">coût d’un scan</Label>
-              <div className="num text-[22px]">0{NBSP}€</div>
-            </div>
-          </div>
+          <p className="mt-6 font-display text-[26px] leading-[1.15]">
+            {frTitre("Le référencement vous plaçait dans une liste. L’IA, elle, choisit.")}
+          </p>
         </div>
       </div>
     </Apparition>
   );
 }
 
-/* ---------------- Contenu du rapport ---------------- */
+/* ---------------- Ce que le scan révèle ---------------- */
 
-const RAPPORT = [
-  ["Score global", "Un chiffre de 0 à 100, avec son verdict et le détail des quatre composantes."],
-  ["Score par moteur", "ChatGPT, Claude, Gemini et Perplexity notés séparément : ils ne vous voient pas pareil."],
-  ["Part de voix", "Vos mentions rapportées à celles de vos concurrents, question par question."],
-  ["Verbatims", "Les réponses brutes des moteurs, avec les passages qui vous citent — ou pas."],
-  ["Sources citées", "Les pages sur lesquelles les moteurs s’appuient pour recommander vos concurrents."],
-  ["Actions prioritaires", "Ce qu’il faut corriger en premier, classé par impact sur le score."],
+const REVELE = [
+  "Votre score de visibilité, de 0 à 100, mesuré sur ChatGPT, Claude, Gemini et Perplexity.",
+  "Combien de fois vos concurrents sont cités sur les questions où vous ne l’êtes pas.",
+  "Les phrases exactes que l’IA prononce à votre sujet. Mot pour mot.",
+  "Les sources sur lesquelles elle s’appuie pour recommander vos concurrents plutôt que vous.",
 ];
 
-function ContenuRapport() {
+function ScanRevele() {
   return (
     <Apparition as="section" className="mt-32">
       <div className="flex flex-wrap items-baseline justify-between gap-4">
-        <h2 className="text-[34px] leading-none sm:text-[46px]">Ce que contient le rapport</h2>
-        <span className="label-xs">gratuit, envoyé par lien privé</span>
+        <h2 className="text-[34px] leading-none sm:text-[46px]">Ce que le scan révèle</h2>
+        <span className="label-xs">en 90 secondes, gratuitement</span>
       </div>
-      <div className="mt-10 grid gap-px border border-rule bg-rule sm:grid-cols-2 lg:grid-cols-3">
-        {RAPPORT.map(([titre, desc], i) => (
-          <div key={titre} className="ligne-i bg-card p-6">
-            <span className="num text-[10px] tracking-[0.14em] text-ink-3">
+      <ol className="mt-10 border-t border-rule">
+        {REVELE.map((t, i) => (
+          <li
+            key={t}
+            className="ligne-i -mx-3 grid grid-cols-[30px_1fr] gap-4 border-b border-rule px-3 py-5"
+          >
+            <span className="num pt-1.5 text-[10px] tracking-[0.14em] text-ink-3">
               {String(i + 1).padStart(2, "0")}
             </span>
-            <div className="mt-3 text-[17px] font-medium">{titre}</div>
-            <p className="mt-2 text-[14px] leading-relaxed text-ink-2">{desc}</p>
-          </div>
+            <p className="max-w-[70ch] text-[16px] leading-relaxed sm:text-[18px]">{fr(t)}</p>
+          </li>
         ))}
-      </div>
+      </ol>
     </Apparition>
   );
 }
