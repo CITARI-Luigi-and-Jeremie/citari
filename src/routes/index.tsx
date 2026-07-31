@@ -202,14 +202,14 @@ function BlocPreuve() {
               style={{ ["--delai" as string]: `${i * 60}ms` }}
             >
               <span className="num w-6 text-[13px] text-ink-3">{String(i + 1).padStart(2, "0")}</span>
-              <span className="min-w-0 flex-1 truncate text-[16px]">{c}</span>
+              <span className="min-w-0 flex-1 text-[16px] leading-snug">{c}</span>
               <span className="hidden h-px w-14 shrink-0 bg-rule-strong sm:block" />
               <Etiquette>cité</Etiquette>
             </li>
           ))}
           <li className="mt-1 flex items-center gap-4 rounded-sm border-t border-rule py-4 pr-2">
             <span className="num w-6 text-[13px] text-ink-3">—</span>
-            <span className="min-w-0 flex-1 truncate font-display text-[19px] italic text-bordeaux">
+            <span className="min-w-0 flex-1 font-display text-[19px] italic text-bordeaux">
               votre marque
             </span>
             <span className="hidden h-px w-14 shrink-0 bg-bordeaux/40 sm:block" />
