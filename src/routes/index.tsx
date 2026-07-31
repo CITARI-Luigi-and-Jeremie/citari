@@ -77,10 +77,14 @@ function Accueil() {
             <BlocPreuve />
           </Apparition>
         </section>
-
+        <BandeauConfiance />
         <StatistiqueExergue />
+        <CoutInvisibilite />
         <LaMesure />
+        <ContenuRapport />
         <Offre />
+        <Deroule />
+        <PourQui />
         <Engagement />
         <Faq />
         <AppelFinal />
@@ -89,6 +93,7 @@ function Accueil() {
     </>
   );
 }
+
 
 const NAV = [
   ["/guide-geo", "Guide du GEO"],
