@@ -481,6 +481,11 @@ function Engagement() {
             "Vous ne trouverez sur ce site ni témoignage, ni logo client, ni résultat chiffré présenté comme un cas réel. L’agence est jeune : la crédibilité vient de la clarté de la méthode, pas d’une preuve sociale fabriquée.",
           )}
         </p>
+        <p className="mt-6 max-w-[34ch] text-balance font-display text-[26px] leading-[1.15] text-bordeaux">
+          {frTitre(
+            "Si votre score est bon, nous vous le dirons et nous ne vous vendrons rien.",
+          )}
+        </p>
       </div>
       <div className="lg:pt-14">
         <LigneVide legende="ce que nous ne promettons pas" />
