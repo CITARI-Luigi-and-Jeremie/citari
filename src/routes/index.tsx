@@ -438,17 +438,20 @@ function Engagement() {
 
 function Faq() {
   return (
-    <section className="mt-32">
-      <h2 className="text-[38px] leading-none sm:text-[48px]">Questions fréquentes</h2>
-      <dl className="mt-8 border-t border-rule-strong">
+    <Apparition as="section" className="mt-32">
+      <h2 className="text-[34px] leading-none sm:text-[46px]">Questions fréquentes</h2>
+      <dl className="mt-8 border-t border-rule">
         {FAQ.map((f) => (
-          <div key={f.q} className="grid gap-2 border-b border-rule py-5 md:grid-cols-[minmax(0,34ch)_1fr] md:gap-12">
-            <dt className="text-[17px] font-medium leading-snug">{f.q}</dt>
+          <div
+            key={f.q}
+            className="ligne-i -mx-3 grid gap-2 border-b border-rule px-3 py-6 md:grid-cols-[minmax(0,32ch)_1fr] md:gap-12"
+          >
+            <dt className="text-[16px] font-medium leading-snug">{f.q}</dt>
             <dd className="max-w-[62ch] text-[15px] leading-relaxed text-ink-2">{f.r}</dd>
           </div>
         ))}
       </dl>
-    </section>
+    </Apparition>
   );
 }
 
