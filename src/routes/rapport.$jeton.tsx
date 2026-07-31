@@ -1,4 +1,5 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+import { LogoLien } from "@/components/logo";
 import { chargerRapport } from "@/lib/scan.functions";
 import { Etiquette, Label, Rule } from "@/components/kit";
 import {
@@ -88,9 +89,7 @@ function Rapport() {
       {/* En-tête éditorial, calé à gauche */}
       <header className="pt-14 md:pt-20">
         <div className="flex items-baseline justify-between gap-6">
-          <Link to="/" className="label-xs no-print">
-            Citari
-          </Link>
+          <LogoLien hauteur={18} className="no-print" />
           <button
             type="button"
             onClick={() => window.print()}

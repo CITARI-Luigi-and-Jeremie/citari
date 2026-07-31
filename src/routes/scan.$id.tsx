@@ -1,4 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { LogoLien } from "@/components/logo";
 import { useServerFn } from "@tanstack/react-start";
 import { useCallback, useEffect, useRef, useState } from "react";
 
@@ -84,9 +85,7 @@ function Attente() {
 
   return (
     <div className="mx-auto max-w-[1000px] px-6 py-16 lg:px-10">
-      <Link to="/" className="label-xs">
-        Citari
-      </Link>
+      <LogoLien hauteur={18} />
 
       <div className="mt-16 flex items-end justify-between gap-6 border-b border-rule pb-5">
         <div className="font-display text-[100px] font-light leading-[0.78] tracking-[-0.03em] sm:text-[156px]">
@@ -196,9 +195,7 @@ function Teaser({ id }: { id: string }) {
 
   return (
     <div className="mx-auto max-w-[1080px] px-6 py-16 lg:px-10">
-      <Link to="/" className="label-xs">
-        Citari
-      </Link>
+      <LogoLien hauteur={18} />
 
       <header className="mt-14 border-b border-rule pb-8">
         <Label>score de visibilité IA · {data.marque}</Label>
