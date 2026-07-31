@@ -433,7 +433,7 @@ function Engagement() {
       <div className="lg:pt-14">
         <LigneVide legende="ce que nous ne promettons pas" />
       </div>
-    </section>
+    </Apparition>
   );
 }
 
