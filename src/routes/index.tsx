@@ -452,12 +452,40 @@ function Faq() {
   );
 }
 
+/* ---------------- Appel final ---------------- */
+
+function AppelFinal() {
+  return (
+    <Apparition
+      as="section"
+      className="mt-32 grid items-end gap-8 border-t border-rule pt-10 lg:grid-cols-[1fr_auto] lg:gap-16"
+    >
+      <div>
+        <Label className="pb-4">première étape</Label>
+        <p className="max-w-[24ch] text-balance font-display text-[38px] font-light leading-[1.06] sm:text-[54px]">
+          {frTitre("Commencez par savoir où vous en êtes.")}
+        </p>
+        <p className="mt-5 max-w-[52ch] text-[15px] leading-relaxed text-ink-2">
+          {fr(
+            "Le scan est gratuit, sans inscription et sans relance automatique : 24 questions, 4 moteurs, un score et un rapport complet.",
+          )}
+        </p>
+      </div>
+      <a href="#scan" className="shrink-0">
+        <Btn size="lg" className="w-full sm:w-auto">
+          Lancer le scan gratuit
+        </Btn>
+      </a>
+    </Apparition>
+  );
+}
+
 function PiedDePage() {
   return (
-    <footer className="mt-28 border-t border-rule-strong py-8">
-      <div className="flex flex-wrap items-baseline justify-between gap-6">
+    <footer className="mt-28 border-t border-rule py-10">
+      <div className="flex flex-wrap items-baseline justify-between gap-x-8 gap-y-6">
         <span className="font-display text-[20px]">GEO&nbsp;Sprint</span>
-        <nav className="flex flex-wrap gap-6">
+        <nav className="flex flex-wrap gap-x-7 gap-y-3">
           {[
             ["/guide-geo", "Guide du GEO"],
             ["/geo-vs-seo", "GEO vs SEO"],
@@ -465,15 +493,16 @@ function PiedDePage() {
             ["/mentions-legales", "Mentions légales"],
             ["/confidentialite", "Confidentialité"],
           ].map(([to, label]) => (
-            <Link key={to} to={to} className="label-xs hover:text-ink">
+            <Link key={to} to={to} className="label-xs lien-nav">
               {label}
             </Link>
           ))}
         </nav>
       </div>
-      <p className="num mt-6 text-[11px] text-ink-3">
+      <p className="num mt-8 text-[11px] leading-relaxed text-ink-3">
         Mesure par API officielles des éditeurs · aucun scraping des interfaces grand public
       </p>
     </footer>
   );
 }
+
