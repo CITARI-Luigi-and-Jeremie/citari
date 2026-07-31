@@ -526,17 +526,17 @@ function AppelFinal() {
       <div>
         <Label className="pb-4">première étape</Label>
         <p className="max-w-[24ch] text-balance font-display text-[38px] font-light leading-[1.06] sm:text-[54px]">
-          {frTitre("Commencez par savoir où vous en êtes.")}
+          {frTitre("Commencez par le scan.")}
         </p>
         <p className="mt-5 max-w-[52ch] text-[15px] leading-relaxed text-ink-2">
           {fr(
-            "Le scan est gratuit, sans inscription et sans relance automatique : 24 questions, 4 moteurs, un score et un rapport complet.",
+            "Il est gratuit, et il vous dira si vous avez un problème. 24 questions, 4 moteurs, un score, un rapport complet.",
           )}
         </p>
       </div>
       <a href="#scan" className="shrink-0">
         <Btn size="lg" className="w-full sm:w-auto">
-          Lancer le scan gratuit
+          Lancer mon scan gratuit
         </Btn>
       </a>
     </Apparition>
