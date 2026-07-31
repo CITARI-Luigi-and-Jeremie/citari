@@ -300,6 +300,54 @@
   }
 }
 
+/* COUCHE 2 — grain de papier : bruit SVG inline, fixe, imperceptible. */
+@utility grain {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  opacity: var(--grain-opacity);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 240px 240px;
+}
+
+/* COUCHE 3 — champ de texte derrière le hero. */
+@utility champ-texte {
+  position: absolute;
+  inset: -2rem -1rem auto -1rem;
+  height: calc(100% + 4rem);
+  overflow: hidden;
+  z-index: 0;
+  pointer-events: none;
+  user-select: none;
+  color: var(--ink);
+  opacity: var(--champ-opacity);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  line-height: 1.32;
+  text-align: justify;
+  hyphens: auto;
+  columns: 2;
+  column-gap: 2.5rem;
+  mask-image:
+    radial-gradient(120% 90% at 50% 45%, transparent 0%, transparent 34%, black 78%),
+    linear-gradient(to right, transparent, black 12%, black 88%, transparent),
+    linear-gradient(to bottom, transparent, black 14%, black 82%, transparent);
+  mask-composite: intersect;
+  -webkit-mask-image:
+    radial-gradient(120% 90% at 50% 45%, transparent 0%, transparent 34%, black 78%),
+    linear-gradient(to right, transparent, black 12%, black 88%, transparent),
+    linear-gradient(to bottom, transparent, black 14%, black 82%, transparent);
+  -webkit-mask-composite: source-in;
+}
+
+@media (max-width: 640px) {
+  .champ-texte {
+    columns: 1;
+  }
+}
+
 
 @media print {
   body {
