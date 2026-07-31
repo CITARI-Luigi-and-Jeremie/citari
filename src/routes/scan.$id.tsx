@@ -152,15 +152,15 @@ function Attente() {
 
       <div className="mt-16">
         <Label className="pb-3">questions générées</Label>
-        <Rule strong />
+        <Rule />
         {etat?.questions?.length ? (
           <ol>
             {etat.questions.map((q) => (
-              <li key={q.rank} className="rise grid grid-cols-[28px_1fr] gap-3 border-b border-rule py-2">
-                <span className="num pt-0.5 text-[11px] text-ink-3">
+              <li key={q.rank} className="rise grid grid-cols-[32px_1fr] gap-4 border-b border-rule py-2.5">
+                <span className="num pt-1 text-[10px] tracking-[0.14em] text-ink-3">
                   {String(q.rank).padStart(2, "0")}
                 </span>
-                <span className="num text-[13px] leading-snug">{fr(q.text)}</span>
+                <span className="text-[14px] leading-snug text-ink-2">{fr(q.text)}</span>
               </li>
             ))}
           </ol>
