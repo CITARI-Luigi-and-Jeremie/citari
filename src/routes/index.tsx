@@ -129,31 +129,30 @@ function EnTete() {
 /* ---------------- Bloc de preuve interactif ---------------- */
 
 function PilulePreuve({
-  legende,
   valeur,
   onChange,
   options,
+  aria,
 }: {
-  legende: string;
   valeur: string;
   onChange: (v: string) => void;
   options: readonly string[];
+  aria: string;
 }) {
   return (
-    <label className="group relative inline-flex min-w-0 items-center gap-2 rounded-full border border-rule-strong bg-paper-2 py-2 pl-3.5 pr-9 transition-colors duration-300 hover:border-bordeaux/50 focus-within:border-bordeaux">
-      <span className="label-xs shrink-0">{legende}</span>
-      <span className="truncate text-[14px]">{valeur}</span>
+    <span className="group relative inline-flex max-w-full items-center gap-1.5 rounded-full border border-bordeaux/35 bg-paper px-3 py-1 align-middle transition-colors duration-300 hover:border-bordeaux focus-within:border-bordeaux">
+      <span className="truncate text-[15px] text-bordeaux sm:text-[16px]">{valeur}</span>
       <svg
         aria-hidden="true"
         viewBox="0 0 12 12"
-        className="pointer-events-none absolute right-3.5 h-3 w-3 text-ink-3 transition-transform duration-300 group-hover:translate-y-px"
+        className="h-2.5 w-2.5 shrink-0 text-bordeaux/70 transition-transform duration-300 group-hover:translate-y-px"
       >
-        <path d="M2 4.5 6 8.5 10 4.5" fill="none" stroke="currentColor" strokeWidth="1.4" />
+        <path d="M2 4.5 6 8.5 10 4.5" fill="none" stroke="currentColor" strokeWidth="1.6" />
       </svg>
       <select
         value={valeur}
         onChange={(e) => onChange(e.target.value)}
-        aria-label={legende}
+        aria-label={aria}
         className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
       >
         {options.map((o) => (
@@ -162,7 +161,18 @@ function PilulePreuve({
           </option>
         ))}
       </select>
-    </label>
+    </span>
+  );
+}
+
+function Etape({ n, titre }: { n: string; titre: string }) {
+  return (
+    <div className="flex items-center gap-3">
+      <span className="num flex h-5 w-5 items-center justify-center rounded-full border border-rule-strong text-[10px] text-ink-3">
+        {n}
+      </span>
+      <span className="label-xs">{titre}</span>
+    </div>
   );
 }
 
@@ -173,57 +183,63 @@ function BlocPreuve() {
 
   return (
     <div className="carte carte-i overflow-hidden">
-      {/* Barre de réglage : deux choix, rien d'autre. */}
-      <div className="flex flex-wrap items-center gap-2 border-b border-rule bg-paper-2/60 px-5 py-4 sm:px-7">
-        <span className="label-xs mr-1 w-full sm:w-auto">exemple</span>
-        <PilulePreuve legende="métier" valeur={metier} options={METIERS} onChange={(v) => setMetier(v as Metier)} />
-        <PilulePreuve legende="ville" valeur={ville} options={VILLES} onChange={setVille} />
+      {/* Réglage : une phrase, deux mots à changer. */}
+      <div className="border-b border-rule bg-paper-2/60 px-5 py-4 sm:px-7">
+        <span className="label-xs">démonstration</span>
+        <p className="mt-2 text-[15px] leading-relaxed text-ink-2 sm:text-[16px]">
+          Je suis{" "}
+          <PilulePreuve
+            aria="métier"
+            valeur={metier}
+            options={METIERS}
+            onChange={(v) => setMetier(v as Metier)}
+          />{" "}
+          à{" "}
+          <PilulePreuve aria="ville" valeur={ville} options={VILLES} onChange={setVille} />
+        </p>
       </div>
 
       <div key={`${metier}-${ville}`} className="rise px-5 py-6 sm:px-7 sm:py-8">
-        {/* La question, telle qu'un client la pose. */}
-        <div className="flex justify-end">
-          <p className="max-w-[36ch] rounded-lg rounded-br-sm bg-ink px-4 py-3 text-[14px] leading-snug text-paper">
+        <Etape n="1" titre="votre client demande à ChatGPT" />
+        <div className="mt-3 flex justify-end">
+          <p className="max-w-[36ch] rounded-xl rounded-br-sm bg-ink px-4 py-3 text-[14px] leading-snug text-paper">
             {fr(ex.question)}
           </p>
         </div>
 
-        {/* La réponse : trois noms, un classement, rien à lire. */}
-        <div className="mt-6 flex items-center gap-2.5">
-          <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-bordeaux" />
-          <span className="label-xs">ce que l’IA répond</span>
+        <div className="mt-8">
+          <Etape n="2" titre="ChatGPT répond" />
         </div>
 
-        <ol className="mt-4 space-y-px">
+        <ol className="mt-4 overflow-hidden rounded-lg border border-rule">
           {ex.concurrents.map((c, i) => (
             <li
               key={c}
-              className="ligne-i flex items-center gap-4 rounded-sm py-3 pr-2"
+              className="flex items-center gap-3 border-b border-rule bg-paper-2/40 px-4 py-3.5"
               style={{ ["--delai" as string]: `${i * 60}ms` }}
             >
-              <span className="num w-6 text-[13px] text-ink-3">{String(i + 1).padStart(2, "0")}</span>
+              <span className="num w-5 shrink-0 text-[12px] text-ink-3">{String(i + 1).padStart(2, "0")}</span>
               <span className="min-w-0 flex-1 text-[16px] leading-snug">{c}</span>
-              <span className="hidden h-px w-14 shrink-0 bg-rule-strong sm:block" />
-              <Etiquette>cité</Etiquette>
+              <span className="label-xs shrink-0 text-ink-3">cité</span>
             </li>
           ))}
-          <li className="mt-1 flex items-center gap-4 rounded-sm border-t border-rule py-4 pr-2">
-            <span className="num w-6 text-[13px] text-ink-3">—</span>
-            <span className="min-w-0 flex-1 font-display text-[19px] italic text-bordeaux">
+          <li className="flex items-center gap-3 border-l-2 border-l-bordeaux bg-bordeaux/[0.06] px-4 py-4">
+            <span className="num w-5 shrink-0 text-[12px] text-bordeaux/60">—</span>
+            <span className="min-w-0 flex-1 font-display text-[20px] italic leading-tight text-bordeaux">
               votre marque
             </span>
-            <span className="hidden h-px w-14 shrink-0 bg-bordeaux/40 sm:block" />
             <Etiquette ton="bordeaux">absente</Etiquette>
           </li>
         </ol>
 
-        <p className="mt-6 text-[13px] leading-relaxed text-ink-3">
+        <p className="mt-5 text-[13px] leading-relaxed text-ink-3">
           {fr("Exemple illustratif : les noms sont fictifs. Votre scan utilise vos vrais concurrents.")}
         </p>
       </div>
     </div>
   );
 }
+
 
 
 
