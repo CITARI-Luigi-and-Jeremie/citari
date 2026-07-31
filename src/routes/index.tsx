@@ -231,12 +231,17 @@ function Formulaire() {
   }
 
   return (
-    <form onSubmit={onSubmit} className="carte p-7 sm:p-9">
-      <div className="flex items-baseline justify-between">
-        <h2 className="text-[28px] leading-none">Scan gratuit</h2>
-        <span className="label-xs">sans inscription</span>
+    <form
+      id="scan"
+      onSubmit={onSubmit}
+      className="carte carte-i scroll-mt-24 p-6 sm:p-9"
+    >
+      <div className="flex items-baseline justify-between gap-4">
+        <h2 className="text-[27px] leading-none sm:text-[30px]">Scan gratuit</h2>
+        <span className="label-xs shrink-0">sans inscription</span>
       </div>
-      <Rule className="my-5" strong />
+      <Rule className="my-6" />
+
 
       <div className="grid gap-5">
         <Field label="Marque">
