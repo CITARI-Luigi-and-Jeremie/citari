@@ -410,7 +410,10 @@ function Offre() {
 
 function Engagement() {
   return (
-    <section className="mt-32 grid gap-10 border-t border-rule-strong pt-8 lg:grid-cols-[minmax(0,34ch)_1fr]">
+    <Apparition
+      as="section"
+      className="mt-32 grid gap-10 border-t border-rule pt-10 lg:grid-cols-[minmax(0,34ch)_1fr]"
+    >
       <div>
         <Label className="pb-3">engagement d’honnêteté</Label>
         <p className="font-display text-[30px] leading-[1.12]">
