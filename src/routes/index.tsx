@@ -128,71 +128,103 @@ function EnTete() {
 
 /* ---------------- Bloc de preuve interactif ---------------- */
 
+function PilulePreuve({
+  legende,
+  valeur,
+  onChange,
+  options,
+}: {
+  legende: string;
+  valeur: string;
+  onChange: (v: string) => void;
+  options: readonly string[];
+}) {
+  return (
+    <label className="group relative inline-flex min-w-0 items-center gap-2 rounded-full border border-rule-strong bg-paper-2 py-2 pl-3.5 pr-9 transition-colors duration-300 hover:border-bordeaux/50 focus-within:border-bordeaux">
+      <span className="label-xs shrink-0">{legende}</span>
+      <span className="truncate text-[14px]">{valeur}</span>
+      <svg
+        aria-hidden="true"
+        viewBox="0 0 12 12"
+        className="pointer-events-none absolute right-3.5 h-3 w-3 text-ink-3 transition-transform duration-300 group-hover:translate-y-px"
+      >
+        <path d="M2 4.5 6 8.5 10 4.5" fill="none" stroke="currentColor" strokeWidth="1.4" />
+      </svg>
+      <select
+        value={valeur}
+        onChange={(e) => onChange(e.target.value)}
+        aria-label={legende}
+        className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
+      >
+        {options.map((o) => (
+          <option key={o} value={o}>
+            {o}
+          </option>
+        ))}
+      </select>
+    </label>
+  );
+}
+
 function BlocPreuve() {
   const [metier, setMetier] = useState<Metier>(METIERS[0]);
   const [ville, setVille] = useState<string>(VILLES[0]);
   const ex = exemple(metier, ville);
 
   return (
-    <div className="carte carte-i p-6 sm:p-8">
-      <div className="flex flex-wrap items-center gap-2">
-        <Etiquette>exemple</Etiquette>
-        <Etiquette ton="bordeaux">noms de concurrents fictifs</Etiquette>
+    <div className="carte carte-i overflow-hidden">
+      {/* Barre de réglage : deux choix, rien d'autre. */}
+      <div className="flex flex-wrap items-center gap-2 border-b border-rule bg-paper-2/60 px-5 py-4 sm:px-7">
+        <span className="label-xs mr-1 w-full sm:w-auto">exemple</span>
+        <PilulePreuve legende="métier" valeur={metier} options={METIERS} onChange={(v) => setMetier(v as Metier)} />
+        <PilulePreuve legende="ville" valeur={ville} options={VILLES} onChange={setVille} />
       </div>
 
-      <p className="mt-6 font-display text-[27px] leading-[1.2] sm:text-[34px]">
-        Je suis{" "}
-        <select
-          value={metier}
-          onChange={(e) => setMetier(e.target.value as Metier)}
-          className="select-edito font-display text-[27px] sm:text-[34px]"
-          aria-label="Choisir un métier"
-        >
-          {METIERS.map((m) => (
-            <option key={m} value={m}>
-              {m}
-            </option>
-          ))}
-        </select>{" "}
-        à{" "}
-        <select
-          value={ville}
-          onChange={(e) => setVille(e.target.value)}
-          className="select-edito font-display text-[27px] sm:text-[34px]"
-          aria-label="Choisir une ville"
-        >
-          {VILLES.map((v) => (
-            <option key={v} value={v}>
-              {v}
-            </option>
-          ))}
-        </select>
-      </p>
+      <div key={`${metier}-${ville}`} className="rise px-5 py-6 sm:px-7 sm:py-8">
+        {/* La question, telle qu'un client la pose. */}
+        <div className="flex justify-end">
+          <p className="max-w-[36ch] rounded-lg rounded-br-sm bg-ink px-4 py-3 text-[14px] leading-snug text-paper">
+            {fr(ex.question)}
+          </p>
+        </div>
 
-      <div
-        key={`${metier}-${ville}`}
-        className="rise mt-7 grid gap-5 border-t border-rule pt-6 sm:grid-cols-[auto_1fr] sm:gap-x-8 sm:gap-y-6"
-      >
-        <Label className="sm:pt-1">question posée</Label>
-        <p className="text-[14px] leading-snug">{fr(ex.question)}</p>
+        {/* La réponse : trois noms, un classement, rien à lire. */}
+        <div className="mt-6 flex items-center gap-2.5">
+          <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-bordeaux" />
+          <span className="label-xs">ce que l’IA répond</span>
+        </div>
 
-        <Label className="sm:pt-1">réponse de l’IA</Label>
-        <p className="max-w-[52ch] text-[15px] leading-relaxed text-ink-2">{ex.reponse}</p>
-
-        <Label className="sm:pt-1">marques citées</Label>
-        <ol className="flex flex-wrap gap-x-5 gap-y-1 text-[14px]">
+        <ol className="mt-4 space-y-px">
           {ex.concurrents.map((c, i) => (
-            <li key={c}>
-              <span className="num text-[11px] text-ink-3">{String(i + 1).padStart(2, "0")}</span> {c}
+            <li
+              key={c}
+              className="ligne-i flex items-center gap-4 rounded-sm py-3 pr-2"
+              style={{ ["--delai" as string]: `${i * 60}ms` }}
+            >
+              <span className="num w-6 text-[13px] text-ink-3">{String(i + 1).padStart(2, "0")}</span>
+              <span className="min-w-0 flex-1 text-[16px] leading-snug">{c}</span>
+              <span className="hidden h-px w-14 shrink-0 bg-rule-strong sm:block" />
+              <Etiquette>cité</Etiquette>
             </li>
           ))}
+          <li className="mt-1 flex items-center gap-4 rounded-sm border-t border-rule py-4 pr-2">
+            <span className="num w-6 text-[13px] text-ink-3">—</span>
+            <span className="min-w-0 flex-1 font-display text-[19px] italic text-bordeaux">
+              votre marque
+            </span>
+            <span className="hidden h-px w-14 shrink-0 bg-bordeaux/40 sm:block" />
+            <Etiquette ton="bordeaux">absente</Etiquette>
+          </li>
         </ol>
-      </div>
 
-      <LigneVide legende="votre marque" className="mt-9" />
+        <p className="mt-6 text-[13px] leading-relaxed text-ink-3">
+          {fr("Exemple illustratif : les noms sont fictifs. Votre scan utilise vos vrais concurrents.")}
+        </p>
+      </div>
     </div>
   );
 }
+
 
 
 /* ---------------- Formulaire de scan ---------------- */
