@@ -291,11 +291,14 @@ function Formulaire() {
       {erreur ? <p className="num mt-5 text-[12px] text-bordeaux">{erreur}</p> : null}
 
       <Btn type="submit" size="lg" className="mt-7 w-full" disabled={envoi}>
-        {envoi ? "Lancement…" : "Mesurer ma visibilité"}
+        {envoi ? "Lancement…" : "Lancer mon scan gratuit"}
       </Btn>
       <p className="mt-4 text-[12px] leading-snug text-ink-3">
+        Gratuit · Sans compte · Sans carte bancaire · Résultat en 90 secondes
+      </p>
+      <p className="mt-2 text-[12px] leading-snug text-ink-3">
         {fr(
-          "Environ 90 secondes. 3 scans par jour et par connexion. Aucune donnée n’est transmise à un tiers en dehors des quatre moteurs interrogés.",
+          "3 scans par jour et par connexion. Aucune donnée n’est transmise à un tiers en dehors des quatre moteurs interrogés.",
         )}
       </p>
     </form>
