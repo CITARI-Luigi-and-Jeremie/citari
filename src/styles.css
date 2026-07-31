@@ -204,59 +204,63 @@
   }
 }
 
-/* ——— Logotype : signe + mot, entièrement piloté par les variables --marque-*. ——— */
+/* ——— Logotype Citari : entièrement piloté par les variables --marque-*. ——— */
 @utility marque {
   display: inline-flex;
   align-items: center;
   gap: var(--marque-ecart);
-  color: var(--marque-couleur);
   opacity: var(--marque-opacite);
   line-height: 1;
   user-select: none;
   transition: opacity var(--marque-transition);
-
-  & img {
-    height: var(--marque-h);
-    width: auto;
-    display: block;
-  }
 }
 
-@utility marque-mot {
-  font-family: var(--marque-mot-famille);
-  font-size: calc(var(--marque-h) * var(--marque-mot-taille));
-  font-weight: var(--marque-mot-graisse);
-  letter-spacing: var(--marque-mot-interlettre);
-  text-transform: var(--marque-mot-casse);
-  line-height: 1;
-  padding-left: 0.02em;
+/* Le signe est peint par masque alpha : sa couleur suit --marque-couleur. */
+@utility marque-signe {
+  display: block;
+  height: var(--marque-h);
+  width: calc(var(--marque-h) * var(--marque-ratio));
+  background-color: var(--marque-couleur);
+  mask-image: var(--marque-src);
+  mask-repeat: no-repeat;
+  mask-position: left center;
+  mask-size: contain;
+  -webkit-mask-image: var(--marque-src);
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-position: left center;
+  -webkit-mask-size: contain;
+  transition: background-color var(--marque-transition);
 }
 
 /* Point bronze final : le seul écart de couleur autorisé dans la marque. */
 @utility marque-point {
-  color: var(--marque-accent);
+  display: block;
+  width: calc(var(--marque-h) * var(--marque-point-taille));
+  height: calc(var(--marque-h) * var(--marque-point-taille));
+  border-radius: 999px;
+  background: var(--marque-accent);
+  transform: translateY(calc(var(--marque-h) * 0.26));
+  opacity: 0;
+  transition:
+    opacity var(--marque-transition),
+    transform var(--marque-transition);
 }
 
-@utility marque-filet {
-  display: block;
-  width: 1px;
-  height: calc(var(--marque-h) * 0.82);
-  background: var(--marque-filet);
+.marque .marque-point {
+  opacity: 1;
 }
 
 @utility marque-i {
-  transition:
-    opacity var(--marque-transition),
-    letter-spacing var(--marque-transition);
-
   &:hover {
     opacity: var(--marque-opacite-hover);
   }
 
-  &:hover .marque-mot {
-    letter-spacing: calc(var(--marque-mot-interlettre) + 0.012em);
+  &:hover .marque-point {
+    background: var(--marque-accent);
+    transform: translateY(calc(var(--marque-h) * 0.26)) scale(1.35);
   }
 }
+
 
 @keyframes geo-rise {
 
