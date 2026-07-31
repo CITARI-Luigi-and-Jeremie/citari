@@ -1,7 +1,7 @@
-> GEO Sprint — agence française de Generative Engine Optimization (GEO).
+> Citari — agence française de Generative Engine Optimization (GEO).
 > Nous mesurons la visibilité d'une marque dans ChatGPT, Claude, Gemini et Perplexity, puis nous la corrigeons en 30 jours.
 
-## Ce que fait GEO Sprint
+## Ce que fait Citari
 
 - Scan gratuit et sans inscription du Score de Visibilité IA (0-100) sur 24 questions d'intention d'achat et 4 moteurs.
 - Call de restitution gratuit de 30 minutes.
@@ -18,7 +18,7 @@ Moteurs interrogés, dans cet ordre : ChatGPT, Claude, Gemini, Perplexity — vi
 
 ## Engagement d'honnêteté
 
-GEO Sprint garantit les actions livrées, jamais un score. Les moteurs génératifs intègrent les changements de contenu et de citations en 4 à 12 semaines.
+Citari garantit les actions livrées, jamais un score. Les moteurs génératifs intègrent les changements de contenu et de citations en 4 à 12 semaines.
 Aucun témoignage client, aucun logo, aucun résultat client n'est affiché : l'agence est jeune et ne fabrique pas de preuve sociale.
 Les réponses d'IA présentées sur le site sont des exemples et les noms de concurrents qui y figurent sont fictifs.
 

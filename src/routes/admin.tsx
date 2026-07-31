@@ -8,10 +8,10 @@ import { dateFr, euros, fr, groupe } from "@/lib/typo";
 export const Route = createFileRoute("/admin")({
   head: () => ({
     meta: [
-      { title: "Back-office — GEO Sprint" },
+      { title: "Back-office — Citari" },
       { name: "description", content: "Espace de gestion interne des scans, prospects et missions." },
       { name: "robots", content: "noindex, nofollow" },
-      { property: "og:title", content: "Back-office — GEO Sprint" },
+      { property: "og:title", content: "Back-office — Citari" },
       { property: "og:description", content: "Espace interne." },
     ],
   }),

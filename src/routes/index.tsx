@@ -13,13 +13,13 @@ import { NBSP, euros, fr, frTitre } from "@/lib/typo";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "GEO Sprint — êtes-vous cité par ChatGPT ? Scan gratuit" },
+      { title: "Citari — êtes-vous cité par ChatGPT ? Scan gratuit" },
       {
         name: "description",
         content:
           "Mesurez gratuitement la visibilité de votre marque dans ChatGPT, Claude, Gemini et Perplexity. 24 questions d’achat, 4 moteurs, 1 score. Sprint GEO de 30 jours à 2 900 €.",
       },
-      { property: "og:title", content: "GEO Sprint — êtes-vous cité par ChatGPT ?" },
+      { property: "og:title", content: "Citari — êtes-vous cité par ChatGPT ?" },
       {
         property: "og:description",
         content:

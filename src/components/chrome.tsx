@@ -126,8 +126,8 @@ export function jsonLdArticle(titre: string, description: string, url: string, f
       headline: titre,
       description,
       inLanguage: "fr",
-      author: { "@type": "Organization", name: "GEO Sprint" },
-      publisher: { "@type": "Organization", name: "GEO Sprint" },
+      author: { "@type": "Organization", name: "Citari" },
+      publisher: { "@type": "Organization", name: "Citari" },
       mainEntityOfPage: url,
     },
     {

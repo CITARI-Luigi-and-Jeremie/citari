@@ -5,14 +5,14 @@ import { fr } from "@/lib/typo";
 export const Route = createFileRoute("/confidentialite")({
   head: () => ({
     meta: [
-      { title: "Politique de confidentialité — GEO Sprint" },
+      { title: "Politique de confidentialité — Citari" },
       {
         name: "description",
         content:
-          "Finalités, bases légales, sous-traitants, durées de conservation et droits des personnes concernant les données traitées par GEO Sprint.",
+          "Finalités, bases légales, sous-traitants, durées de conservation et droits des personnes concernant les données traitées par Citari.",
       },
       { name: "robots", content: "noindex" },
-      { property: "og:title", content: "Politique de confidentialité — GEO Sprint" },
+      { property: "og:title", content: "Politique de confidentialité — Citari" },
       { property: "og:description", content: "Traitement des données personnelles, conforme au RGPD." },
     ],
   }),

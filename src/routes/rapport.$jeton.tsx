@@ -89,7 +89,7 @@ function Rapport() {
       <header className="pt-14 md:pt-20">
         <div className="flex items-baseline justify-between gap-6">
           <Link to="/" className="label-xs no-print">
-            GEO Sprint
+            Citari
           </Link>
           <button
             type="button"
@@ -234,7 +234,7 @@ function Rapport() {
 
       <footer className="mt-24 border-t border-rule-strong pt-4">
         <p className="num text-[11px] text-ink-3">
-          GEO Sprint{NBSP}· rapport {scan.report_token.slice(0, 8)}{NBSP}·{" "}
+          Citari{NBSP}· rapport {scan.report_token.slice(0, 8)}{NBSP}·{" "}
           {frTitre("mesure par API officielles, sans scraping")}
         </p>
       </footer>
