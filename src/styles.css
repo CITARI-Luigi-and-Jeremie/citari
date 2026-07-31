@@ -54,11 +54,16 @@
 }
 
 :root {
-  /* Surfaces : porcelaine très légèrement froide. */
-  --paper: oklch(0.987 0.002 250);
-  --paper-2: oklch(0.965 0.003 250);
-  --paper-3: oklch(0.938 0.004 250);
+  /* Surfaces : blanc cassé légèrement chaud. */
+  --paper: #faf9f6;
+  --paper-2: oklch(0.965 0.005 85);
+  --paper-3: oklch(0.938 0.006 85);
   --surface: oklch(1 0 0);
+
+  /* Traitement de fond : réglages. */
+  --grain-opacity: 0.03;
+  --champ-opacity: 0.045;
+
 
   /* Encre : graphite profond, jamais de noir pur. */
   --ink: oklch(0.215 0.008 250);
