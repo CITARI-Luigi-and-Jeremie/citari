@@ -240,15 +240,11 @@
   border-radius: 999px;
   background: var(--marque-accent);
   transform: translateY(calc(var(--marque-h) * 0.26));
-  opacity: 0;
   transition:
-    opacity var(--marque-transition),
+    background-color var(--marque-transition),
     transform var(--marque-transition);
 }
 
-.marque .marque-point {
-  opacity: 1;
-}
 
 @utility marque-i {
   &:hover {
