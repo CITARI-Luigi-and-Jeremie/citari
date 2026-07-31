@@ -200,15 +200,17 @@ function Teaser({ id }: { id: string }) {
         GEO Sprint
       </Link>
 
-      <header className="mt-14 border-b border-rule-strong pb-6">
+      <header className="mt-14 border-b border-rule pb-8">
         <Label>score de visibilité IA · {data.marque}</Label>
-        <div className="mt-4 flex flex-wrap items-end gap-x-12 gap-y-4">
-          <div className="num text-[120px] leading-[0.78] sm:text-[190px]">{affiche}</div>
-          <div className="pb-4">
-            <div className="font-display text-[44px] leading-none text-bordeaux">
+        <div className="mt-5 flex flex-wrap items-end gap-x-14 gap-y-4">
+          <div className="font-display text-[130px] font-light leading-[0.76] tracking-[-0.03em] sm:text-[196px]">
+            {affiche}
+          </div>
+          <div className="pb-5">
+            <div className="font-display text-[40px] font-light leading-none text-bordeaux">
               {verdict(data.score)}
             </div>
-            <div className="num mt-2 text-[12px] text-ink-3">sur 100</div>
+            <div className="num mt-3 text-[11px] tracking-[0.14em] text-ink-3">sur 100</div>
           </div>
         </div>
       </header>
