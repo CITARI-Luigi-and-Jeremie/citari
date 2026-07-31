@@ -569,18 +569,20 @@ function BandeauConfiance() {
   );
 }
 
-/* ---------------- Le coût de l’invisibilité ---------------- */
+/* ---------------- Le contexte ---------------- */
 
 function CoutInvisibilite() {
   return (
     <Apparition as="section" className="mt-32">
       <Label className="pb-4">ce qui se joue</Label>
-      <h2 className="max-w-[20ch] text-balance text-[34px] leading-[1.04] sm:text-[52px]">
-        {frTitre("Une réponse d’IA ne cite jamais dix marques.")}
+      <h2 className="max-w-[22ch] text-balance text-[34px] leading-[1.04] sm:text-[52px]">
+        {frTitre(
+          "Sur Google, on vous trouve. Dans ChatGPT, on vous recommande — ou pas.",
+        )}
       </h2>
       <div className="mt-10 grid gap-x-16 gap-y-10 lg:grid-cols-[1fr_1fr]">
         <div className="carte carte-i p-7">
-          <Label>aujourd’hui</Label>
+          <Label>la réponse d’une IA</Label>
           <ol className="mt-5 grid gap-3 text-[15px]">
             {["Concurrent A", "Concurrent B", "Concurrent C"].map((c, i) => (
               <li key={c} className="flex items-baseline gap-3 border-b border-rule pb-3">
@@ -594,59 +596,52 @@ function CoutInvisibilite() {
         <div className="self-center">
           <p className="text-[15px] leading-relaxed text-ink-2">
             {fr(
-              "Le référencement classique vous laissait une chance : la deuxième page, un lien plus bas, une annonce. Un moteur génératif tranche. Il nomme deux ou trois entreprises, et la décision est déjà prise avant que vous soyez consulté.",
+              "Un moteur de recherche affiche dix liens et laisse l’acheteur choisir. Une IA donne trois noms. Parfois deux.",
             )}
           </p>
           <p className="mt-5 text-[15px] leading-relaxed text-ink-2">
             {fr(
-              "Un seul dossier signé rembourse le sprint. L’inverse ne se voit jamais : une affaire perdue de cette façon ne laisse aucune trace dans vos statistiques.",
+              "Il n’y a pas de deuxième page. Il n’y a pas de « voir plus de résultats ». Vous êtes dans la réponse, ou vous n’existez pas.",
             )}
           </p>
-          <div className="mt-8 grid grid-cols-2 gap-6 border-t border-rule pt-6">
-            <div>
-              <Label className="pb-2">coût du sprint</Label>
-              <div className="num text-[22px]">{euros(2900)}</div>
-            </div>
-            <div>
-              <Label className="pb-2">coût d’un scan</Label>
-              <div className="num text-[22px]">0{NBSP}€</div>
-            </div>
-          </div>
+          <p className="mt-6 font-display text-[26px] leading-[1.15]">
+            {frTitre("Le référencement vous plaçait dans une liste. L’IA, elle, choisit.")}
+          </p>
         </div>
       </div>
     </Apparition>
   );
 }
 
-/* ---------------- Contenu du rapport ---------------- */
+/* ---------------- Ce que le scan révèle ---------------- */
 
-const RAPPORT = [
-  ["Score global", "Un chiffre de 0 à 100, avec son verdict et le détail des quatre composantes."],
-  ["Score par moteur", "ChatGPT, Claude, Gemini et Perplexity notés séparément : ils ne vous voient pas pareil."],
-  ["Part de voix", "Vos mentions rapportées à celles de vos concurrents, question par question."],
-  ["Verbatims", "Les réponses brutes des moteurs, avec les passages qui vous citent — ou pas."],
-  ["Sources citées", "Les pages sur lesquelles les moteurs s’appuient pour recommander vos concurrents."],
-  ["Actions prioritaires", "Ce qu’il faut corriger en premier, classé par impact sur le score."],
+const REVELE = [
+  "Votre score de visibilité, de 0 à 100, mesuré sur ChatGPT, Claude, Gemini et Perplexity.",
+  "Combien de fois vos concurrents sont cités sur les questions où vous ne l’êtes pas.",
+  "Les phrases exactes que l’IA prononce à votre sujet. Mot pour mot.",
+  "Les sources sur lesquelles elle s’appuie pour recommander vos concurrents plutôt que vous.",
 ];
 
-function ContenuRapport() {
+function ScanRevele() {
   return (
     <Apparition as="section" className="mt-32">
       <div className="flex flex-wrap items-baseline justify-between gap-4">
-        <h2 className="text-[34px] leading-none sm:text-[46px]">Ce que contient le rapport</h2>
-        <span className="label-xs">gratuit, envoyé par lien privé</span>
+        <h2 className="text-[34px] leading-none sm:text-[46px]">Ce que le scan révèle</h2>
+        <span className="label-xs">en 90 secondes, gratuitement</span>
       </div>
-      <div className="mt-10 grid gap-px border border-rule bg-rule sm:grid-cols-2 lg:grid-cols-3">
-        {RAPPORT.map(([titre, desc], i) => (
-          <div key={titre} className="ligne-i bg-card p-6">
-            <span className="num text-[10px] tracking-[0.14em] text-ink-3">
+      <ol className="mt-10 border-t border-rule">
+        {REVELE.map((t, i) => (
+          <li
+            key={t}
+            className="ligne-i -mx-3 grid grid-cols-[30px_1fr] gap-4 border-b border-rule px-3 py-5"
+          >
+            <span className="num pt-1.5 text-[10px] tracking-[0.14em] text-ink-3">
               {String(i + 1).padStart(2, "0")}
             </span>
-            <div className="mt-3 text-[17px] font-medium">{titre}</div>
-            <p className="mt-2 text-[14px] leading-relaxed text-ink-2">{desc}</p>
-          </div>
+            <p className="max-w-[70ch] text-[16px] leading-relaxed sm:text-[18px]">{fr(t)}</p>
+          </li>
         ))}
-      </div>
+      </ol>
     </Apparition>
   );
 }
