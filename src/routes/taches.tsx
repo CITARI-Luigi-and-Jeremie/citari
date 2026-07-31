@@ -64,7 +64,7 @@ function Taches() {
       <div className="mx-auto w-full max-w-2xl px-4 pb-32 pt-6 sm:px-6 sm:pb-16 sm:pt-12">
         <header className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4">
           <div className="min-w-0">
-            <h1 className="truncate text-[22px] font-semibold tracking-tight sm:text-[26px]">
+            <h1 className="truncate font-sans text-[22px] font-semibold tracking-tight sm:text-[26px]">
               Mes tâches
             </h1>
             <p className="mt-1 text-[13px] text-lin-text-3">
