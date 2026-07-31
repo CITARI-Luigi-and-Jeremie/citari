@@ -53,15 +53,14 @@ function Accueil() {
             <Apparition>
               <Label>visibilité dans les moteurs génératifs</Label>
               <h1 className="mt-6 text-balance text-[46px] leading-[0.95] sm:text-[68px] lg:text-[84px]">
-                Votre marque est-elle <em className="not-italic text-bordeaux">invisible</em> dans
-                ChatGPT{NBSP}?
+                Vos clients ne cherchent plus sur{" "}
+                <em className="not-italic text-ink-3">Google</em>.
               </h1>
             </Apparition>
             <Apparition delai={90}>
-              <p className="mt-8 max-w-[46ch] text-[16px] leading-[1.72] text-ink-2 sm:text-[17px]">
-                {fr(
-                  "Quand un dirigeant demande conseil à une IA, la réponse cite deux ou trois marques. Il n’y a pas de deuxième page. Si la vôtre n’y figure pas, vous perdez l’affaire sans jamais l’apprendre.",
-                )}
+              <p className="mt-8 max-w-[44ch] text-[17px] leading-[1.68] text-ink-2 sm:text-[19px]">
+                Ils demandent à ChatGPT. Et ChatGPT recommande quelqu’un d’autre. Découvrez qui, en
+                90 secondes.
               </p>
             </Apparition>
             <Apparition delai={160} className="mt-14 hidden lg:block">
