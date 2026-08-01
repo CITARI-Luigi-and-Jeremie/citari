@@ -2,7 +2,7 @@
 
 **Citari** : agence GEO (Generative Engine Optimization) pour PME/ETI francophones.
 On fait apparaître les marques clientes dans les réponses de ChatGPT, Claude, Gemini,
-Perplexity et Grok.
+Perplexity, Grok et Le Chat.
 
 > Le produit vendu s'appelle **Sprint GEO** (2 900 €) — ne pas confondre avec le nom
 > de la société. « GEO Sprint » était l'ancien nom, il ne doit plus apparaître nulle part.
@@ -93,7 +93,7 @@ part ailleurs. Une colonne qui bouge côté Lovable se répare là.
 Pièges vérifiés sur la base réelle (2026-08-01) — ne pas les redécouvrir :
 
 - `responses.engine` et `mentions.engine` stockent les **libellés** (`ChatGPT`,
-  `Claude`, `Gemini`, `Perplexity`), pas des identifiants techniques.
+  `Claude`, `Gemini`, `Perplexity`, `Grok`, `Le Chat`), pas des identifiants.
 - **`mentions` n'a pas de colonne `mentioned`** : une ligne *est* une mention.
   La marque suivie s'identifie par `is_target`, jamais par comparaison de noms.
 - `share_of_voice` est un **tableau** `[{name,count,share,target}]`, pas un dict.
@@ -117,7 +117,7 @@ pas (le client Supabase y est typé `any`) — c'est le prochain morceau.
 - Scan en CLI : `pnpm --filter @geo/core scan:cli -- --brand "X" --url https://x.fr --sector "..." --competitors "A,B"`.
 
 ## Mode démo
-`GEO_MOCK=1` remplace les 5 providers ET Supabase par des simulations
+`GEO_MOCK=1` remplace les 6 providers ET Supabase par des simulations
 (`packages/core/src/mock/`). Base en mémoire persistée dans un fichier du dossier
 temporaire, partagée entre process. Ne jamais laisser en production.
 

@@ -7,7 +7,7 @@ Tout le code est prêt et testé en mode démo. Voici ce qu'il reste à faire, d
 - [ ] SQL Editor → exécuter **dans l'ordre** `supabase/migrations/0001_init.sql`, `0002_seed_directories.sql`, `0003_follow_ups.sql`
 - [ ] Récupérer `SUPABASE_URL` et `SUPABASE_SERVICE_ROLE_KEY` (Settings → API)
 
-## 2. Clés API des 4 moteurs
+## 2. Clés API des 6 moteurs
 - [ ] OpenAI : https://platform.openai.com/api-keys → `OPENAI_API_KEY`
 - [ ] Anthropic : https://console.anthropic.com → `ANTHROPIC_API_KEY`
 - [ ] Google AI Studio : https://aistudio.google.com/apikey → `GOOGLE_AI_API_KEY`
