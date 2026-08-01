@@ -13,7 +13,7 @@ export function Chrome({ children }: { children: ReactNode }) {
   return (
     <div className="mx-auto max-w-[1240px] px-6 lg:px-10">
       <header className="flex flex-wrap items-center justify-between gap-4 border-b border-rule-strong py-5">
-        <LogoLien hauteur={34} />
+        <LogoLien hauteur={36} className="justify-start" />
         <nav className="flex flex-wrap gap-6">
           {LIENS.map(([to, label]) => (
             <Link key={to} to={to} className="label-xs hover:text-ink">

@@ -47,7 +47,7 @@ export function LogoLien({
       to="/"
       aria-label="Citari — accueil"
       className={cn(
-        "group/logo relative inline-flex items-center justify-center",
+        "group/logo relative inline-flex items-center justify-start",
         className,
       )}
     >
