@@ -1,6 +1,11 @@
-import { Apparition } from "@/components/apparition";
-import { Label } from "@/components/kit";
 import { NBSP, fr, frTitre } from "@/lib/typo";
+
+/* Sous-titre commun aux deux mouvements de la section « le scan gratuit ». */
+export function SousTitre({ children }: { children: React.ReactNode }) {
+  return (
+    <p className="label-xs border-t border-ink pt-4 text-ink">{children}</p>
+  );
+}
 
 /* ---------------- 1. La mesure ---------------- */
 
@@ -18,7 +23,7 @@ const ETAPES: [string, string][] = [
   ],
   [
     "Six moteurs interrogés en direct",
-    "ChatGPT, Claude, Gemini, Perplexity, Grok et Le Chat répondent à chacune des vingt-quatre questions, par les API officielles des éditeurs. Cent quarante-quatre réponses réelles, collectées pendant votre scan. Jamais de capture d’écran, jamais de scraping. Le Chat, le moteur de Mistral, est le seul moteur français de l’échantillon. Vos clients français commencent à l’utiliser — nous le mesurons comme les autres.",
+    "ChatGPT, Claude, Gemini, Perplexity, Grok et Le Chat répondent à chacune des vingt-quatre questions, par les API officielles des éditeurs. Cent quarante-quatre réponses réelles, collectées pendant votre scan. Jamais de capture d’écran, jamais de scraping. Le Chat, le moteur de Mistral, est le seul moteur français de l’échantillon. Vos clients français commencent à l’utiliser, et nous le mesurons comme les autres.",
   ],
   [
     "Chaque réponse est décortiquée",
@@ -36,14 +41,14 @@ const ETAPES: [string, string][] = [
 
 export function Mesure() {
   return (
-    <Apparition as="section" className="mt-40 border-t border-rule pt-10 sm:mt-52">
-      <Label className="pb-6">la mesure</Label>
-      <h2 className="max-w-[15ch] text-balance text-[38px] leading-[1.02] sm:text-[62px]">
+    <div className="mt-20">
+      <SousTitre>Comment nous mesurons</SousTitre>
+      <h3 className="mt-8 max-w-[15ch] text-balance font-display text-[32px] font-light leading-[1.06] sm:text-[46px]">
         {frTitre("Nous ne prononçons jamais votre nom.")}
-      </h2>
+      </h3>
       <p className="mt-10 max-w-[62ch] text-[18px] leading-[1.6] text-ink-2">
         {fr(
-          "C’est la seule façon d’obtenir une mesure honnête. Si nous demandions à ChatGPT ce qu’il pense de votre entreprise, il en dirait du bien — nous lui aurions soufflé la réponse. Nous posons donc les questions que vos acheteurs posent réellement, sans jamais citer votre marque, et nous regardons si elle apparaît d’elle-même.",
+          "C’est la seule façon d’obtenir une mesure honnête. Si nous demandions à ChatGPT ce qu’il pense de votre entreprise, il en dirait du bien, puisque nous lui aurions soufflé la réponse. Nous posons donc les questions que vos acheteurs posent réellement, sans jamais citer votre marque, et nous regardons si elle apparaît d’elle-même.",
         )}
       </p>
 
@@ -82,7 +87,7 @@ export function Mesure() {
           </li>
         ))}
       </ol>
-    </Apparition>
+    </div>
   );
 }
 

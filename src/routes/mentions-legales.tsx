@@ -33,7 +33,7 @@ function Page() {
         <H2 id="editeur">Éditeur du site</H2>
         <Liste
           items={[
-            ["Dénomination", "Citari — [À COMPLÉTER : forme juridique et raison sociale]"],
+            ["Dénomination", "Citari, [À COMPLÉTER : forme juridique et raison sociale]"],
             ["Adresse du siège", "[À COMPLÉTER]"],
             ["SIRET", "[À COMPLÉTER]"],
             ["RCS", "[À COMPLÉTER : ville et numéro d’immatriculation]"],
@@ -59,7 +59,7 @@ function Page() {
         <H2 id="propriete">Propriété intellectuelle</H2>
         <p className="mt-5 text-[16px] leading-[1.7] text-ink-2">
           {fr(
-            "L’ensemble des contenus du site — textes, méthode de mesure, mise en page, rapports produits — est protégé par le droit d’auteur. Toute reproduction, même partielle, est soumise à autorisation préalable de l’éditeur.",
+            "L’ensemble des contenus du site (textes, méthode de mesure, mise en page, rapports produits) est protégé par le droit d’auteur. Toute reproduction, même partielle, est soumise à autorisation préalable de l’éditeur.",
           )}
         </p>
 

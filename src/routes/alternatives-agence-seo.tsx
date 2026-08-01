@@ -133,7 +133,7 @@ function Page() {
         <H2 id="choisir">Comment trancher</H2>
         <p className="mt-5 text-[16px] leading-[1.7] text-ink-2">
           {fr(
-            "Posez-vous deux questions. Premièrement : avez-vous du temps interne ? Si oui, le faire soi-même est une option honnête, et ce guide vous donne la méthode. Deuxièmement : avez-vous besoin d’une preuve chiffrée avant/après ? Si oui, exigez un échantillon de questions figé et une mesure répétée — quel que soit le prestataire retenu, y compris nous.",
+            "Posez-vous deux questions. Premièrement : avez-vous du temps interne ? Si oui, le faire soi-même est une option honnête, et ce guide vous donne la méthode. Deuxièmement : avez-vous besoin d’une preuve chiffrée avant/après ? Si oui, exigez un échantillon de questions figé et une mesure répétée, quel que soit le prestataire retenu, y compris nous.",
           )}
         </p>
 
