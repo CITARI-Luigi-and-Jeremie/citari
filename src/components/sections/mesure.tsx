@@ -41,7 +41,7 @@ export function Mesure() {
       <h2 className="max-w-[15ch] text-balance text-[38px] leading-[1.02] sm:text-[62px]">
         {frTitre("Nous ne prononçons jamais votre nom.")}
       </h2>
-      <p className="mt-10 max-w-[62ch] text-[16px] leading-relaxed text-ink-2">
+      <p className="mt-10 max-w-[62ch] text-[18px] leading-[1.6] text-ink-2">
         {fr(
           "C’est la seule façon d’obtenir une mesure honnête. Si nous demandions à ChatGPT ce qu’il pense de votre entreprise, il en dirait du bien — nous lui aurions soufflé la réponse. Nous posons donc les questions que vos acheteurs posent réellement, sans jamais citer votre marque, et nous regardons si elle apparaît d’elle-même.",
         )}
@@ -62,7 +62,7 @@ export function Mesure() {
               </h3>
             </div>
             <div>
-              <p className="max-w-[62ch] text-[15px] leading-relaxed text-ink-2">{fr(texte)}</p>
+              <p className="max-w-[62ch] text-[17px] leading-[1.6] text-ink-2">{fr(texte)}</p>
               {i === 3 ? (
                 <dl className="mt-8 max-w-[46ch] border-t border-rule">
                   {FORMULE.map(([k, v]) => (
@@ -70,7 +70,7 @@ export function Mesure() {
                       key={k}
                       className="flex items-baseline justify-between gap-6 border-b border-rule py-3.5"
                     >
-                      <dt className="text-[14px] text-ink-2">{k}</dt>
+                      <dt className="text-[16px] text-ink-2">{k}</dt>
                       <dd className="font-display text-[26px] font-light leading-none">
                         {v.replace(" ", NBSP)}
                       </dd>

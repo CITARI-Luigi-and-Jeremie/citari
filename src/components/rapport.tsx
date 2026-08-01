@@ -69,14 +69,14 @@ export function ScoresMoteurs({
   avant?: Record<string, number | null> | null;
 }) {
   return (
-    <div className="grid grid-cols-2 md:grid-cols-4">
+    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6">
       {MOTEURS.map((m, i) => {
         const v = scores[m];
         const a = avant?.[m];
         return (
           <div
             key={m}
-            className={cn("border-t border-rule py-4 pr-6", i > 0 && "md:border-l md:pl-6")}
+            className={cn("border-t border-rule py-4 pr-6", i > 0 && "lg:border-l lg:pl-5")}
           >
             <Label>{m}</Label>
             <div className="num mt-1 text-[38px] leading-none">
