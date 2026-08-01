@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { askClaudeJson, fetchHomeText, getDb, unwrap } from "@geo/core";
 import { AI_CRAWLERS } from "../lib/crawl.js";
-import { recordDeliverable, resolveClient, slugify, writeDeliverableFile } from "../lib/context.js";
+import { recordDeliverable, requireUrl, resolveClient, slugify, writeDeliverableFile } from "../lib/context.js";
 import type { AuditResult } from "./audit-technique.js";
 
 const FixesSchema = z.object({
@@ -29,7 +29,7 @@ export async function generateFixes(clientRef: string): Promise<void> {
   if (!audit) throw new Error(`Aucun audit trouvé pour ${client.brand} — lancez d'abord : pnpm toolkit audit-technique <url> --client "${client.brand}"`);
 
   const clientData = unwrap(await db.from("client_data").select("key,value").eq("client_id", client.id)) as { key: string; value: string }[];
-  const homeText = await fetchHomeText(client.url);
+  const homeText = await fetchHomeText(requireUrl(client));
 
   // robots.txt corrigé — déterministe, pas besoin de LLM
   const robotsTxt = `# robots.txt généré par Citari — crawlers IA explicitement autorisés

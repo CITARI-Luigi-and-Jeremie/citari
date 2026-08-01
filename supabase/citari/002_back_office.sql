@@ -16,6 +16,10 @@
 alter table public.clients add column if not exists website_url text;
 alter table public.clients add column if not exists sector text;
 
+-- Le rappel de re-scan J+90 porte sur le sprint (`sprints.rescan_due_on`),
+-- pas sur le client : un même client peut enchaîner plusieurs sprints.
+alter table public.sprints add column if not exists rescan_reminder_sent boolean not null default false;
+
 comment on column public.clients.website_url is
   'Site sur lequel travaille l''usine de livraison. Renseigné à la conversion du lead depuis scans.website_url, modifiable ensuite.';
 
@@ -71,6 +75,12 @@ grant all on public.crawler_hits to service_role;
 -- ⚠ Vérifier chaque URL avant la première utilisation client : les plateformes
 --   changent de domaine et de politique d'inscription.
 -- ─────────────────────────────────────────────────────────────
+-- Unicité sur (secteur, url) et non sur url seule : un annuaire généraliste
+-- comme TripAdvisor sert légitimement plusieurs secteurs. C'est cet index qui
+-- rend le `on conflict do nothing` ci-dessous opérant, donc le seed rejouable.
+create unique index if not exists directories_sector_url_uidx
+  on public.directories (sector, url);
+
 insert into public.directories (sector, name, url, kind, authority_note) values
 -- Tous secteurs
 ('tous', 'Google Business Profile', 'https://www.google.com/business/', 'fiche', 'Priorité absolue en local. Fiche complète + avis = source très citée.'),

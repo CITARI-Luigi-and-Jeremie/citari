@@ -35,8 +35,8 @@ export async function sprintReport(clientRef: string): Promise<void> {
   const deliverables = unwrap(await db.from("deliverables").select("*").eq("client_id", client.id).order("created_at")) as any[];
   const citations = unwrap(await db.from("citation_targets").select("*").eq("client_id", client.id)) as any[];
 
-  const initialScan = client.initial_scan_id
-    ? ((await db.from("scans").select("*").eq("id", client.initial_scan_id).maybeSingle()).data as any)
+  const initialScan = client.initialScanId
+    ? ((await db.from("scans").select("*").eq("id", client.initialScanId).maybeSingle()).data as any)
     : null;
 
   const doneTasks = tasks.filter((t) => t.done);

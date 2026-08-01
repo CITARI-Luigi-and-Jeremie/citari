@@ -1,6 +1,6 @@
 import { getDb, unwrap } from "@geo/core";
 import { AI_CRAWLERS, analyzeRobots, auditHtml, fetchText, normalizeBase } from "../lib/crawl.js";
-import { recordDeliverable, resolveClient, slugify, writeDeliverableFile } from "../lib/context.js";
+import { recordDeliverable, requireUrl, resolveClient, slugify, writeDeliverableFile } from "../lib/context.js";
 
 /**
  * Vérifie que les correctifs livrés sont RÉELLEMENT en ligne.
@@ -21,7 +21,7 @@ interface Check {
 export async function verifyFixes(clientRef: string): Promise<void> {
   const client = await resolveClient(clientRef);
   const slug = slugify(client.brand);
-  const base = normalizeBase(client.url);
+  const base = normalizeBase(requireUrl(client));
   const checks: Check[] = [];
 
   console.log(`Vérification des correctifs sur ${base}…`);

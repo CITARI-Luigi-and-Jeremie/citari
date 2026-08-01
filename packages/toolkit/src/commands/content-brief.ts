@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { askClaudeJson, fetchHomeText, getDb, unwrap } from "@geo/core";
-import { recordDeliverable, resolveClient, slugify, writeDeliverableFile } from "../lib/context.js";
+import { recordDeliverable, requireUrl, resolveClient, slugify, writeDeliverableFile } from "../lib/context.js";
 
 const BriefsSchema = z.object({
   briefs: z.array(
@@ -20,21 +20,24 @@ export async function contentBrief(clientRef: string): Promise<void> {
   const client = await resolveClient(clientRef);
   const slug = slugify(client.brand);
   const db = getDb();
-  if (!client.initial_scan_id) throw new Error(`${client.brand} n'a pas de scan initial rattaché.`);
+  if (!client.initialScanId) throw new Error(`${client.brand} n'a pas de scan initial rattaché.`);
 
   // Requêtes où la marque est absente des réponses
-  const queries = unwrap(await db.from("queries").select("id,text,category").eq("scan_id", client.initial_scan_id)) as any[];
-  const responses = unwrap(await db.from("responses").select("id,query_id").eq("scan_id", client.initial_scan_id)) as any[];
+  const queries = unwrap(await db.from("queries").select("id,text,intent").eq("scan_id", client.initialScanId)) as any[];
+  const responses = unwrap(await db.from("responses").select("id,query_id").eq("scan_id", client.initialScanId)) as any[];
+  // Une ligne de `mentions` est une mention : on filtre sur `is_target` plutôt
+  // que de comparer des noms de marque, qui varient d'une réponse à l'autre.
   const mentions = unwrap(
-    await db.from("mentions").select("response_id,brand,mentioned").eq("scan_id", client.initial_scan_id).eq("brand", client.brand)
+    await db.from("mentions").select("response_id,is_target").eq("scan_id", client.initialScanId).eq("is_target", true)
   ) as any[];
-  const mentionedResponseIds = new Set(mentions.filter((m) => m.mentioned).map((m) => m.response_id));
-  const missedQueries = queries.filter((q) =>
-    responses.filter((r) => r.query_id === q.id).every((r) => !mentionedResponseIds.has(r.id))
-  );
+  const mentionedResponseIds = new Set(mentions.map((m) => m.response_id));
+  const missedQueries = queries.filter((q) => {
+    const rs = responses.filter((r) => r.query_id === q.id);
+    return rs.length > 0 && !rs.some((r) => mentionedResponseIds.has(r.id));
+  });
 
   const clientData = unwrap(await db.from("client_data").select("key,value").eq("client_id", client.id)) as { key: string; value: string }[];
-  const homeText = await fetchHomeText(client.url);
+  const homeText = await fetchHomeText(requireUrl(client));
 
   console.log(`${missedQueries.length} requêtes où ${client.brand} est absent — génération des briefs…`);
   const out = await askClaudeJson(
@@ -43,7 +46,7 @@ export async function contentBrief(clientRef: string): Promise<void> {
 Concurrents : ${(client.competitors ?? []).map((c) => c.name).join(", ") || "?"}
 
 Requêtes du scan où ${client.brand} est ABSENT des réponses IA (cibles prioritaires) :
-${missedQueries.map((q) => `- [${q.category}] ${q.text}`).join("\n") || "- (aucune, prendre les requêtes à faible position)"}
+${missedQueries.map((q) => `- [${q.intent}] ${q.text}`).join("\n") || "- (aucune, prendre les requêtes à faible position)"}
 
 Extrait du site existant :
 """${homeText}"""

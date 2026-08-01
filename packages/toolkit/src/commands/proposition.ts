@@ -101,7 +101,7 @@ Ce sont des questions posées par des acheteurs en phase de décision. Chacune e
 - Audit technique complet de ${i.url}
 - Correction du \`robots.txt\` : autorisation explicite de GPTBot, ClaudeBot, PerplexityBot, Google-Extended et des autres crawlers IA
 - Rédaction et pose d'un fichier \`llms.txt\`
-- Balisage schema.org des pages clés (Organization, Service, FAQPage${i.sector.match(/BTP|Santé|Restaur|Hôtel|Immobilier/i) ? ", LocalBusiness" : ""})
+- Balisage schema.org des pages clés (Organization, Service, FAQPage${(i.sector ?? "").match(/BTP|Santé|Restaur|Hôtel|Immobilier/i) ? ", LocalBusiness" : ""})
 - Restructuration des pages principales en format « réponse directe »
 
 **Livrables :** rapport d'audit, fichiers prêts à poser, document de spécifications pour votre développeur si nous n'avons pas d'accès direct.
@@ -198,19 +198,27 @@ ${md
 async function resolveTarget(ref: string): Promise<{ scanId: string; contactName: string | null; clientId: string | null }> {
   const db = getDb();
 
-  const client = await db.from("clients").select("*").ilike("brand", ref).maybeSingle();
-  if (client.data?.initial_scan_id) {
-    return { scanId: client.data.initial_scan_id, contactName: client.data.contact_name ?? null, clientId: client.data.id };
+  // Un `eq` sur une colonne uuid lève une erreur Postgres si la référence
+  // n'en a pas la forme : on ne tente les recherches par id qu'à bon escient.
+  const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(ref);
+
+  const client = await db.from("clients").select("*").ilike("brand_name", ref).maybeSingle();
+  if (client.data?.scan_id) {
+    return { scanId: client.data.scan_id, contactName: client.data.contact_name ?? null, clientId: client.data.id };
   }
 
-  for (const col of ["id", "email", "brand"] as const) {
-    const q = col === "id" ? db.from("leads").select("*").eq("id", ref) : db.from("leads").select("*").ilike(col, ref);
-    const { data } = await q.maybeSingle();
-    if (data) return { scanId: data.scan_id, contactName: null, clientId: null };
+  // `company` et non `brand` : côté leads, la marque est recopiée du scan.
+  for (const col of ["email", "company"] as const) {
+    const { data } = await db.from("leads").select("*").ilike(col, ref).maybeSingle();
+    if (data?.scan_id) return { scanId: data.scan_id, contactName: data.first_name ?? null, clientId: null };
   }
+  if (isUuid) {
+    const { data } = await db.from("leads").select("*").eq("id", ref).maybeSingle();
+    if (data?.scan_id) return { scanId: data.scan_id, contactName: data.first_name ?? null, clientId: null };
 
-  const scan = await db.from("scans").select("id").eq("id", ref).maybeSingle();
-  if (scan.data) return { scanId: scan.data.id, contactName: null, clientId: null };
+    const scan = await db.from("scans").select("id").eq("id", ref).maybeSingle();
+    if (scan.data) return { scanId: scan.data.id, contactName: null, clientId: null };
+  }
 
   throw new Error(`Cible introuvable : "${ref}" (client, lead, email ou id de scan attendus).`);
 }

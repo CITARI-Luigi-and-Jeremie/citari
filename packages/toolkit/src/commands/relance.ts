@@ -67,7 +67,7 @@ function step2(i: ScanInsights): Draft {
 
 Je reviens vers vous sans relancer sur notre offre — juste une chose concrète que vous pouvez vérifier en 5 minutes.
 
-Ouvrez ${i.url.replace(/\/$/, "")}/robots.txt et cherchez GPTBot, ClaudeBot et PerplexityBot. S'ils y sont bloqués, aucune des IA ne peut lire votre site : tout le reste devient inutile tant que ce n'est pas corrigé. Beaucoup de sites les ont bloqués en 2023-2024 sans le savoir, souvent via un réglage par défaut du CMS.${sourcesBlock}
+Ouvrez ${(i.url ?? "votre site").replace(/\/$/, "")}/robots.txt et cherchez GPTBot, ClaudeBot et PerplexityBot. S'ils y sont bloqués, aucune des IA ne peut lire votre site : tout le reste devient inutile tant que ce n'est pas corrigé. Beaucoup de sites les ont bloqués en 2023-2024 sans le savoir, souvent via un réglage par défaut du CMS.${sourcesBlock}
 
 J'ai détaillé la méthode complète ici, en accès libre : ${process.env.NEXT_PUBLIC_SITE_URL || "https://votre-domaine.fr"}/guide-geo
 
