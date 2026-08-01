@@ -9,23 +9,41 @@ Perplexity et Grok.
 
 ## Architecture — décidée le 2026-08-01
 
-| Où | Quoi | Qui édite |
-|---|---|---|
-| **Lovable** (`150f9fa5-b533-49e7-a797-19c52f94db36`) | Tunnel public **et son moteur de scan** : landing, scan, teaser, rapport, capture de lead, Supabase | Luigi |
-| **Ce dépôt** | L'usine de livraison : `packages/toolkit` + `apps/admin` | Claude Code |
+| Dossier | Quoi | Dépôt Git | Outillage |
+|---|---|---|---|
+| `apps/citari` | Le front **et son moteur de scan** : landing, scan, teaser, rapport, lead | [sprint-voice-insight](https://github.com/LuigiRevelli/sprint-voice-insight) — autonome | bun, TanStack Start |
+| `apps/admin` | Back-office de livraison : sprints, livrables, relances, citations | ce dépôt | pnpm, Next.js |
+| `packages/*` | Toolkit CLI + socle partagé | ce dépôt | pnpm |
 
-Le projet Lovable n'est pas qu'un front : c'est une app TanStack Start dont
-`src/lib/orchestrateur.server.ts` interroge les moteurs, calcule le score et
-écrit en base. Ce moteur est **le seul** qui mesure. Ce dépôt ne doit jamais en
-exécuter un second : l'intérêt du J+90 est l'écart avec le J0, et un écart entre
-deux implémentations de score différentes ne veut rien dire.
+### `apps/citari` est un checkout lié, pas un sous-dossier
 
-`apps/web` a été supprimé le 2026-08-01 — il refaisait le tunnel public déjà
-servi par Lovable. `apps/admin` est conservé : l'admin Lovable liste et modifie
-un statut, celui-ci gère conversion, relances, sprints, livrables et citations.
+Il a son propre `.git`, synchronisé avec le projet Lovable
+`150f9fa5-b533-49e7-a797-19c52f94db36`. Luigi édite sur Lovable, on récupère
+avec `git -C apps/citari pull` ; on édite ici, on pousse. Il est **gitignoré**
+et **exclu du workspace pnpm** (`!apps/citari`) : le versionner dans ce dépôt
+recréerait deux sources de vérité.
+
+S'il est absent après un clone :
+`git clone https://github.com/LuigiRevelli/sprint-voice-insight.git apps/citari`
+
+### Un seul moteur de score
+
+`apps/citari/src/lib/orchestrateur.server.ts` interroge les moteurs, calcule le
+score et écrit en base. C'est **le seul** qui mesure. Ne jamais en exécuter un
+second : l'intérêt du J+90 est l'écart avec le J0, et un écart entre deux
+implémentations différentes ne veut rien dire. `packages/core` contient encore
+un moteur complet — il sert au mode démo et aux tests, pas à la production.
 
 **Le schéma Supabase appartient au front.** Le toolkit en est consommateur ;
 il ne crée ni scans, ni leads, ni clients.
+
+### Sécurité vérifiée le 2026-08-01
+
+Le `.env` du front est versionné sur GitHub (dépôt privé) mais ne contient que
+l'URL Supabase et la clé `sb_publishable_`, publique par conception. RLS est
+actif sur les 16 tables avec **zéro policy** — donc « tout refuser » pour cette
+clé. Tout passe par le service role dans les server functions. Si un jour une
+policy est ajoutée, revérifier que `leads` (emails, RGPD) reste inaccessible.
 
 ## Ce dépôt
 
