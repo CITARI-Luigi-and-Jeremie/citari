@@ -103,6 +103,49 @@ async function perplexity(q: string, langue: string): Promise<ReponseMoteur> {
   };
 }
 
+/** Grok — API xAI officielle (format OpenAI). */
+async function grok(q: string, langue: string): Promise<ReponseMoteur> {
+  const t = Date.now();
+  const key = process.env.XAI_API_KEY;
+  if (!key) return manquant("Clé API xAI non configurée");
+  const res = await fetch("https://api.x.ai/v1/chat/completions", {
+    method: "POST",
+    headers: { "content-type": "application/json", authorization: `Bearer ${key}` },
+    body: JSON.stringify({ model: "grok-4", messages: prompt(q, langue) }),
+  });
+  if (!res.ok) return manquant(`xAI [${res.status}]`);
+  const json = (await res.json()) as {
+    choices: { message: { content: string } }[];
+    citations?: string[];
+  };
+  return {
+    text: json.choices[0]?.message?.content ?? "",
+    sources: (json.citations ?? []).map((url) => ({ url })),
+    latency: Date.now() - t,
+    cost: 0.005,
+  };
+}
+
+/** Le Chat — API Mistral officielle (format OpenAI). */
+async function lechat(q: string, langue: string): Promise<ReponseMoteur> {
+  const t = Date.now();
+  const key = process.env.MISTRAL_API_KEY;
+  if (!key) return manquant("Clé API Mistral non configurée");
+  const res = await fetch("https://api.mistral.ai/v1/chat/completions", {
+    method: "POST",
+    headers: { "content-type": "application/json", authorization: `Bearer ${key}` },
+    body: JSON.stringify({ model: "mistral-large-latest", messages: prompt(q, langue) }),
+  });
+  if (!res.ok) return manquant(`Mistral [${res.status}]`);
+  const json = (await res.json()) as { choices: { message: { content: string } }[] };
+  return {
+    text: json.choices[0]?.message?.content ?? "",
+    sources: [],
+    latency: Date.now() - t,
+    cost: 0.004,
+  };
+}
+
 function manquant(error: string): ReponseMoteur {
   return { text: "", sources: [], latency: 0, cost: 0, error };
 }
@@ -112,6 +155,8 @@ export async function interroger(moteur: Moteur, question: string, langue: strin
     if (moteur === "ChatGPT") return await chatgpt(question, langue);
     if (moteur === "Claude") return await claude(question, langue);
     if (moteur === "Gemini") return await gemini(question, langue);
+    if (moteur === "Grok") return await grok(question, langue);
+    if (moteur === "Le Chat") return await lechat(question, langue);
     return await perplexity(question, langue);
   } catch (e) {
     return manquant(e instanceof Error ? e.message : "Erreur inconnue");

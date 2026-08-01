@@ -1,3 +1,5 @@
+import { MOTEURS } from "@/lib/typo";
+
 // Calcul du Score de Visibilité IA — règles métier figées.
 // mention 50 % · position 20 % · recommandation 20 % · sentiment 10 %
 
@@ -58,7 +60,7 @@ export function calculerScore(
       POIDS.sentiment * (cible.length ? sentiment : 0));
 
   const parMoteur: Record<string, number | null> = {};
-  for (const moteur of ["ChatGPT", "Claude", "Gemini", "Perplexity"]) {
+  for (const moteur of MOTEURS) {
     const rep = reponses.filter((r) => r.engine === moteur);
     if (!rep.length) {
       parMoteur[moteur] = null;
