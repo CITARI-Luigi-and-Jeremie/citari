@@ -2,7 +2,7 @@ export * from "./types";
 export { getDb, unwrap } from "./db";
 export { requireEnv, optionalEnv } from "./env";
 export { costCents, MAX_SCAN_COST_CENTS } from "./cost";
-export { getProviders, OpenAIProvider, AnthropicProvider, GeminiProvider, PerplexityProvider } from "./providers/index";
+export { getProviders, OpenAIProvider, AnthropicProvider, GeminiProvider, PerplexityProvider, GrokProvider } from "./providers/index";
 export { extractUrls } from "./providers/base";
 export { askClaudeJson, type LLMUsage } from "./llm/json";
 export { generateQueries, fetchHomeText } from "./queries/generate";

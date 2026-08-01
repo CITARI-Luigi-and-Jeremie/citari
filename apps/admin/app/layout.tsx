@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { fontVariables } from "./fonts";
 import "./globals.css";
 
-export const metadata: Metadata = { title: "GEO Sprint — Admin" };
+export const metadata: Metadata = { title: "Citari — Admin" };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -15,7 +15,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         )}
         <nav className="border-b border-rule bg-paper-raised px-6 py-3">
           <div className="mx-auto flex max-w-5xl items-center gap-6 text-sm font-medium">
-            <span className="font-bold text-signal">GEO Sprint · Admin</span>
+            <span className="font-bold text-signal">Citari · Admin</span>
             <a href="/leads" className="hover:text-signal">Leads</a>
             <a href="/clients" className="hover:text-signal">Clients</a>
             <a href="/leads/export" className="ml-auto text-ink-faint hover:text-signal">Export CSV</a>

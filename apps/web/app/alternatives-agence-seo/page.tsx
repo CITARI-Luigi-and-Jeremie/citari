@@ -7,7 +7,7 @@ const DESCRIPTION =
 const UPDATED = "2026-07-30";
 
 export const metadata: Metadata = {
-  title: `${TITLE} | GEO Sprint`,
+  title: `${TITLE} | Citari`,
   description: DESCRIPTION,
   alternates: { canonical: "/alternatives-agence-seo" },
 };

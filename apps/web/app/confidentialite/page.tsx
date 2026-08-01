@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-export const metadata: Metadata = { title: "Politique de confidentialité | GEO Sprint", robots: { index: false } };
+export const metadata: Metadata = { title: "Politique de confidentialité | Citari", robots: { index: false } };
 
 /**
  * RGPD : le scanner collecte marque, URL, secteur, concurrents, IP et email.
@@ -9,7 +9,7 @@ export const metadata: Metadata = { title: "Politique de confidentialité | GEO 
 export default function ConfidentialitePage() {
   return (
     <main className="mx-auto max-w-prose space-y-8 px-4 py-16">
-      <a href="/" className="label transition-colors duration-150 ease-sharp hover:text-ink">← GEO Sprint</a>
+      <a href="/" className="label transition-colors duration-150 ease-sharp hover:text-ink">← Citari</a>
       <h1 className="font-editorial text-3xl text-ink">Politique de confidentialité</h1>
       <p className="text-sm text-ink-faint">Dernière mise à jour : 30 juillet 2026</p>
 

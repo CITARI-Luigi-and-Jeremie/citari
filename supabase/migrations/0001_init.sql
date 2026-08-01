@@ -1,4 +1,4 @@
--- GEO Sprint — schéma initial
+-- Citari — schéma initial
 create extension if not exists "pgcrypto";
 
 -- ─── Scans & pipeline ────────────────────────────────────────────────

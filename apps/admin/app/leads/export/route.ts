@@ -17,7 +17,7 @@ export async function GET() {
   return new Response("﻿" + [header.join(";"), ...rows].join("\n"), {
     headers: {
       "Content-Type": "text/csv; charset=utf-8",
-      "Content-Disposition": `attachment; filename="leads-geo-sprint.csv"`,
+      "Content-Disposition": `attachment; filename="leads-citari.csv"`,
     },
   });
 }

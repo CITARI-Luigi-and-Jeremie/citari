@@ -11,7 +11,7 @@ import { slugify, writeDeliverableFile } from "../lib/context.js";
  */
 
 const BOOKING = () => process.env.BOOKING_URL || "[LIEN DE RÉSERVATION]";
-const SIGNATURE = () => process.env.FOUNDER_SIGNATURE || "Luigi\nGEO Sprint";
+const SIGNATURE = () => process.env.FOUNDER_SIGNATURE || "Luigi\nCitari";
 
 interface Draft {
   step: number;

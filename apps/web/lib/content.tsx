@@ -22,7 +22,7 @@ export function ArticleLayout({
     <div className="mx-auto max-w-shell px-4 lg:px-8">
       <header className="flex items-baseline justify-between border-b border-rule py-6">
         <a href="/" className="font-mono text-sm tracking-wider text-ink transition-colors duration-150 ease-sharp hover:text-signal">
-          GEO&nbsp;SPRINT
+          CITARI
         </a>
         <a href="/" className="label transition-colors duration-150 ease-sharp hover:text-ink">
           Scan gratuit
@@ -38,7 +38,7 @@ export function ArticleLayout({
       </div>
 
       <div className="grid gap-12 border-t border-rule pt-16 lg:grid-cols-[180px_minmax(0,1fr)] lg:gap-16">
-        <div className="label lg:sticky lg:top-8 lg:self-start">GEO Sprint · analyse</div>
+        <div className="label lg:sticky lg:top-8 lg:self-start">Citari · analyse</div>
         <article className="min-w-0 space-y-6">{children}</article>
       </div>
 
@@ -166,8 +166,8 @@ export function articleJsonLd(opts: { title: string; description: string; slug: 
     description: opts.description,
     dateModified: opts.updated,
     mainEntityOfPage: { "@type": "WebPage", "@id": `${base}${opts.slug}` },
-    author: { "@type": "Organization", name: "GEO Sprint", url: base },
-    publisher: { "@type": "Organization", name: "GEO Sprint", url: base },
+    author: { "@type": "Organization", name: "Citari", url: base },
+    publisher: { "@type": "Organization", name: "Citari", url: base },
   };
 }
 

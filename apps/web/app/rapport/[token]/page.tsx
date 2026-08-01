@@ -318,7 +318,7 @@ export default async function ReportPage({ params }: { params: Promise<{ token: 
               archivées pour le re-scan J+90.
             </p>
             <p className="mt-4 font-mono text-micro uppercase">
-              GEO Sprint · rapport généré le {dateStr}
+              Citari · rapport généré le {dateStr}
             </p>
           </footer>
         </main>

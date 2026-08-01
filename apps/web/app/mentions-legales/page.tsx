@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-export const metadata: Metadata = { title: "Mentions légales | GEO Sprint", robots: { index: false } };
+export const metadata: Metadata = { title: "Mentions légales | Citari", robots: { index: false } };
 
 /**
  * Obligatoire en France (art. 6 III LCEN). Les [À COMPLÉTER] doivent être remplis
@@ -9,7 +9,7 @@ export const metadata: Metadata = { title: "Mentions légales | GEO Sprint", rob
 export default function MentionsLegalesPage() {
   return (
     <main className="mx-auto max-w-prose space-y-8 px-4 py-16">
-      <a href="/" className="label transition-colors duration-150 ease-sharp hover:text-ink">← GEO Sprint</a>
+      <a href="/" className="label transition-colors duration-150 ease-sharp hover:text-ink">← Citari</a>
       <h1 className="font-editorial text-3xl text-ink">Mentions légales</h1>
 
       <section className="space-y-2">

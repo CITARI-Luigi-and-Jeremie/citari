@@ -3,6 +3,7 @@ import { OpenAIProvider } from "./openai";
 import { AnthropicProvider } from "./anthropic";
 import { GeminiProvider } from "./gemini";
 import { PerplexityProvider } from "./perplexity";
+import { GrokProvider } from "./grok";
 import { isMock, MockProvider } from "../mock/mockLlm";
 
 /** `mockBrands` n'est utilisé qu'en mode démo (GEO_MOCK=1) pour simuler les mentions. */
@@ -14,6 +15,7 @@ export function getProviders(mockBrands?: BrandRef[]): Record<EngineId, LLMProvi
       anthropic: new MockProvider("anthropic", brands),
       gemini: new MockProvider("gemini", brands),
       perplexity: new MockProvider("perplexity", brands),
+      grok: new MockProvider("grok", brands),
     };
   }
   return {
@@ -21,7 +23,8 @@ export function getProviders(mockBrands?: BrandRef[]): Record<EngineId, LLMProvi
     anthropic: new AnthropicProvider(),
     gemini: new GeminiProvider(),
     perplexity: new PerplexityProvider(),
+    grok: new GrokProvider(),
   };
 }
 
-export { OpenAIProvider, AnthropicProvider, GeminiProvider, PerplexityProvider };
+export { OpenAIProvider, AnthropicProvider, GeminiProvider, PerplexityProvider, GrokProvider };

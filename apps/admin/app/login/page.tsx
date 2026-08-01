@@ -23,7 +23,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
   const { error } = await searchParams;
   return (
     <div className="mx-auto mt-24 max-w-sm border border-rule bg-paper-raised p-8">
-      <h1 className="text-xl font-bold">Admin GEO Sprint</h1>
+      <h1 className="text-xl font-bold">Admin Citari</h1>
       <form action={login} className="mt-4 space-y-3">
         <input
           type="password"

@@ -136,7 +136,7 @@ ${recommendations(citations.length - obtained.length, pendingTasks.length, conte
 
 ---
 
-*Rapport généré le ${new Date().toLocaleDateString("fr-FR")} — GEO Sprint*
+*Rapport généré le ${new Date().toLocaleDateString("fr-FR")} — Citari*
 `;
 
   const path = writeDeliverableFile(slug, "rapport-fin-de-sprint.md", md);

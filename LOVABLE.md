@@ -1,4 +1,4 @@
-# Prompt Lovable — GEO Sprint
+# Prompt Lovable — Citari
 
 Copie-colle la partie « PROMPT » ci-dessous dans Lovable. Le reste de ce fichier
 explique comment l'utiliser et ce qui ne passera pas par Lovable.
@@ -30,7 +30,7 @@ back-office — passe très bien.
 
 # PROMPT
 
-Tu construis **GEO Sprint**, le site d'une agence française de GEO (Generative
+Tu construis **Citari**, le site d'une agence française de GEO (Generative
 Engine Optimization). Lis tout avant de commencer, puis construis dans l'ordre
 indiqué à la fin.
 
@@ -41,7 +41,7 @@ l'IA répond en citant deux ou trois marques. Si la sienne n'y est pas, il perd
 une affaire sans jamais le savoir — il n'existe pas de deuxième page de
 résultats.
 
-GEO Sprint mesure cette invisibilité, puis la corrige.
+Citari mesure cette invisibilité, puis la corrige.
 
 **Le tunnel commercial :**
 1. **Scan gratuit** (l'aimant à prospects) : le visiteur mesure sa visibilité

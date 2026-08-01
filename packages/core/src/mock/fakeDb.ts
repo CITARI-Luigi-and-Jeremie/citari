@@ -14,7 +14,7 @@ type Row = Record<string, any>;
 // Fichier partagé entre les process web (:3000) et admin (:3001) en mode démo.
 // GEO_MOCK_STORE permet d'isoler les tests pour ne pas écraser une démo en cours.
 function storeFile(): string {
-  return process.env.GEO_MOCK_STORE || join(tmpdir(), "geo-sprint-mock-db.json");
+  return process.env.GEO_MOCK_STORE || join(tmpdir(), "citari-mock-db.json");
 }
 
 const TABLE_DEFAULTS: Record<string, Row> = {

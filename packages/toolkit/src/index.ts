@@ -1,6 +1,6 @@
 #!/usr/bin/env tsx
 /**
- * Usine de livraison GEO Sprint — CLI interne du fondateur.
+ * Usine de livraison Citari — CLI interne du fondateur.
  * Usage : pnpm toolkit <commande> [args]
  */
 import { Command } from "commander";

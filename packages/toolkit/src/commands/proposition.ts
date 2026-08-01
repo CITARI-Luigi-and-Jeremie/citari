@@ -163,7 +163,7 @@ Des questions avant de décider ? Répondez à cet email, je réponds sous 24 h.
 
 ---
 
-*Proposition établie le ${fmt(today)} · Validité 30 jours · GEO Sprint*
+*Proposition établie le ${fmt(today)} · Validité 30 jours · Citari*
 `;
 
   const html = `<article style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;max-width:760px;margin:0 auto;line-height:1.6;color:#0f172a">

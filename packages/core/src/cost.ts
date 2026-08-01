@@ -6,6 +6,7 @@ const PRICES: Record<EngineId | "anthropic-internal", { input: number; output: n
   anthropic: { input: 280, output: 1400 },      // claude sonnet
   gemini: { input: 10, output: 40 },            // gemini flash
   perplexity: { input: 90, output: 90 },        // sonar
+  grok: { input: 280, output: 1380 },           // grok-4
   "anthropic-internal": { input: 280, output: 1400 },
 };
 

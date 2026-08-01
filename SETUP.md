@@ -12,6 +12,7 @@ Tout le code est prêt et testé en mode démo. Voici ce qu'il reste à faire, d
 - [ ] Anthropic : https://console.anthropic.com → `ANTHROPIC_API_KEY`
 - [ ] Google AI Studio : https://aistudio.google.com/apikey → `GOOGLE_AI_API_KEY`
 - [ ] Perplexity : https://www.perplexity.ai/settings/api → `PERPLEXITY_API_KEY`
+- [ ] xAI (Grok) : https://console.x.ai → `XAI_API_KEY`
 
 ## 3. Emails & réservation
 - [ ] Resend : https://resend.com → `RESEND_API_KEY`, vérifier le domaine d'envoi, remplir `RESEND_FROM`
@@ -54,5 +55,5 @@ sans bloquer — mais la fonction serverless doit vivre assez longtemps :
 - [ ] Après mise en ligne : lancer `pnpm toolkit audit-technique https://votre-domaine.fr` sur votre propre site (il doit être exemplaire)
 
 ## Mode démo (référence)
-`GEO_MOCK=1` simule les 4 moteurs et la base (fichier partagé dans le dossier temporaire).
+`GEO_MOCK=1` simule les 5 moteurs et la base (fichier partagé dans le dossier temporaire).
 Utile pour : démo produit, tests UI, développement sans coût. Un bandeau jaune s'affiche sur toutes les pages.

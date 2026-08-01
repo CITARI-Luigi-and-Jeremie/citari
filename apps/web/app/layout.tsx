@@ -2,12 +2,12 @@ import type { Metadata } from "next";
 import { fontVariables } from "./fonts";
 import "./globals.css";
 
-const TITLE = "GEO Sprint — Votre marque est-elle invisible dans ChatGPT ?";
+const TITLE = "Citari — Votre marque est-elle invisible dans ChatGPT ?";
 const DESCRIPTION =
   "Mesurez gratuitement votre visibilité dans ChatGPT, Claude, Gemini et Perplexity en 90 secondes. Puis rendez votre marque citable avec le Sprint GEO de 30 jours.";
 
 export const metadata: Metadata = {
-  title: { default: TITLE, template: "%s — GEO Sprint" },
+  title: { default: TITLE, template: "%s — Citari" },
   description: DESCRIPTION,
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"),
   openGraph: {
@@ -15,7 +15,7 @@ export const metadata: Metadata = {
     description: DESCRIPTION,
     type: "website",
     locale: "fr_FR",
-    siteName: "GEO Sprint",
+    siteName: "Citari",
     images: [{ url: "/og.png", width: 1200, height: 630, alt: TITLE }],
   },
   twitter: { card: "summary_large_image", title: TITLE, description: DESCRIPTION, images: ["/og.png"] },
@@ -24,7 +24,7 @@ export const metadata: Metadata = {
 const orgJsonLd = {
   "@context": "https://schema.org",
   "@type": "Organization",
-  name: "GEO Sprint",
+  name: "Citari",
   description:
     "Agence GEO (Generative Engine Optimization) pour PME francophones : nous rendons votre marque visible dans les réponses de ChatGPT, Claude, Gemini et Perplexity.",
   url: process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000",

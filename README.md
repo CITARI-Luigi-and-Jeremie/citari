@@ -1,4 +1,4 @@
-# GEO Sprint — plateforme complète
+# Citari — plateforme complète
 
 Agence GEO (Generative Engine Optimization) : scanner de visibilité IA (lead magnet), landing de vente du Sprint GEO, back-office et usine de livraison CLI. Cahier des charges complet : [SPEC.md](SPEC.md).
 

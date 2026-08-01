@@ -32,7 +32,7 @@ export async function generateFixes(clientRef: string): Promise<void> {
   const homeText = await fetchHomeText(client.url);
 
   // robots.txt corrigé — déterministe, pas besoin de LLM
-  const robotsTxt = `# robots.txt généré par GEO Sprint — crawlers IA explicitement autorisés
+  const robotsTxt = `# robots.txt généré par Citari — crawlers IA explicitement autorisés
 ${AI_CRAWLERS.map((b) => `User-agent: ${b}\nAllow: /`).join("\n\n")}
 
 User-agent: *

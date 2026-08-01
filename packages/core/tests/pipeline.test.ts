@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it } from "vitest";
 import { getDb, unwrap } from "../src/db";
 import { resetMockDb } from "../src/mock/fakeDb";
 import { runScan, createRescan } from "../src/scan/runScan";
+import { ENGINES } from "../src/types";
 
 process.env.GEO_MOCK = "1";
 // Store isolé : les tests ne doivent pas écraser une démo en cours dans l'autre fichier
@@ -49,10 +50,11 @@ describe("pipeline complet (GEO_MOCK)", () => {
     expect(categories).toEqual(new Set(["comparative", "problem", "local", "trust"]));
 
     const responses = unwrap(await db.from("responses").select("*").eq("scan_id", id)) as any[];
-    expect(responses.length).toBe(queries.length * 4);
+    // Un moteur ajouté ne doit pas casser le test : on compte les moteurs déclarés.
+    expect(responses.length).toBe(queries.length * ENGINES.length);
 
     const mentions = unwrap(await db.from("mentions").select("*").eq("scan_id", id)) as any[];
-    expect(mentions.length).toBe(responses.length * 3); // 3 marques par réponse
+    expect(mentions.length).toBe(responses.length * 3); // marque cible + 2 concurrents
 
     // Perplexity fournit des citations (données du Chantier 3)
     const perplexityWithCitations = responses.filter((r: any) => r.engine === "perplexity" && r.citations.length > 0);

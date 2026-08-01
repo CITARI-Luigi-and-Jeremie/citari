@@ -13,7 +13,7 @@ export async function sendEmail(opts: { to: string; subject: string; html: strin
     method: "POST",
     headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
     body: JSON.stringify({
-      from: process.env.RESEND_FROM || "GEO Sprint <onboarding@resend.dev>",
+      from: process.env.RESEND_FROM || "Citari <onboarding@resend.dev>",
       to: [opts.to],
       subject: opts.subject,
       html: opts.html,

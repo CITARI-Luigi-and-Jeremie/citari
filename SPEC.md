@@ -1,4 +1,4 @@
-# Cahier des charges — Plateforme GEO Sprint (v2, complet)
+# Cahier des charges — Plateforme Citari (v2, complet)
 
 Il décrit TOUT ce qu'on construit : (A) le scanner gratuit qui génère les leads, (B) la landing qui vend le Sprint GEO, (C) l'usine de livraison interne pour exécuter les missions clients.
 

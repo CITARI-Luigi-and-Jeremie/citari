@@ -52,7 +52,7 @@ export default function LandingPage() {
 
       <div className="mx-auto max-w-shell px-4 lg:px-8">
         <header className="flex items-baseline justify-between border-b border-rule py-6">
-          <span className="font-mono text-sm tracking-wider text-ink">GEO&nbsp;SPRINT</span>
+          <span className="font-mono text-sm tracking-wider text-ink">CITARI</span>
           <nav className="flex gap-6">
             <a href="#offre" className="label transition-colors duration-150 ease-sharp hover:text-ink">Offre</a>
             <a href="/guide-geo" className="label transition-colors duration-150 ease-sharp hover:text-ink">Guide</a>
@@ -232,7 +232,7 @@ export default function LandingPage() {
 
         <footer className="border-t border-rule py-12">
           <div className="flex flex-wrap items-baseline justify-between gap-6">
-            <span className="font-mono text-sm tracking-wider text-ink">GEO&nbsp;SPRINT</span>
+            <span className="font-mono text-sm tracking-wider text-ink">CITARI</span>
             <nav className="flex flex-wrap gap-x-6 gap-y-2">
               {[
                 ["/guide-geo", "Guide GEO"],
