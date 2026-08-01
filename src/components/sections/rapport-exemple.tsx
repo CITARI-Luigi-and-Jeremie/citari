@@ -81,8 +81,9 @@ QUESTIONS.forEach((q, qi) => {
       sources:
         moteur === "Perplexity"
           ? [
-              { url: `https://${SOURCES_HOTES[graine % SOURCES_HOTES.length]}/page` },
-              { url: `https://${SOURCES_HOTES[(graine + 3) % SOURCES_HOTES.length]}/article` },
+              { url: `https://${SOURCES_HOTES[(qi * 3 + 1) % SOURCES_HOTES.length]}/page` },
+              { url: `https://${SOURCES_HOTES[(qi * 5 + 2) % SOURCES_HOTES.length]}/article` },
+              { url: `https://${SOURCES_HOTES[(qi + 4) % SOURCES_HOTES.length]}/dossier` },
             ]
           : [],
       error: indisponible ? "timeout" : null,
