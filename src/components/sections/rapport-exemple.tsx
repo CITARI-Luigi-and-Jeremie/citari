@@ -1,5 +1,5 @@
-import { Apparition } from "@/components/apparition";
-import { Etiquette, Label, Rule } from "@/components/kit";
+import { Etiquette, Rule } from "@/components/kit";
+import { SousTitre } from "@/components/sections/mesure";
 import {
   Actions,
   PartDeVoix,
@@ -309,6 +309,5 @@ export function RapportExemple() {
         )}
       </p>
     </div>
-  </Apparition>
-);
+  );
 }
