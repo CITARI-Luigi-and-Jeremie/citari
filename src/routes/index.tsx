@@ -510,94 +510,115 @@ function Mesure() {
 }
 
 
-/* ---------------- 2. Ce que nous faisons ---------------- */
+/* ---------------- 2. Le Sprint GEO ---------------- */
 
-const CHANTIERS: [string, string, string[]][] = [
+const CHANTIERS: [string, string, string, string][] = [
   [
+    "Elle ne peut pas vous lire",
     "Technique",
-    "Rendre le site lisible par les IA.",
-    [
-      "Autorisation des crawlers : GPTBot, ClaudeBot, PerplexityBot.",
-      "Fichier llms.txt rédigé et publié.",
-      "Balisage schema.org sur les pages clés.",
-      "Pages restructurées en réponse directe.",
-    ],
+    "La plupart des sites bloquent les robots d’IA sans le savoir : un réglage par défaut du CMS, hérité de 2023. Nous ouvrons l’accès à GPTBot, ClaudeBot et PerplexityBot, nous publions un fichier llms.txt, nous balisons vos pages clés en schema.org et nous réécrivons vos pages principales au format réponse directe — celui que les modèles savent citer.",
+    "Le rapport d’audit, les fichiers prêts à poser, et un cahier de spécifications si c’est votre agence qui publie.",
   ],
   [
+    "Elle n’a rien à citer de vous",
     "Contenu",
-    "5 contenus rédigés et livrés.",
-    [
-      "Ciblés sur les questions où vous êtes absent.",
-      "Livrés en Markdown et en HTML.",
-      "Balisage intégré, prêts à publier.",
-      "Aucune rédaction à votre charge.",
-    ],
+    "Une IA ne cite pas une plaquette. Elle cite une page qui répond à une question précise avec des faits vérifiables. Nous partons des questions de votre scan où vous êtes absent, et nous écrivons les pages qui manquent : comparatifs, alternatives, FAQ métier, guides d’achat.",
+    "Cinq contenus rédigés, en Markdown et en HTML, balisage intégré, prêts à publier. Sujets validés avec vous avant rédaction.",
   ],
   [
+    "Personne d’autre ne parle de vous",
     "Citations",
-    "8 cibles prioritaires.",
-    [
-      "Annuaires sectoriels, comparateurs, presse spécialisée.",
-      "Inscriptions faites par nous.",
-      "Pitchs rédigés et envoyés.",
-      "Relances gérées jusqu’à réponse.",
-    ],
+    "Les moteurs s’appuient sur des sources tierces qu’ils consultent en direct. Nous identifions celles sur lesquelles ils s’appuient pour recommander vos concurrents, et nous vous y installons.",
+    "Huit cibles traitées — inscriptions faites, pitchs presse rédigés et envoyés, relances assurées, statut de chacune suivi.",
   ],
+];
+
+const REPERES: [string, string][] = [
+  ["J1", "cadrage"],
+  ["J7", "correctifs posés"],
+  ["J14", "premiers contenus"],
+  ["J30", "rapport"],
+  ["J+90", "re-scan offert"],
 ];
 
 function Sprint() {
   return (
     <Apparition as="section" className="mt-40 border-t border-rule pt-10">
-      <Label className="pb-5">ce que nous faisons</Label>
-      <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end lg:gap-20">
-        <h2 className="max-w-[18ch] text-balance text-[34px] leading-[1.04] sm:text-[52px]">
-          {frTitre("Le Sprint GEO — 30 jours, trois chantiers.")}
-        </h2>
-        <div className="shrink-0">
-          <div className="font-display text-[52px] font-light leading-none sm:text-[64px]">
-            {euros(2900)} <span className="text-[22px] text-ink-3">HT</span>
-          </div>
-          <p className="mt-3 text-[13px] leading-relaxed text-ink-2">
-            Paiement unique. 50{NBSP}% à la commande, 50{NBSP}% à la livraison. Pas d’abonnement.
-          </p>
-        </div>
-      </div>
+      <Label className="pb-6">ce que nous faisons</Label>
+      <h2 className="max-w-[17ch] text-balance text-[38px] leading-[1.02] sm:text-[62px]">
+        {frTitre("Le Sprint GEO — trente jours, trois chantiers.")}
+      </h2>
+      <p className="mt-10 max-w-[62ch] text-[16px] leading-relaxed text-ink-2">
+        {fr(
+          "Une IA ne vous cite pas pour trois raisons possibles : elle ne peut pas vous lire, elle n’a rien à citer de vous, ou personne d’autre ne parle de vous. Nous traitons les trois.",
+        )}
+      </p>
 
-      <div className="mt-16 grid gap-y-12 border-t border-rule sm:grid-cols-3 sm:gap-x-12 lg:gap-x-20">
-        {CHANTIERS.map(([nom, phrase, points], i) => (
+      <div className="mt-16 grid gap-y-14 border-t border-rule sm:grid-cols-3 sm:gap-x-12 lg:gap-x-16">
+        {CHANTIERS.map(([cause, technique, texte, livrable], i) => (
           <div
-            key={nom}
-            className={`pt-7 ${i > 0 ? "sm:border-l sm:border-rule sm:pl-12 lg:pl-20" : ""}`}
+            key={cause}
+            className={`pt-8 ${i > 0 ? "sm:border-l sm:border-rule sm:pl-12 lg:pl-16" : ""}`}
           >
-            <div className="flex items-baseline gap-3">
-              <span className="num text-[10px] tracking-[0.14em] text-ink-3">
-                {String(i + 1).padStart(2, "0")}
-              </span>
-              <h3 className="text-[19px] font-medium">{nom}</h3>
+            <span className="num text-[11px] tracking-[0.14em] text-bordeaux">
+              {String(i + 1).padStart(2, "0")}
+            </span>
+            <h3 className="mt-3 max-w-[18ch] font-display text-[26px] font-light leading-[1.12]">
+              {cause}
+            </h3>
+            <div className="label-xs mt-3 text-ink-3">{technique}</div>
+            <p className="mt-5 max-w-[42ch] text-[14px] leading-relaxed text-ink-2">{fr(texte)}</p>
+            <div className="mt-6 border-t border-rule pt-4">
+              <div className="label-xs pb-2">vous recevez</div>
+              <p className="max-w-[42ch] text-[14px] leading-relaxed">{fr(livrable)}</p>
             </div>
-            <p className="mt-3 max-w-[30ch] text-[15px] leading-snug">{fr(phrase)}</p>
-            <ul className="mt-5 grid gap-3">
-              {points.map((p) => (
-                <li key={p} className="max-w-[38ch] text-[14px] leading-relaxed text-ink-2">
-                  {fr(p)}
-                </li>
-              ))}
-            </ul>
           </div>
         ))}
       </div>
 
-      <p className="mt-14 border-t border-rule pt-5 text-[13px] leading-relaxed text-ink-3">
-        Trois sprints par mois, pas davantage. Un seul client par secteur et par zone.
-      </p>
-      <p className="mt-2 text-[13px] leading-relaxed text-ink-3">
-        {fr(
-          "Option Sprint Domination : 4 900 € HT — dix contenus, seize cibles de citation, deux langues.",
-        )}
-      </p>
+      <div className="mt-20 border-t border-rule pt-8">
+        <Label className="pb-5">déroulé du sprint</Label>
+        <ol className="grid border-t border-rule sm:grid-flow-col sm:auto-cols-fr">
+          {REPERES.map(([jour, quoi], i) => (
+            <li
+              key={jour}
+              className={`border-b border-rule py-5 sm:border-b-0 sm:py-6 ${
+                i > 0 ? "sm:border-l sm:border-rule sm:pl-6" : ""
+              }`}
+            >
+              <div className="num text-[11px] tracking-[0.12em] text-ink-3">
+                {jour.replace(/ /g, NBSP)}
+              </div>
+              <div className="mt-2 max-w-[16ch] text-[15px] leading-snug text-ink-2">{quoi}</div>
+            </li>
+          ))}
+        </ol>
+      </div>
+
+      <div className="mt-20 grid gap-10 border-t border-rule pt-10 lg:grid-cols-[auto_minmax(0,44ch)] lg:gap-20">
+        <div className="font-display text-[56px] font-light leading-none sm:text-[72px]">
+          {euros(2900)} <span className="text-[24px] text-ink-3">HT</span>
+        </div>
+        <div>
+          <p className="text-[17px] leading-relaxed">
+            {fr(
+              "Paiement unique. 50 % à la commande, 50 % à la livraison. Aucun abonnement, aucune reconduction. Re-scan à J+90 inclus.",
+            )}
+          </p>
+          <p className="mt-6 text-[17px] leading-relaxed">
+            Trois sprints par mois, pas davantage. Un seul client par secteur et par zone.
+          </p>
+          <p className="mt-8 text-[13px] leading-relaxed text-ink-3">
+            {fr(
+              "Option Sprint Domination : 4 900 € HT — dix contenus, seize cibles de citation, deux langues.",
+            )}
+          </p>
+        </div>
+      </div>
     </Apparition>
   );
 }
+
 
 /* ---------------- 3. Ce que nous ne garantissons pas ---------------- */
 
