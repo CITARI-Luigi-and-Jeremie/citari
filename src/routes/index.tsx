@@ -620,34 +620,34 @@ function Sprint() {
 }
 
 
-/* ---------------- 3. Ce que nous ne garantissons pas ---------------- */
+/* ---------------- 3. Garanties ---------------- */
 
 const NOUS_GARANTISSONS = [
-  "Nous garantissons les actions livrées, pas un score.",
-  "L’exécution intégrale des trois chantiers, détaillée dans un rapport de fin de mission.",
-  "Une mesure identique avant et après : mêmes 24 questions, mêmes quatre moteurs, au re-scan offert à J+90.",
+  "L’exécution intégrale des trois chantiers, documentée action par action dans le rapport de fin de mission.",
+  "Une mesure identique avant et après : mêmes questions, mêmes moteurs, même formule. Le re-scan à J+90 est inclus, que le résultat nous arrange ou non.",
+  "Un interlocuteur unique : celui qui exécute.",
 ];
 
 const NOUS_NE_GARANTISSONS_PAS = [
-  "Aucune position, aucun score, aucun chiffre à 30 jours. Les moteurs génératifs intègrent les changements de contenu et de citations en 4 à 12 semaines.",
-  "Vous ne trouverez sur ce site ni témoignage, ni logo client, ni résultat chiffré présenté comme un cas réel. L’agence est jeune : la crédibilité vient de la clarté de la méthode, pas d’une preuve sociale fabriquée.",
-  "Si votre score est bon, nous vous le dirons et nous ne vous vendrons rien.",
+  "Un score précis à une date précise. Les moteurs intègrent les changements en quatre à douze semaines, et personne ne contrôle ce délai.",
+  "Une position. « Premier dans ChatGPT » n’existe pas : il n’y a pas de classement, seulement une réponse rédigée qui varie d’une fois sur l’autre.",
+  "Un effet immédiat. Ce travail se cumule dans le temps — c’est précisément pour cela que les places se prennent maintenant.",
 ];
 
 function Garanties() {
   return (
     <Apparition as="section" className="mt-40 border-t border-rule pt-10">
-      <h2 className="max-w-[20ch] text-balance text-[34px] leading-[1.04] sm:text-[52px]">
-        {frTitre("Ce que nous ne garantissons pas.")}
+      <h2 className="max-w-[17ch] text-balance text-[38px] leading-[1.02] sm:text-[62px]">
+        {frTitre("Nos engagements, et leurs limites.")}
       </h2>
-      <div className="mt-14 grid gap-12 border-t border-rule pt-8 lg:grid-cols-2 lg:gap-20">
+      <div className="mt-16 grid gap-12 border-t border-rule pt-8 lg:grid-cols-2 lg:gap-20">
         <div>
           <Label className="pb-5">nous garantissons</Label>
-          <ul className="grid gap-5">
+          <ul className="grid">
             {NOUS_GARANTISSONS.map((t) => (
               <li
                 key={t}
-                className="max-w-[54ch] border-b border-rule pb-5 text-[15px] leading-relaxed"
+                className="max-w-[54ch] border-b border-rule py-5 text-[15px] leading-relaxed"
               >
                 {fr(t)}
               </li>
@@ -656,11 +656,11 @@ function Garanties() {
         </div>
         <div>
           <Label className="pb-5">nous ne garantissons pas</Label>
-          <ul className="grid gap-5">
+          <ul className="grid">
             {NOUS_NE_GARANTISSONS_PAS.map((t) => (
               <li
                 key={t}
-                className="max-w-[54ch] border-b border-rule pb-5 text-[15px] leading-relaxed text-ink-2"
+                className="max-w-[54ch] border-b border-rule py-5 text-[15px] leading-relaxed text-ink-3"
               >
                 {fr(t)}
               </li>
@@ -668,78 +668,15 @@ function Garanties() {
           </ul>
         </div>
       </div>
+      <p className="mx-auto mt-32 mb-16 max-w-[24ch] text-balance text-center font-display text-[30px] font-light leading-[1.18] sm:text-[42px]">
+        {frTitre(
+          "Si votre score est bon, nous vous le dirons et nous ne vous vendrons rien.",
+        )}
+      </p>
     </Apparition>
   );
 }
 
-/* ---------------- 5. La méthode ---------------- */
-
-const FORMULE: [string, string][] = [
-  ["taux de mention", "50 %"],
-  ["position moyenne", "20 %"],
-  ["recommandation explicite", "20 %"],
-  ["sentiment", "10 %"],
-];
-
-const REPERES: [string, string][] = [
-  ["J1", "cadrage"],
-  ["J7", "correctifs posés"],
-  ["J14", "premiers contenus"],
-  ["J30", "rapport"],
-  ["J+90", "re-scan offert"],
-];
-
-function Methode() {
-  return (
-    <Apparition as="section" className="mt-40 border-t border-rule pt-10">
-      <h2 className="text-[34px] leading-none sm:text-[52px]">La méthode</h2>
-
-      <div className="mt-12 grid gap-12 lg:grid-cols-[minmax(0,52ch)_1fr] lg:gap-20">
-        <div>
-          <p className="text-[16px] leading-relaxed text-ink-2">
-            {fr(
-              "24 questions d’intention d’achat, posées à ChatGPT, Claude, Gemini et Perplexity via les API officielles des éditeurs. 40 % de questions comparatives, 25 % de questions problème, 20 % de questions locales, 15 % de questions de confiance. L’échantillon est généré une fois, puis figé : le re-scan rejoue exactement les mêmes, sinon la comparaison ne vaut rien.",
-            )}
-          </p>
-          <p className="mt-6 text-[16px] leading-relaxed text-ink-2">
-            {fr(
-              "Le score va de 0 à 100. Voici sa formule exacte, publiée en clair : vous pouvez la recalculer vous-même à partir du rapport.",
-            )}
-          </p>
-        </div>
-        <dl className="grid h-max border-t border-rule">
-          {FORMULE.map(([k, v]) => (
-            <div key={k} className="flex items-baseline justify-between gap-6 border-b border-rule py-4">
-              <dt className="text-[15px] text-ink-2">{k}</dt>
-              <dd className="font-display text-[30px] font-light leading-none">
-                {v.replace(" ", NBSP)}
-              </dd>
-            </div>
-          ))}
-        </dl>
-      </div>
-
-      <div className="mt-20">
-        <Label className="pb-5">déroulé du sprint</Label>
-        <ol className="grid border-t border-rule sm:grid-flow-col sm:auto-cols-fr">
-          {REPERES.map(([jour, quoi], i) => (
-            <li
-              key={jour}
-              className={`border-b border-rule py-5 sm:border-b-0 sm:py-6 ${
-                i > 0 ? "sm:border-l sm:border-rule sm:pl-6" : ""
-              }`}
-            >
-              <div className="num text-[11px] tracking-[0.12em] text-bordeaux">
-                {jour.replace(/ /g, NBSP)}
-              </div>
-              <div className="mt-2 max-w-[16ch] text-[15px] leading-snug text-ink-2">{quoi}</div>
-            </li>
-          ))}
-        </ol>
-      </div>
-    </Apparition>
-  );
-}
 
 
 /* ---------------- FAQ ---------------- */
