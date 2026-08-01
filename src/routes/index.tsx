@@ -256,7 +256,52 @@ function BlocPreuve() {
 }
 
 
+/* ---------------- Aperçu du rapport ---------------- */
 
+const ENGINES_SCAN = ["ChatGPT", "Claude", "Gemini", "Grok", "Perplexity"];
+
+function ApercuRapport() {
+  return (
+    <div className="grid gap-5 sm:grid-cols-2">
+      <div className="carte bg-paper-2/50 p-5">
+        <Label>ce que vous obtiendrez</Label>
+        <ul className="mt-4 grid gap-3 text-[14px] leading-snug text-ink-2">
+          <li className="flex gap-3">
+            <span className="mt-0.5 h-1.5 w-1.5 rounded-full bg-bordeaux" />
+            <span>{fr("Un score de visibilité de 0 à 100 sur les 5 moteurs.")}</span>
+          </li>
+          <li className="flex gap-3">
+            <span className="mt-0.5 h-1.5 w-1.5 rounded-full bg-bordeaux" />
+            <span>{fr("Le classement de vos concurrents question par question.")}</span>
+          </li>
+          <li className="flex gap-3">
+            <span className="mt-0.5 h-1.5 w-1.5 rounded-full bg-bordeaux" />
+            <span>{fr("Les phrases exactes citées par l’IA à votre sujet.")}</span>
+          </li>
+        </ul>
+      </div>
+      <div className="carte bg-paper-2/50 p-5">
+        <Label>moteurs interrogés</Label>
+        <div className="mt-4 flex flex-wrap gap-2">
+          {ENGINES_SCAN.map((m) => (
+            <span
+              key={m}
+              className="inline-flex rounded-full border border-rule-strong bg-paper px-3 py-1 text-[12px] font-medium text-ink-2"
+            >
+              {m}
+            </span>
+          ))}
+        </div>
+        <div className="mt-4 flex items-baseline gap-3 border-t border-rule pt-4">
+          <span className="font-display text-[42px] font-light leading-none text-ink-3">24</span>
+          <span className="text-[13px] leading-snug text-ink-3">
+            {fr("questions d’intention d’achat, générées à partir de votre secteur.")}
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 /* ---------------- Formulaire de scan ---------------- */
 
