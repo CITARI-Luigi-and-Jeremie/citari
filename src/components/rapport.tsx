@@ -78,7 +78,13 @@ export function ScoresMoteurs({
             key={m}
             className={cn("border-t border-rule py-4 pr-6", i > 0 && "lg:border-l lg:pl-5")}
           >
-            <Label>{m}</Label>
+            <Label>
+              <span className="inline-flex items-center gap-1.5">
+                <MoteurLogo moteur={m} className="text-[13px] text-ink" />
+                {m}
+              </span>
+            </Label>
+
             <div className="num mt-1 text-[38px] leading-none">
               {v === null || v === undefined ? "—" : v}
             </div>
