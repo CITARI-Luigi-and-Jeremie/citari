@@ -54,6 +54,8 @@ pnpm toolkit generate-fixes "Client"                               # Chantier 1 
 pnpm toolkit content-brief "Client"                                # Chantier 2 : 4-6 briefs
 pnpm toolkit draft-content "Client" <brief-id>                     # Chantier 2 : rédaction (relecture obligatoire)
 pnpm toolkit citation-targets "Client"                             # Chantier 3 : cibles + pitchs
+pnpm toolkit verify-fixes "Client"                                  # Contrôle : les correctifs sont-ils en ligne ?
+pnpm toolkit crawler-log "Client" access.log                       # Preuve : les crawlers IA passent-ils ?
 pnpm toolkit sprint-report "Client"                                # Semaine 4 : rapport de fin de sprint
 pnpm toolkit rescan "Client"                                       # J+90 : mêmes requêtes, rapport avant/après
 ```

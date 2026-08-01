@@ -9,6 +9,8 @@ import { generateFixes } from "./commands/generate-fixes.js";
 import { contentBrief } from "./commands/content-brief.js";
 import { draftContent } from "./commands/draft-content.js";
 import { citationTargets } from "./commands/citation-targets.js";
+import { verifyFixes } from "./commands/verify-fixes.js";
+import { crawlerLog } from "./commands/crawler-log.js";
 import { sprintReport } from "./commands/sprint-report.js";
 import { relance } from "./commands/relance.js";
 import { proposition } from "./commands/proposition.js";
@@ -49,6 +51,19 @@ program
   .argument("<client>", "nom ou id du client")
   .description("Chantier 3 — cibles de citation priorisées + brouillons de pitchs presse")
   .action((client: string) => run(citationTargets(client)));
+
+program
+  .command("verify-fixes")
+  .argument("<client>", "nom ou id du client")
+  .description("Contrôle — vérifie que les correctifs livrés sont réellement en ligne")
+  .action((client: string) => run(verifyFixes(client)));
+
+program
+  .command("crawler-log")
+  .argument("<client>", "nom ou id du client")
+  .argument("<fichier>", "log d'accès du serveur, format combiné Apache/Nginx")
+  .description("Preuve — compte les passages réels des crawlers IA sur le site du client")
+  .action((client: string, fichier: string) => run(crawlerLog(client, fichier)));
 
 program
   .command("relance")

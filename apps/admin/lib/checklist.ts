@@ -5,6 +5,8 @@ export const SPRINT_CHECKLIST: { week: number; label: string }[] = [
   { week: 1, label: "Lancer `pnpm toolkit audit-technique <url>`" },
   { week: 1, label: "Lancer `pnpm toolkit generate-fixes <client>`" },
   { week: 1, label: "Validation + pose des fixes techniques (robots.txt, llms.txt, schema.org)" },
+  { week: 1, label: "Lancer `pnpm toolkit verify-fixes <client>` — CONFIRMER que les correctifs sont en ligne" },
+  { week: 1, label: "Demander au client un export des logs d'accès (format combiné) pour la mesure des crawlers" },
   { week: 1, label: "Lancer `pnpm toolkit content-brief <client>`" },
   { week: 1, label: "Validation des sujets de contenu avec le client" },
   // Semaine 2
@@ -19,7 +21,8 @@ export const SPRINT_CHECKLIST: { week: number; label: string }[] = [
   { week: 3, label: "Suivi des inscriptions annuaires" },
   // Semaine 4
   { week: 4, label: "Relances citations externes" },
-  { week: 4, label: "Vérification technique finale" },
+  { week: 4, label: "Lancer `pnpm toolkit verify-fixes <client>` — vérification technique finale" },
+  { week: 4, label: "Lancer `pnpm toolkit crawler-log <client> <logs>` — preuve du passage des crawlers IA" },
   { week: 4, label: "Lancer `pnpm toolkit sprint-report <client>` (rapport de fin de sprint) puis l'envoyer au client" },
   { week: 4, label: "Programmation du re-scan J+90" },
 ];
