@@ -165,21 +165,16 @@ function PilulePreuve({
   );
 }
 
-function Etape({ n, titre }: { n: string; titre: string }) {
-  return (
-    <div className="flex items-center gap-3">
-      <span className="num flex h-5 w-5 items-center justify-center rounded-full border border-rule-strong text-[10px] text-ink-3">
-        {n}
-      </span>
-      <span className="label-xs">{titre}</span>
-    </div>
-  );
-}
+const MOTEURS_DEMO = ["ChatGPT", "Claude", "Gemini", "Perplexity", "Grok"] as const;
+type MoteurDemo = (typeof MOTEURS_DEMO)[number];
 
 function BlocPreuve() {
   const [metier, setMetier] = useState<Metier>(METIERS[0]);
   const [ville, setVille] = useState<string>(VILLES[0]);
+  const [moteur, setMoteur] = useState<MoteurDemo>(MOTEURS_DEMO[0]);
   const ex = exemple(metier, ville);
+  const decalage = MOTEURS_DEMO.indexOf(moteur) % ex.concurrents.length;
+  const classement = ex.concurrents.map((_, i) => ex.concurrents[(i + decalage) % ex.concurrents.length]);
 
   return (
     <div className="carte carte-i overflow-hidden">
@@ -199,32 +194,52 @@ function BlocPreuve() {
         </p>
       </div>
 
-      <div key={`${metier}-${ville}`} className="rise px-5 py-6 sm:px-7 sm:py-8">
-        <Etape n="1" titre="votre client demande à ChatGPT" />
-        <div className="mt-3 flex justify-end">
-          <p className="max-w-[36ch] rounded-xl rounded-br-sm bg-ink px-4 py-3 text-[14px] leading-snug text-paper">
-            {fr(ex.question)}
-          </p>
-        </div>
-
-        <div className="mt-8">
-          <Etape n="2" titre="ChatGPT répond" />
-        </div>
-
-        <ol className="mt-4 overflow-hidden rounded-lg border border-rule">
-          {ex.concurrents.map((c, i) => (
-            <li
-              key={c}
-              className="flex items-center gap-3 border-b border-rule bg-paper-2/40 px-4 py-3.5"
-              style={{ ["--delai" as string]: `${i * 60}ms` }}
+      {/* Choix du moteur : les cinq que nous interrogeons. */}
+      <div className="flex flex-wrap items-center gap-x-1 gap-y-1.5 border-b border-rule px-5 py-3 sm:px-7">
+        {MOTEURS_DEMO.map((m) => {
+          const actif = m === moteur;
+          return (
+            <button
+              key={m}
+              type="button"
+              onClick={() => setMoteur(m)}
+              aria-pressed={actif}
+              className={`rounded-full px-3 py-1.5 text-[12px] tracking-[0.02em] transition-[background-color,color] duration-300 ease-[cubic-bezier(0.2,0.7,0.2,1)] ${
+                actif ? "bg-ink text-paper" : "text-ink-3 hover:bg-paper-2 hover:text-ink"
+              }`}
             >
+              {m}
+            </button>
+          );
+        })}
+      </div>
+
+      <div key={`${metier}-${ville}-${moteur}`} className="rise px-5 py-6 sm:px-7 sm:py-8">
+        <div className="flex justify-end">
+          <div className="max-w-[36ch]">
+            <span className="label-xs mb-2 block text-right">votre client</span>
+            <p className="rounded-2xl rounded-br-md bg-ink px-4 py-3 text-[14px] leading-snug text-paper shadow-soft">
+              {fr(ex.question)}
+            </p>
+          </div>
+        </div>
+
+        <div className="mt-7 flex items-center gap-2.5">
+          <span className="h-1.5 w-1.5 rounded-full bg-bordeaux" />
+          <span className="label-xs">{fr(`${moteur} répond`)}</span>
+        </div>
+
+        <ol className="mt-4 overflow-hidden rounded-lg border border-rule bg-card">
+          {classement.map((c, i) => (
+            <li key={c} className="ligne-i flex items-center gap-4 border-b border-rule px-4 py-3.5">
               <span className="num w-5 shrink-0 text-[12px] text-ink-3">{String(i + 1).padStart(2, "0")}</span>
               <span className="min-w-0 flex-1 text-[16px] leading-snug">{c}</span>
               <span className="label-xs shrink-0 text-ink-3">cité</span>
             </li>
           ))}
-          <li className="flex items-center gap-3 border-l-2 border-l-bordeaux bg-bordeaux/[0.06] px-4 py-4">
-            <span className="num w-5 shrink-0 text-[12px] text-bordeaux/60">—</span>
+          <li className="relative flex items-center gap-4 bg-bordeaux-wash px-4 py-4">
+            <span className="absolute inset-y-0 left-0 w-px bg-bordeaux" />
+            <span className="num w-5 shrink-0 text-center text-[12px] text-bordeaux/60">—</span>
             <span className="min-w-0 flex-1 font-display text-[20px] italic leading-tight text-bordeaux">
               votre marque
             </span>
@@ -233,7 +248,7 @@ function BlocPreuve() {
         </ol>
 
         <p className="mt-5 text-[13px] leading-relaxed text-ink-3">
-          {fr("Exemple illustratif : les noms sont fictifs. Votre scan utilise vos vrais concurrents.")}
+          {fr("Exemple illustratif : les noms sont fictifs. Votre scan interroge ChatGPT, Claude, Gemini, Perplexity et Grok avec vos vrais concurrents.")}
         </p>
       </div>
     </div>
