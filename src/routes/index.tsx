@@ -81,11 +81,11 @@ function Accueil() {
             <BlocPreuve />
           </Apparition>
         </section>
-        <Constat />
+        <Mesure />
         <Sprint />
         <Garanties />
         <PourQui />
-        <Methode />
+
         <Faq />
         <AppelFinal />
         <PiedDePage />
@@ -173,7 +173,9 @@ function BlocPreuve() {
   const classement = ex.concurrents.map((_, i) => ex.concurrents[(i + decalage) % ex.concurrents.length]);
 
   return (
+    <div>
     <div className="carte carte-i overflow-hidden">
+
       {/* Réglage : une phrase, deux mots à changer. */}
       <div className="border-b border-rule bg-paper-2/60 px-5 py-4 sm:px-7">
         <span className="label-xs">démonstration</span>
@@ -248,7 +250,12 @@ function BlocPreuve() {
         </p>
       </div>
     </div>
+    <p className="mt-7 max-w-[34ch] font-display text-[24px] font-light leading-[1.2]">
+      Une IA ne donne pas dix liens. Elle donne trois noms.
+    </p>
+    </div>
   );
+
 }
 
 
@@ -418,175 +425,112 @@ function Formulaire() {
   );
 }
 
-/* ---------------- 1. Le constat ---------------- */
-
-function Constat() {
-  return (
-    <Apparition as="section" className="mt-40 sm:mt-56">
-      <p className="max-w-[16ch] text-balance font-display text-[46px] font-light leading-[1.02] sm:text-[86px]">
-        Une IA ne donne pas dix liens. Elle donne trois noms.
-      </p>
-      <div className="mt-24 grid gap-6 border-t border-rule pt-6 sm:mt-32 lg:grid-cols-[minmax(0,60ch)_1fr] lg:gap-20">
-        <p className="text-[16px] leading-relaxed text-ink-2">
-          <span className="num text-bordeaux">46{NBSP}%</span> des utilisateurs d’IA démarrent leur
-          recherche d’achat directement sur une IA.
-        </p>
-        <p className="text-[11px] leading-relaxed text-ink-3 lg:pt-1">
-          Sources : Alchemer 2026 · G2 Research 2026 · Reuters
-        </p>
-      </div>
-    </Apparition>
-  );
-}
-
-/* ---------------- 2. Ce que nous faisons ---------------- */
-
-const CHANTIERS: [string, string, string[]][] = [
-  [
-    "Technique",
-    "Rendre le site lisible par les IA.",
-    [
-      "Autorisation des crawlers : GPTBot, ClaudeBot, PerplexityBot.",
-      "Fichier llms.txt rédigé et publié.",
-      "Balisage schema.org sur les pages clés.",
-      "Pages restructurées en réponse directe.",
-    ],
-  ],
-  [
-    "Contenu",
-    "5 contenus rédigés et livrés.",
-    [
-      "Ciblés sur les questions où vous êtes absent.",
-      "Livrés en Markdown et en HTML.",
-      "Balisage intégré, prêts à publier.",
-      "Aucune rédaction à votre charge.",
-    ],
-  ],
-  [
-    "Citations",
-    "8 cibles prioritaires.",
-    [
-      "Annuaires sectoriels, comparateurs, presse spécialisée.",
-      "Inscriptions faites par nous.",
-      "Pitchs rédigés et envoyés.",
-      "Relances gérées jusqu’à réponse.",
-    ],
-  ],
-];
-
-function Sprint() {
-  return (
-    <Apparition as="section" className="mt-40 border-t border-rule pt-10">
-      <Label className="pb-5">ce que nous faisons</Label>
-      <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end lg:gap-20">
-        <h2 className="max-w-[18ch] text-balance text-[34px] leading-[1.04] sm:text-[52px]">
-          {frTitre("Le Sprint GEO — 30 jours, trois chantiers.")}
-        </h2>
-        <div className="shrink-0">
-          <div className="font-display text-[52px] font-light leading-none sm:text-[64px]">
-            {euros(2900)} <span className="text-[22px] text-ink-3">HT</span>
-          </div>
-          <p className="mt-3 text-[13px] leading-relaxed text-ink-2">
-            Paiement unique. 50{NBSP}% à la commande, 50{NBSP}% à la livraison. Pas d’abonnement.
-          </p>
-        </div>
-      </div>
-
-      <div className="mt-16 grid gap-y-12 border-t border-rule sm:grid-cols-3 sm:gap-x-12 lg:gap-x-20">
-        {CHANTIERS.map(([nom, phrase, points], i) => (
-          <div
-            key={nom}
-            className={`pt-7 ${i > 0 ? "sm:border-l sm:border-rule sm:pl-12 lg:pl-20" : ""}`}
-          >
-            <div className="flex items-baseline gap-3">
-              <span className="num text-[10px] tracking-[0.14em] text-ink-3">
-                {String(i + 1).padStart(2, "0")}
-              </span>
-              <h3 className="text-[19px] font-medium">{nom}</h3>
-            </div>
-            <p className="mt-3 max-w-[30ch] text-[15px] leading-snug">{fr(phrase)}</p>
-            <ul className="mt-5 grid gap-3">
-              {points.map((p) => (
-                <li key={p} className="max-w-[38ch] text-[14px] leading-relaxed text-ink-2">
-                  {fr(p)}
-                </li>
-              ))}
-            </ul>
-          </div>
-        ))}
-      </div>
-
-      <p className="mt-14 border-t border-rule pt-5 text-[13px] leading-relaxed text-ink-3">
-        Trois sprints par mois, pas davantage. Un seul client par secteur et par zone.
-      </p>
-      <p className="mt-2 text-[13px] leading-relaxed text-ink-3">
-        {fr(
-          "Option Sprint Domination : 4 900 € HT — dix contenus, seize cibles de citation, deux langues.",
-        )}
-      </p>
-    </Apparition>
-  );
-}
-
-/* ---------------- 3. Ce que nous ne garantissons pas ---------------- */
-
-const NOUS_GARANTISSONS = [
-  "Nous garantissons les actions livrées, pas un score.",
-  "L’exécution intégrale des trois chantiers, détaillée dans un rapport de fin de mission.",
-  "Une mesure identique avant et après : mêmes 24 questions, mêmes quatre moteurs, au re-scan offert à J+90.",
-];
-
-const NOUS_NE_GARANTISSONS_PAS = [
-  "Aucune position, aucun score, aucun chiffre à 30 jours. Les moteurs génératifs intègrent les changements de contenu et de citations en 4 à 12 semaines.",
-  "Vous ne trouverez sur ce site ni témoignage, ni logo client, ni résultat chiffré présenté comme un cas réel. L’agence est jeune : la crédibilité vient de la clarté de la méthode, pas d’une preuve sociale fabriquée.",
-  "Si votre score est bon, nous vous le dirons et nous ne vous vendrons rien.",
-];
-
-function Garanties() {
-  return (
-    <Apparition as="section" className="mt-40 border-t border-rule pt-10">
-      <h2 className="max-w-[20ch] text-balance text-[34px] leading-[1.04] sm:text-[52px]">
-        {frTitre("Ce que nous ne garantissons pas.")}
-      </h2>
-      <div className="mt-14 grid gap-12 border-t border-rule pt-8 lg:grid-cols-2 lg:gap-20">
-        <div>
-          <Label className="pb-5">nous garantissons</Label>
-          <ul className="grid gap-5">
-            {NOUS_GARANTISSONS.map((t) => (
-              <li
-                key={t}
-                className="max-w-[54ch] border-b border-rule pb-5 text-[15px] leading-relaxed"
-              >
-                {fr(t)}
-              </li>
-            ))}
-          </ul>
-        </div>
-        <div>
-          <Label className="pb-5">nous ne garantissons pas</Label>
-          <ul className="grid gap-5">
-            {NOUS_NE_GARANTISSONS_PAS.map((t) => (
-              <li
-                key={t}
-                className="max-w-[54ch] border-b border-rule pb-5 text-[15px] leading-relaxed text-ink-2"
-              >
-                {fr(t)}
-              </li>
-            ))}
-          </ul>
-        </div>
-      </div>
-    </Apparition>
-  );
-}
-
-/* ---------------- 5. La méthode ---------------- */
+/* ---------------- 1. La mesure ---------------- */
 
 const FORMULE: [string, string][] = [
   ["taux de mention", "50 %"],
   ["position moyenne", "20 %"],
   ["recommandation explicite", "20 %"],
   ["sentiment", "10 %"],
+];
+
+const ETAPES: [string, string][] = [
+  [
+    "Vingt-quatre questions écrites pour votre marché",
+    "Générées à partir de votre secteur et de votre ville : dix comparatives, six sur un problème à résoudre, cinq locales, trois sur la confiance. Ce sont des questions d’acheteur, pas des mots-clés.",
+  ],
+  [
+    "Quatre moteurs interrogés en direct",
+    "ChatGPT, Claude, Gemini et Perplexity répondent à chacune des vingt-quatre questions, par les API officielles des éditeurs. Quatre-vingt-seize réponses réelles, collectées pendant votre scan. Jamais de capture d’écran, jamais de scraping.",
+  ],
+  [
+    "Chaque réponse est décortiquée",
+    "Quelles marques sont nommées, dans quel ordre, laquelle est explicitement recommandée, sur quel ton. Et la phrase exacte, mot pour mot, où cela se joue.",
+  ],
+  [
+    "Un score, et tout ce qu’il y a derrière",
+    "Sur cent points : présence dans la réponse 50, rang 20, recommandation explicite 20, tonalité 10. La formule est publiée parce que vous devez pouvoir la recalculer, et la contester.",
+  ],
+  [
+    "Les questions sont scellées",
+    "Elles sont enregistrées telles quelles, le premier jour. À J+90 nous rejouons exactement les mêmes, sur les mêmes moteurs, avec la même formule. Nous ne pouvons pas choisir nos questions après coup : c’est ce qui rend le avant/après incontestable.",
+  ],
+];
+
+function Mesure() {
+  return (
+    <Apparition as="section" className="mt-40 border-t border-rule pt-10 sm:mt-52">
+      <Label className="pb-6">la mesure</Label>
+      <h2 className="max-w-[15ch] text-balance text-[38px] leading-[1.02] sm:text-[62px]">
+        {frTitre("Nous ne prononçons jamais votre nom.")}
+      </h2>
+      <p className="mt-10 max-w-[62ch] text-[16px] leading-relaxed text-ink-2">
+        {fr(
+          "C’est la seule façon d’obtenir une mesure honnête. Si nous demandions à ChatGPT ce qu’il pense de votre entreprise, il en dirait du bien — nous lui aurions soufflé la réponse. Nous posons donc les questions que vos acheteurs posent réellement, sans jamais citer votre marque, et nous regardons si elle apparaît d’elle-même.",
+        )}
+      </p>
+
+      <ol className="mt-20 border-t border-rule">
+        {ETAPES.map(([titre, texte], i) => (
+          <li
+            key={titre}
+            className="grid gap-4 border-b border-rule py-10 md:grid-cols-[minmax(0,26ch)_1fr] md:gap-16"
+          >
+            <div className="flex items-baseline gap-4">
+              <span className="num text-[11px] tracking-[0.14em] text-bordeaux">
+                {String(i + 1).padStart(2, "0")}
+              </span>
+              <h3 className="max-w-[22ch] font-display text-[24px] font-light leading-[1.15]">
+                {frTitre(titre)}
+              </h3>
+            </div>
+            <div>
+              <p className="max-w-[62ch] text-[15px] leading-relaxed text-ink-2">{fr(texte)}</p>
+              {i === 3 ? (
+                <dl className="mt-8 max-w-[46ch] border-t border-rule">
+                  {FORMULE.map(([k, v]) => (
+                    <div
+                      key={k}
+                      className="flex items-baseline justify-between gap-6 border-b border-rule py-3.5"
+                    >
+                      <dt className="text-[14px] text-ink-2">{k}</dt>
+                      <dd className="font-display text-[26px] font-light leading-none">
+                        {v.replace(" ", NBSP)}
+                      </dd>
+                    </div>
+                  ))}
+                </dl>
+              ) : null}
+            </div>
+          </li>
+        ))}
+      </ol>
+    </Apparition>
+  );
+}
+
+
+/* ---------------- 2. Le Sprint GEO ---------------- */
+
+const CHANTIERS: [string, string, string, string][] = [
+  [
+    "Elle ne peut pas vous lire",
+    "Technique",
+    "La plupart des sites bloquent les robots d’IA sans le savoir : un réglage par défaut du CMS, hérité de 2023. Nous ouvrons l’accès à GPTBot, ClaudeBot et PerplexityBot, nous publions un fichier llms.txt, nous balisons vos pages clés en schema.org et nous réécrivons vos pages principales au format réponse directe — celui que les modèles savent citer.",
+    "Le rapport d’audit, les fichiers prêts à poser, et un cahier de spécifications si c’est votre agence qui publie.",
+  ],
+  [
+    "Elle n’a rien à citer de vous",
+    "Contenu",
+    "Une IA ne cite pas une plaquette. Elle cite une page qui répond à une question précise avec des faits vérifiables. Nous partons des questions de votre scan où vous êtes absent, et nous écrivons les pages qui manquent : comparatifs, alternatives, FAQ métier, guides d’achat.",
+    "Cinq contenus rédigés, en Markdown et en HTML, balisage intégré, prêts à publier. Sujets validés avec vous avant rédaction.",
+  ],
+  [
+    "Personne d’autre ne parle de vous",
+    "Citations",
+    "Les moteurs s’appuient sur des sources tierces qu’ils consultent en direct. Nous identifions celles sur lesquelles ils s’appuient pour recommander vos concurrents, et nous vous y installons.",
+    "Huit cibles traitées — inscriptions faites, pitchs presse rédigés et envoyés, relances assurées, statut de chacune suivi.",
+  ],
 ];
 
 const REPERES: [string, string][] = [
@@ -597,37 +541,42 @@ const REPERES: [string, string][] = [
   ["J+90", "re-scan offert"],
 ];
 
-function Methode() {
+function Sprint() {
   return (
     <Apparition as="section" className="mt-40 border-t border-rule pt-10">
-      <h2 className="text-[34px] leading-none sm:text-[52px]">La méthode</h2>
+      <Label className="pb-6">ce que nous faisons</Label>
+      <h2 className="max-w-[17ch] text-balance text-[38px] leading-[1.02] sm:text-[62px]">
+        {frTitre("Le Sprint GEO — trente jours, trois chantiers.")}
+      </h2>
+      <p className="mt-10 max-w-[62ch] text-[16px] leading-relaxed text-ink-2">
+        {fr(
+          "Une IA ne vous cite pas pour trois raisons possibles : elle ne peut pas vous lire, elle n’a rien à citer de vous, ou personne d’autre ne parle de vous. Nous traitons les trois.",
+        )}
+      </p>
 
-      <div className="mt-12 grid gap-12 lg:grid-cols-[minmax(0,52ch)_1fr] lg:gap-20">
-        <div>
-          <p className="text-[16px] leading-relaxed text-ink-2">
-            {fr(
-              "24 questions d’intention d’achat, posées à ChatGPT, Claude, Gemini et Perplexity via les API officielles des éditeurs. 40 % de questions comparatives, 25 % de questions problème, 20 % de questions locales, 15 % de questions de confiance. L’échantillon est généré une fois, puis figé : le re-scan rejoue exactement les mêmes, sinon la comparaison ne vaut rien.",
-            )}
-          </p>
-          <p className="mt-6 text-[16px] leading-relaxed text-ink-2">
-            {fr(
-              "Le score va de 0 à 100. Voici sa formule exacte, publiée en clair : vous pouvez la recalculer vous-même à partir du rapport.",
-            )}
-          </p>
-        </div>
-        <dl className="grid h-max border-t border-rule">
-          {FORMULE.map(([k, v]) => (
-            <div key={k} className="flex items-baseline justify-between gap-6 border-b border-rule py-4">
-              <dt className="text-[15px] text-ink-2">{k}</dt>
-              <dd className="font-display text-[30px] font-light leading-none">
-                {v.replace(" ", NBSP)}
-              </dd>
+      <div className="mt-16 grid gap-y-14 border-t border-rule sm:grid-cols-3 sm:gap-x-12 lg:gap-x-16">
+        {CHANTIERS.map(([cause, technique, texte, livrable], i) => (
+          <div
+            key={cause}
+            className={`pt-8 ${i > 0 ? "sm:border-l sm:border-rule sm:pl-12 lg:pl-16" : ""}`}
+          >
+            <span className="num text-[11px] tracking-[0.14em] text-bordeaux">
+              {String(i + 1).padStart(2, "0")}
+            </span>
+            <h3 className="mt-3 max-w-[18ch] font-display text-[26px] font-light leading-[1.12]">
+              {cause}
+            </h3>
+            <div className="label-xs mt-3 text-ink-3">{technique}</div>
+            <p className="mt-5 max-w-[42ch] text-[14px] leading-relaxed text-ink-2">{fr(texte)}</p>
+            <div className="mt-6 border-t border-rule pt-4">
+              <div className="label-xs pb-2">vous recevez</div>
+              <p className="max-w-[42ch] text-[14px] leading-relaxed">{fr(livrable)}</p>
             </div>
-          ))}
-        </dl>
+          </div>
+        ))}
       </div>
 
-      <div className="mt-20">
+      <div className="mt-20 border-t border-rule pt-8">
         <Label className="pb-5">déroulé du sprint</Label>
         <ol className="grid border-t border-rule sm:grid-flow-col sm:auto-cols-fr">
           {REPERES.map(([jour, quoi], i) => (
@@ -637,7 +586,7 @@ function Methode() {
                 i > 0 ? "sm:border-l sm:border-rule sm:pl-6" : ""
               }`}
             >
-              <div className="num text-[11px] tracking-[0.12em] text-bordeaux">
+              <div className="num text-[11px] tracking-[0.12em] text-ink-3">
                 {jour.replace(/ /g, NBSP)}
               </div>
               <div className="mt-2 max-w-[16ch] text-[15px] leading-snug text-ink-2">{quoi}</div>
@@ -645,9 +594,89 @@ function Methode() {
           ))}
         </ol>
       </div>
+
+      <div className="mt-20 grid gap-10 border-t border-rule pt-10 lg:grid-cols-[auto_minmax(0,44ch)] lg:gap-20">
+        <div className="font-display text-[56px] font-light leading-none sm:text-[72px]">
+          {euros(2900)} <span className="text-[24px] text-ink-3">HT</span>
+        </div>
+        <div>
+          <p className="text-[17px] leading-relaxed">
+            {fr(
+              "Paiement unique. 50 % à la commande, 50 % à la livraison. Aucun abonnement, aucune reconduction. Re-scan à J+90 inclus.",
+            )}
+          </p>
+          <p className="mt-6 text-[17px] leading-relaxed">
+            Trois sprints par mois, pas davantage. Un seul client par secteur et par zone.
+          </p>
+          <p className="mt-8 text-[13px] leading-relaxed text-ink-3">
+            {fr(
+              "Option Sprint Domination : 4 900 € HT — dix contenus, seize cibles de citation, deux langues.",
+            )}
+          </p>
+        </div>
+      </div>
     </Apparition>
   );
 }
+
+
+/* ---------------- 3. Garanties ---------------- */
+
+const NOUS_GARANTISSONS = [
+  "L’exécution intégrale des trois chantiers, documentée action par action dans le rapport de fin de mission.",
+  "Une mesure identique avant et après : mêmes questions, mêmes moteurs, même formule. Le re-scan à J+90 est inclus, que le résultat nous arrange ou non.",
+  "Un interlocuteur unique : celui qui exécute.",
+];
+
+const NOUS_NE_GARANTISSONS_PAS = [
+  "Un score précis à une date précise. Les moteurs intègrent les changements en quatre à douze semaines, et personne ne contrôle ce délai.",
+  "Une position. « Premier dans ChatGPT » n’existe pas : il n’y a pas de classement, seulement une réponse rédigée qui varie d’une fois sur l’autre.",
+  "Un effet immédiat. Ce travail se cumule dans le temps — c’est précisément pour cela que les places se prennent maintenant.",
+];
+
+function Garanties() {
+  return (
+    <Apparition as="section" className="mt-40 border-t border-rule pt-10">
+      <h2 className="max-w-[17ch] text-balance text-[38px] leading-[1.02] sm:text-[62px]">
+        {frTitre("Nos engagements, et leurs limites.")}
+      </h2>
+      <div className="mt-16 grid gap-12 border-t border-rule pt-8 lg:grid-cols-2 lg:gap-20">
+        <div>
+          <Label className="pb-5">nous garantissons</Label>
+          <ul className="grid">
+            {NOUS_GARANTISSONS.map((t) => (
+              <li
+                key={t}
+                className="max-w-[54ch] border-b border-rule py-5 text-[15px] leading-relaxed"
+              >
+                {fr(t)}
+              </li>
+            ))}
+          </ul>
+        </div>
+        <div>
+          <Label className="pb-5">nous ne garantissons pas</Label>
+          <ul className="grid">
+            {NOUS_NE_GARANTISSONS_PAS.map((t) => (
+              <li
+                key={t}
+                className="max-w-[54ch] border-b border-rule py-5 text-[15px] leading-relaxed text-ink-3"
+              >
+                {fr(t)}
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+      <p className="mx-auto mt-32 mb-16 max-w-[24ch] text-balance text-center font-display text-[30px] font-light leading-[1.18] sm:text-[42px]">
+        {frTitre(
+          "Si votre score est bon, nous vous le dirons et nous ne vous vendrons rien.",
+        )}
+      </p>
+    </Apparition>
+  );
+}
+
 
 
 /* ---------------- FAQ ---------------- */
