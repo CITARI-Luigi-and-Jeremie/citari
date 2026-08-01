@@ -140,3 +140,12 @@ insert into public.directories (sector, name, url, kind, authority_note) values
 ('Association / ONG', 'HelloAsso', 'https://www.helloasso.com', 'annuaire', 'Fiche association, dons.'),
 ('Association / ONG', 'Journal Officiel des associations', 'https://www.journal-officiel.gouv.fr/pages/associations-recherche/', 'annuaire', 'Publication officielle — existence légale.')
 on conflict do nothing;
+
+-- ─────────────────────────────────────────────────────────────
+-- 6. Progression du scan
+--
+-- Le schéma porte `status` et `phase` mais pas de pourcentage. Le runner en
+-- calcule un (réponses collectées / attendues) et l'écran d'attente l'affiche.
+-- Colonne ignorable par le front s'il préfère le dériver lui-même.
+-- ─────────────────────────────────────────────────────────────
+alter table public.scans add column if not exists progress int not null default 0;
