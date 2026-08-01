@@ -223,12 +223,14 @@ function BlocPreuve() {
               type="button"
               onClick={() => setMoteur(m)}
               aria-pressed={actif}
-              className={`rounded-full px-3 py-1.5 text-[12px] tracking-[0.02em] transition-[background-color,color] duration-300 ease-[cubic-bezier(0.2,0.7,0.2,1)] ${
+              className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[12px] tracking-[0.02em] transition-[background-color,color] duration-300 ease-[cubic-bezier(0.2,0.7,0.2,1)] ${
                 actif ? "bg-ink text-paper" : "text-ink-3 hover:bg-paper-2 hover:text-ink"
               }`}
             >
+              <MoteurLogo moteur={m} className="text-[14px]" />
               {m}
             </button>
+
           );
         })}
       </div>
