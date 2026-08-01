@@ -81,11 +81,11 @@ function Accueil() {
             <BlocPreuve />
           </Apparition>
         </section>
-        <Constat />
+        <Mesure />
         <Sprint />
         <Garanties />
         <PourQui />
-        <Methode />
+
         <Faq />
         <AppelFinal />
         <PiedDePage />
