@@ -304,8 +304,9 @@ function ApercuRapport() {
         </div>
         <div className="mt-4 border-t border-rule pt-4">
           <div className="flex items-start gap-3">
-            <span className="font-display text-[42px] font-light leading-[0.9] text-ink-3">24</span>
+            <span className="shrink-0 font-display text-[42px] font-light leading-[0.9] text-ink-3">24</span>
             <span className="max-w-[18ch] pt-2 text-[13px] leading-snug text-ink-3">
+
               {fr("questions d’intention d’achat, générées à partir de votre secteur.")}
             </span>
           </div>
