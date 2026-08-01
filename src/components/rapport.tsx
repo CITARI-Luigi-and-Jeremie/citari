@@ -171,8 +171,12 @@ export function TableauRequetes({
             <th className="label-xs w-24 py-2 text-left align-bottom">intention</th>
             {MOTEURS.map((m) => (
               <th key={m} className="label-xs w-[110px] py-2 text-left align-bottom">
-                {m}
+                <span className="inline-flex items-center gap-1.5">
+                  <MoteurLogo moteur={m} className="text-[12px] text-ink" />
+                  {m}
+                </span>
               </th>
+
             ))}
           </tr>
         </thead>
