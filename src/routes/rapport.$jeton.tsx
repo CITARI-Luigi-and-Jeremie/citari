@@ -89,7 +89,7 @@ function Rapport() {
       {/* En-tête éditorial, calé à gauche */}
       <header className="pt-14 md:pt-20">
         <div className="flex items-baseline justify-between gap-6">
-          <LogoLien hauteur={18} className="no-print" />
+          <LogoLien hauteur={24} className="no-print" />
           <button
             type="button"
             onClick={() => window.print()}
