@@ -9,6 +9,8 @@ import { RapportExemple } from "@/components/sections/rapport-exemple";
 import { ChampTexte } from "@/components/fond";
 
 import { LogoLien, Logo } from "@/components/logo";
+import { MoteurLogo } from "@/components/moteur-logo";
+
 import { Btn, Champ, Choix, Etiquette, Field, Label, Rule } from "@/components/kit";
 import { FAQ, LANGUES, METIERS, SECTEURS, VILLES, exemple, type Metier } from "@/data/contenu";
 import { lancerScan } from "@/lib/scan.functions";
