@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
  */
 export function Logo({
   className,
-  hauteur = 20,
+  hauteur = 24,
   point = true,
 }: {
   className?: string;
@@ -43,8 +43,26 @@ export function LogoLien({
   point?: boolean;
 }) {
   return (
-    <Link to="/" aria-label="Citari — accueil" className={cn("inline-flex items-center", className)}>
-      <Logo hauteur={hauteur} point={point} className="marque-i" />
+    <Link
+      to="/"
+      aria-label="Citari — accueil"
+      className={cn(
+        "group/logo relative inline-flex items-center justify-center",
+        className,
+      )}
+    >
+      {/* Halo circulaire derrière le signe, ancré à gauche. */}
+      <span
+        aria-hidden="true"
+        className="pointer-events-none absolute -left-2 top-1/2 aspect-square h-[calc(var(--marque-h)*2.6)] -translate-y-1/2 rounded-full bg-ink/[0.04] opacity-0 transition-[opacity,transform] duration-500 ease-[cubic-bezier(0.2,0.7,0.2,1)] group-hover/logo:opacity-100 group-hover/logo:scale-100"
+        style={{ transform: "translateY(-50%) scale(0.85)" }}
+      />
+      <Logo hauteur={hauteur} point={point} className="marque-i relative" />
+      {/* Filet d'accent sous le logo. */}
+      <span
+        aria-hidden="true"
+        className="absolute -bottom-1 left-0 h-[1.5px] w-full origin-left scale-x-0 bg-bordeaux transition-transform duration-700 ease-[cubic-bezier(0.2,0.7,0.2,1)] group-hover/logo:scale-x-100"
+      />
     </Link>
   );
 }

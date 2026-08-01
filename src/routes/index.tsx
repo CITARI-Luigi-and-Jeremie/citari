@@ -110,7 +110,7 @@ function EnTete() {
   return (
     <header className="sticky top-0 z-40 border-b border-rule bg-paper/80 backdrop-blur-md">
       <div className="mx-auto grid max-w-[1240px] grid-cols-[minmax(0,1fr)_auto] items-center gap-4 px-6 py-4 lg:px-10">
-        <LogoLien hauteur={20} />
+        <LogoLien hauteur={28} />
         <nav className="flex shrink-0 items-center gap-5 sm:gap-7">
           {NAV.map(([to, label]) => (
             <Link key={to} to={to} className="label-xs lien-nav hidden sm:inline-block">
@@ -797,7 +797,7 @@ function PiedDePage() {
   return (
     <footer className="mt-28 border-t border-rule py-10">
       <div className="flex flex-wrap items-baseline justify-between gap-x-8 gap-y-6">
-        <Logo hauteur={19} />
+        <Logo hauteur={22} />
         <nav className="flex flex-wrap gap-x-7 gap-y-3">
           {[
             ["/guide-geo", "Guide du GEO"],
