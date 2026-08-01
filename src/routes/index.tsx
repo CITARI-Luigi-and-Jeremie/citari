@@ -81,19 +81,15 @@ function Accueil() {
             <BlocPreuve />
           </Apparition>
         </section>
-        <BandeauConfiance />
-        <StatistiqueExergue />
-        <CoutInvisibilite />
-        <ScanRevele />
-        <LaMesure />
-        <Pivot />
-        <Offre />
-        <Deroule />
+        <Constat />
+        <Sprint />
+        <Garanties />
         <PourQui />
-        <Engagement />
+        <Methode />
         <Faq />
         <AppelFinal />
         <PiedDePage />
+
       </div>
     </>
   );
