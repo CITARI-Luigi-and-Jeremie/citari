@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
  */
 export function Logo({
   className,
-  hauteur = 20,
+  hauteur = 24,
   point = true,
 }: {
   className?: string;
