@@ -1,5 +1,9 @@
 packages:
   - "apps/*"
+  # Front Citari : dépôt Git autonome (bun + TanStack Start), synchronisé avec
+  # Lovable. Il ne fait pas partie de ce workspace pnpm — sa présence sous apps/
+  # est une commodité de navigation, pas un lien de build.
+  - "!apps/citari"
   - "packages/*"
 allowBuilds:
   esbuild: true
