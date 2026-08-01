@@ -59,5 +59,5 @@ a donc rien à configurer côté timeout.
 - [ ] Après mise en ligne : lancer `pnpm toolkit audit-technique https://votre-domaine.fr` sur votre propre site (il doit être exemplaire)
 
 ## Mode démo (référence)
-`GEO_MOCK=1` simule les 5 moteurs et la base (fichier partagé dans le dossier temporaire).
+`GEO_MOCK=1` simule les 6 moteurs et la base (fichier partagé dans le dossier temporaire).
 Utile pour : démo produit, tests UI, développement sans coût. Un bandeau jaune s'affiche sur toutes les pages.
