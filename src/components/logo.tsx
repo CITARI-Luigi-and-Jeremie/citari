@@ -61,7 +61,7 @@ export function LogoLien({
       {/* Filet d'accent sous le logo. */}
       <span
         aria-hidden="true"
-        className="absolute -bottom-1 left-0 h-[1.5px] w-full origin-left scale-x-0 bg-accent transition-transform duration-700 ease-[cubic-bezier(0.2,0.7,0.2,1)] group-hover/logo:scale-x-100"
+        className="absolute -bottom-1 left-0 h-[1.5px] w-full origin-left scale-x-0 bg-bordeaux transition-transform duration-700 ease-[cubic-bezier(0.2,0.7,0.2,1)] group-hover/logo:scale-x-100"
       />
     </Link>
   );
