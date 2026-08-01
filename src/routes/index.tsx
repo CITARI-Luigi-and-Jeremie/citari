@@ -64,8 +64,8 @@ function Accueil() {
             </Apparition>
             <Apparition delai={90}>
               <p className="mt-8 max-w-[44ch] text-[17px] leading-[1.68] text-ink-2 sm:text-[19px]">
-                Ils demandent à ChatGPT. Et ChatGPT recommande quelqu’un d’autre. Découvrez qui, en
-                90 secondes.
+                Ils demandent maintenant à ChatGPT. Et ChatGPT recommande vos concurrents. Vérifiez-le
+                en 90 secondes.
               </p>
             </Apparition>
             <Apparition delai={160} className="mt-14 hidden lg:block">
