@@ -177,22 +177,29 @@ export async function avancerScan(id: string) {
         const rep = await interroger(item.engine as (typeof MOTEURS)[number], item.text, scan.language);
         const { data: inserted } = await supabaseAdmin
           .from("responses")
-          .insert({
-            scan_id: id,
-            query_id: item.queryId,
-            engine: item.engine,
-            raw_text: rep.text,
-            sources: rep.sources,
-            latency_ms: rep.latency,
-            cost_eur: rep.cost,
-            error: rep.error ?? null,
-          })
+          .upsert(
+            {
+              scan_id: id,
+              query_id: item.queryId,
+              engine: item.engine,
+              raw_text: rep.text,
+              sources: rep.sources,
+              latency_ms: rep.latency,
+              cost_eur: rep.cost,
+              error: rep.error ?? null,
+            },
+            { onConflict: "scan_id,query_id,engine", ignoreDuplicates: true },
+          )
           .select("id")
-          .single();
+          .maybeSingle();
+        // Doublon (paire déjà traitée par un sondage concurrent) : ni coût, ni analyse.
+        if (!inserted) return;
+
         await supabaseAdmin
           .from("cost_log")
           .insert({ scan_id: id, engine: item.engine, cost_eur: rep.cost });
-        if (!inserted || rep.error || !rep.text) return;
+        if (rep.error || !rep.text) return;
+
 
         const analyse = await analyser(rep.text, scan.brand_name);
         const cibleNorm = scan.brand_name.toLowerCase();
