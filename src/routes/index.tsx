@@ -6,7 +6,7 @@ import { Apparition } from "@/components/apparition";
 import { ChampTexte } from "@/components/fond";
 
 import { LogoLien, Logo } from "@/components/logo";
-import { Btn, Champ, Choix, Etiquette, Field, Label, LigneVide, Rule } from "@/components/kit";
+import { Btn, Champ, Choix, Etiquette, Field, Label, Rule } from "@/components/kit";
 import { FAQ, LANGUES, METIERS, SECTEURS, VILLES, exemple, type Metier } from "@/data/contenu";
 import { lancerScan } from "@/lib/scan.functions";
 import { NBSP, euros, fr, frTitre } from "@/lib/typo";
@@ -56,7 +56,7 @@ function Accueil() {
           <div className="relative z-[2]">
             <Apparition>
 
-              <Label>Votre visibilité dans ChatGPT, Claude, Gemini, Grok et Perplexity</Label>
+              <Label>Votre visibilité dans ChatGPT, Claude, Gemini et Perplexity</Label>
               <h1 className="mt-6 text-balance text-[46px] leading-[0.95] sm:text-[68px] lg:text-[84px]">
                 Vos clients ne cherchent plus sur{" "}
                 <em className="not-italic text-ink-3">Google</em>.
@@ -161,7 +161,7 @@ function PilulePreuve({
   );
 }
 
-const MOTEURS_DEMO = ["ChatGPT", "Claude", "Gemini", "Perplexity", "Grok"] as const;
+const MOTEURS_DEMO = ["ChatGPT", "Claude", "Gemini", "Perplexity"] as const;
 type MoteurDemo = (typeof MOTEURS_DEMO)[number];
 
 function BlocPreuve() {
@@ -244,7 +244,7 @@ function BlocPreuve() {
         </ol>
 
         <p className="mt-5 text-[13px] leading-relaxed text-ink-3">
-          {fr("Exemple illustratif : les noms sont fictifs. Votre scan interroge ChatGPT, Claude, Gemini, Perplexity et Grok avec vos vrais concurrents.")}
+          {fr("Exemple illustratif : les noms sont fictifs. Votre scan interroge ChatGPT, Claude, Gemini et Perplexity avec vos vrais concurrents.")}
         </p>
       </div>
     </div>
@@ -254,7 +254,7 @@ function BlocPreuve() {
 
 /* ---------------- Aperçu du rapport ---------------- */
 
-const ENGINES_SCAN = ["ChatGPT", "Claude", "Gemini", "Grok", "Perplexity"];
+const ENGINES_SCAN = ["ChatGPT", "Claude", "Gemini", "Perplexity"];
 
 function ApercuRapport() {
   return (
@@ -264,7 +264,7 @@ function ApercuRapport() {
         <ul className="mt-4 grid gap-3 text-[14px] leading-snug text-ink-2">
           <li className="flex gap-3">
             <span className="mt-0.5 h-1.5 w-1.5 rounded-full bg-bordeaux" />
-            <span>{fr("Un score de visibilité de 0 à 100 sur les 5 moteurs.")}</span>
+            <span>{fr("Un score de visibilité de 0 à 100 sur les 4 moteurs.")}</span>
           </li>
           <li className="flex gap-3">
             <span className="mt-0.5 h-1.5 w-1.5 rounded-full bg-bordeaux" />
@@ -351,7 +351,7 @@ function Formulaire() {
         <div>
           <h2 className="text-[27px] leading-none sm:text-[30px]">Scan gratuit</h2>
           <p className="mt-2 text-[14px] leading-snug text-ink-2">
-            {fr("Votre score de visibilité dans ChatGPT, Claude, Gemini, Grok et Perplexity.")}
+            {fr("Votre score de visibilité dans ChatGPT, Claude, Gemini et Perplexity.")}
           </p>
         </div>
         <span className="label-xs shrink-0">sans inscription</span>
@@ -654,15 +654,15 @@ function Methode() {
 
 function Faq() {
   return (
-    <Apparition as="section" className="mt-32">
-      <h2 className="text-[34px] leading-none sm:text-[46px]">Questions fréquentes</h2>
-      <dl className="mt-8 border-t border-rule">
+    <Apparition as="section" className="mt-40 border-t border-rule pt-10">
+      <h2 className="text-[34px] leading-none sm:text-[52px]">Questions fréquentes</h2>
+      <dl className="mt-12 border-t border-rule">
         {FAQ.map((f) => (
           <div
             key={f.q}
-            className="ligne-i -mx-3 grid gap-2 border-b border-rule px-3 py-6 md:grid-cols-[minmax(0,32ch)_1fr] md:gap-12"
+            className="grid gap-3 border-b border-rule py-7 md:grid-cols-[minmax(0,30ch)_1fr] md:gap-16"
           >
-            <dt className="text-[16px] font-medium leading-snug">{f.q}</dt>
+            <dt className="max-w-[30ch] text-[17px] font-medium leading-snug">{f.q}</dt>
             <dd className="max-w-[62ch] text-[15px] leading-relaxed text-ink-2">{f.r}</dd>
           </div>
         ))}
@@ -677,7 +677,7 @@ function AppelFinal() {
   return (
     <Apparition
       as="section"
-      className="mt-32 grid items-end gap-8 border-t border-rule pt-10 lg:grid-cols-[1fr_auto] lg:gap-16"
+      className="mt-40 grid items-end gap-8 border-t border-rule pt-10 lg:grid-cols-[1fr_auto] lg:gap-16"
     >
       <div>
         <Label className="pb-4">première étape</Label>
@@ -699,142 +699,7 @@ function AppelFinal() {
   );
 }
 
-/* ---------------- Bandeau de confiance ---------------- */
-
-const CONFIANCE = [
-  ["96", "réponses d’IA analysées, une par question et par moteur"],
-  ["90 s", "pour obtenir votre score, sans inscription"],
-  ["J+90", "re-scan offert, mêmes questions, mêmes moteurs"],
-  ["0", "abonnement, 0 engagement, 0 reconduction tacite"],
-];
-
-function BandeauConfiance() {
-  return (
-    <Apparition as="section" className="mt-20 border-y border-rule">
-      <dl className="grid divide-y divide-rule sm:grid-cols-2 sm:divide-y-0 lg:grid-cols-4 lg:divide-x">
-        {CONFIANCE.map(([n, t]) => (
-          <div key={n} className="px-0 py-6 sm:px-6 lg:first:pl-0 lg:last:pr-0">
-            <dt className="font-display text-[38px] font-light leading-none">
-              {n.replace(" ", NBSP)}
-            </dt>
-            <dd className="mt-2 max-w-[28ch] text-[13px] leading-snug text-ink-2">{t}</dd>
-          </div>
-        ))}
-      </dl>
-    </Apparition>
-  );
-}
-
-/* ---------------- Le contexte ---------------- */
-
-function CoutInvisibilite() {
-  return (
-    <Apparition as="section" className="mt-32">
-      <Label className="pb-4">ce qui se joue</Label>
-      <h2 className="max-w-[22ch] text-balance text-[34px] leading-[1.04] sm:text-[52px]">
-        {frTitre(
-          "Sur Google, on vous trouve. Dans ChatGPT, on vous recommande — ou pas.",
-        )}
-      </h2>
-      <div className="mt-10 grid gap-x-16 gap-y-10 lg:grid-cols-[1fr_1fr]">
-        <div className="carte carte-i p-7">
-          <Label>la réponse d’une IA</Label>
-          <ol className="mt-5 grid gap-3 text-[15px]">
-            {["Concurrent A", "Concurrent B", "Concurrent C"].map((c, i) => (
-              <li key={c} className="flex items-baseline gap-3 border-b border-rule pb-3">
-                <span className="num text-[11px] text-ink-3">{String(i + 1).padStart(2, "0")}</span>
-                <span className="text-ink-2">{c}</span>
-              </li>
-            ))}
-          </ol>
-          <LigneVide legende="votre marque" className="mt-7" />
-        </div>
-        <div className="self-center">
-          <p className="text-[15px] leading-relaxed text-ink-2">
-            {fr(
-              "Un moteur de recherche affiche dix liens et laisse l’acheteur choisir. Une IA donne trois noms. Parfois deux.",
-            )}
-          </p>
-          <p className="mt-5 text-[15px] leading-relaxed text-ink-2">
-            {fr(
-              "Il n’y a pas de deuxième page. Il n’y a pas de « voir plus de résultats ». Vous êtes dans la réponse, ou vous n’existez pas.",
-            )}
-          </p>
-          <p className="mt-6 font-display text-[26px] leading-[1.15]">
-            {frTitre("Le référencement vous plaçait dans une liste. L’IA, elle, choisit.")}
-          </p>
-        </div>
-      </div>
-    </Apparition>
-  );
-}
-
-/* ---------------- Ce que le scan révèle ---------------- */
-
-const REVELE = [
-  "Votre score de visibilité, de 0 à 100, mesuré sur ChatGPT, Claude, Gemini et Perplexity.",
-  "Combien de fois vos concurrents sont cités sur les questions où vous ne l’êtes pas.",
-  "Les phrases exactes que l’IA prononce à votre sujet. Mot pour mot.",
-  "Les sources sur lesquelles elle s’appuie pour recommander vos concurrents plutôt que vous.",
-];
-
-function ScanRevele() {
-  return (
-    <Apparition as="section" className="mt-32">
-      <div className="flex flex-wrap items-baseline justify-between gap-4">
-        <h2 className="text-[34px] leading-none sm:text-[46px]">Ce que le scan révèle</h2>
-        <span className="label-xs">en 90 secondes, gratuitement</span>
-      </div>
-      <ol className="mt-10 border-t border-rule">
-        {REVELE.map((t, i) => (
-          <li
-            key={t}
-            className="ligne-i -mx-3 grid grid-cols-[30px_1fr] gap-4 border-b border-rule px-3 py-5"
-          >
-            <span className="num pt-1.5 text-[10px] tracking-[0.14em] text-ink-3">
-              {String(i + 1).padStart(2, "0")}
-            </span>
-            <p className="max-w-[70ch] text-[16px] leading-relaxed sm:text-[18px]">{fr(t)}</p>
-          </li>
-        ))}
-      </ol>
-    </Apparition>
-  );
-}
-
-/* ---------------- Déroulé du sprint ---------------- */
-
-const ETAPES = [
-  ["J0", "Scan et call de restitution", "On lit le rapport ensemble, 30 minutes. Vous repartez avec le diagnostic, que vous travailliez avec nous ou non."],
-  ["J1 — J7", "Audit et plan de bataille", "Accès des robots d’IA, données structurées, questions perdues : le périmètre exact est arrêté et validé avec vous."],
-  ["J8 — J25", "Production", "Cinq contenus au format réponse directe, publiés. Huit cibles de citation travaillées une à une."],
-  ["J26 — J30", "Livraison", "Rapport de fin de sprint : ce qui a été livré, ce qui reste en cours d’obtention, et pourquoi."],
-  ["J+90", "Re-scan", "Mêmes 24 questions, mêmes moteurs. Comparatif avant/après, sans mise en scène."],
-];
-
-function Deroule() {
-  return (
-    <Apparition as="section" className="mt-32">
-      <h2 className="text-[34px] leading-none sm:text-[46px]">Le déroulé, jour par jour</h2>
-      <ol className="mt-10 border-t border-rule">
-        {ETAPES.map(([jour, titre, desc]) => (
-          <li
-            key={jour}
-            className="ligne-i -mx-3 grid gap-2 border-b border-rule px-3 py-6 md:grid-cols-[110px_minmax(0,26ch)_1fr] md:gap-10"
-          >
-            <span className="num pt-1 text-[11px] tracking-[0.12em] text-bordeaux">
-              {jour.replace(/ /g, NBSP)}
-            </span>
-            <div className="text-[17px] font-medium leading-snug">{titre}</div>
-            <p className="max-w-[58ch] text-[14px] leading-relaxed text-ink-2">{fr(desc)}</p>
-          </li>
-        ))}
-      </ol>
-    </Apparition>
-  );
-}
-
-/* ---------------- Pour qui / pas pour qui ---------------- */
+/* ---------------- 4. À qui cela s’adresse ---------------- */
 
 const POUR = [
   "Vous vendez un service à forte valeur, où une recommandation pèse lourd.",
@@ -852,30 +717,31 @@ const PAS_POUR = [
 
 function PourQui() {
   return (
-    <Apparition as="section" className="mt-32 border-t border-rule pt-10">
-      <h2 className="text-[34px] leading-none sm:text-[46px]">À qui cela s’adresse</h2>
-      <div className="mt-10 grid gap-10 lg:grid-cols-2 lg:gap-20">
+    <Apparition as="section" className="mt-40 border-t border-rule pt-10">
+      <h2 className="text-[34px] leading-none sm:text-[52px]">À qui cela s’adresse</h2>
+      <div className="mt-14 grid gap-12 border-t border-rule pt-8 lg:grid-cols-2 lg:gap-20">
         <div>
-          <Label className="pb-4">le sprint a du sens si</Label>
-          <ul className="grid gap-4">
+          <Label className="pb-5">le sprint a du sens si</Label>
+          <ul className="grid">
             {POUR.map((t) => (
-              <li key={t} className="flex gap-4 border-b border-rule pb-4 text-[15px] leading-relaxed">
-                <span className="mt-2 h-px w-6 shrink-0 bg-bordeaux" aria-hidden />
-                <span>{fr(t)}</span>
+              <li
+                key={t}
+                className="max-w-[48ch] border-b border-rule py-4 text-[15px] leading-relaxed"
+              >
+                {fr(t)}
               </li>
             ))}
           </ul>
         </div>
         <div>
-          <Label className="pb-4">nous vous le déconseillons si</Label>
-          <ul className="grid gap-4">
+          <Label className="pb-5">nous vous le déconseillons si</Label>
+          <ul className="grid">
             {PAS_POUR.map((t) => (
               <li
                 key={t}
-                className="flex gap-4 border-b border-rule pb-4 text-[15px] leading-relaxed text-ink-3"
+                className="max-w-[48ch] border-b border-rule py-4 text-[15px] leading-relaxed text-ink-3"
               >
-                <span className="mt-2 h-px w-6 shrink-0 bg-rule-strong" aria-hidden />
-                <span>{fr(t)}</span>
+                {fr(t)}
               </li>
             ))}
           </ul>
