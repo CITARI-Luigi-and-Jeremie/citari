@@ -4,6 +4,8 @@ import { useState } from "react";
 
 import { Apparition } from "@/components/apparition";
 import { Mesure } from "@/components/sections/mesure";
+import { CoutAbsence } from "@/components/sections/cout";
+import { RapportExemple } from "@/components/sections/rapport-exemple";
 import { ChampTexte } from "@/components/fond";
 
 import { LogoLien, Logo } from "@/components/logo";
@@ -184,7 +186,7 @@ function BlocPreuve() {
       {/* Réglage : une phrase, deux mots à changer. */}
       <div className="border-b border-rule bg-paper-2/60 px-5 py-4 sm:px-7">
         <span className="label-xs">démonstration</span>
-        <p className="mt-2 text-[15px] leading-relaxed text-ink-2 sm:text-[16px]">
+        <p className="mt-2 text-[17px] leading-[1.6] text-ink-2 sm:text-[16px]">
           Je suis{" "}
           <PilulePreuve
             aria="métier"
@@ -468,7 +470,7 @@ function Sprint() {
       <h2 className="max-w-[17ch] text-balance text-[38px] leading-[1.02] sm:text-[62px]">
         {frTitre("Le Sprint GEO — trente jours, trois chantiers.")}
       </h2>
-      <p className="mt-10 max-w-[62ch] text-[16px] leading-relaxed text-ink-2">
+      <p className="mt-10 max-w-[62ch] text-[17px] leading-[1.6] text-ink-2">
         {fr(
           "Une IA ne vous cite pas pour trois raisons possibles : elle ne peut pas vous lire, elle n’a rien à citer de vous, ou personne d’autre ne parle de vous. Nous traitons les trois.",
         )}
@@ -487,10 +489,10 @@ function Sprint() {
               {cause}
             </h3>
             <div className="label-xs mt-3 text-ink-3">{technique}</div>
-            <p className="mt-5 max-w-[42ch] text-[14px] leading-relaxed text-ink-2">{fr(texte)}</p>
+            <p className="mt-5 max-w-[42ch] text-[16px] leading-[1.6] text-ink-2">{fr(texte)}</p>
             <div className="mt-6 border-t border-rule pt-4">
               <div className="label-xs pb-2">vous recevez</div>
-              <p className="max-w-[42ch] text-[14px] leading-relaxed">{fr(livrable)}</p>
+              <p className="max-w-[42ch] text-[16px] leading-[1.6]">{fr(livrable)}</p>
             </div>
           </div>
         ))}
@@ -515,26 +517,39 @@ function Sprint() {
         </ol>
       </div>
 
-      <div className="mt-20 grid gap-10 border-t border-rule pt-10 lg:grid-cols-[auto_minmax(0,44ch)] lg:gap-20">
-        <div className="font-display text-[56px] font-light leading-none sm:text-[72px]">
+      <div className="mt-20 grid gap-10 border-t border-rule pt-12 lg:grid-cols-[auto_minmax(0,44ch)] lg:gap-20">
+        <div className="font-display text-[56px] font-light leading-none sm:text-[80px]">
           {euros(2900)} <span className="text-[24px] text-ink-3">HT</span>
         </div>
         <div>
-          <p className="text-[17px] leading-relaxed">
+          <p className="text-[17px] leading-[1.6]">
+            <strong className="font-semibold">Paiement unique.</strong>{" "}
             {fr(
-              "Paiement unique. 50 % à la commande, 50 % à la livraison. Aucun abonnement, aucune reconduction. Re-scan à J+90 inclus.",
+              "50 % à la commande, 50 % à la livraison. Aucun abonnement, aucune reconduction. Re-scan à J+90 inclus.",
             )}
           </p>
-          <p className="mt-6 text-[17px] leading-relaxed">
-            Trois sprints par mois, pas davantage. Un seul client par secteur et par zone.
-          </p>
-          <p className="mt-8 text-[13px] leading-relaxed text-ink-3">
+          <p className="mt-6 text-[15px] leading-[1.6] text-ink-3">
             {fr(
               "Option Sprint Domination : 4 900 € HT — dix contenus, seize cibles de citation, deux langues.",
             )}
           </p>
         </div>
       </div>
+
+      <div className="mt-24 border-t border-rule pt-10">
+        <p className="max-w-[20ch] font-display text-[38px] font-light leading-[1.1] sm:text-[58px]">
+          {frTitre("Trois sprints par mois. Un seul client par secteur et par zone.")}
+        </p>
+        <p className="mt-8 max-w-[58ch] text-[17px] leading-[1.6] text-ink-2">
+          {fr(
+            "Nous refusons le deuxième cabinet comptable lyonnais qui nous appelle. Ce n’est pas une figure de style : ",
+          )}
+          <strong className="font-semibold text-ink">
+            {fr("deux clients concurrents sur le même marché, ce serait travailler contre soi-même.")}
+          </strong>
+        </p>
+      </div>
+
     </Apparition>
   );
 }
@@ -567,7 +582,7 @@ function Garanties() {
             {NOUS_GARANTISSONS.map((t) => (
               <li
                 key={t}
-                className="max-w-[54ch] border-b border-rule py-5 text-[15px] leading-relaxed"
+                className="max-w-[54ch] border-b border-rule py-5 text-[17px] leading-[1.6]"
               >
                 {fr(t)}
               </li>
@@ -580,13 +595,23 @@ function Garanties() {
             {NOUS_NE_GARANTISSONS_PAS.map((t) => (
               <li
                 key={t}
-                className="max-w-[54ch] border-b border-rule py-5 text-[15px] leading-relaxed text-ink-3"
+                className="max-w-[54ch] border-b border-rule py-5 text-[17px] leading-[1.6] text-ink-3"
               >
                 {fr(t)}
               </li>
             ))}
           </ul>
         </div>
+      </div>
+      <div className="mt-20 max-w-[62ch] border-t border-rule pt-8">
+        <Label className="pb-5">nous vous le déconseillons si</Label>
+        <ul className="grid">
+          {PAS_POUR.map((t) => (
+            <li key={t} className="border-b border-rule py-4 text-[17px] leading-[1.6] text-ink-2">
+              {fr(t)}
+            </li>
+          ))}
+        </ul>
       </div>
       <p className="mx-auto mt-32 mb-16 max-w-[24ch] text-balance text-center font-display text-[30px] font-light leading-[1.18] sm:text-[42px]">
         {frTitre(
@@ -612,7 +637,7 @@ function Faq() {
             className="grid gap-3 border-b border-rule py-7 md:grid-cols-[minmax(0,30ch)_1fr] md:gap-16"
           >
             <dt className="max-w-[30ch] text-[17px] font-medium leading-snug">{f.q}</dt>
-            <dd className="max-w-[62ch] text-[15px] leading-relaxed text-ink-2">{f.r}</dd>
+            <dd className="max-w-[62ch] text-[17px] leading-[1.6] text-ink-2">{f.r}</dd>
           </div>
         ))}
       </dl>
@@ -633,7 +658,7 @@ function AppelFinal() {
         <p className="max-w-[24ch] text-balance font-display text-[38px] font-light leading-[1.06] sm:text-[54px]">
           {frTitre("Commencez par le scan.")}
         </p>
-        <p className="mt-5 max-w-[52ch] text-[15px] leading-relaxed text-ink-2">
+        <p className="mt-5 max-w-[52ch] text-[17px] leading-[1.6] text-ink-2">
           {fr(
             "Il est gratuit, et il vous dira si vous avez un problème. 24 questions, 6 moteurs, un score, un rapport complet.",
           )}
@@ -648,15 +673,6 @@ function AppelFinal() {
   );
 }
 
-/* ---------------- 4. À qui cela s’adresse ---------------- */
-
-const POUR = [
-  "Vous vendez un service à forte valeur, où une recommandation pèse lourd.",
-  "Vos prospects se renseignent avant de vous appeler.",
-  "Vous avez un site que l’on peut modifier et publier dessus.",
-  "Vous acceptez une mesure honnête, y compris quand elle est mauvaise.",
-];
-
 const PAS_POUR = [
   "Vous cherchez une garantie de position chiffrée sous 30 jours.",
   "Vous voulez du volume de contenu plutôt que des réponses utiles.",
@@ -664,41 +680,6 @@ const PAS_POUR = [
   "Vous ne pouvez rien publier ni modifier sur votre site.",
 ];
 
-function PourQui() {
-  return (
-    <Apparition as="section" className="mt-40 border-t border-rule pt-10">
-      <h2 className="text-[34px] leading-none sm:text-[52px]">À qui cela s’adresse</h2>
-      <div className="mt-14 grid gap-12 border-t border-rule pt-8 lg:grid-cols-2 lg:gap-20">
-        <div>
-          <Label className="pb-5">le sprint a du sens si</Label>
-          <ul className="grid">
-            {POUR.map((t) => (
-              <li
-                key={t}
-                className="max-w-[48ch] border-b border-rule py-4 text-[15px] leading-relaxed"
-              >
-                {fr(t)}
-              </li>
-            ))}
-          </ul>
-        </div>
-        <div>
-          <Label className="pb-5">nous vous le déconseillons si</Label>
-          <ul className="grid">
-            {PAS_POUR.map((t) => (
-              <li
-                key={t}
-                className="max-w-[48ch] border-b border-rule py-4 text-[15px] leading-relaxed text-ink-3"
-              >
-                {fr(t)}
-              </li>
-            ))}
-          </ul>
-        </div>
-      </div>
-    </Apparition>
-  );
-}
 
 function PiedDePage() {
 

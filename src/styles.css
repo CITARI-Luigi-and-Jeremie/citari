@@ -67,8 +67,8 @@
 
   /* Encre : graphite profond, jamais de noir pur. */
   --ink: oklch(0.215 0.008 250);
-  --ink-2: oklch(0.42 0.008 250);
-  --ink-3: oklch(0.6 0.008 250);
+  --ink-2: oklch(0.375 0.008 250);
+  --ink-3: oklch(0.52 0.008 250);
 
   /* Filets : quasi invisibles. */
   --rule: oklch(0.912 0.003 250);
@@ -159,9 +159,9 @@
 /* Micro-titre : sans-serif, capitales fines, très espacées. */
 @utility label-xs {
   font-family: var(--font-sans);
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 600;
-  letter-spacing: 0.2em;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--ink-3);
 }
