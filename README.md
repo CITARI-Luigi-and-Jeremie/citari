@@ -13,7 +13,7 @@ Mot de passe admin démo : `demo`. Pour passer en réel : suivre [SETUP.md](SETU
 
 ```bash
 pnpm install
-cp .env.example .env   # remplir les clés (les apps Next lisent .env à la racine via leur cwd : copier aussi dans apps/web/.env.local et apps/admin/.env.local, ou exporter les variables)
+cp .env.example .env   # remplir les clés (les apps Next lisent .env à la racine via leur cwd : copier aussi dans apps/admin/.env.local, ou exporter les variables)
 ```
 
 1. **Base de données** : créer un projet Supabase, puis exécuter `supabase/migrations/0001_init.sql` (SQL Editor ou `supabase db push`).

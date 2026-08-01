@@ -11,7 +11,7 @@ Il décrit TOUT ce qu'on construit : (A) le scanner gratuit qui génère les lea
   3. Sprint GEO — 2 900 € paiement unique : mission de 30 jours où on améliore sa visibilité (3 chantiers, §1). Option Sprint Domination à 4 900 €.
   4. Re-scan offert à J+90 : on mesure la progression → preuve → upsell (2e sprint ou maintenance mensuelle).
 - **L'équipe** : 1 fondateur + Claude Code. Maximiser le levier d'une personne seule.
-- **Trois produits** dans un seul monorepo : `apps/web` (landing + scanner + rapports), `apps/admin` (back-office), `packages/toolkit` (CLI de livraison).
+- **Le tunnel public (landing, scan, rapport) est servi par Lovable.** Ce dépôt porte `apps/admin` (back-office de livraison) et `packages/toolkit` (CLI de livraison).
 
 ## 1. Les 3 chantiers d'un Sprint
 
@@ -23,12 +23,16 @@ Il décrit TOUT ce qu'on construit : (A) le scanner gratuit qui génère les lea
 
 ## 2. Monorepo & stack
 
-- Turborepo — `apps/web`, `apps/admin`, `packages/toolkit`, `packages/core`.
+- Turborepo — `apps/admin`, `packages/toolkit`, `packages/core`.
 - Next.js 15 (App Router), TypeScript strict, Tailwind + shadcn/ui, Supabase, Resend, Vercel.
 - Providers LLM (`packages/core`) : interface `LLMProvider.ask(query, lang) -> { text, citations[] }`, 4 implémentations : OpenAI (gpt-4o), Anthropic (Claude Sonnet), Google Gemini, Perplexity (sonar, retourne les citations — critiques pour le Chantier 3).
 - Clés API en env. Coût par scan loggé, plafonné (~30 requêtes × 4 moteurs). Rate limiting IP (3 scans/jour) + Cloudflare Turnstile.
 
-## 3. `apps/web`
+## 3. Le tunnel public — servi par Lovable
+
+> Section historique : ce tunnel était `apps/web` dans ce dépôt. Il est depuis le
+> 2026-08-01 servi par le projet Lovable, qui embarque aussi le moteur de scan.
+> Ce qui suit décrit toujours le comportement attendu du produit.
 
 ### 3.1 Landing
 - H1 : « Votre marque est-elle invisible dans ChatGPT ? »

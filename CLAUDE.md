@@ -11,16 +11,29 @@ Perplexity et Grok.
 
 | Où | Quoi | Qui édite |
 |---|---|---|
-| **Lovable** (`150f9fa5-b533-49e7-a797-19c52f94db36`) | Tout le front : landing, scan, rapport, admin, Supabase | Luigi |
-| **Ce dépôt** | Le back : moteur de scan et usine de livraison | Claude Code |
+| **Lovable** (`150f9fa5-b533-49e7-a797-19c52f94db36`) | Tunnel public **et son moteur de scan** : landing, scan, teaser, rapport, capture de lead, Supabase | Luigi |
+| **Ce dépôt** | L'usine de livraison : `packages/toolkit` + `apps/admin` | Claude Code |
 
-Le front ne se développe plus ici. `apps/web` et `apps/admin` sont conservés comme
-référence de travail et pour le mode démo, mais ne sont plus la cible.
+Le projet Lovable n'est pas qu'un front : c'est une app TanStack Start dont
+`src/lib/orchestrateur.server.ts` interroge les moteurs, calcule le score et
+écrit en base. Ce moteur est **le seul** qui mesure. Ce dépôt ne doit jamais en
+exécuter un second : l'intérêt du J+90 est l'écart avec le J0, et un écart entre
+deux implémentations de score différentes ne veut rien dire.
+
+`apps/web` a été supprimé le 2026-08-01 — il refaisait le tunnel public déjà
+servi par Lovable. `apps/admin` est conservé : l'admin Lovable liste et modifie
+un statut, celui-ci gère conversion, relances, sprints, livrables et citations.
+
+**Le schéma Supabase appartient au front.** Le toolkit en est consommateur ;
+il ne crée ni scans, ni leads, ni clients.
 
 ## Ce dépôt
 
-- `packages/core` — 5 providers LLM (`LLMProvider.ask`), génération de requêtes,
-  détection de mentions (déterministe + LLM), scoring, runner de scan, log de coûts.
+- `packages/core` — accès Supabase, appels Claude pour les commandes du toolkit,
+  crawl, utilitaires. Contient aussi un moteur de scan complet (providers,
+  scoring, runner) **qui n'est plus la référence** : c'est celui de Lovable qui
+  mesure. Le code est gardé pour le mode démo et les tests ; ne pas le brancher
+  sur la production sans relire la note d'architecture ci-dessus.
 - `packages/toolkit` — l'usine : `pnpm toolkit <commande>`.
   Livraison : `audit-technique`, `generate-fixes`, `content-brief`, `draft-content`,
   `citation-targets`, `sprint-report`, `rescan`.
@@ -30,26 +43,33 @@ référence de travail et pour le mode démo, mais ne sont plus la cible.
 - `supabase/citari/` — complément au schéma posé depuis Lovable. **C'est le schéma
   de référence**, pas `supabase/migrations/` (celui de l'ancienne version locale).
 
-## ⚠ Chantier ouvert : réconcilier les schémas
+## Schéma : la traduction est centralisée
 
-Le schéma Lovable et l'ancien schéma local nomment les colonnes différemment :
+Le toolkit garde son vocabulaire métier ; la traduction vers les colonnes réelles
+vit dans **`packages/toolkit/src/lib/context.ts` et `lib/insights.ts`**, et nulle
+part ailleurs. Une colonne qui bouge côté Lovable se répare là.
 
-| Lovable (référence) | Ancien local |
-|---|---|
-| `scans.brand_name` | `scans.brand` |
-| `scans.website_url` | `scans.url` |
-| `scans.score_global` | `scans.score` |
-| `scans.score_chatgpt/claude/gemini/perplexity/grok` | `scans.score_detail` (jsonb) |
-| `scans.phase` | `scans.status` + `progress` |
-| `scans.ip_hash` | `scans.ip` |
-| `queries.rank` / `queries.intent` | `queries.position` / `category` |
-| `responses.raw_text` / `sources` / `cost_eur` | `text` / `citations` / `cost_cents` |
-| `mentions.recommended` / `is_target` / `verbatim` | `is_recommended` (pas d'équivalent) |
-| `deliverables.sprint_id` | `deliverables.client_id` |
-| `follow_ups.due_on` / `cancelled` | `scheduled_for` / `status` |
+Pièges vérifiés sur la base réelle (2026-08-01) — ne pas les redécouvrir :
 
-**Tant que ce n'est pas fait, le toolkit ne fonctionne pas contre la base Lovable.**
-C'est le prochain gros morceau.
+- `responses.engine` et `mentions.engine` stockent les **libellés** (`ChatGPT`,
+  `Claude`, `Gemini`, `Perplexity`), pas des identifiants techniques.
+- **`mentions` n'a pas de colonne `mentioned`** : une ligne *est* une mention.
+  La marque suivie s'identifie par `is_target`, jamais par comparaison de noms.
+- `share_of_voice` est un **tableau** `[{name,count,share,target}]`, pas un dict.
+- `citation_targets` n'a que `name/url/status/notes` : le détail (pourquoi,
+  difficulté, pitch) va dans le livrable Markdown.
+- `directories.kind` / `authority_note` (et non `type` / `notes`).
+- `leads` n'a ni `brand`, ni `sector`, ni `score` — passer par le scan lié.
+- `follow_ups` n'a pas de `status` : `sent_at` et `cancelled` le dérivent.
+- Le rappel de re-scan J+90 porte sur `sprints.rescan_due_on`, pas sur `clients`.
+- `scans` n'a ni `email` ni `cost_cents` (les coûts vivent dans `cost_log`).
+
+`supabase/citari/002_back_office.sql` complète ce schéma (colonnes du toolkit,
+`crawler_hits`, 53 annuaires). Il est **rejouable** : `if not exists` partout et
+un index unique `(sector, url)` qui rend le seed idempotent.
+
+⚠ `apps/admin` utilise encore l'ancien vocabulaire. Le typecheck ne le signale
+pas (le client Supabase y est typé `any`) — c'est le prochain morceau.
 
 ## Commandes
 - `pnpm install` puis `pnpm test` (vitest) et `pnpm typecheck`.
@@ -61,8 +81,11 @@ C'est le prochain gros morceau.
 temporaire, partagée entre process. Ne jamais laisser en production.
 
 ## Règles métier à ne pas casser
+- **4 moteurs en production** : ChatGPT, Claude, Gemini, Perplexity. Grok existe
+  dans `packages/core` mais le moteur Lovable ne l'interroge pas — ne jamais
+  l'annoncer au client tant que ce n'est pas le cas.
 - Scoring : mention 50 %, position 20 %, recommandation explicite 20 %, sentiment 10 %.
-- Mix de requêtes : 40 % comparatives, 25 % problème, 20 % locales, 15 % confiance.
+- Mix de requêtes : 24 questions — 10 comparatives, 6 problème, 5 locales, 3 confiance.
 - Re-scan = strictement les MÊMES requêtes que le scan initial.
 - Coût par scan loggé, cible < 1,50 €. Rate limit 3 scans/jour/IP + Turnstile.
 - Non-objectifs : comptes prospects, paiement en ligne, scraping des UIs de chatbots,
