@@ -85,12 +85,7 @@ function Accueil() {
           </Apparition>
         </section>
         <CoutAbsence />
-        <Mesure />
-      </div>
-
-      <RapportExemple />
-
-      <div className="mx-auto max-w-[1240px] px-6 lg:px-10">
+        <ScanGratuit />
         <Sprint />
         <Garanties />
         <Faq />
@@ -102,6 +97,23 @@ function Accueil() {
   );
 }
 
+
+function ScanGratuit() {
+  return (
+    <Apparition as="section" className="mt-40 border-t border-rule pt-10 sm:mt-52">
+      <Label className="pb-6">le scan gratuit</Label>
+      <h2 className="max-w-[16ch] text-balance text-[38px] leading-[1.02] sm:text-[62px]">
+        {frTitre("Quatre-vingt-dix secondes, et vous savez.")}
+      </h2>
+      <p className="mt-8 max-w-[62ch] text-[17px] leading-[1.6] text-ink-2">
+        {fr("Voici exactement comment il fonctionne, puis exactement ce qu’il vous remet.")}
+      </p>
+
+      <Mesure />
+      <RapportExemple />
+    </Apparition>
+  );
+}
 
 const NAV = [
   ["/guide-geo", "Guide du GEO"],
@@ -439,7 +451,7 @@ const CHANTIERS: [string, string, string, string][] = [
   [
     "Elle ne peut pas vous lire",
     "Technique",
-    "La plupart des sites bloquent les robots d’IA sans le savoir : un réglage par défaut du CMS, hérité de 2023. Nous ouvrons l’accès à GPTBot, ClaudeBot et PerplexityBot, nous publions un fichier llms.txt, nous balisons vos pages clés en schema.org et nous réécrivons vos pages principales au format réponse directe — celui que les modèles savent citer.",
+    "La plupart des sites bloquent les robots d’IA sans le savoir : un réglage par défaut du CMS, hérité de 2023. Nous ouvrons l’accès à GPTBot, ClaudeBot et PerplexityBot, nous publions un fichier llms.txt, nous balisons vos pages clés en schema.org et nous réécrivons vos pages principales au format réponse directe, celui que les modèles savent citer.",
     "Le rapport d’audit, les fichiers prêts à poser, et un cahier de spécifications si c’est votre agence qui publie.",
   ],
   [
@@ -452,7 +464,7 @@ const CHANTIERS: [string, string, string, string][] = [
     "Personne d’autre ne parle de vous",
     "Citations",
     "Les moteurs s’appuient sur des sources tierces qu’ils consultent en direct. Nous identifions celles sur lesquelles ils s’appuient pour recommander vos concurrents, et nous vous y installons.",
-    "Huit cibles traitées — inscriptions faites, pitchs presse rédigés et envoyés, relances assurées, statut de chacune suivi.",
+    "Huit cibles traitées : inscriptions faites, pitchs presse rédigés et envoyés, relances assurées, statut de chacune suivi.",
   ],
 ];
 
@@ -469,7 +481,7 @@ function Sprint() {
     <Apparition as="section" className="mt-40 border-t border-rule pt-10">
       <Label className="pb-6">ce que nous faisons</Label>
       <h2 className="max-w-[17ch] text-balance text-[38px] leading-[1.02] sm:text-[62px]">
-        {frTitre("Le Sprint GEO — trente jours, trois chantiers.")}
+        {frTitre("Le Sprint GEO : trente jours, trois chantiers.")}
       </h2>
       <p className="mt-10 max-w-[62ch] text-[17px] leading-[1.6] text-ink-2">
         {fr(
@@ -531,7 +543,7 @@ function Sprint() {
           </p>
           <p className="mt-6 text-[15px] leading-[1.6] text-ink-3">
             {fr(
-              "Option Sprint Domination : 4 900 € HT — dix contenus, seize cibles de citation, deux langues.",
+              "Option Sprint Domination : 4 900 € HT, soit dix contenus, seize cibles de citation et deux langues.",
             )}
           </p>
         </div>
@@ -567,7 +579,7 @@ const NOUS_GARANTISSONS = [
 const NOUS_NE_GARANTISSONS_PAS = [
   "Un score précis à une date précise. Les moteurs intègrent les changements en quatre à douze semaines, et personne ne contrôle ce délai.",
   "Une position. « Premier dans ChatGPT » n’existe pas : il n’y a pas de classement, seulement une réponse rédigée qui varie d’une fois sur l’autre.",
-  "Un effet immédiat. Ce travail se cumule dans le temps — c’est précisément pour cela que les places se prennent maintenant.",
+  "Un effet immédiat. Ce travail se cumule dans le temps. C’est précisément pour cela que les places se prennent maintenant.",
 ];
 
 function Garanties() {
