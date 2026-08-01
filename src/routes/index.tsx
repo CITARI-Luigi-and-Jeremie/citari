@@ -246,9 +246,10 @@ function BlocPreuve() {
         </div>
 
         <div className="mt-7 flex items-center gap-2.5">
-          <span className="h-1.5 w-1.5 rounded-full bg-bordeaux" />
+          <MoteurLogo moteur={moteur} className="text-[15px] text-bordeaux" />
           <span className="label-xs">{fr(`${moteur} répond`)}</span>
         </div>
+
 
         <ol className="mt-4 overflow-hidden rounded-lg border border-rule bg-card">
           {classement.map((c, i) => (
