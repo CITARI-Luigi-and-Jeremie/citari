@@ -3,7 +3,7 @@
 
 ## Ce que fait Citari
 
-- Scan gratuit et sans inscription du Score de Visibilité IA (0-100) sur 24 questions d'intention d'achat et 4 moteurs.
+- Scan gratuit et sans inscription du Score de Visibilité IA (0-100) sur 24 questions d'intention d'achat et 6 moteurs (ChatGPT, Claude, Gemini, Perplexity, Grok, Le Chat).
 - Call de restitution gratuit de 30 minutes.
 - Sprint GEO : 2 900 €, paiement unique 50/50, mission de 30 jours, sans abonnement.
 - Option Sprint Domination : 4 900 €.

@@ -124,7 +124,7 @@ function Page() {
         <H2 id="mesure">La méthode de mesure</H2>
         <p className="mt-5 text-[16px] leading-[1.7] text-ink-2">
           {fr(
-            "Sans mesure, le GEO est une opinion. Nous interrogeons quatre moteurs — ChatGPT, Claude, Gemini, Perplexity — sur un échantillon de 24 questions d’intention d’achat : 40 % de comparatives, 25 % de questions problème, 20 % de locales, 15 % de confiance. L’échantillon est généré une fois, puis figé.",
+            "Sans mesure, le GEO est une opinion. Nous interrogeons six moteurs — ChatGPT, Claude, Gemini, Perplexity, Grok, Le Chat — sur un échantillon de 24 questions d’intention d’achat : 40 % de comparatives, 25 % de questions problème, 20 % de locales, 15 % de confiance. L’échantillon est généré une fois, puis figé.",
           )}
         </p>
         <p className="mt-5 text-[16px] leading-[1.7] text-ink-2">
