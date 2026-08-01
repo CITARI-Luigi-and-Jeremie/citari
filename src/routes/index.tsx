@@ -250,7 +250,12 @@ function BlocPreuve() {
         </p>
       </div>
     </div>
+    <p className="mt-7 max-w-[34ch] font-display text-[24px] font-light leading-[1.2]">
+      Une IA ne donne pas dix liens. Elle donne trois noms.
+    </p>
+    </div>
   );
+
 }
 
 
