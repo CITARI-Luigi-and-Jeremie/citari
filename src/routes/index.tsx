@@ -308,12 +308,14 @@ function ApercuRapport() {
           {ENGINES_SCAN.map((m) => (
             <span
               key={m}
-              className="inline-flex rounded-full border border-rule-strong bg-paper px-3 py-1 text-[12px] font-medium text-ink-2"
+              className="inline-flex items-center gap-1.5 rounded-full border border-rule-strong bg-paper px-3 py-1 text-[12px] font-medium text-ink-2"
             >
+              <MoteurLogo moteur={m} className="text-[13px] text-ink" />
               {m}
             </span>
           ))}
         </div>
+
         <div className="mt-4 border-t border-rule pt-4">
           <div className="flex items-start gap-3">
             <span className="shrink-0 font-display text-[42px] font-light leading-[0.9] text-ink-3">24</span>
