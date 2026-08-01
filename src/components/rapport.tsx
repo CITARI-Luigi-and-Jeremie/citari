@@ -1,6 +1,8 @@
 import { cn } from "@/lib/utils";
 import { Etiquette, Label, Rule } from "@/components/kit";
 import { MOTEURS, pourcent, NBSP } from "@/lib/typo";
+import { MoteurLogo } from "@/components/moteur-logo";
+
 
 export type Mention = {
   id: string;
