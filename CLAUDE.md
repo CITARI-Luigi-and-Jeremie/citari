@@ -26,6 +26,29 @@ recréerait deux sources de vérité.
 S'il est absent après un clone :
 `git clone https://github.com/LuigiRevelli/sprint-voice-insight.git apps/citari`
 
+**Règle de travail : une seule personne à la fois sur le front.** Luigi fait le
+design sur Lovable (il voit le rendu en direct) ; on fait ici la logique, les
+bugs et tout ce qui touche à la base (on a le typecheck et la vue sur le
+toolkit). Toujours `git -C apps/citari pull` AVANT de modifier quoi que ce soit.
+
+Deux réglages locaux déjà en place, à refaire après un nouveau clone :
+
+```bash
+# bun est absent de cette machine : dépendances installées avec npm.
+# Le lockfile npm ne doit pas partir vers Lovable, qui reste sur bun.lock.
+echo "package-lock.json" >> apps/citari/.git/info/exclude
+
+# routeTree.gen.ts est régénéré à chaque `npm run dev` et pollue chaque diff.
+git -C apps/citari update-index --skip-worktree src/routeTree.gen.ts
+```
+
+Si un `pull` se plaint de ce fichier : `--no-skip-worktree`, `checkout --`,
+`pull`, puis remettre `--skip-worktree`.
+
+Le front tourne en local sur **8080** (imposé par la config Lovable), pas 3000.
+Il s'affiche, mais **ne peut pas lancer de scan** : les clés serveur (service
+role, Anthropic, Perplexity, passerelle Lovable) ne sont pas dans le dépôt.
+
 ### Un seul moteur de score
 
 `apps/citari/src/lib/orchestrateur.server.ts` interroge les moteurs, calcule le
