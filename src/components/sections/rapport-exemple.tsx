@@ -12,8 +12,7 @@ import {
   type Question,
   type Reponse,
 } from "@/components/rapport";
-import { MOTEURS } from "@/lib/typo";
-import { fr, frTitre } from "@/lib/typo";
+import { MOTEURS, fr, frTitre } from "@/lib/typo";
 
 /* ------------------------------------------------------------------
    Jeu de données strictement illustratif.
@@ -145,8 +144,8 @@ const VERBATIMS: [string, string][] = [
   ],
 ];
 
-VERBATIMS.forEach(([brand, texte], i) => {
-  const cible = MENTIONS.find((m) => m.brand === brand && !m.verbatim && i * 0 === 0);
+VERBATIMS.forEach(([brand, texte]) => {
+  const cible = MENTIONS.find((m) => m.brand === brand && !m.verbatim);
   if (cible) cible.verbatim = texte;
 });
 
