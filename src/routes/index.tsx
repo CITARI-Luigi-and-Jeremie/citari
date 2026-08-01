@@ -56,7 +56,7 @@ function Accueil() {
           <div className="relative z-[2]">
             <Apparition>
 
-              <Label>visibilité dans les moteurs génératifs</Label>
+              <Label>Votre visibilité dans ChatGPT, Claude, Gemini, Grok et Perplexity</Label>
               <h1 className="mt-6 text-balance text-[46px] leading-[0.95] sm:text-[68px] lg:text-[84px]">
                 Vos clients ne cherchent plus sur{" "}
                 <em className="not-italic text-ink-3">Google</em>.
