@@ -103,7 +103,9 @@ export type Database = {
           notes: string | null
           offer: string
           scan_id: string | null
+          sector: string | null
           updated_at: string
+          website_url: string | null
         }
         Insert: {
           amount_eur?: number
@@ -117,7 +119,9 @@ export type Database = {
           notes?: string | null
           offer?: string
           scan_id?: string | null
+          sector?: string | null
           updated_at?: string
+          website_url?: string | null
         }
         Update: {
           amount_eur?: number
@@ -131,7 +135,9 @@ export type Database = {
           notes?: string | null
           offer?: string
           scan_id?: string | null
+          sector?: string | null
           updated_at?: string
+          website_url?: string | null
         }
         Relationships: [
           {
@@ -188,35 +194,95 @@ export type Database = {
           },
         ]
       }
+      crawler_hits: {
+        Row: {
+          bot: string
+          client_id: string
+          created_at: string
+          errors: number
+          hits: number
+          id: string
+          measured_on: string
+          period_end: string | null
+          period_start: string | null
+        }
+        Insert: {
+          bot: string
+          client_id: string
+          created_at?: string
+          errors?: number
+          hits?: number
+          id?: string
+          measured_on?: string
+          period_end?: string | null
+          period_start?: string | null
+        }
+        Update: {
+          bot?: string
+          client_id?: string
+          created_at?: string
+          errors?: number
+          hits?: number
+          id?: string
+          measured_on?: string
+          period_end?: string | null
+          period_start?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crawler_hits_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       deliverables: {
         Row: {
+          client_id: string | null
           created_at: string
+          data: Json | null
           id: string
           kind: string
+          local_path: string | null
           sprint_id: string
           status: string
           title: string
           url: string | null
         }
         Insert: {
+          client_id?: string | null
           created_at?: string
+          data?: Json | null
           id?: string
           kind: string
+          local_path?: string | null
           sprint_id: string
           status?: string
           title: string
           url?: string | null
         }
         Update: {
+          client_id?: string | null
           created_at?: string
+          data?: Json | null
           id?: string
           kind?: string
+          local_path?: string | null
           sprint_id?: string
           status?: string
           title?: string
           url?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "deliverables_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "deliverables_sprint_id_fkey"
             columns: ["sprint_id"]
@@ -534,12 +600,14 @@ export type Database = {
           mention_rate: number | null
           phase: string
           previous_scan_id: string | null
+          progress: number
           reco_rate: number | null
           report_token: string
           score_chatgpt: number | null
           score_claude: number | null
           score_gemini: number | null
           score_global: number | null
+          score_grok: number | null
           score_perplexity: number | null
           sector: string
           sentiment_score: number | null
@@ -564,12 +632,14 @@ export type Database = {
           mention_rate?: number | null
           phase?: string
           previous_scan_id?: string | null
+          progress?: number
           reco_rate?: number | null
           report_token?: string
           score_chatgpt?: number | null
           score_claude?: number | null
           score_gemini?: number | null
           score_global?: number | null
+          score_grok?: number | null
           score_perplexity?: number | null
           sector: string
           sentiment_score?: number | null
@@ -594,12 +664,14 @@ export type Database = {
           mention_rate?: number | null
           phase?: string
           previous_scan_id?: string | null
+          progress?: number
           reco_rate?: number | null
           report_token?: string
           score_chatgpt?: number | null
           score_claude?: number | null
           score_gemini?: number | null
           score_global?: number | null
+          score_grok?: number | null
           score_perplexity?: number | null
           sector?: string
           sentiment_score?: number | null
@@ -664,6 +736,7 @@ export type Database = {
           ends_on: string | null
           id: string
           rescan_due_on: string | null
+          rescan_reminder_sent: boolean
           rescan_scan_id: string | null
           started_on: string
           status: string
@@ -674,6 +747,7 @@ export type Database = {
           ends_on?: string | null
           id?: string
           rescan_due_on?: string | null
+          rescan_reminder_sent?: boolean
           rescan_scan_id?: string | null
           started_on?: string
           status?: string
@@ -684,6 +758,7 @@ export type Database = {
           ends_on?: string | null
           id?: string
           rescan_due_on?: string | null
+          rescan_reminder_sent?: boolean
           rescan_scan_id?: string | null
           started_on?: string
           status?: string
