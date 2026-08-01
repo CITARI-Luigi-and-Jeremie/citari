@@ -255,6 +255,8 @@ async function finaliser(id: string) {
       score_claude: s.parMoteur["Claude"],
       score_gemini: s.parMoteur["Gemini"],
       score_perplexity: s.parMoteur["Perplexity"],
+      score_grok: s.parMoteur["Grok"],
+      score_mistral: s.parMoteur["Le Chat"],
       mention_rate: s.mentionRate,
       avg_position: s.avgPosition,
       reco_rate: s.recoRate,
@@ -328,7 +330,7 @@ export async function rapportParJeton(jeton: string) {
   if (scan.previous_scan_id) {
     const { data: prev } = await supabaseAdmin
       .from("scans")
-      .select("score_global, completed_at, share_of_voice, score_chatgpt, score_claude, score_gemini, score_perplexity")
+      .select("score_global, completed_at, share_of_voice, score_chatgpt, score_claude, score_gemini, score_perplexity, score_grok, score_mistral")
       .eq("id", scan.previous_scan_id)
       .maybeSingle();
     if (prev)
@@ -341,6 +343,8 @@ export async function rapportParJeton(jeton: string) {
           Claude: prev.score_claude as number | null,
           Gemini: prev.score_gemini as number | null,
           Perplexity: prev.score_perplexity as number | null,
+          Grok: prev.score_grok as number | null,
+          "Le Chat": prev.score_mistral as number | null,
         },
       };
   }
@@ -403,7 +407,7 @@ export async function teaserScan(id: string) {
   const { data: scan } = await supabaseAdmin
     .from("scans")
     .select(
-      "id, brand_name, status, score_global, score_chatgpt, score_claude, score_gemini, score_perplexity, share_of_voice",
+      "id, brand_name, status, score_global, score_chatgpt, score_claude, score_gemini, score_perplexity, score_grok, score_mistral, share_of_voice",
     )
     .eq("id", id)
     .maybeSingle();
@@ -433,6 +437,8 @@ export async function teaserScan(id: string) {
       Claude: scan.score_claude as number | null,
       Gemini: scan.score_gemini as number | null,
       Perplexity: scan.score_perplexity as number | null,
+      Grok: scan.score_grok as number | null,
+      "Le Chat": scan.score_mistral as number | null,
     },
     pdv: (Array.isArray(scan.share_of_voice) ? scan.share_of_voice : []) as unknown as PdvItem[],
     verbatim: preuve

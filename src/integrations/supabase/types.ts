@@ -608,6 +608,7 @@ export type Database = {
           score_gemini: number | null
           score_global: number | null
           score_grok: number | null
+          score_mistral: number | null
           score_perplexity: number | null
           sector: string
           sentiment_score: number | null
@@ -640,6 +641,7 @@ export type Database = {
           score_gemini?: number | null
           score_global?: number | null
           score_grok?: number | null
+          score_mistral?: number | null
           score_perplexity?: number | null
           sector: string
           sentiment_score?: number | null
@@ -672,6 +674,7 @@ export type Database = {
           score_gemini?: number | null
           score_global?: number | null
           score_grok?: number | null
+          score_mistral?: number | null
           score_perplexity?: number | null
           sector?: string
           sentiment_score?: number | null

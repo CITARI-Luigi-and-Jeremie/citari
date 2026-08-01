@@ -337,7 +337,7 @@ export function LimiteMethodologique() {
     <div className="max-w-[62ch] border-t border-rule-strong pt-3">
       <Etiquette>limite assumée</Etiquette>
       <p className="mt-2 text-[13px] leading-snug text-ink-2">
-        Les mesures sont obtenues via les API officielles des quatre moteurs. Elles ne reproduisent pas
+        Les mesures sont obtenues via les API officielles des six moteurs. Elles ne reproduisent pas
         exactement l’expérience d’un utilisateur connecté à l’interface grand public (personnalisation,
         historique, position géographique). Aucun scraping n’est pratiqué. Les résultats sont comparables
         entre eux dans le temps, puisque l’échantillon de questions est figé.

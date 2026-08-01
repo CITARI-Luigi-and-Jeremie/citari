@@ -114,6 +114,6 @@ export const FAQ = [
   },
   {
     q: "Comment le score est-il calculé ?",
-    r: "Sur 100 points : taux de mention pour 50 %, position moyenne dans la réponse pour 20 %, recommandation explicite pour 20 %, sentiment pour 10 %. L’échantillon compte 24 questions d’intention d’achat interrogées sur ChatGPT, Claude, Gemini et Perplexity, via les API officielles des éditeurs, jamais par scraping.",
+    r: "Sur 100 points : taux de mention pour 50 %, position moyenne dans la réponse pour 20 %, recommandation explicite pour 20 %, sentiment pour 10 %. L’échantillon compte 24 questions d’intention d’achat interrogées sur ChatGPT, Claude, Gemini, Perplexity, Grok et Le Chat, soit 144 réponses, via les API officielles des éditeurs, jamais par scraping.",
   },
 ];

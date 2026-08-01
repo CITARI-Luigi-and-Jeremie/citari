@@ -50,5 +50,5 @@ export function verdict(score: number): string {
   return "Référence du secteur";
 }
 
-export const MOTEURS = ["ChatGPT", "Claude", "Gemini", "Perplexity"] as const;
+export const MOTEURS = ["ChatGPT", "Claude", "Gemini", "Perplexity", "Grok", "Le Chat"] as const;
 export type Moteur = (typeof MOTEURS)[number];
