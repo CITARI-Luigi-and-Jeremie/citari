@@ -254,65 +254,61 @@ function Bloc({
 
 export function RapportExemple() {
   return (
-    <Apparition
-      as="section"
-      className="mt-40 border-y border-rule bg-paper-2/70 sm:mt-52"
-    >
-      <div className="mx-auto max-w-[1240px] px-6 py-20 sm:py-28 lg:px-10">
-        <Label className="pb-6">ce que vous recevez</Label>
-        <h2 className="max-w-[16ch] text-balance text-[38px] leading-[1.02] sm:text-[62px]">
-          {frTitre("Le rapport, avant de le demander.")}
-        </h2>
-        <p className="mt-8 max-w-[62ch] text-[17px] leading-[1.6] text-ink-2">
-          {fr(
-            "Voici exactement les pages que vous recevez à la fin du scan — mêmes composants, mêmes calculs. Seules les données changent : ce sont les vôtres.",
-          )}
-        </p>
-        <div className="mt-8">
-          <Etiquette>rapport d’exemple — données illustratives, marques fictives</Etiquette>
-        </div>
-
-        <div className="mt-16 grid gap-20">
-          <Bloc accroche="Votre score, et sa décomposition par moteur.">
-            <ScoreGeant score={SCORE} verdict="Marginal" />
-            <div className="mt-10">
-              <ScoresMoteurs scores={SCORES_MOTEURS} />
-            </div>
-          </Bloc>
-
-          <Bloc accroche="Qui occupe le terrain à votre place.">
-            <PartDeVoix items={PART_DE_VOIX} />
-          </Bloc>
-
-          <Bloc accroche="Les phrases exactes, mot pour mot.">
-            <Verbatims mentions={MENTIONS} marque={MARQUE} />
-          </Bloc>
-
-          <Bloc accroche="Les 24 questions, une par une, avec votre rang sur chaque moteur.">
-            <TableauRequetes
-              questions={QUESTIONS}
-              reponses={REPONSES}
-              mentions={MENTIONS}
-              marque="Vaurel"
-            />
-          </Bloc>
-
-          <Bloc accroche="Les sources sur lesquelles les moteurs s’appuient.">
-            <Sources reponses={REPONSES} />
-          </Bloc>
-
-          <Bloc accroche="Dix actions classées par priorité.">
-            <Actions actions={ACTIONS} />
-          </Bloc>
-        </div>
-
-        <Rule className="mt-20" />
-        <p className="mt-6 max-w-[62ch] text-[15px] leading-[1.6] text-ink-3">
-          {fr(
-            "Aucun chiffre de cette page ne provient d’un client réel. Le cabinet et ses concurrents sont inventés ; la structure du rapport, elle, est celle que vous recevrez.",
-          )}
-        </p>
+    <div className="mt-24">
+      <SousTitre>Ce que vous recevez</SousTitre>
+      <h3 className="mt-8 max-w-[16ch] text-balance font-display text-[32px] font-light leading-[1.06] sm:text-[46px]">
+        {frTitre("Le rapport, avant de le demander.")}
+      </h3>
+      <p className="mt-8 max-w-[62ch] text-[17px] leading-[1.6] text-ink-2">
+        {fr(
+          "Voici exactement les pages que vous recevez à la fin du scan : mêmes composants, mêmes calculs. Seules les données changent, ce sont les vôtres.",
+        )}
+      </p>
+      <div className="mt-8">
+        <Etiquette>rapport d’exemple, données illustratives, marques fictives</Etiquette>
       </div>
-    </Apparition>
-  );
+
+      <div className="mt-16 grid gap-20">
+        <Bloc accroche="Votre score, et sa décomposition par moteur.">
+          <ScoreGeant score={SCORE} verdict="Marginal" />
+          <div className="mt-10">
+            <ScoresMoteurs scores={SCORES_MOTEURS} />
+          </div>
+        </Bloc>
+
+        <Bloc accroche="Qui occupe le terrain à votre place.">
+          <PartDeVoix items={PART_DE_VOIX} />
+        </Bloc>
+
+        <Bloc accroche="Les phrases exactes, mot pour mot.">
+          <Verbatims mentions={MENTIONS} marque={MARQUE} />
+        </Bloc>
+
+        <Bloc accroche="Les 24 questions, une par une, avec votre rang sur chaque moteur.">
+          <TableauRequetes
+            questions={QUESTIONS}
+            reponses={REPONSES}
+            mentions={MENTIONS}
+            marque="Vaurel"
+          />
+        </Bloc>
+
+        <Bloc accroche="Les sources sur lesquelles les moteurs s’appuient.">
+          <Sources reponses={REPONSES} />
+        </Bloc>
+
+        <Bloc accroche="Dix actions classées par priorité.">
+          <Actions actions={ACTIONS} />
+        </Bloc>
+      </div>
+
+      <Rule className="mt-20" />
+      <p className="mt-6 max-w-[62ch] text-[15px] leading-[1.6] text-ink-3">
+        {fr(
+          "Aucun chiffre de cette page ne provient d’un client réel. Le cabinet et ses concurrents sont inventés ; la structure du rapport, elle, est celle que vous recevrez.",
+        )}
+      </p>
+    </div>
+  </Apparition>
+);
 }
