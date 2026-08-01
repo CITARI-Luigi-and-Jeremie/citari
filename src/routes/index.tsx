@@ -6,7 +6,7 @@ import { Apparition } from "@/components/apparition";
 import { ChampTexte } from "@/components/fond";
 
 import { LogoLien, Logo } from "@/components/logo";
-import { Btn, Champ, Choix, Etiquette, Field, Label, LigneVide, Rule } from "@/components/kit";
+import { Btn, Champ, Choix, Etiquette, Field, Label, Rule } from "@/components/kit";
 import { FAQ, LANGUES, METIERS, SECTEURS, VILLES, exemple, type Metier } from "@/data/contenu";
 import { lancerScan } from "@/lib/scan.functions";
 import { NBSP, euros, fr, frTitre } from "@/lib/typo";
@@ -56,7 +56,7 @@ function Accueil() {
           <div className="relative z-[2]">
             <Apparition>
 
-              <Label>Votre visibilité dans ChatGPT, Claude, Gemini, Grok et Perplexity</Label>
+              <Label>Votre visibilité dans ChatGPT, Claude, Gemini et Perplexity</Label>
               <h1 className="mt-6 text-balance text-[46px] leading-[0.95] sm:text-[68px] lg:text-[84px]">
                 Vos clients ne cherchent plus sur{" "}
                 <em className="not-italic text-ink-3">Google</em>.
@@ -81,19 +81,15 @@ function Accueil() {
             <BlocPreuve />
           </Apparition>
         </section>
-        <BandeauConfiance />
-        <StatistiqueExergue />
-        <CoutInvisibilite />
-        <ScanRevele />
-        <LaMesure />
-        <Pivot />
-        <Offre />
-        <Deroule />
+        <Constat />
+        <Sprint />
+        <Garanties />
         <PourQui />
-        <Engagement />
+        <Methode />
         <Faq />
         <AppelFinal />
         <PiedDePage />
+
       </div>
     </>
   );
@@ -165,7 +161,7 @@ function PilulePreuve({
   );
 }
 
-const MOTEURS_DEMO = ["ChatGPT", "Claude", "Gemini", "Perplexity", "Grok"] as const;
+const MOTEURS_DEMO = ["ChatGPT", "Claude", "Gemini", "Perplexity"] as const;
 type MoteurDemo = (typeof MOTEURS_DEMO)[number];
 
 function BlocPreuve() {
@@ -248,7 +244,7 @@ function BlocPreuve() {
         </ol>
 
         <p className="mt-5 text-[13px] leading-relaxed text-ink-3">
-          {fr("Exemple illustratif : les noms sont fictifs. Votre scan interroge ChatGPT, Claude, Gemini, Perplexity et Grok avec vos vrais concurrents.")}
+          {fr("Exemple illustratif : les noms sont fictifs. Votre scan interroge ChatGPT, Claude, Gemini et Perplexity avec vos vrais concurrents.")}
         </p>
       </div>
     </div>
@@ -258,7 +254,7 @@ function BlocPreuve() {
 
 /* ---------------- Aperçu du rapport ---------------- */
 
-const ENGINES_SCAN = ["ChatGPT", "Claude", "Gemini", "Grok", "Perplexity"];
+const ENGINES_SCAN = ["ChatGPT", "Claude", "Gemini", "Perplexity"];
 
 function ApercuRapport() {
   return (
@@ -268,7 +264,7 @@ function ApercuRapport() {
         <ul className="mt-4 grid gap-3 text-[14px] leading-snug text-ink-2">
           <li className="flex gap-3">
             <span className="mt-0.5 h-1.5 w-1.5 rounded-full bg-bordeaux" />
-            <span>{fr("Un score de visibilité de 0 à 100 sur les 5 moteurs.")}</span>
+            <span>{fr("Un score de visibilité de 0 à 100 sur les 4 moteurs.")}</span>
           </li>
           <li className="flex gap-3">
             <span className="mt-0.5 h-1.5 w-1.5 rounded-full bg-bordeaux" />
@@ -355,7 +351,7 @@ function Formulaire() {
         <div>
           <h2 className="text-[27px] leading-none sm:text-[30px]">Scan gratuit</h2>
           <p className="mt-2 text-[14px] leading-snug text-ink-2">
-            {fr("Votre score de visibilité dans ChatGPT, Claude, Gemini, Grok et Perplexity.")}
+            {fr("Votre score de visibilité dans ChatGPT, Claude, Gemini et Perplexity.")}
           </p>
         </div>
         <span className="label-xs shrink-0">sans inscription</span>
@@ -422,208 +418,251 @@ function Formulaire() {
   );
 }
 
-/* ---------------- Statistique en exergue ---------------- */
+/* ---------------- 1. Le constat ---------------- */
 
-function StatistiqueExergue() {
+function Constat() {
   return (
-    <Apparition
-      as="section"
-      className="mt-32 grid gap-8 border-t border-rule pt-10 lg:grid-cols-[1fr_240px] lg:gap-20"
-    >
-      <p className="text-balance font-display text-[34px] font-light leading-[1.1] sm:text-[56px]">
-        <span className="num text-bordeaux">46{NBSP}%</span> des utilisateurs d’IA démarrent leur
-        recherche d’achat directement sur une IA.
+    <Apparition as="section" className="mt-40 sm:mt-56">
+      <p className="max-w-[16ch] text-balance font-display text-[46px] font-light leading-[1.02] sm:text-[86px]">
+        Une IA ne donne pas dix liens. Elle donne trois noms.
       </p>
-      <div className="lg:pt-4">
-        <Label className="pb-2">sources</Label>
-        <ul className="text-[12px] leading-relaxed text-ink-3">
-          <li>Alchemer, 2026</li>
-          <li>G2 Research, 2026</li>
-          <li>Reuters</li>
-        </ul>
+      <div className="mt-24 grid gap-6 border-t border-rule pt-6 sm:mt-32 lg:grid-cols-[minmax(0,60ch)_1fr] lg:gap-20">
+        <p className="text-[16px] leading-relaxed text-ink-2">
+          <span className="num text-bordeaux">46{NBSP}%</span> des utilisateurs d’IA démarrent leur
+          recherche d’achat directement sur une IA.
+        </p>
+        <p className="text-[11px] leading-relaxed text-ink-3 lg:pt-1">
+          Sources : Alchemer 2026 · G2 Research 2026 · Reuters
+        </p>
       </div>
     </Apparition>
   );
 }
 
-/* ---------------- La mesure ---------------- */
+/* ---------------- 2. Ce que nous faisons ---------------- */
 
-function LaMesure() {
+const CHANTIERS: [string, string, string[]][] = [
+  [
+    "Technique",
+    "Rendre le site lisible par les IA.",
+    [
+      "Autorisation des crawlers : GPTBot, ClaudeBot, PerplexityBot.",
+      "Fichier llms.txt rédigé et publié.",
+      "Balisage schema.org sur les pages clés.",
+      "Pages restructurées en réponse directe.",
+    ],
+  ],
+  [
+    "Contenu",
+    "5 contenus rédigés et livrés.",
+    [
+      "Ciblés sur les questions où vous êtes absent.",
+      "Livrés en Markdown et en HTML.",
+      "Balisage intégré, prêts à publier.",
+      "Aucune rédaction à votre charge.",
+    ],
+  ],
+  [
+    "Citations",
+    "8 cibles prioritaires.",
+    [
+      "Annuaires sectoriels, comparateurs, presse spécialisée.",
+      "Inscriptions faites par nous.",
+      "Pitchs rédigés et envoyés.",
+      "Relances gérées jusqu’à réponse.",
+    ],
+  ],
+];
+
+function Sprint() {
   return (
-    <Apparition as="section" className="mt-28">
-      <h2 className="text-[34px] leading-none sm:text-[46px]">La mesure</h2>
-      <dl className="mt-8 grid gap-x-10 gap-y-6 border-y border-rule py-8 sm:grid-cols-3">
-        {[
-          ["24", "questions d’intention d’achat, figées"],
-          ["4", "moteurs : ChatGPT, Claude, Gemini, Perplexity"],
-          ["1", "score de 0 à 100"],
-        ].map(([n, t]) => (
-          <div key={n} className="flex items-baseline gap-4">
-            <dt className="font-display text-[46px] font-light leading-none">{n}</dt>
-            <dd className="max-w-[26ch] text-[14px] leading-snug text-ink-2">{t}</dd>
+    <Apparition as="section" className="mt-40 border-t border-rule pt-10">
+      <Label className="pb-5">ce que nous faisons</Label>
+      <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end lg:gap-20">
+        <h2 className="max-w-[18ch] text-balance text-[34px] leading-[1.04] sm:text-[52px]">
+          {frTitre("Le Sprint GEO — 30 jours, trois chantiers.")}
+        </h2>
+        <div className="shrink-0">
+          <div className="font-display text-[52px] font-light leading-none sm:text-[64px]">
+            {euros(2900)} <span className="text-[22px] text-ink-3">HT</span>
+          </div>
+          <p className="mt-3 text-[13px] leading-relaxed text-ink-2">
+            Paiement unique. 50{NBSP}% à la commande, 50{NBSP}% à la livraison. Pas d’abonnement.
+          </p>
+        </div>
+      </div>
+
+      <div className="mt-16 grid gap-y-12 border-t border-rule sm:grid-cols-3 sm:gap-x-12 lg:gap-x-20">
+        {CHANTIERS.map(([nom, phrase, points], i) => (
+          <div
+            key={nom}
+            className={`pt-7 ${i > 0 ? "sm:border-l sm:border-rule sm:pl-12 lg:pl-20" : ""}`}
+          >
+            <div className="flex items-baseline gap-3">
+              <span className="num text-[10px] tracking-[0.14em] text-ink-3">
+                {String(i + 1).padStart(2, "0")}
+              </span>
+              <h3 className="text-[19px] font-medium">{nom}</h3>
+            </div>
+            <p className="mt-3 max-w-[30ch] text-[15px] leading-snug">{fr(phrase)}</p>
+            <ul className="mt-5 grid gap-3">
+              {points.map((p) => (
+                <li key={p} className="max-w-[38ch] text-[14px] leading-relaxed text-ink-2">
+                  {fr(p)}
+                </li>
+              ))}
+            </ul>
           </div>
         ))}
-      </dl>
-      <div className="mt-10 grid gap-x-16 gap-y-8 md:grid-cols-[minmax(0,42ch)_1fr]">
-        <p className="text-[15px] leading-relaxed text-ink-2">
-          {fr(
-            "L’échantillon se répartit en 40 % de questions comparatives, 25 % de questions problème, 20 % de questions locales et 15 % de questions de confiance. Il est généré une fois, puis figé : le re-scan à J+90 rejoue exactement les mêmes, sinon la comparaison ne vaut rien.",
-          )}
-        </p>
-        <dl className="grid grid-cols-2 gap-y-6 self-start sm:grid-cols-4">
-          {[
-            ["taux de mention", "50 %"],
-            ["position moyenne", "20 %"],
-            ["recommandation", "20 %"],
-            ["sentiment", "10 %"],
-          ].map(([k, v]) => (
-            <div key={k}>
-              <dt className="label-xs">{k}</dt>
-              <dd className="num mt-1.5 text-[22px]">{v.replace(" ", NBSP)}</dd>
+      </div>
+
+      <p className="mt-14 border-t border-rule pt-5 text-[13px] leading-relaxed text-ink-3">
+        Trois sprints par mois, pas davantage. Un seul client par secteur et par zone.
+      </p>
+      <p className="mt-2 text-[13px] leading-relaxed text-ink-3">
+        {fr(
+          "Option Sprint Domination : 4 900 € HT — dix contenus, seize cibles de citation, deux langues.",
+        )}
+      </p>
+    </Apparition>
+  );
+}
+
+/* ---------------- 3. Ce que nous ne garantissons pas ---------------- */
+
+const NOUS_GARANTISSONS = [
+  "Nous garantissons les actions livrées, pas un score.",
+  "L’exécution intégrale des trois chantiers, détaillée dans un rapport de fin de mission.",
+  "Une mesure identique avant et après : mêmes 24 questions, mêmes quatre moteurs, au re-scan offert à J+90.",
+];
+
+const NOUS_NE_GARANTISSONS_PAS = [
+  "Aucune position, aucun score, aucun chiffre à 30 jours. Les moteurs génératifs intègrent les changements de contenu et de citations en 4 à 12 semaines.",
+  "Vous ne trouverez sur ce site ni témoignage, ni logo client, ni résultat chiffré présenté comme un cas réel. L’agence est jeune : la crédibilité vient de la clarté de la méthode, pas d’une preuve sociale fabriquée.",
+  "Si votre score est bon, nous vous le dirons et nous ne vous vendrons rien.",
+];
+
+function Garanties() {
+  return (
+    <Apparition as="section" className="mt-40 border-t border-rule pt-10">
+      <h2 className="max-w-[20ch] text-balance text-[34px] leading-[1.04] sm:text-[52px]">
+        {frTitre("Ce que nous ne garantissons pas.")}
+      </h2>
+      <div className="mt-14 grid gap-12 border-t border-rule pt-8 lg:grid-cols-2 lg:gap-20">
+        <div>
+          <Label className="pb-5">nous garantissons</Label>
+          <ul className="grid gap-5">
+            {NOUS_GARANTISSONS.map((t) => (
+              <li
+                key={t}
+                className="max-w-[54ch] border-b border-rule pb-5 text-[15px] leading-relaxed"
+              >
+                {fr(t)}
+              </li>
+            ))}
+          </ul>
+        </div>
+        <div>
+          <Label className="pb-5">nous ne garantissons pas</Label>
+          <ul className="grid gap-5">
+            {NOUS_NE_GARANTISSONS_PAS.map((t) => (
+              <li
+                key={t}
+                className="max-w-[54ch] border-b border-rule pb-5 text-[15px] leading-relaxed text-ink-2"
+              >
+                {fr(t)}
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    </Apparition>
+  );
+}
+
+/* ---------------- 5. La méthode ---------------- */
+
+const FORMULE: [string, string][] = [
+  ["taux de mention", "50 %"],
+  ["position moyenne", "20 %"],
+  ["recommandation explicite", "20 %"],
+  ["sentiment", "10 %"],
+];
+
+const REPERES: [string, string][] = [
+  ["J1", "cadrage"],
+  ["J7", "correctifs posés"],
+  ["J14", "premiers contenus"],
+  ["J30", "rapport"],
+  ["J+90", "re-scan offert"],
+];
+
+function Methode() {
+  return (
+    <Apparition as="section" className="mt-40 border-t border-rule pt-10">
+      <h2 className="text-[34px] leading-none sm:text-[52px]">La méthode</h2>
+
+      <div className="mt-12 grid gap-12 lg:grid-cols-[minmax(0,52ch)_1fr] lg:gap-20">
+        <div>
+          <p className="text-[16px] leading-relaxed text-ink-2">
+            {fr(
+              "24 questions d’intention d’achat, posées à ChatGPT, Claude, Gemini et Perplexity via les API officielles des éditeurs. 40 % de questions comparatives, 25 % de questions problème, 20 % de questions locales, 15 % de questions de confiance. L’échantillon est généré une fois, puis figé : le re-scan rejoue exactement les mêmes, sinon la comparaison ne vaut rien.",
+            )}
+          </p>
+          <p className="mt-6 text-[16px] leading-relaxed text-ink-2">
+            {fr(
+              "Le score va de 0 à 100. Voici sa formule exacte, publiée en clair : vous pouvez la recalculer vous-même à partir du rapport.",
+            )}
+          </p>
+        </div>
+        <dl className="grid h-max border-t border-rule">
+          {FORMULE.map(([k, v]) => (
+            <div key={k} className="flex items-baseline justify-between gap-6 border-b border-rule py-4">
+              <dt className="text-[15px] text-ink-2">{k}</dt>
+              <dd className="font-display text-[30px] font-light leading-none">
+                {v.replace(" ", NBSP)}
+              </dd>
             </div>
           ))}
         </dl>
       </div>
-    </Apparition>
-  );
-}
 
-/* ---------------- Offre ---------------- */
-
-const LIVRABLES = [
-  [
-    "Nous rendons votre site lisible par les IA.",
-    "La plupart des sites bloquent les robots des IA sans le savoir. Nous ouvrons la porte, nous étiquetons chaque page, nous structurons vos réponses pour qu’une machine puisse les citer.",
-  ],
-  [
-    "Nous créons les pages que les IA citent.",
-    "Comparatifs, alternatives, guides d’achat, questions fréquentes. Des faits, des chiffres, des réponses directes : le seul type de contenu qu’une IA reprend.",
-  ],
-  [
-    "Nous faisons parler de vous ailleurs.",
-    "Une IA ne croit pas ce que vous dites de vous. Elle croit ce que les autres en disent. Annuaires du secteur, presse spécialisée, comparateurs, forums : nous allons chercher les citations là où vos concurrents les ont déjà.",
-  ],
-];
-
-function Pivot() {
-  return (
-    <Apparition as="section" className="mt-32 border-t border-rule pt-10">
-      <p className="max-w-[22ch] text-balance font-display text-[40px] font-light leading-[1.04] sm:text-[64px]">
-        Le scan vous dit où vous en êtes. Il ne change rien.
-      </p>
-      <p className="mt-6 font-display text-[30px] leading-none text-bordeaux sm:text-[40px]">
-        Le Sprint GEO, si.
-      </p>
-    </Apparition>
-  );
-}
-
-function Offre() {
-  return (
-    <Apparition as="section" className="mt-20">
-      <h2 className="max-w-[18ch] text-balance text-[34px] leading-[1.04] sm:text-[46px]">
-        30 jours pour entrer dans les réponses.
-      </h2>
-      <p className="mt-5 max-w-[46ch] text-[15px] leading-relaxed text-ink-2">
-        Nous ne vous vendons pas un tableau de bord de plus. Nous faisons le travail.
-      </p>
-      <div className="mt-10 grid gap-12 lg:grid-cols-[1fr_320px] lg:gap-20">
-        <ol className="border-t border-rule">
-          {LIVRABLES.map(([titre, desc], i) => (
+      <div className="mt-20">
+        <Label className="pb-5">déroulé du sprint</Label>
+        <ol className="grid border-t border-rule sm:grid-flow-col sm:auto-cols-fr">
+          {REPERES.map(([jour, quoi], i) => (
             <li
-              key={titre}
-              className="ligne-i -mx-3 grid grid-cols-[30px_1fr] gap-4 border-b border-rule px-3 py-5"
+              key={jour}
+              className={`border-b border-rule py-5 sm:border-b-0 sm:py-6 ${
+                i > 0 ? "sm:border-l sm:border-rule sm:pl-6" : ""
+              }`}
             >
-              <span className="num pt-1 text-[10px] tracking-[0.14em] text-ink-3">
-                {String(i + 1).padStart(2, "0")}
-              </span>
-              <div>
-                <div className="text-[17px] font-medium">{titre}</div>
-                <p className="mt-1.5 max-w-[54ch] text-[14px] leading-relaxed text-ink-2">
-                  {fr(desc)}
-                </p>
+              <div className="num text-[11px] tracking-[0.12em] text-bordeaux">
+                {jour.replace(/ /g, NBSP)}
               </div>
+              <div className="mt-2 max-w-[16ch] text-[15px] leading-snug text-ink-2">{quoi}</div>
             </li>
           ))}
         </ol>
-
-        <aside className="carte carte-i h-max p-7">
-          <Label>mission de 30 jours</Label>
-          <div className="mt-3 font-display text-[52px] font-light leading-none">{euros(2900)}</div>
-          <p className="mt-3 text-[14px] font-medium">Une fois. Pas d’abonnement.</p>
-          <p className="mt-3 text-[13px] leading-relaxed text-ink-2">
-            50{NBSP}% à la commande, 50{NBSP}% à la livraison. Nous garantissons l’exécution
-            intégrale des trois chantiers, détaillée dans un rapport de fin de mission.
-          </p>
-          <Rule className="my-6" />
-          <Label>option</Label>
-          <div className="mt-2 text-[16px] font-medium">
-            Sprint Domination · <span className="num">{euros(4900)}</span>
-          </div>
-          <p className="mt-2 text-[13px] leading-relaxed text-ink-2">
-            Périmètre élargi : dix contenus, seize cibles de citation, deux langues.
-          </p>
-          <Rule className="my-6" />
-          <Label>disponibilité</Label>
-          <p className="mt-2 text-[13px] leading-relaxed text-ink-2">
-            Trois sprints par mois. Nous n’en prenons pas davantage. Un seul client par secteur et
-            par zone.
-          </p>
-        </aside>
       </div>
     </Apparition>
   );
 }
 
-/* ---------------- Engagement ---------------- */
-
-function Engagement() {
-  return (
-    <Apparition
-      as="section"
-      className="mt-32 grid gap-10 border-t border-rule pt-10 lg:grid-cols-[minmax(0,34ch)_1fr]"
-    >
-      <div>
-        <Label className="pb-3">engagement d’honnêteté</Label>
-        <p className="font-display text-[30px] leading-[1.12]">
-          {frTitre("Nous garantissons les actions livrées, pas un score.")}
-        </p>
-        <p className="mt-5 text-[14px] leading-relaxed text-ink-2">
-          {fr(
-            "Les moteurs génératifs intègrent les changements de contenu et de citations en 4 à 12 semaines. Personne ne peut honnêtement promettre un chiffre dans cette fenêtre : nous nous engageons donc sur ce qui est produit, et nous le mesurons à J+90.",
-          )}
-        </p>
-        <p className="mt-4 text-[14px] leading-relaxed text-ink-2">
-          {fr(
-            "Vous ne trouverez sur ce site ni témoignage, ni logo client, ni résultat chiffré présenté comme un cas réel. L’agence est jeune : la crédibilité vient de la clarté de la méthode, pas d’une preuve sociale fabriquée.",
-          )}
-        </p>
-        <p className="mt-6 max-w-[34ch] text-balance font-display text-[26px] leading-[1.15] text-bordeaux">
-          {frTitre(
-            "Si votre score est bon, nous vous le dirons et nous ne vous vendrons rien.",
-          )}
-        </p>
-      </div>
-      <div className="lg:pt-14">
-        <LigneVide legende="ce que nous ne promettons pas" />
-      </div>
-    </Apparition>
-  );
-}
 
 /* ---------------- FAQ ---------------- */
 
 function Faq() {
   return (
-    <Apparition as="section" className="mt-32">
-      <h2 className="text-[34px] leading-none sm:text-[46px]">Questions fréquentes</h2>
-      <dl className="mt-8 border-t border-rule">
+    <Apparition as="section" className="mt-40 border-t border-rule pt-10">
+      <h2 className="text-[34px] leading-none sm:text-[52px]">Questions fréquentes</h2>
+      <dl className="mt-12 border-t border-rule">
         {FAQ.map((f) => (
           <div
             key={f.q}
-            className="ligne-i -mx-3 grid gap-2 border-b border-rule px-3 py-6 md:grid-cols-[minmax(0,32ch)_1fr] md:gap-12"
+            className="grid gap-3 border-b border-rule py-7 md:grid-cols-[minmax(0,30ch)_1fr] md:gap-16"
           >
-            <dt className="text-[16px] font-medium leading-snug">{f.q}</dt>
+            <dt className="max-w-[30ch] text-[17px] font-medium leading-snug">{f.q}</dt>
             <dd className="max-w-[62ch] text-[15px] leading-relaxed text-ink-2">{f.r}</dd>
           </div>
         ))}
@@ -638,7 +677,7 @@ function AppelFinal() {
   return (
     <Apparition
       as="section"
-      className="mt-32 grid items-end gap-8 border-t border-rule pt-10 lg:grid-cols-[1fr_auto] lg:gap-16"
+      className="mt-40 grid items-end gap-8 border-t border-rule pt-10 lg:grid-cols-[1fr_auto] lg:gap-16"
     >
       <div>
         <Label className="pb-4">première étape</Label>
@@ -660,142 +699,7 @@ function AppelFinal() {
   );
 }
 
-/* ---------------- Bandeau de confiance ---------------- */
-
-const CONFIANCE = [
-  ["96", "réponses d’IA analysées, une par question et par moteur"],
-  ["90 s", "pour obtenir votre score, sans inscription"],
-  ["J+90", "re-scan offert, mêmes questions, mêmes moteurs"],
-  ["0", "abonnement, 0 engagement, 0 reconduction tacite"],
-];
-
-function BandeauConfiance() {
-  return (
-    <Apparition as="section" className="mt-20 border-y border-rule">
-      <dl className="grid divide-y divide-rule sm:grid-cols-2 sm:divide-y-0 lg:grid-cols-4 lg:divide-x">
-        {CONFIANCE.map(([n, t]) => (
-          <div key={n} className="px-0 py-6 sm:px-6 lg:first:pl-0 lg:last:pr-0">
-            <dt className="font-display text-[38px] font-light leading-none">
-              {n.replace(" ", NBSP)}
-            </dt>
-            <dd className="mt-2 max-w-[28ch] text-[13px] leading-snug text-ink-2">{t}</dd>
-          </div>
-        ))}
-      </dl>
-    </Apparition>
-  );
-}
-
-/* ---------------- Le contexte ---------------- */
-
-function CoutInvisibilite() {
-  return (
-    <Apparition as="section" className="mt-32">
-      <Label className="pb-4">ce qui se joue</Label>
-      <h2 className="max-w-[22ch] text-balance text-[34px] leading-[1.04] sm:text-[52px]">
-        {frTitre(
-          "Sur Google, on vous trouve. Dans ChatGPT, on vous recommande — ou pas.",
-        )}
-      </h2>
-      <div className="mt-10 grid gap-x-16 gap-y-10 lg:grid-cols-[1fr_1fr]">
-        <div className="carte carte-i p-7">
-          <Label>la réponse d’une IA</Label>
-          <ol className="mt-5 grid gap-3 text-[15px]">
-            {["Concurrent A", "Concurrent B", "Concurrent C"].map((c, i) => (
-              <li key={c} className="flex items-baseline gap-3 border-b border-rule pb-3">
-                <span className="num text-[11px] text-ink-3">{String(i + 1).padStart(2, "0")}</span>
-                <span className="text-ink-2">{c}</span>
-              </li>
-            ))}
-          </ol>
-          <LigneVide legende="votre marque" className="mt-7" />
-        </div>
-        <div className="self-center">
-          <p className="text-[15px] leading-relaxed text-ink-2">
-            {fr(
-              "Un moteur de recherche affiche dix liens et laisse l’acheteur choisir. Une IA donne trois noms. Parfois deux.",
-            )}
-          </p>
-          <p className="mt-5 text-[15px] leading-relaxed text-ink-2">
-            {fr(
-              "Il n’y a pas de deuxième page. Il n’y a pas de « voir plus de résultats ». Vous êtes dans la réponse, ou vous n’existez pas.",
-            )}
-          </p>
-          <p className="mt-6 font-display text-[26px] leading-[1.15]">
-            {frTitre("Le référencement vous plaçait dans une liste. L’IA, elle, choisit.")}
-          </p>
-        </div>
-      </div>
-    </Apparition>
-  );
-}
-
-/* ---------------- Ce que le scan révèle ---------------- */
-
-const REVELE = [
-  "Votre score de visibilité, de 0 à 100, mesuré sur ChatGPT, Claude, Gemini et Perplexity.",
-  "Combien de fois vos concurrents sont cités sur les questions où vous ne l’êtes pas.",
-  "Les phrases exactes que l’IA prononce à votre sujet. Mot pour mot.",
-  "Les sources sur lesquelles elle s’appuie pour recommander vos concurrents plutôt que vous.",
-];
-
-function ScanRevele() {
-  return (
-    <Apparition as="section" className="mt-32">
-      <div className="flex flex-wrap items-baseline justify-between gap-4">
-        <h2 className="text-[34px] leading-none sm:text-[46px]">Ce que le scan révèle</h2>
-        <span className="label-xs">en 90 secondes, gratuitement</span>
-      </div>
-      <ol className="mt-10 border-t border-rule">
-        {REVELE.map((t, i) => (
-          <li
-            key={t}
-            className="ligne-i -mx-3 grid grid-cols-[30px_1fr] gap-4 border-b border-rule px-3 py-5"
-          >
-            <span className="num pt-1.5 text-[10px] tracking-[0.14em] text-ink-3">
-              {String(i + 1).padStart(2, "0")}
-            </span>
-            <p className="max-w-[70ch] text-[16px] leading-relaxed sm:text-[18px]">{fr(t)}</p>
-          </li>
-        ))}
-      </ol>
-    </Apparition>
-  );
-}
-
-/* ---------------- Déroulé du sprint ---------------- */
-
-const ETAPES = [
-  ["J0", "Scan et call de restitution", "On lit le rapport ensemble, 30 minutes. Vous repartez avec le diagnostic, que vous travailliez avec nous ou non."],
-  ["J1 — J7", "Audit et plan de bataille", "Accès des robots d’IA, données structurées, questions perdues : le périmètre exact est arrêté et validé avec vous."],
-  ["J8 — J25", "Production", "Cinq contenus au format réponse directe, publiés. Huit cibles de citation travaillées une à une."],
-  ["J26 — J30", "Livraison", "Rapport de fin de sprint : ce qui a été livré, ce qui reste en cours d’obtention, et pourquoi."],
-  ["J+90", "Re-scan", "Mêmes 24 questions, mêmes moteurs. Comparatif avant/après, sans mise en scène."],
-];
-
-function Deroule() {
-  return (
-    <Apparition as="section" className="mt-32">
-      <h2 className="text-[34px] leading-none sm:text-[46px]">Le déroulé, jour par jour</h2>
-      <ol className="mt-10 border-t border-rule">
-        {ETAPES.map(([jour, titre, desc]) => (
-          <li
-            key={jour}
-            className="ligne-i -mx-3 grid gap-2 border-b border-rule px-3 py-6 md:grid-cols-[110px_minmax(0,26ch)_1fr] md:gap-10"
-          >
-            <span className="num pt-1 text-[11px] tracking-[0.12em] text-bordeaux">
-              {jour.replace(/ /g, NBSP)}
-            </span>
-            <div className="text-[17px] font-medium leading-snug">{titre}</div>
-            <p className="max-w-[58ch] text-[14px] leading-relaxed text-ink-2">{fr(desc)}</p>
-          </li>
-        ))}
-      </ol>
-    </Apparition>
-  );
-}
-
-/* ---------------- Pour qui / pas pour qui ---------------- */
+/* ---------------- 4. À qui cela s’adresse ---------------- */
 
 const POUR = [
   "Vous vendez un service à forte valeur, où une recommandation pèse lourd.",
@@ -813,30 +717,31 @@ const PAS_POUR = [
 
 function PourQui() {
   return (
-    <Apparition as="section" className="mt-32 border-t border-rule pt-10">
-      <h2 className="text-[34px] leading-none sm:text-[46px]">À qui cela s’adresse</h2>
-      <div className="mt-10 grid gap-10 lg:grid-cols-2 lg:gap-20">
+    <Apparition as="section" className="mt-40 border-t border-rule pt-10">
+      <h2 className="text-[34px] leading-none sm:text-[52px]">À qui cela s’adresse</h2>
+      <div className="mt-14 grid gap-12 border-t border-rule pt-8 lg:grid-cols-2 lg:gap-20">
         <div>
-          <Label className="pb-4">le sprint a du sens si</Label>
-          <ul className="grid gap-4">
+          <Label className="pb-5">le sprint a du sens si</Label>
+          <ul className="grid">
             {POUR.map((t) => (
-              <li key={t} className="flex gap-4 border-b border-rule pb-4 text-[15px] leading-relaxed">
-                <span className="mt-2 h-px w-6 shrink-0 bg-bordeaux" aria-hidden />
-                <span>{fr(t)}</span>
+              <li
+                key={t}
+                className="max-w-[48ch] border-b border-rule py-4 text-[15px] leading-relaxed"
+              >
+                {fr(t)}
               </li>
             ))}
           </ul>
         </div>
         <div>
-          <Label className="pb-4">nous vous le déconseillons si</Label>
-          <ul className="grid gap-4">
+          <Label className="pb-5">nous vous le déconseillons si</Label>
+          <ul className="grid">
             {PAS_POUR.map((t) => (
               <li
                 key={t}
-                className="flex gap-4 border-b border-rule pb-4 text-[15px] leading-relaxed text-ink-3"
+                className="max-w-[48ch] border-b border-rule py-4 text-[15px] leading-relaxed text-ink-3"
               >
-                <span className="mt-2 h-px w-6 shrink-0 bg-rule-strong" aria-hidden />
-                <span>{fr(t)}</span>
+                {fr(t)}
               </li>
             ))}
           </ul>
