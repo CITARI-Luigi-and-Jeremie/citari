@@ -89,8 +89,9 @@ export const FAQ = [
   },
   {
     q: "Pourquoi maintenant ?",
-    r: "Parce que les places se prennent maintenant. Les modèles apprennent lentement et retiennent longtemps. Ceux qui s’installent aujourd’hui dans les réponses y resteront des années. Ceux qui attendent devront déloger quelqu’un.",
+    r: "Parce que 46 % des utilisateurs d’IA démarrent déjà leur recherche d’achat directement sur une IA (Alchemer 2026, G2 Research 2026, Reuters). Les modèles apprennent lentement et retiennent longtemps : ceux qui s’installent aujourd’hui dans les réponses y resteront des années. Ceux qui attendent devront déloger quelqu’un.",
   },
+
   {
     q: "Vous garantissez un résultat ?",
     r: "Non, et méfiez-vous de ceux qui le promettent. Nous garantissons des actions précises, listées à l’avance, et une mesure honnête avant/après. Les moteurs mettent 4 à 12 semaines à intégrer les changements.",
