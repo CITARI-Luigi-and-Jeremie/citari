@@ -109,8 +109,8 @@ const NAV = [
 function EnTete() {
   return (
     <header className="sticky top-0 z-40 border-b border-rule bg-paper/80 backdrop-blur-md">
-      <div className="mx-auto grid max-w-[1240px] grid-cols-[minmax(0,1fr)_auto] items-center gap-4 px-6 py-4 lg:px-10">
-        <LogoLien hauteur={28} />
+      <div className="mx-auto grid max-w-[1240px] grid-cols-[minmax(0,1fr)_auto] items-center gap-4 px-6 py-5 lg:px-10">
+        <LogoLien hauteur={34} />
         <nav className="flex shrink-0 items-center gap-5 sm:gap-7">
           {NAV.map(([to, label]) => (
             <Link key={to} to={to} className="label-xs lien-nav hidden sm:inline-block">

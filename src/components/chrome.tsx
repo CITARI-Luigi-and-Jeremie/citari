@@ -12,8 +12,8 @@ const LIENS = [
 export function Chrome({ children }: { children: ReactNode }) {
   return (
     <div className="mx-auto max-w-[1240px] px-6 lg:px-10">
-      <header className="flex flex-wrap items-center justify-between gap-4 border-b border-rule-strong py-4">
-        <LogoLien hauteur={28} />
+      <header className="flex flex-wrap items-center justify-between gap-4 border-b border-rule-strong py-5">
+        <LogoLien hauteur={34} />
         <nav className="flex flex-wrap gap-6">
           {LIENS.map(([to, label]) => (
             <Link key={to} to={to} className="label-xs hover:text-ink">
@@ -25,7 +25,7 @@ export function Chrome({ children }: { children: ReactNode }) {
       {children}
       <footer className="mt-28 border-t border-rule-strong py-8">
         <div className="flex flex-wrap items-baseline justify-between gap-6">
-          <Logo hauteur={22} />
+          <Logo hauteur={24} />
           <nav className="flex flex-wrap gap-6">
             {[...LIENS, ["/mentions-legales", "Mentions légales"], ["/confidentialite", "Confidentialité"]].map(
               ([to, label]) => (
