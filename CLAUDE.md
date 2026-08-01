@@ -122,9 +122,16 @@ pas (le client Supabase y est typé `any`) — c'est le prochain morceau.
 temporaire, partagée entre process. Ne jamais laisser en production.
 
 ## Règles métier à ne pas casser
-- **4 moteurs en production** : ChatGPT, Claude, Gemini, Perplexity. Grok existe
-  dans `packages/core` mais le moteur Lovable ne l'interroge pas — ne jamais
-  l'annoncer au client tant que ce n'est pas le cas.
+- **6 moteurs** : ChatGPT, Claude, Gemini, Perplexity, Grok, Le Chat (Mistral).
+  Décidé le 2026-08-01, avant le premier client — et c'était la dernière
+  occasion : la promesse « mêmes questions, mêmes moteurs à J+90 » interdit de
+  toucher à cette liste dès qu'un scan a été vendu. Un scan antérieur à un
+  changement de liste n'est plus comparable à son re-scan.
+- « Le Chat » est l'étiquette affichée, `mistral` l'identifiant et
+  `score_mistral` la colonne : on nomme partout l'assistant que le public
+  utilise, mais la base garde le nom de l'éditeur, plus stable.
+- La table des prix `packages/core/src/cost.ts` est typée `Record<EngineId, …>` :
+  ajouter un moteur sans son tarif ne compile pas. C'est volontaire.
 - Scoring : mention 50 %, position 20 %, recommandation explicite 20 %, sentiment 10 %.
 - Mix de requêtes : 24 questions — 10 comparatives, 6 problème, 5 locales, 3 confiance.
 - Re-scan = strictement les MÊMES requêtes que le scan initial.

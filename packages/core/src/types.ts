@@ -1,8 +1,8 @@
 export type Lang = "fr" | "it" | "en";
 
-export type EngineId = "openai" | "anthropic" | "gemini" | "perplexity" | "grok";
+export type EngineId = "openai" | "anthropic" | "gemini" | "perplexity" | "grok" | "mistral";
 
-export const ENGINES: EngineId[] = ["openai", "anthropic", "gemini", "perplexity", "grok"];
+export const ENGINES: EngineId[] = ["openai", "anthropic", "gemini", "perplexity", "grok", "mistral"];
 
 export const ENGINE_LABELS: Record<EngineId, string> = {
   openai: "ChatGPT",
@@ -10,6 +10,7 @@ export const ENGINE_LABELS: Record<EngineId, string> = {
   gemini: "Gemini",
   perplexity: "Perplexity",
   grok: "Grok",
+  mistral: "Le Chat",
 };
 
 export type QueryCategory = "comparative" | "problem" | "local" | "trust";

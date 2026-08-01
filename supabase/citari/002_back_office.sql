@@ -29,6 +29,9 @@ comment on column public.clients.website_url is
 -- Le front annonce cinq moteurs, le schéma n'en score que quatre.
 -- ─────────────────────────────────────────────────────────────
 alter table public.scans add column if not exists score_grok numeric;
+-- Le Chat (Mistral) : sixième moteur. Colonne nommée d'après l'éditeur,
+-- plus stable qu'un nom de produit ; l'étiquette affichée reste « Le Chat ».
+alter table public.scans add column if not exists score_mistral numeric;
 
 -- ─────────────────────────────────────────────────────────────
 -- 3. Traçabilité des livrables produits en local

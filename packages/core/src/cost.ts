@@ -7,6 +7,7 @@ const PRICES: Record<EngineId | "anthropic-internal", { input: number; output: n
   gemini: { input: 10, output: 40 },            // gemini flash
   perplexity: { input: 90, output: 90 },        // sonar
   grok: { input: 280, output: 1380 },           // grok-4
+  mistral: { input: 190, output: 560 },         // mistral-large
   "anthropic-internal": { input: 280, output: 1400 },
 };
 

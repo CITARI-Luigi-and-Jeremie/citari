@@ -21,6 +21,10 @@ const ENGINE_SCORE_COLUMN = {
   Gemini: "score_gemini",
   Perplexity: "score_perplexity",
   Grok: "score_grok",
+  // « Le Chat » et non « Mistral » : on nomme l'assistant que le public
+  // utilise, comme pour les autres moteurs. La colonne garde le nom de
+  // l'éditeur, plus stable qu'un nom de produit.
+  "Le Chat": "score_mistral",
 } as const;
 
 type EngineLabel = keyof typeof ENGINE_SCORE_COLUMN;

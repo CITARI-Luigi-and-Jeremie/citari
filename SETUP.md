@@ -13,6 +13,7 @@ Tout le code est prêt et testé en mode démo. Voici ce qu'il reste à faire, d
 - [ ] Google AI Studio : https://aistudio.google.com/apikey → `GOOGLE_AI_API_KEY`
 - [ ] Perplexity : https://www.perplexity.ai/settings/api → `PERPLEXITY_API_KEY`
 - [ ] xAI (Grok) : https://console.x.ai → `XAI_API_KEY`
+- [ ] Mistral (Le Chat) : https://console.mistral.ai → `MISTRAL_API_KEY`
 
 ## 3. Emails & réservation
 - [ ] Resend : https://resend.com → `RESEND_API_KEY`, vérifier le domaine d'envoi, remplir `RESEND_FROM`
