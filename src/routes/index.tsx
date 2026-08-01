@@ -82,16 +82,20 @@ function Accueil() {
             <BlocPreuve />
           </Apparition>
         </section>
+        <CoutAbsence />
         <Mesure />
+      </div>
+
+      <RapportExemple />
+
+      <div className="mx-auto max-w-[1240px] px-6 lg:px-10">
         <Sprint />
         <Garanties />
-        <PourQui />
-
         <Faq />
         <AppelFinal />
         <PiedDePage />
-
       </div>
+
     </>
   );
 }
