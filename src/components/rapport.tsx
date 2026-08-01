@@ -1,6 +1,8 @@
 import { cn } from "@/lib/utils";
 import { Etiquette, Label, Rule } from "@/components/kit";
 import { MOTEURS, pourcent, NBSP } from "@/lib/typo";
+import { MoteurLogo } from "@/components/moteur-logo";
+
 
 export type Mention = {
   id: string;
@@ -78,7 +80,13 @@ export function ScoresMoteurs({
             key={m}
             className={cn("border-t border-rule py-4 pr-6", i > 0 && "lg:border-l lg:pl-5")}
           >
-            <Label>{m}</Label>
+            <Label>
+              <span className="inline-flex items-center gap-1.5">
+                <MoteurLogo moteur={m} className="text-[13px] text-ink" />
+                {m}
+              </span>
+            </Label>
+
             <div className="num mt-1 text-[38px] leading-none">
               {v === null || v === undefined ? "—" : v}
             </div>
@@ -163,8 +171,12 @@ export function TableauRequetes({
             <th className="label-xs w-24 py-2 text-left align-bottom">intention</th>
             {MOTEURS.map((m) => (
               <th key={m} className="label-xs w-[110px] py-2 text-left align-bottom">
-                {m}
+                <span className="inline-flex items-center gap-1.5">
+                  <MoteurLogo moteur={m} className="text-[12px] text-ink" />
+                  {m}
+                </span>
               </th>
+
             ))}
           </tr>
         </thead>

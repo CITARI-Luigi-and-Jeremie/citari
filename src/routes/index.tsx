@@ -9,6 +9,8 @@ import { RapportExemple } from "@/components/sections/rapport-exemple";
 import { ChampTexte } from "@/components/fond";
 
 import { LogoLien, Logo } from "@/components/logo";
+import { MoteurLogo } from "@/components/moteur-logo";
+
 import { Btn, Champ, Choix, Etiquette, Field, Label, Rule } from "@/components/kit";
 import { FAQ, LANGUES, METIERS, SECTEURS, VILLES, exemple, type Metier } from "@/data/contenu";
 import { lancerScan } from "@/lib/scan.functions";
@@ -221,12 +223,14 @@ function BlocPreuve() {
               type="button"
               onClick={() => setMoteur(m)}
               aria-pressed={actif}
-              className={`rounded-full px-3 py-1.5 text-[12px] tracking-[0.02em] transition-[background-color,color] duration-300 ease-[cubic-bezier(0.2,0.7,0.2,1)] ${
+              className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[12px] tracking-[0.02em] transition-[background-color,color] duration-300 ease-[cubic-bezier(0.2,0.7,0.2,1)] ${
                 actif ? "bg-ink text-paper" : "text-ink-3 hover:bg-paper-2 hover:text-ink"
               }`}
             >
+              <MoteurLogo moteur={m} className="text-[14px]" />
               {m}
             </button>
+
           );
         })}
       </div>
@@ -242,9 +246,10 @@ function BlocPreuve() {
         </div>
 
         <div className="mt-7 flex items-center gap-2.5">
-          <span className="h-1.5 w-1.5 rounded-full bg-bordeaux" />
+          <MoteurLogo moteur={moteur} className="text-[15px] text-bordeaux" />
           <span className="label-xs">{fr(`${moteur} répond`)}</span>
         </div>
+
 
         <ol className="mt-4 overflow-hidden rounded-lg border border-rule bg-card">
           {classement.map((c, i) => (
@@ -308,12 +313,14 @@ function ApercuRapport() {
           {ENGINES_SCAN.map((m) => (
             <span
               key={m}
-              className="inline-flex rounded-full border border-rule-strong bg-paper px-3 py-1 text-[12px] font-medium text-ink-2"
+              className="inline-flex items-center gap-1.5 rounded-full border border-rule-strong bg-paper px-3 py-1 text-[12px] font-medium text-ink-2"
             >
+              <MoteurLogo moteur={m} className="text-[13px] text-ink" />
               {m}
             </span>
           ))}
         </div>
+
         <div className="mt-4 border-t border-rule pt-4">
           <div className="flex items-start gap-3">
             <span className="shrink-0 font-display text-[42px] font-light leading-[0.9] text-ink-3">24</span>
