@@ -19,13 +19,13 @@ export const Route = createFileRoute("/")({
       {
         name: "description",
         content:
-          "Mesurez gratuitement la visibilité de votre marque dans ChatGPT, Claude, Gemini et Perplexity. 24 questions d’achat, 4 moteurs, 1 score. Sprint GEO de 30 jours à 2 900 €.",
+          "Mesurez gratuitement la visibilité de votre marque dans ChatGPT, Claude, Gemini, Perplexity, Grok et Le Chat. 24 questions d’achat, 6 moteurs, 1 score. Sprint GEO de 30 jours à 2 900 €.",
       },
       { property: "og:title", content: "Citari — êtes-vous cité par ChatGPT ?" },
       {
         property: "og:description",
         content:
-          "Scan gratuit de visibilité IA sur ChatGPT, Claude, Gemini et Perplexity. Sans inscription.",
+          "Scan gratuit de visibilité IA sur ChatGPT, Claude, Gemini, Perplexity, Grok et Le Chat. Sans inscription.",
       },
     ],
     scripts: [
@@ -57,7 +57,7 @@ function Accueil() {
           <div className="relative z-[2]">
             <Apparition>
 
-              <Label>Votre visibilité dans ChatGPT, Claude, Gemini et Perplexity</Label>
+              <Label>Votre visibilité dans ChatGPT, Claude, Gemini, Perplexity, Grok et Le Chat</Label>
               <h1 className="mt-6 text-balance text-[46px] leading-[0.95] sm:text-[68px] lg:text-[84px]">
                 Vos clients ne cherchent plus sur{" "}
                 <em className="not-italic text-ink-3">Google</em>.
@@ -162,7 +162,7 @@ function PilulePreuve({
   );
 }
 
-const MOTEURS_DEMO = ["ChatGPT", "Claude", "Gemini", "Perplexity"] as const;
+const MOTEURS_DEMO = ["ChatGPT", "Claude", "Gemini", "Perplexity", "Grok", "Le Chat"] as const;
 type MoteurDemo = (typeof MOTEURS_DEMO)[number];
 
 function BlocPreuve() {
@@ -193,7 +193,7 @@ function BlocPreuve() {
         </p>
       </div>
 
-      {/* Choix du moteur : les cinq que nous interrogeons. */}
+      {/* Choix du moteur : les six que nous interrogeons. */}
       <div className="flex flex-wrap items-center gap-x-1 gap-y-1.5 border-b border-rule px-5 py-3 sm:px-7">
         {MOTEURS_DEMO.map((m) => {
           const actif = m === moteur;
@@ -247,7 +247,7 @@ function BlocPreuve() {
         </ol>
 
         <p className="mt-5 text-[13px] leading-relaxed text-ink-3">
-          {fr("Exemple illustratif : les noms sont fictifs. Votre scan interroge ChatGPT, Claude, Gemini et Perplexity avec vos vrais concurrents.")}
+          {fr("Exemple illustratif : les noms sont fictifs. Votre scan interroge ChatGPT, Claude, Gemini, Perplexity, Grok et Le Chat avec vos vrais concurrents.")}
         </p>
       </div>
     </div>
@@ -262,7 +262,7 @@ function BlocPreuve() {
 
 /* ---------------- Aperçu du rapport ---------------- */
 
-const ENGINES_SCAN = ["ChatGPT", "Claude", "Gemini", "Perplexity"];
+const ENGINES_SCAN = ["ChatGPT", "Claude", "Gemini", "Perplexity", "Grok", "Le Chat"];
 
 function ApercuRapport() {
   return (
@@ -272,7 +272,7 @@ function ApercuRapport() {
         <ul className="mt-4 grid gap-3 text-[14px] leading-snug text-ink-2">
           <li className="flex gap-3">
             <span className="mt-0.5 h-1.5 w-1.5 rounded-full bg-bordeaux" />
-            <span>{fr("Un score de visibilité de 0 à 100 sur les 4 moteurs.")}</span>
+            <span>{fr("Un score de visibilité de 0 à 100 sur les 6 moteurs.")}</span>
           </li>
           <li className="flex gap-3">
             <span className="mt-0.5 h-1.5 w-1.5 rounded-full bg-bordeaux" />
@@ -359,7 +359,7 @@ function Formulaire() {
         <div>
           <h2 className="text-[27px] leading-none sm:text-[30px]">Scan gratuit</h2>
           <p className="mt-2 text-[14px] leading-snug text-ink-2">
-            {fr("Votre score de visibilité dans ChatGPT, Claude, Gemini et Perplexity.")}
+            {fr("Votre score de visibilité dans ChatGPT, Claude, Gemini, Perplexity, Grok et Le Chat.")}
           </p>
         </div>
         <span className="label-xs shrink-0">sans inscription</span>
@@ -631,7 +631,7 @@ function AppelFinal() {
         </p>
         <p className="mt-5 max-w-[52ch] text-[15px] leading-relaxed text-ink-2">
           {fr(
-            "Il est gratuit, et il vous dira si vous avez un problème. 24 questions, 4 moteurs, un score, un rapport complet.",
+            "Il est gratuit, et il vous dira si vous avez un problème. 24 questions, 6 moteurs, un score, un rapport complet.",
           )}
         </p>
       </div>

@@ -17,8 +17,8 @@ const ETAPES: [string, string][] = [
     "Générées à partir de votre secteur et de votre ville : dix comparatives, six sur un problème à résoudre, cinq locales, trois sur la confiance. Ce sont des questions d’acheteur, pas des mots-clés.",
   ],
   [
-    "Quatre moteurs interrogés en direct",
-    "ChatGPT, Claude, Gemini et Perplexity répondent à chacune des vingt-quatre questions, par les API officielles des éditeurs. Quatre-vingt-seize réponses réelles, collectées pendant votre scan. Jamais de capture d’écran, jamais de scraping.",
+    "Six moteurs interrogés en direct",
+    "ChatGPT, Claude, Gemini, Perplexity, Grok et Le Chat répondent à chacune des vingt-quatre questions, par les API officielles des éditeurs. Cent quarante-quatre réponses réelles, collectées pendant votre scan. Jamais de capture d’écran, jamais de scraping. Le Chat, le moteur de Mistral, est le seul moteur français de l’échantillon. Vos clients français commencent à l’utiliser — nous le mesurons comme les autres.",
   ],
   [
     "Chaque réponse est décortiquée",
