@@ -173,7 +173,9 @@ function BlocPreuve() {
   const classement = ex.concurrents.map((_, i) => ex.concurrents[(i + decalage) % ex.concurrents.length]);
 
   return (
+    <div>
     <div className="carte carte-i overflow-hidden">
+
       {/* Réglage : une phrase, deux mots à changer. */}
       <div className="border-b border-rule bg-paper-2/60 px-5 py-4 sm:px-7">
         <span className="label-xs">démonstration</span>
