@@ -56,15 +56,22 @@ rend l'argument imparable : un seul client récupéré rembourse le sprint.
 
 ## 3. Ce que nous vendons
 
-### Le scan gratuit, produit d'appel et instrument de vente
+### L'aperçu gratuit, produit d'appel (~0,15 €)
 
-Quatre-vingt-dix secondes, sans inscription, sans carte bancaire. Vingt-quatre
-questions d'intention d'achat propres au secteur et à la ville, posées à six
-moteurs, soit cent quarante-quatre réponses réelles collectées par les API
-officielles. Un score sur 100.
+Quatre-vingt-dix secondes, sans inscription, sans carte bancaire. Vingt
+questions d'intention d'achat posées à ChatGPT et Gemini, soit quarante
+réponses réelles. Un score, l'écart de comptage avec les concurrents, un
+verbatim, un audit flash du site, un extrait de la question miroir. Le reste
+est verrouillé : il se débloque en réservant le diagnostic.
 
-Il coûte environ 0,53 € en appels API. C'est à la fois le lead magnet et
-l'argument de vente personnalisé le moins cher du marché.
+### Le diagnostic complet, offert en rendez-vous (~1,70 €)
+
+Trente minutes en visio avec Luigi ou Jérémie. Le scan 24 questions × 6
+moteurs avec recherche web (les sources réelles), l'audit technique complet,
+la question miroir sur les six moteurs, la question la plus chère mot pour
+mot, et le seuil de remboursement calculé avec le panier moyen du prospect.
+C'est le moment de vente : le prospect vient chercher son diagnostic, pas
+écouter un pitch.
 
 ### Le Sprint GEO, produit payant
 

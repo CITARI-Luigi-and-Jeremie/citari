@@ -5,6 +5,57 @@ d'une nouvelle session, après `CLAUDE.md`.
 
 ---
 
+## 2026-08-02 — Pivot du tunnel : aperçu pas cher, diagnostic en rendez-vous
+
+Décision de Luigi, implémentée le jour même dans le moteur (commit a9ec33a du
+dépôt front). Le tunnel devient : **aperçu gratuit (~0,15 €) → rendez-vous
+Calendly en visio avec Luigi ou Jérémie → diagnostic complet offert pendant le
+call (~1,70 €) → Sprint GEO 2 900 €**.
+
+La vraie raison n'est pas le coût (un sprint vendu finance 4 400 scans) : un
+service à 2 900 € se vend par un humain, et le rendez-vous a maintenant une
+valeur propre — on vient y chercher son diagnostic complet, pas se faire
+vendre quelque chose.
+
+**Aperçu** : 20 questions × ChatGPT + Gemini, comptages en avant (« vos
+concurrents cités 17 fois, vous 2 »), score conservé, un verbatim, un audit
+flash (robots.txt + llms.txt), une question miroir ChatGPT. Tout le reste est
+verrouillé à l'écran avec le CTA Calendly.
+
+**Diagnostic complet** (uniquement sur RDV réservé) : 24 × 6 avec recherche
+web sur Claude et Grok (les sources réelles, ce qui ranime le chantier
+citations), question miroir sur les six moteurs, audit technique complet du
+toolkit préparé avant le call, seuil de remboursement calculé en direct avec
+le panier moyen du prospect. Plafond porté à 3 €.
+
+**Cache 30 jours par domaine normalisé** : même site rescanné = même score.
+Résout la variance (un prospect qui rescanne et voit un autre chiffre ne croit
+plus la mesure), l'abus, et le coût des curieux. Le J+90 court-circuite le
+cache.
+
+**Les deux bugs bloquants sont corrigés au passage** : `is_target` compare des
+formes normalisées (accents/ponctuation retirés), et le nom de marque est
+validé à la saisie (≥ 2 alphanumériques).
+
+**Limites connues, à ne pas oublier :**
+- La recherche web n'est PAS active sur ChatGPT et Gemini : ils passent par la
+  passerelle Lovable qui n'expose pas d'outil de recherche. Pour l'activer il
+  faudrait des clés OpenAI et Google directes. Claude, Grok (et Perplexity
+  nativement) couvrent le besoin de sources en attendant.
+- La question miroir est étiquetée HORS méthodologie de score, et doit le
+  rester : c'est un artefact de démonstration.
+- **Rien n'a encore tourné en réel** — l'UI des verrous et de la landing à
+  deux étages reste à faire côté Lovable, par Jérémie (prompt prêt dans le
+  Notion, page « Prompt Lovable — nouveau tunnel »).
+- Le direct en call : pré-calculer le pack, et garder « l'épreuve du direct »
+  (rejouer UNE question devant le prospect) comme contre-argument au soupçon
+  de précuit. Ne jamais faire tourner la machine entière en visio.
+
+La métrique qui juge ce pivot : **le taux de réservation Calendly après
+aperçu**. Sous ~5 % au bout d'un mois, enrichir l'étage gratuit.
+
+---
+
 ## 2026-08-01 et 02 — Le front rapatrié, six moteurs, la base assainie
 
 ### Architecture arrêtée
