@@ -26,11 +26,12 @@ export async function submitScan(payload: ScanPayload) {
 }
 
 export function brandFromDomain(domain: string) {
-  const host = domain
-    .trim()
-    .replace(/^https?:\/\//i, "")
-    .replace(/^www\./i, "")
-    .split("/")[0];
+  const host =
+    domain
+      .trim()
+      .replace(/^https?:\/\//i, "")
+      .replace(/^www\./i, "")
+      .split("/")[0] ?? "";
   const label = host.split(".")[0] ?? "";
   if (!label) return "";
   return label
