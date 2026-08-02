@@ -2,7 +2,7 @@ import { createHash } from "node:crypto";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { interroger, analyser, genererQuestions, questionMiroir } from "@/lib/moteurs.server";
 import { calculerScore, partDeVoix, type LigneMention } from "@/lib/score";
-import { MOTEURS, MOTEURS_APERCU, type ModeScan, type Moteur } from "@/lib/typo";
+import { MOTEURS, MOTEURS_APERCU, MOTEURS_CONTROLE, type ModeScan, type Moteur } from "@/lib/typo";
 
 export type PdvItem = { name: string; count: number; share: number; target: boolean };
 export type Action = { chantier: string; titre: string; pourquoi: string; effort: string };
@@ -10,12 +10,14 @@ export type Action = { chantier: string; titre: string; pourquoi: string; effort
 export const PLAFOND_SCANS_PAR_IP = 3;
 // Aperçu : gratuit et public, le plafond est un fusible anti-dérive.
 // Complet : déclenché uniquement pour un rendez-vous réservé, on paye la qualité.
-export const PLAFONDS_EUR: Record<ModeScan, number> = { apercu: 0.25, complet: 3 };
+export const PLAFONDS_EUR: Record<ModeScan, number> = { apercu: 0.25, complet: 3, controle: 1 };
 const LOT = 8; // paires (question × moteur) traitées à chaque appel
 const CACHE_JOURS = 30;
 
 function moteursDuMode(mode: ModeScan): readonly Moteur[] {
-  return mode === "apercu" ? MOTEURS_APERCU : MOTEURS;
+  if (mode === "apercu") return MOTEURS_APERCU;
+  if (mode === "controle") return MOTEURS_CONTROLE;
+  return MOTEURS;
 }
 
 /** Normalisation pour la détection de marque : minuscules, sans accents ni ponctuation. */
@@ -241,6 +243,8 @@ async function preparerQuestions(scan: ScanRow) {
 
   // Audit flash + question miroir, une seule fois, en parallèle de la mise en
   // place. Aperçu : miroir sur ChatGPT seul (une accroche). Complet : les six.
+  // Contrôle J+45 : ni audit ni miroir, c'est de la télémétrie interne.
+  if (scan.mode === "controle") return;
   const moteursMiroir = scan.mode === "apercu" ? (["ChatGPT"] as const) : MOTEURS;
   const [audit, miroirs] = await Promise.all([
     auditFlash(scan.website_url),

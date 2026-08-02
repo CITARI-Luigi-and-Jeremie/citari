@@ -60,4 +60,10 @@ export type Moteur = (typeof MOTEURS)[number];
  */
 export const MOTEURS_APERCU = ["ChatGPT", "Gemini"] as const satisfies readonly Moteur[];
 
-export type ModeScan = "apercu" | "complet";
+/**
+ * Contrôle interne J+45 : uniquement les moteurs à recherche, les seuls qui
+ * peuvent avoir bougé à mi-parcours. Jamais montré au client comme un score.
+ */
+export const MOTEURS_CONTROLE = ["Claude", "Perplexity", "Grok"] as const satisfies readonly Moteur[];
+
+export type ModeScan = "apercu" | "complet" | "controle";
