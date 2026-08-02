@@ -37,7 +37,14 @@ export function memeMarque(a: string, b: string): boolean {
   const na = normaliserNom(a);
   const nb = normaliserNom(b);
   if (na.length < 2 || nb.length < 2) return false;
-  return na === nb || na.includes(nb) || nb.includes(na);
+  if (na === nb || na.includes(nb) || nb.includes(na)) return true;
+  // Formes compactes, sans espaces : « nutri)smar » → « nutrismar » doit
+  // matcher « NutriSmart » → « nutrismart », et « L'Oréal » → « loreal ».
+  // C'est le cas exact du bug d'origine, attrapé par le test — la ponctuation
+  // devenue espace cassait l'inclusion.
+  const ca = na.replace(/ /g, "");
+  const cb = nb.replace(/ /g, "");
+  return ca.length >= 3 && cb.length >= 3 && (ca.includes(cb) || cb.includes(ca));
 }
 
 /** Clé de cache : le domaine du site, sinon marque+secteur+ville normalisés. */
@@ -138,7 +145,7 @@ type AuditFlash = {
   llmstxt: boolean;
 };
 
-async function auditFlash(siteUrl: string | null): Promise<AuditFlash | null> {
+export async function auditFlash(siteUrl: string | null): Promise<AuditFlash | null> {
   if (!siteUrl) return null;
   let base: URL;
   try {
