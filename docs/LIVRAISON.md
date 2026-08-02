@@ -45,6 +45,11 @@ un site illisible par les robots ne peut être ni consulté en direct, ni appris
 | Déployer (ou envoyer le cahier de specs à l'agence du client) | **humain** | |
 | Vérifier que tout est réellement en ligne | machine | `pnpm toolkit verify-fixes` |
 | Compter les passages réels de GPTBot, ClaudeBot, PerplexityBot | machine | `pnpm toolkit crawler-log` (logs serveur du client) |
+| **Verrouiller l'entité** : Wikidata, `schema.org sameAs`, nom-adresse-téléphone identiques partout | **humain** | une demi-journée, standard S1 |
+
+Le verrouillage d'entité est le vaccin contre la confusion d'homonymes que la
+question miroir révèle souvent : c'est ce qui fait qu'un moteur relie toutes
+les mentions à une seule entreprise au lieu de les diluer.
 
 Le piège mortel du chantier : des correctifs livrés mais jamais déployés.
 `verify-fixes` existe précisément pour ça — il distingue les échecs bloquants
@@ -54,15 +59,31 @@ Le piège mortel du chantier : des correctifs livrés mais jamais déployés.
 
 | Action | Qui | Outil |
 |---|---|---|
-| Briefs ciblés sur les questions perdues du scan | machine | `pnpm toolkit content-brief` |
+| **Étape zéro : classer les questions perdues par gagnabilité** | machine | `pnpm toolkit prioriser` |
+| Briefs ciblés sur les questions gagnables | machine | `pnpm toolkit content-brief` |
 | Validation des sujets avec le client | **humain** | call 15 min |
 | Rédaction des 5 contenus (réponse directe + schema.org intégré) | machine | `pnpm toolkit draft-content` |
 | Combler les `[À COMPLÉTER]` (prix, chiffres, faits clients) | **humain** | jamais inventés par la machine |
 | Relecture client, puis publication | **humain** | |
+| **Signaler chaque URL publiée à Bing/IndexNow** | machine | `pnpm toolkit indexnow` |
+
+`prioriser` note chaque question perdue (intention, encombrement, présence du
+concurrent dominant, forteresses éditoriales dans les sources) : les 5 contenus
+visent le haut du classement, ce qui maximise le delta mesuré à J+90.
+
+IndexNow, c'est le raccourci que personne n'utilise : la recherche de ChatGPT
+tourne sur Bing, et un ping IndexNow fait indexer une page en heures au lieu de
+semaines. Décisif dans une fenêtre de 90 jours. La clé est générée par la
+commande et le fichier `<clé>.txt` fait partie des correctifs du chantier 1.
 
 Formats qui marchent : comparatif « X vs Y », page « alternatives à », FAQ
 métier balisée, guide d'achat, page locale. Chaque contenu vise une question
-scellée précise — pas un mot-clé, une question.
+scellée précise, pas un mot-clé.
+
+**Le comparatif doit être honnête au point d'être citable** : tableau factuel,
+forces réelles des concurrents incluses. Une pub déguisée n'est jamais reprise
+par un moteur ; une comparaison loyale l'est. Celui qui écrit la comparaison
+contrôle le cadre — être le comparateur, pas seulement le comparé.
 
 ### Chantier 3 — Citations : faire parler ailleurs (J7 → J30)
 
@@ -78,6 +99,27 @@ Depuis l'activation de la recherche web sur le scan complet, les cibles ne
 sont plus devinées : ce sont les sources que Claude, Grok et Perplexity ont
 réellement consultées pour recommander les concurrents. On s'installe
 exactement là où les moteurs regardent.
+
+**Le placement ciblé est la version supérieure de l'inscription.** Sur une
+question comparative, les moteurs citent la page tierce qui compare (un
+classement, un « les 10 meilleurs »), presque jamais le site d'un prestataire.
+L'outreach vise donc d'abord les pages exactes que le scan a vues citées :
+beaucoup de classements acceptent des ajouts. Promesse chirurgicale : « l'IA
+cite cette page ; vous y serez. » ⚠ Certaines plateformes monétisent
+l'inscription (100-300 € selon le secteur) : à annoncer dans la proposition,
+à la charge du client, jamais découvert en cours de sprint.
+
+**Le kit « 10 avis en 30 jours ».** Sentiment (10 %) + recommandation (20 %) :
+près d'un tiers du score dépend de ce que des tiers disent. On fournit au
+client le kit de collecte : gabarits d'email pour ses propres clients, QR code,
+séquence de demande. Vrais clients, vrais avis. C'est lui qui l'exécute, c'est
+l'action au meilleur ratio effort/score du sprint.
+
+**Le programme porte-parole (optionnel).** La machine repère chaque mois deux
+vraies questions publiques (forums, Reddit) alignées sur les thèmes des 24
+questions ; le dirigeant y répond en son nom, avec transparence. Lent mais
+cumulatif, et strictement dans la doctrine : jamais de faux avis, jamais
+d'astroturfing.
 
 ---
 
@@ -111,6 +153,10 @@ Par ordre de priorité :
    marque y figure réellement ; met à jour les statuts ; alimente l'email de
    preuve et le rapport final. Constructible et testable dès maintenant, sans
    clé API.
+
+   ✅ Déjà construits (2026-08-02) : **`prioriser`** (gagnabilité des questions
+   perdues, 5 tests) et **`indexnow`** (ping Bing avec gestion de clé par
+   client, mode --dry-run).
 3. **Contrôle J+45 interne** — mini-mesure sur les trois moteurs à recherche
    uniquement (~0,40 €), jamais montrée comme un score : elle sert à savoir à
    mi-parcours si les citations prennent, et à réorienter l'effort. Le J+90
@@ -141,3 +187,13 @@ première exécution réelle à faire avant le premier client.
 - **Plus tard, après 3 sprints mesurés** : la garantie de mouvement
   (remboursé si rien ne bouge à J+90) — voir STRATEGIE.md. Pas avant d'avoir
   la preuve que le mouvement est systématique.
+
+## 6. L'après-sprint : la Vigie (décision à prendre avec Jérémie)
+
+Le sprint reste sans abonnement, c'est un argument de vente. Mais après le
+J+90 : la Vigie, ~190 €/mois résiliable à tout moment. Mini-mesure mensuelle
+sur les trois moteurs à recherche (~0,40 € de coût), alerte si le score chute
+ou si un concurrent double le client, un contenu de rafraîchissement par
+trimestre. Dix clients en Vigie = 1 900 €/mois récurrents, et le client reste
+dans la base : premier au courant, premier rappelé pour un second sprint.
+C'est ce qui transforme une agence à missions en machine qui se compose.

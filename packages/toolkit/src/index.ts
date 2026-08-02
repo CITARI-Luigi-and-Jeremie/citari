@@ -15,6 +15,8 @@ import { sprintReport } from "./commands/sprint-report.js";
 import { relance } from "./commands/relance.js";
 import { proposition } from "./commands/proposition.js";
 import { rescan } from "./commands/rescan.js";
+import { prioriser } from "./commands/prioriser.js";
+import { indexnow } from "./commands/indexnow.js";
 
 const program = new Command()
   .name("toolkit")
@@ -32,6 +34,20 @@ program
   .argument("<client>", "nom ou id du client")
   .description("Chantier 1 — robots.txt corrigé, llms.txt, blocs JSON-LD + doc de specs")
   .action((client: string) => run(generateFixes(client)));
+
+program
+  .command("prioriser")
+  .argument("<client>", "nom ou id du client")
+  .description("Chantier 2 — classe les questions perdues par gagnabilité avant J+90 (sans clé API)")
+  .action((client: string) => run(prioriser(client)));
+
+program
+  .command("indexnow")
+  .argument("<client>", "nom ou id du client")
+  .argument("<urls...>", "URLs publiées à signaler à Bing/IndexNow")
+  .option("--dry-run", "affiche le payload sans l'envoyer")
+  .action((client: string, urls: string[], opts: { dryRun?: boolean }) =>
+    run(indexnow(client, urls, opts)));
 
 program
   .command("content-brief")
