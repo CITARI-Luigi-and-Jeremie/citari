@@ -152,6 +152,26 @@ apporte aujourd'hui.
 
 ---
 
+## Position concurrentielle
+
+Analyse complète dans [docs/STRATEGIE.md](docs/STRATEGIE.md). En résumé :
+
+Aucun de nos arguments actuels n'est une barrière. La méthode, la formule
+publiée, les six moteurs et le scan gratuit se copient en une semaine. Le vrai
+désavantage n'est pas technique : c'est la **distribution**. Une agence SEO qui
+a déjà quarante clients vendra du GEO sans avoir à convaincre personne.
+
+Le différenciateur retenu est le **baromètre sectoriel** : publier le classement
+de visibilité IA d'un secteur entier (200 entreprises pour 106 € d'API), ce qui
+transforme l'acquisition en produit, nous rend citables par les IA, et
+constitue le seul actif qui se compose. Premier essai prévu sur les cabinets
+d'expertise comptable de la région lyonnaise, une cinquantaine d'entreprises
+pour environ 27 €.
+
+Second étage, à n'activer qu'après trois sprints mesurés : le remboursement si
+le score n'a pas bougé à J+90. Personne d'autre ne peut l'offrir sans questions
+gelées permettant d'arbitrer sans litige.
+
 ## Ordre de travail recommandé
 
 1. **Structure juridique et capital.** Rien ne peut être facturé avant. Les
