@@ -51,8 +51,8 @@ async function gemini(q: string, langue: string): Promise<ReponseMoteur> {
   return { text: json.choices[0]?.message?.content ?? "", sources: [], latency: Date.now() - t, cost: 0.002 };
 }
 
-/** Claude — API Anthropic officielle. */
-async function claude(q: string, langue: string): Promise<ReponseMoteur> {
+/** Claude — API Anthropic officielle. `recherche` active l'outil web_search. */
+async function claude(q: string, langue: string, recherche: boolean): Promise<ReponseMoteur> {
   const t = Date.now();
   const key = process.env.ANTHROPIC_API_KEY;
   if (!key) return manquant("Clé API Anthropic non configurée");
@@ -65,18 +65,29 @@ async function claude(q: string, langue: string): Promise<ReponseMoteur> {
     },
     body: JSON.stringify({
       model: "claude-sonnet-4-5",
-      max_tokens: 700,
+      max_tokens: 1024,
       system: prompt(q, langue)[0]!.content,
       messages: [{ role: "user", content: q }],
+      ...(recherche
+        ? { tools: [{ type: "web_search_20250305", name: "web_search", max_uses: 3 }] }
+        : {}),
     }),
   });
   if (!res.ok) return manquant(`Anthropic [${res.status}]`);
-  const json = (await res.json()) as { content: { text?: string }[] };
+  const json = (await res.json()) as {
+    content: { type?: string; text?: string; citations?: { url?: string }[] }[];
+  };
+  const sources: { url: string }[] = [];
+  for (const bloc of json.content) {
+    for (const c of bloc.citations ?? []) {
+      if (c.url && !sources.some((x) => x.url === c.url)) sources.push({ url: c.url });
+    }
+  }
   return {
     text: json.content.map((c) => c.text ?? "").join("\n"),
-    sources: [],
+    sources,
     latency: Date.now() - t,
-    cost: 0.006,
+    cost: recherche ? 0.012 : 0.006,
   };
 }
 
@@ -103,15 +114,19 @@ async function perplexity(q: string, langue: string): Promise<ReponseMoteur> {
   };
 }
 
-/** Grok — API xAI officielle (format OpenAI). */
-async function grok(q: string, langue: string): Promise<ReponseMoteur> {
+/** Grok — API xAI officielle (format OpenAI). `recherche` active la live search. */
+async function grok(q: string, langue: string, recherche: boolean): Promise<ReponseMoteur> {
   const t = Date.now();
   const key = process.env.XAI_API_KEY;
   if (!key) return manquant("Clé API xAI non configurée");
   const res = await fetch("https://api.x.ai/v1/chat/completions", {
     method: "POST",
     headers: { "content-type": "application/json", authorization: `Bearer ${key}` },
-    body: JSON.stringify({ model: "grok-4", messages: prompt(q, langue) }),
+    body: JSON.stringify({
+      model: "grok-4",
+      messages: prompt(q, langue),
+      ...(recherche ? { search_parameters: { mode: "auto", return_citations: true } } : {}),
+    }),
   });
   if (!res.ok) return manquant(`xAI [${res.status}]`);
   const json = (await res.json()) as {
@@ -122,7 +137,7 @@ async function grok(q: string, langue: string): Promise<ReponseMoteur> {
     text: json.choices[0]?.message?.content ?? "",
     sources: (json.citations ?? []).map((url) => ({ url })),
     latency: Date.now() - t,
-    cost: 0.005,
+    cost: recherche ? 0.01 : 0.005,
   };
 }
 
@@ -150,17 +165,42 @@ function manquant(error: string): ReponseMoteur {
   return { text: "", sources: [], latency: 0, cost: 0, error };
 }
 
-export async function interroger(moteur: Moteur, question: string, langue: string): Promise<ReponseMoteur> {
+export async function interroger(
+  moteur: Moteur,
+  question: string,
+  langue: string,
+  opts: { recherche?: boolean } = {},
+): Promise<ReponseMoteur> {
+  const recherche = opts.recherche ?? false;
   try {
     if (moteur === "ChatGPT") return await chatgpt(question, langue);
-    if (moteur === "Claude") return await claude(question, langue);
+    if (moteur === "Claude") return await claude(question, langue, recherche);
     if (moteur === "Gemini") return await gemini(question, langue);
-    if (moteur === "Grok") return await grok(question, langue);
+    if (moteur === "Grok") return await grok(question, langue, recherche);
     if (moteur === "Le Chat") return await lechat(question, langue);
     return await perplexity(question, langue);
   } catch (e) {
     return manquant(e instanceof Error ? e.message : "Erreur inconnue");
   }
+}
+
+/**
+ * Question miroir — volontairement HORS méthodologie de score.
+ *
+ * Pour le score, on ne prononce jamais le nom de la marque. Ici on fait
+ * l'inverse, une seule fois, pour montrer au prospect ce que l'IA raconte
+ * quand on la force : infos périmées, confusion avec un homonyme,
+ * hallucinations. C'est un artefact de démonstration, jamais un critère.
+ */
+export async function questionMiroir(
+  marque: string,
+  secteur: string,
+  ville: string | null,
+  moteur: Moteur,
+): Promise<{ moteur: Moteur; texte: string; erreur?: string }> {
+  const q = `Que peux-tu me dire de « ${marque} » (${secteur}${ville ? `, ${ville}` : ""}) ? Est-ce une entreprise que tu recommanderais ?`;
+  const rep = await interroger(moteur, q, "fr");
+  return { moteur, texte: rep.text, ...(rep.error ? { erreur: rep.error } : {}) };
 }
 
 /** Analyse d'une réponse : marques citées, ordre, recommandation, sentiment. */
@@ -198,17 +238,23 @@ export async function genererQuestions(input: {
   secteur: string;
   ville?: string | null;
   langue: string;
+  nombre?: 20 | 24;
 }): Promise<{ text: string; intent: string }[]> {
   const key = process.env.LOVABLE_API_KEY;
   if (!key) throw new Error("LOVABLE_API_KEY absente");
+  const nombre = input.nombre ?? 24;
+  const mix =
+    nombre === 20
+      ? "Exactement 20 questions : 8 comparatives, 5 problème, 4 locales, 3 confiance."
+      : "Exactement 24 questions : 10 comparatives, 6 problème, 5 locales, 3 confiance.";
   const json = await gateway("google/gemini-3.6-flash", [
     {
       role: "system",
       content:
         "Tu génères un échantillon de questions réellement posées à une IA par un décideur en phase d'achat. " +
         'Renvoie UNIQUEMENT du JSON : {"queries":[{"text":"","intent":"comparative|probleme|locale|confiance"}]}. ' +
-        "Exactement 24 questions : 10 comparatives, 6 problème, 5 locales, 3 confiance. " +
-        "Jamais le nom de la marque suivie dans la question : on mesure si l'IA la cite spontanément.",
+        mix +
+        " Jamais le nom de la marque suivie dans la question : on mesure si l'IA la cite spontanément.",
     },
     {
       role: "user",
@@ -220,5 +266,5 @@ export async function genererQuestions(input: {
   const parsed = JSON.parse(match ? match[0] : '{"queries":[]}') as {
     queries: { text: string; intent: string }[];
   };
-  return parsed.queries.filter((q) => q?.text).slice(0, 24);
+  return parsed.queries.filter((q) => q?.text).slice(0, nombre);
 }

@@ -3,12 +3,29 @@ import { getRequest } from "@tanstack/react-start/server";
 import { z } from "zod";
 
 const CreerInput = z.object({
-  marque: z.string().trim().min(1).max(80),
+  // Un nom réduit à de la ponctuation (« "" », « nutri) ») rendrait la
+  // détection impossible et produirait un 0/100 artefactuel présenté comme
+  // un diagnostic. On refuse à la porte, avec un message actionnable.
+  marque: z
+    .string()
+    .trim()
+    .min(1)
+    .max(80)
+    .refine(
+      (m) =>
+        m
+          .toLowerCase()
+          .normalize("NFD")
+          .replace(/[\u0300-\u036f]/g, "")
+          .replace(/[^a-z0-9]+/g, "").length >= 2,
+      { message: "Le nom de marque doit contenir au moins deux lettres ou chiffres." },
+    ),
   url: z.string().trim().max(200).optional().nullable(),
   secteur: z.string().trim().min(1).max(80),
   ville: z.string().trim().max(80).optional().nullable(),
   concurrents: z.array(z.string().trim().max(80)).max(3).default([]),
   langue: z.enum(["fr", "it", "en"]).default("fr"),
+  mode: z.enum(["apercu", "complet"]).default("apercu"),
 });
 
 export const lancerScan = createServerFn({ method: "POST" })
@@ -32,8 +49,9 @@ export const lancerScan = createServerFn({ method: "POST" })
       concurrents: data.concurrents.filter(Boolean),
       langue: data.langue,
       ipHash,
+      mode: data.mode,
     });
-    return { id: scan.id };
+    return { id: scan.id, cached: scan.cached ?? false };
   });
 
 export const suivreScan = createServerFn({ method: "POST" })

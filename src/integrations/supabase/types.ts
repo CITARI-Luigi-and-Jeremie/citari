@@ -593,8 +593,12 @@ export type Database = {
           competitors: string[]
           completed_at: string | null
           created_at: string
+          audit: Json | null
+          domain_key: string | null
           error_message: string | null
           id: string
+          miroir: Json | null
+          mode: string
           ip_hash: string | null
           language: string
           mention_rate: number | null
@@ -626,8 +630,12 @@ export type Database = {
           competitors?: string[]
           completed_at?: string | null
           created_at?: string
+          audit?: Json | null
+          domain_key?: string | null
           error_message?: string | null
           id?: string
+          miroir?: Json | null
+          mode?: string
           ip_hash?: string | null
           language?: string
           mention_rate?: number | null
@@ -659,8 +667,12 @@ export type Database = {
           competitors?: string[]
           completed_at?: string | null
           created_at?: string
+          audit?: Json | null
+          domain_key?: string | null
           error_message?: string | null
           id?: string
+          miroir?: Json | null
+          mode?: string
           ip_hash?: string | null
           language?: string
           mention_rate?: number | null

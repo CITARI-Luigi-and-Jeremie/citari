@@ -52,3 +52,12 @@ export function verdict(score: number): string {
 
 export const MOTEURS = ["ChatGPT", "Claude", "Gemini", "Perplexity", "Grok", "Le Chat"] as const;
 export type Moteur = (typeof MOTEURS)[number];
+
+/**
+ * Aperçu gratuit : ChatGPT parce que c'est le nom que tout le monde connaît,
+ * Gemini parce que c'est le moins cher des six et le deuxième plus utilisé.
+ * Le jeu complet des six moteurs est réservé au diagnostic en rendez-vous.
+ */
+export const MOTEURS_APERCU = ["ChatGPT", "Gemini"] as const satisfies readonly Moteur[];
+
+export type ModeScan = "apercu" | "complet";
