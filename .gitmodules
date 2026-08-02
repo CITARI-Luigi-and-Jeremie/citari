@@ -1,0 +1,4 @@
+[submodule "apps/citari"]
+	path = apps/citari
+	url = https://github.com/LuigiRevelli/sprint-voice-insight.git
+	branch = citari

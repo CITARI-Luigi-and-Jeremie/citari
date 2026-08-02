@@ -19,16 +19,29 @@ Perplexity, Grok et Le Chat.
 | `apps/admin` | Back-office de livraison : sprints, livrables, relances, citations | ce dépôt | pnpm, Next.js |
 | `packages/*` | Toolkit CLI + socle partagé | ce dépôt | pnpm |
 
-### `apps/citari` est un checkout lié, pas un sous-dossier
+### `apps/citari` est un sous-module Git
 
-Il a son propre `.git`, synchronisé avec le projet Lovable
-`150f9fa5-b533-49e7-a797-19c52f94db36`. Luigi édite sur Lovable, on récupère
-avec `git -C apps/citari pull` ; on édite ici, on pousse. Il est **gitignoré**
-et **exclu du workspace pnpm** (`!apps/citari`) : le versionner dans ce dépôt
-recréerait deux sources de vérité.
+Il pointe sur le dépôt `sprint-voice-insight`, branche `citari`, que **Lovable
+possède et synchronise**. C'est pour cela qu'il y a deux dépôts : la
+synchronisation bidirectionnelle de Lovable ne fonctionne qu'avec le sien.
+Fusionner le front dans ce dépôt casserait la possibilité d'éditer le design
+sur Lovable.
 
-S'il est absent après un clone :
-`git clone https://github.com/LuigiRevelli/sprint-voice-insight.git apps/citari`
+Le sous-module résout le problème : `citari` est le point d'entrée unique et
+contient le front, sans rompre le lien avec Lovable.
+
+```bash
+# Cloner le tout d'un coup
+git clone --recurse-submodules https://github.com/LuigiRevelli/citari.git
+
+# Récupérer les modifications faites sur Lovable
+git -C apps/citari pull
+
+# Enregistrer la nouvelle version du front dans ce dépôt
+git add apps/citari && git commit -m "front: synchro Lovable"
+```
+
+Il reste **exclu du workspace pnpm** (`!apps/citari`) : outillage bun, pas pnpm.
 
 **Règle de travail : une seule personne à la fois sur le front.** Luigi fait le
 design sur Lovable (il voit le rendu en direct) ; on fait ici la logique, les

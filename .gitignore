@@ -10,7 +10,3 @@ deliverables/*
 *.tsbuildinfo
 .DS_Store
 
-# Front Citari — dépôt Git autonome, synchronisé avec Lovable.
-# Volontairement non versionné ici : c'est un checkout lié, pas un sous-dossier.
-# Cloner avec :  git clone https://github.com/LuigiRevelli/sprint-voice-insight.git apps/citari
-apps/citari/
