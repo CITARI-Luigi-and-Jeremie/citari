@@ -7,6 +7,10 @@ Perplexity, Grok et Le Chat.
 > Le produit vendu s'appelle **Sprint GEO** (2 900 €) — ne pas confondre avec le nom
 > de la société. « GEO Sprint » était l'ancien nom, il ne doit plus apparaître nulle part.
 
+> **Lire aussi [JOURNAL.md](JOURNAL.md)** : décisions prises, bugs ouverts et
+> raisonnements qui ne sont pas déductibles du code. Et [ASSOCIE.md](ASSOCIE.md)
+> pour la vue business complète.
+
 ## Architecture — décidée le 2026-08-01
 
 | Dossier | Quoi | Dépôt Git | Outillage |
