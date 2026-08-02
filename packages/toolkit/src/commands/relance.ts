@@ -138,7 +138,7 @@ export async function relance(leadRef: string, opts: { all?: boolean } = {}): Pr
         unwrap(
           await db
             .from("follow_ups")
-            .insert({ lead_id: lead.id, step: d.step, subject: d.subject, body: d.body, scheduled_for: scheduled })
+            .insert({ lead_id: lead.id, step: d.step, subject: d.subject, body: d.body, due_on: scheduled })
             .select("id")
         );
       }

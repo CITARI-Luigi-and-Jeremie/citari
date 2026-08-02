@@ -5,6 +5,27 @@ d'une nouvelle session, après `CLAUDE.md`.
 
 ---
 
+## 2026-08-02 (soir) — La machine des 90 jours est complète
+
+Tout ce qui était « à construire » dans LIVRAISON.md est codé, testé et poussé :
+admin reconstruit sur le schéma réel (avec la checklist des 90 jours créée à
+chaque conversion, semaines 1-4 + J+45/J+90), verify-citations,
+verify-contents, controle-45 (mode « controle » côté moteur, protégé du J+90),
+crawler-log persiste dans crawler_hits, sprint-report intègre les preuves.
+36 tests, typecheck 3/3.
+
+L'audit a aussi corrigé des colonnes obsolètes que le typecheck ne voyait pas
+(client Supabase non typé) : scans.score→score_global, follow_ups.scheduled_for
+→due_on (et statut dérivé de sent_at/cancelled), citation_targets par sprint_id
+et non client_id, sprints.started_on/ends_on/rescan_due_on, deliverables.path→
+local_path. Statuts canoniques des citations : a_faire/envoyee/relancee/
+obtenue/refusee.
+
+L'admin n'exécute JAMAIS de scan : launchRescan insère la ligne avec
+previous_scan_id et la collecte se pilote depuis la page /scan/<id> du front.
+Reste avant le premier client : clés API, première exécution réelle des 4
+commandes LLM, et l'UI du tunnel par Jérémie.
+
 ## 2026-08-02 — Pivot du tunnel : aperçu pas cher, diagnostic en rendez-vous
 
 Décision de Luigi, implémentée le jour même dans le moteur (commit a9ec33a du

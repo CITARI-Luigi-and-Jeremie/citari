@@ -33,7 +33,17 @@ export async function sprintReport(clientRef: string): Promise<void> {
     ? (unwrap(await db.from("sprint_tasks").select("*").eq("sprint_id", sprint.id).order("position")) as any[])
     : [];
   const deliverables = unwrap(await db.from("deliverables").select("*").eq("client_id", client.id).order("created_at")) as any[];
-  const citations = unwrap(await db.from("citation_targets").select("*").eq("client_id", client.id)) as any[];
+  // citation_targets est rattachée au sprint, pas au client (schéma du front).
+  const sprintIds = sprints.map((s) => s.id);
+  const citations = sprintIds.length
+    ? (unwrap(await db.from("citation_targets").select("*").in("sprint_id", sprintIds)) as any[])
+    : [];
+
+  // Les preuves : passages réels des robots IA et vérifications en ligne.
+  const crawlerHits = unwrap(
+    await db.from("crawler_hits").select("bot,hits,errors,period_start,period_end").eq("client_id", client.id).order("created_at")
+  ) as any[];
+  const verifs = deliverables.filter((d) => ["citations_verifiees", "contenus_verifies"].includes(d.kind));
 
   const initialScan = client.initialScanId
     ? ((await db.from("scans").select("*").eq("id", client.initialScanId).maybeSingle()).data as any)
@@ -42,18 +52,18 @@ export async function sprintReport(clientRef: string): Promise<void> {
   const doneTasks = tasks.filter((t) => t.done);
   const pendingTasks = tasks.filter((t) => !t.done);
   const contents = deliverables.filter((d) => d.kind === "content");
-  const obtained = citations.filter((c) => c.status === "obtained");
-  const inProgress = citations.filter((c) => c.status === "sent" || c.status === "followed_up");
+  const obtained = citations.filter((c) => c.status === "obtenue");
+  const inProgress = citations.filter((c) => c.status === "envoyee" || c.status === "relancee");
 
   const fmt = (d: string | null | undefined) => (d ? new Date(d).toLocaleDateString("fr-FR") : "—");
-  const rescanDate = client_rescanDue(client) ?? (sprint?.ends_at ? addDays(sprint.ends_at, 60) : null);
+  const rescanDate = sprint?.rescan_due_on ?? (sprint?.ends_on ? addDays(sprint.ends_on, 60) : null);
 
   const md = `# Rapport de fin de sprint GEO — ${client.brand}
 
-**Période :** ${fmt(sprint?.starts_at)} → ${fmt(sprint?.ends_at)}
+**Période :** ${fmt(sprint?.started_on)} → ${fmt(sprint?.ends_on)}
 **Site :** ${client.url}
 **Secteur :** ${client.sector ?? "—"}
-**Score de visibilité IA au démarrage :** ${initialScan?.score ?? "—"}/100 (scan du ${fmt(initialScan?.created_at)})
+**Score de visibilité IA au démarrage :** ${initialScan?.score_global != null ? Math.round(initialScan.score_global) : "—"}/100 (scan du ${fmt(initialScan?.created_at)})
 
 ---
 
@@ -117,6 +127,25 @@ re-scan.
 
 ---
 
+## Preuves mesurées, pas déclarées
+
+${crawlerHits.length > 0
+  ? `**Passages réels des robots d'IA sur votre site** (lus dans vos logs serveur) :
+
+| Robot | Visites | Erreurs | Période |
+|---|---|---|---|
+${crawlerHits.map((h) => `| ${h.bot} | ${h.hits} | ${h.errors} | ${h.period_start ?? "?"} → ${h.period_end ?? "?"} |`).join("\n")}
+
+Un robot qui visite votre site peut le lire, le retenir et le citer. C'est la
+condition de tout le reste.`
+  : "_Passages des robots : en attente de l'export des logs serveur._"}
+
+${verifs.length > 0
+  ? verifs.map((v) => `- **${v.title}**${v.local_path ? ` — détail : \`${v.local_path}\`` : ""}`).join("\n")
+  : ""}
+
+---
+
 ## 4. Re-scan J+90 (inclus)
 
 **Date prévue : ${rescanDate ? fmt(rescanDate) : "à planifier"}**
@@ -158,11 +187,7 @@ ${recommendations(citations.length - obtained.length, pendingTasks.length, conte
 function listDeliverables(deliverables: any[], kinds: string[]): string {
   const items = deliverables.filter((d) => kinds.includes(d.kind));
   if (items.length === 0) return "- (aucun livrable enregistré)";
-  return items.map((d) => `- **${KIND_LABELS[d.kind] ?? d.kind}** : ${d.title}${d.path ? ` — \`${d.path}\`` : ""}`).join("\n");
-}
-
-function client_rescanDue(client: any): string | null {
-  return client.rescan_due_at ?? null;
+  return items.map((d) => `- **${KIND_LABELS[d.kind] ?? d.kind}** : ${d.title}${d.local_path ? ` — \`${d.local_path}\`` : ""}`).join("\n");
 }
 
 function addDays(date: string, days: number): string {

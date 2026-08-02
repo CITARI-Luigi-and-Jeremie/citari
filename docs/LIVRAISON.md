@@ -120,19 +120,21 @@ indiscutables pendant le sprint, pas seulement à la fin.
 
 ---
 
-## Ce qui n'est pas encore codé
+## Tout est codé (2026-08-02)
 
-| À construire | Ce que ça fera |
+| Brique | État |
 |---|---|
-| Le back-office (priorité 1) | Le poste de pilotage : checklist S1→S4, livrables, statuts citations, échéances. |
-| verify-citations | Vérifie que le client figure vraiment sur chaque site où on l'a inscrit. |
-| Contrôle J+45 | La mini-mesure interne de mi-parcours, moteurs à recherche uniquement, jamais montrée comme un score. |
-| Vérif de publication | Les 5 contenus répondent en ligne, balisage présent, listés dans llms.txt. |
-| Rapport à preuves | sprint-report assemble automatiquement corrections vérifiées + robots comptés + citations en ligne. |
+| **Le back-office** | ✅ Reconstruit sur le schéma réel : leads priorisés, conversion en client (crée le sprint + la checklist des 90 jours), fiche client, relances, livrables, citations avec statuts, ouverture du re-scan J+90. Il n'exécute jamais de mesure lui-même : le seul moteur est celui du front. |
+| **verify-citations** | ✅ Crawle chaque cible, cherche la marque (entités HTML décodées, comparaison normalisée), met à jour les statuts. Une cible « obtenue » où la marque a disparu est reclassée : le rapport n'affirme jamais une citation invérifiable. |
+| **verify-contents** | ✅ Chaque contenu publié : la page répond, porte du JSON-LD, figure dans llms.txt. |
+| **controle-45** | ✅ Mode « controle » côté moteur : mêmes questions que le scan initial, Claude + Perplexity + Grok seulement, plafond 1 €, ni audit ni miroir. Le re-scan J+90 ne le confond jamais avec lui. |
+| **sprint-report à preuves** | ✅ Le rapport intègre les passages réels des robots (table crawler_hits, alimentée par crawler-log) et les vérifications en ligne. |
+| **La checklist des 90 jours** | ✅ Encodée dans l'admin (créée à chaque conversion) : S1 technique, S2 contenu, S3 placement, S4 preuves, puis J+45 et J+90. C'est l'exécutable de ce document. |
 
 ⚠ Les commandes qui écrivent du contenu (generate-fixes, content-brief,
 draft-content, citation-targets) n'ont jamais tourné avec une vraie clé API.
-Première exécution réelle avant le premier client.
+Première exécution réelle avant le premier client. Et l'interface du nouveau
+tunnel (verrous + Calendly) reste à faire par Jérémie via le prompt Lovable.
 
 ---
 

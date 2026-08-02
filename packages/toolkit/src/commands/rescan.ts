@@ -40,7 +40,7 @@ export async function rescan(clientRef: string): Promise<void> {
   // Un re-scan par scan initial : relancer la commande ne doit pas facturer
   // une seconde collecte ni créer deux points de comparaison concurrents.
   const existing = unwrap(
-    await db.from("scans").select("id, status, report_token").eq("previous_scan_id", initial.id).limit(1)
+    await db.from("scans").select("id, status, report_token").eq("previous_scan_id", initial.id).neq("mode", "controle").limit(1)
   ) as { id: string; status: string; report_token: string | null }[];
 
   if (existing[0]) {
@@ -62,6 +62,7 @@ export async function rescan(clientRef: string): Promise<void> {
         language: initial.language ?? "fr",
         competitors: initial.competitors ?? [],
         previous_scan_id: initial.id,
+        mode: "complet",
         status: "running",
         phase: "init",
         started_at: new Date().toISOString(),

@@ -17,6 +17,9 @@ import { proposition } from "./commands/proposition.js";
 import { rescan } from "./commands/rescan.js";
 import { prioriser } from "./commands/prioriser.js";
 import { indexnow } from "./commands/indexnow.js";
+import { verifyCitations } from "./commands/verify-citations.js";
+import { verifyContents } from "./commands/verify-contents.js";
+import { controle45 } from "./commands/controle-45.js";
 
 const program = new Command()
   .name("toolkit")
@@ -67,6 +70,25 @@ program
   .argument("<client>", "nom ou id du client")
   .description("Chantier 3 — cibles de citation priorisées + brouillons de pitchs presse")
   .action((client: string) => run(citationTargets(client)));
+
+program
+  .command("controle-45")
+  .argument("<client>", "nom ou id du client")
+  .description("Interne — mi-parcours : mêmes questions, moteurs à recherche seulement (~0,40 €)")
+  .action((client: string) => run(controle45(client)));
+
+program
+  .command("verify-citations")
+  .argument("<client>", "nom ou id du client")
+  .description("Preuve — la marque figure-t-elle réellement sur chaque cible de citation ?")
+  .action((client: string) => run(verifyCitations(client)));
+
+program
+  .command("verify-contents")
+  .argument("<client>", "nom ou id du client")
+  .argument("<urls...>", "URLs des contenus publiés")
+  .description("Preuve — les contenus répondent, portent du JSON-LD et figurent dans llms.txt")
+  .action((client: string, urls: string[]) => run(verifyContents(client, urls)));
 
 program
   .command("verify-fixes")

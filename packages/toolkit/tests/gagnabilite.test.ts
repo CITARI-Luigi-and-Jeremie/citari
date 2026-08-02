@@ -37,3 +37,24 @@ describe("gagnabilité", () => {
     expect(g.score).toBeLessThanOrEqual(100);
   });
 });
+
+import { marquePresente } from "../src/commands/verify-citations";
+import { analyserContenu } from "../src/commands/verify-contents";
+
+describe("preuves", () => {
+  it("trouve la marque malgré balises, accents et ponctuation", () => {
+    const html = `<html><body><h2>Cabinet <b>Vaurel</b> &amp; Associés</h2></body></html>`;
+    expect(marquePresente(html, "cabinet vaurel associes")).toBe(true);
+  });
+  it("ne trouve pas une marque absente, et ignore les scripts", () => {
+    const html = `<script>var x = "Cabinet Vaurel";</script><body>Autre chose</body>`;
+    expect(marquePresente(html, "Cabinet Vaurel")).toBe(false);
+  });
+  it("matche la forme compacte (NutriSmart vs nutri smart)", () => {
+    expect(marquePresente("<p>Avis sur NutriSmart</p>", "nutri smart")).toBe(true);
+  });
+  it("détecte le JSON-LD", () => {
+    expect(analyserContenu('<script type="application/ld+json">{}</script>').jsonLd).toBe(true);
+    expect(analyserContenu("<p>rien</p>").jsonLd).toBe(false);
+  });
+});

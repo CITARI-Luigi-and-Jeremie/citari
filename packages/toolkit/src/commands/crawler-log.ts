@@ -1,6 +1,7 @@
 import { createReadStream } from "node:fs";
 import { createInterface } from "node:readline";
 import { AI_CRAWLERS } from "../lib/crawl.js";
+import { getDb } from "@geo/core";
 import { recordDeliverable, resolveClient, slugify, writeDeliverableFile } from "../lib/context.js";
 
 /**
@@ -151,6 +152,23 @@ ${days.length > 0
 *Cette mesure est indépendante du Score de Visibilité IA : elle prouve que le site est **lisible**,
 pas qu'il est **cité**. Les deux sont nécessaires, la lisibilité vient en premier.*
 `;
+
+  // Persistance dans crawler_hits : c'est la série temporelle qui prouve, de
+  // sprint en sprint, que le site est devenu lisible. Une ligne par bot vu.
+  const db = getDb();
+  const periodStart = days[0] ?? null;
+  const periodEnd = days[days.length - 1] ?? null;
+  for (const [bot, st] of ranked) {
+    const errs = [...st.statuses.entries()].filter(([c]) => c >= 400).reduce((a, [, n]) => a + n, 0);
+    await db.from("crawler_hits").insert({
+      client_id: client.id,
+      period_start: periodStart,
+      period_end: periodEnd,
+      bot,
+      hits: st.hits,
+      errors: errs,
+    });
+  }
 
   const path = writeDeliverableFile(slug, "crawlers-ia.md", md);
   await recordDeliverable(client.id, "crawler_log", `Passages crawlers IA (${totalHits} visites, ~${perWeek}/semaine)`, path, {

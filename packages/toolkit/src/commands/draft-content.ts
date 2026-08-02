@@ -20,7 +20,7 @@ export async function draftContent(clientRef: string, briefId: string): Promise<
 
   console.log(`Rédaction : "${b.title}" (${b.format})…`);
   const out = await askClaudeJson(
-    `Rédige le contenu web complet suivant pour ${client.brand} (${client.url}, secteur : ${client.sector ?? "?"}).
+    `Rédige le contenu web complet suivant pour ${client.brand} (${client.url ?? "site non renseigné"}, secteur : ${client.sector ?? "?"}).
 
 Titre : ${b.title}
 Format : ${b.format}
