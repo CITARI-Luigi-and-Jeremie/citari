@@ -9,8 +9,10 @@ import {
 } from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
 
+import "../styles.css";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
+import { CONTACT_EMAIL } from "@/lib/site";
 
 function NotFoundComponent() {
   return (
@@ -77,21 +79,19 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Lovable Generated Project" },
-      { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Lovable Generated Project" },
+      { name: "author", content: "Citari" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:site", content: "@Lovable" },
     ],
     links: [
+      { rel: "stylesheet", href: appCss },
+      { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
+      { rel: "preconnect", href: "https://fonts.googleapis.com" },
+      { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {
         rel: "stylesheet",
-        href: appCss,
+        href: "https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Newsreader:ital,wght@1,400&display=swap",
       },
-      { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
     ],
   }),
   shellComponent: RootShell,
@@ -102,7 +102,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="fr">
       <head>
         <HeadContent />
       </head>
@@ -114,13 +114,62 @@ function RootShell({ children }: { children: ReactNode }) {
   );
 }
 
+function SiteHeader() {
+  return (
+    <header className="border-b border-rule">
+      <div className="mx-auto flex max-w-5xl items-baseline justify-between px-5 py-5 sm:px-8">
+        <Link to="/" className="text-[20px] font-semibold tracking-[-0.02em]">
+          Citari
+        </Link>
+        <Link to="/methode" className="text-[15px] underline-offset-4 hover:underline">
+          Méthode
+        </Link>
+      </div>
+    </header>
+  );
+}
+
+function SiteFooter() {
+  return (
+    <footer className="border-t border-rule">
+      <div className="mx-auto max-w-5xl px-5 py-10 sm:px-8">
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-2 text-[15px]">
+          <span>Citari</span>
+          <span className="text-ink-2">·</span>
+          <Link to="/methode" className="underline-offset-4 hover:underline">
+            Méthode
+          </Link>
+          <span className="text-ink-2">·</span>
+          <Link to="/mentions-legales" className="underline-offset-4 hover:underline">
+            Mentions légales
+          </Link>
+          <span className="text-ink-2">·</span>
+          <a
+            href={`mailto:${CONTACT_EMAIL}`}
+            className="underline-offset-4 hover:underline"
+          >
+            Contact
+          </a>
+        </div>
+        <p className="mono mt-4 text-[12px] text-ink-2">
+          Citari — mentions légales en cours de complétion.
+        </p>
+      </div>
+    </footer>
+  );
+}
+
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
 
   return (
     <QueryClientProvider client={queryClient}>
-      {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-      <Outlet />
+      <SiteHeader />
+      <main>
+        {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
+        <Outlet />
+      </main>
+      <SiteFooter />
     </QueryClientProvider>
   );
 }
