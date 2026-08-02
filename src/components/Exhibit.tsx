@@ -8,7 +8,7 @@ export function Exhibit() {
     return () => clearTimeout(timer);
   }, []);
 
-  const mark = `highlight-signal${on ? " highlight-signal-on" : ""}`;
+  const mark = `highlight-signal not-italic${on ? " highlight-signal-on" : ""}`;
 
   return (
     <section className="border-t border-rule">
