@@ -103,22 +103,83 @@ Jamais de faux avis, jamais d'astroturfing.
 
 ---
 
-## Le calendrier complet
+## JOURS 1 à 30 — Le sprint de production
 
-| Quand | La machine | Nous |
+| Semaine | La machine | Nous |
 |---|---|---|
-| S1 | audit-technique, generate-fixes, prioriser | call cadrage, déploiement, Wikidata, validation sujets |
-| S2 | content-brief, draft-content, citation-targets | compléter, publier 2 contenus, inscriptions, kit avis |
-| S3 | verify-fixes, crawler-log, indexnow | publier le reste, pitchs presse, placement ciblé |
-| S4 | sprint-report | relances, call de clôture, rapport |
-| J+45 | contrôle interne (3 moteurs rapides, ~0,40 €) | réorienter les citations si rien ne bouge |
-| J+90 | rescan : mêmes 24 questions, mêmes 6 moteurs | call de restitution avant/après |
+| **S1** (J1-J7) | audit-technique, generate-fixes, verify-fixes, prioriser, content-brief | Call de cadrage 1 h (dont le panier moyen), déploiement des correctifs, verrouillage de l'entité (Wikidata, sameAs, NAP), validation des 5 sujets |
+| **S2** (J8-J14) | draft-content, citation-targets, indexnow | Combler les [À COMPLÉTER], publier, premières inscriptions, remettre le kit avis |
+| **S3** (J15-J21) | draft-content (suite), indexnow, crawler-log | Publier le reste, placement ciblé sur les classements que les IA citent, pitchs presse |
+| **S4** (J22-J30) | verify-contents, verify-citations, verify-fixes, sprint-report | Relances, call de clôture, remise du rapport |
 
-**Chaque vendredi : l'email de preuve.** Ce qui a été fait dans la semaine,
-liens et captures, gabarit fixe, dix minutes. C'est ce qui rend les 2 900 €
-indiscutables pendant le sprint, pas seulement à la fin.
+## JOURS 31 à 90 — Ce qui fait la différence
 
----
+C'est la partie que personne ne fait, et c'est elle qui produit le delta. Une
+agence classique livre au jour 30 et disparaît. Or à J30 presque rien n'a
+bougé dans les moteurs : les pitchs n'ont pas reçu de réponse, les
+inscriptions ne sont pas validées, les contenus commencent à peine à être
+indexés.
+
+### Phase 5 — Maturation (J31-J45)
+
+On ne crée plus rien, on fait aboutir.
+
+- 2e relance des pitchs presse restés sans réponse
+- Vérifier la validation des inscriptions annuaires (2 à 4 semaines de délai)
+- `verify-fixes` #2 : un redéploiement du client a-t-il écrasé les correctifs ?
+  Ça arrive, et ça anéantit le sprint en silence
+- Point avis avec le client : combien collectés sur les 10 visés ?
+- Email de preuve mensuel
+
+### Phase 6 — Contrôle et correction de trajectoire (J45-J60)
+
+**Le seul moment où l'on peut encore infléchir le J+90.** Au-delà de J+60,
+une nouvelle action n'a plus le temps d'être intégrée.
+
+- `controle-45` : mini-mesure interne, mêmes questions, uniquement Claude,
+  Perplexity et Grok — les trois seuls qui peuvent déjà avoir bougé (~0,40 €)
+- Analyser : ont-ils bougé par rapport au scan initial ?
+- Si plat, diagnostiquer : robots bloqués ? contenus indexés ? citations
+  réellement obtenues ?
+- `crawler-log` #2 : comparer avec la mesure de S3
+- Si plat, réorienter : nouvelles cibles, `indexnow` relancé, contenu
+  additionnel sur une question plus gagnable
+
+Le contrôle J+45 n'est jamais montré au client comme un score. Télémétrie
+interne. Le J+90 reste la seule mesure contractuelle.
+
+### Phase 7 — Consolidation (J60-J75)
+
+Ce qui a été obtenu peut disparaître : fiche supprimée, page déplacée,
+article dépublié.
+
+- `verify-citations` #2 : les citations tiennent-elles toujours ?
+- `verify-contents` #2 : contenus en ligne, balisés, référencés ?
+- Dernière vague de relances presse (au-delà, une parution n'aura pas le
+  temps d'être vue par le re-scan)
+- Relancer le kit avis si moins de 5 collectés
+- Email de preuve mensuel
+
+### Phase 8 — La mesure finale (J75-J90)
+
+- J+80 : préparer le comparatif avant/après
+- J+90 : re-scan, mêmes 24 questions, mêmes 6 moteurs, même formule
+- Call de restitution, y compris si le résultat est mauvais
+- Proposer la suite : Vigie ou second sprint
+
+**47 étapes au total**, encodées dans `apps/admin/lib/checklist.ts` et créées
+automatiquement à chaque conversion d'un lead en client. Si ce document et la
+checklist divergent, c'est ce document qui fait foi.
+
+## La preuve, en continu
+
+| Quand | Ce qu'on montre |
+|---|---|
+| Chaque vendredi (S1-S4) | Email de preuve : ce qui a été fait, liens et captures. Dix minutes, gabarit fixe. Rend les 2 900 € indiscutables pendant le sprint. |
+| Chaque mois (J31-J90) | Relances envoyées, inscriptions validées, vérifications passées. |
+| En continu | Les passages réels des robots d'IA comptés dans les logs : une preuve indépendante du score. |
+| J+30 | Rapport de fin de sprint, action par action, avec vérifications. |
+| J+90 | Le comparatif avant/après, sans mise en scène. |
 
 ## Tout est codé (2026-08-02)
 

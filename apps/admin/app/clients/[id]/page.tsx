@@ -22,11 +22,14 @@ const CITATION_STATUSES: Record<string, string> = {
 };
 
 const WEEK_LABELS: Record<number, string> = {
-  1: "Semaine 1 — technique",
-  2: "Semaine 2 — contenu",
-  3: "Semaine 3 — placement",
-  4: "Semaine 4 — preuves et clôture",
-  5: "Après le sprint — J+45 et J+90",
+  1: "Semaine 1 — technique (J1-J7)",
+  2: "Semaine 2 — contenu (J8-J14)",
+  3: "Semaine 3 — placement (J15-J21)",
+  4: "Semaine 4 — preuves et clôture (J22-J30)",
+  5: "Phase 5 — maturation (J31-J45)",
+  6: "Phase 6 — contrôle et correction (J45-J60)",
+  7: "Phase 7 — consolidation (J60-J75)",
+  8: "Phase 8 — la mesure finale (J75-J90)",
 };
 
 export default async function ClientDetail({ params }: { params: Promise<{ id: string }> }) {
@@ -139,7 +142,7 @@ export default async function ClientDetail({ params }: { params: Promise<{ id: s
             {tasks.filter((t) => t.done).length}/{tasks.length} faites
           </span>
         </h2>
-        {[1, 2, 3, 4, 5].map((week) => (
+        {[1, 2, 3, 4, 5, 6, 7, 8].map((week) => (
           <div key={week} className="mt-4">
             <h3 className="text-sm font-bold text-ink-faint">{WEEK_LABELS[week] ?? `Semaine ${week}`}</h3>
             <ul className="mt-1 space-y-1">
