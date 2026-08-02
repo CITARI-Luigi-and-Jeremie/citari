@@ -8,7 +8,7 @@ export function Exhibit() {
     return () => clearTimeout(timer);
   }, []);
 
-  const mark = `highlight-signal not-italic${on ? " highlight-signal-on" : ""}`;
+  const mark = `highlight-signal${on ? " highlight-signal-on" : ""}`;
 
   return (
     <section className="border-t border-rule">
@@ -19,8 +19,14 @@ export function Exhibit() {
           </p>
           <blockquote className="quote-serif measure mt-6 text-[24px] leading-[1.45] sm:text-[28px]">
             « Pour un cabinet fiable à Lyon, je recommande plutôt{" "}
-            <span className={mark}>Concurrent A</span> ou{" "}
-            <span className={mark}>Concurrent B</span>. »
+            <span className={mark} style={{ fontStyle: "normal" }}>
+              Concurrent A
+            </span>{" "}
+            ou{" "}
+            <span className={mark} style={{ fontStyle: "normal" }}>
+              Concurrent B
+            </span>
+            . »
           </blockquote>
           <p className="mono mt-6 text-[13px] text-ink-2">
             — ChatGPT, interrogé le 02/08/2026
