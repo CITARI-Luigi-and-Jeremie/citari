@@ -7,7 +7,7 @@ import { MOTEURS, MOTEURS_APERCU, MOTEURS_CONTROLE, type ModeScan, type Moteur }
 export type PdvItem = { name: string; count: number; share: number; target: boolean };
 export type Action = { chantier: string; titre: string; pourquoi: string; effort: string };
 
-export const PLAFOND_SCANS_PAR_IP = 3;
+export const PLAFOND_SCANS_PAR_IP = 2;
 // Aperçu : gratuit et public, le plafond est un fusible anti-dérive.
 // Complet : déclenché uniquement pour un rendez-vous réservé, on paye la qualité.
 // Mesurés sur le premier scan réel : 1,06 € pour 24 questions × 6 moteurs.
@@ -28,7 +28,21 @@ export const PLAFONDS_EUR: Record<ModeScan, number> = { apercu: 0.25, complet: 3
 function lotDuMode(mode: ModeScan): number {
   return mode === "apercu" ? 20 : 8;
 }
-const CACHE_JOURS = 30;
+/**
+ * Fenêtre de cache d'un résultat de scan.
+ *
+ * Trois jours, et pas trente : le GEO d'une entreprise bouge, notamment quand
+ * elle vient de découvrir son score et commence à agir. Resservir un mois plus
+ * tard une mesure périmée ferait mentir le chiffre, et priverait le prospect de
+ * la seule chose qui le ferait revenir, voir son score progresser.
+ *
+ * Trois jours suffisent à couvrir ce qu'on veut couvrir : le visiteur qui
+ * relance deux fois dans la journée, celui qui repasse le lendemain montrer le
+ * rapport à son associé, et le partage du lien dans une équipe. Pendant cette
+ * fenêtre, tout le monde voit exactement le même score et les mêmes réponses,
+ * puisqu'on renvoie le scan existant et non une nouvelle mesure.
+ */
+const CACHE_JOURS = 3;
 
 function moteursDuMode(mode: ModeScan): readonly Moteur[] {
   if (mode === "apercu") return MOTEURS_APERCU;
@@ -82,6 +96,29 @@ export function hacherIp(ip: string) {
   return createHash("sha256").update(`geo-sprint:${ip}`).digest("hex").slice(0, 32);
 }
 
+/**
+ * Le scan déjà mesuré pour ce domaine, s'il est dans la fenêtre de cache.
+ *
+ * Extrait de `creerScan` pour que l'appelant puisse savoir qu'un résultat
+ * existe AVANT d'appliquer le quota : resservir une mesure déjà payée ne
+ * consomme aucune API, donc refuser ce visiteur au motif du plafond n'aurait
+ * aucun sens.
+ */
+export async function chercherCache(domaine: string, mode: ModeScan) {
+  const depuis = new Date(Date.now() - CACHE_JOURS * 86400000).toISOString();
+  const { data } = await supabaseAdmin
+    .from("scans")
+    .select("id, report_token, status, created_at")
+    .eq("domain_key", domaine)
+    .eq("mode", mode)
+    .gte("created_at", depuis)
+    .in("status", ["done", "running"])
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  return data;
+}
+
 export async function quotaAtteint(ipHash: string) {
   const depuis = new Date(Date.now() - 24 * 3600 * 1000).toISOString();
   const { count } = await supabaseAdmin
@@ -108,23 +145,14 @@ export async function creerScan(input: {
   const mode: ModeScan = input.mode ?? "apercu";
   const domaine = cleDomaine(input.url, input.marque, input.secteur, input.ville);
 
-  // Cache : même domaine, même mode, moins de 30 jours → même résultat.
-  // Trois effets voulus : le score ne bouge pas d'un scan à l'autre (la
-  // crédibilité de la mesure), les curieux qui rescannent ne coûtent rien,
+  // Cache : même domaine, même mode, moins de 3 jours → on renvoie le scan
+  // existant, donc le même score ET les mêmes réponses, partout.
+  // Trois effets voulus : le chiffre ne bouge pas d'un rechargement à l'autre
+  // (la crédibilité de la mesure), les curieux qui rescannent ne coûtent rien,
   // et l'abus est borné. Un re-scan J+90 (previousScanId) court-circuite
   // le cache : c'est une nouvelle mesure par définition.
   if (!input.previousScanId) {
-    const depuis = new Date(Date.now() - CACHE_JOURS * 86400000).toISOString();
-    const { data: existant } = await supabaseAdmin
-      .from("scans")
-      .select("id, report_token, status, created_at")
-      .eq("domain_key", domaine)
-      .eq("mode", mode)
-      .gte("created_at", depuis)
-      .in("status", ["done", "running"])
-      .order("created_at", { ascending: false })
-      .limit(1)
-      .maybeSingle();
+    const existant = await chercherCache(domaine, mode);
     if (existant) return { id: existant.id, report_token: existant.report_token, cached: true };
   }
 
@@ -349,7 +377,18 @@ export async function avancerScan(id: string) {
       return;
     }
 
-    await supabaseAdmin.from("scans").update({ phase: "interrogation" }).eq("id", id);
+    // `progress` est aussi calculé à la volée par etatScan pour l'affichage.
+    // On le persiste quand même : sans lui, un scan abandonné en cours de route
+    // est indistinguable en base d'un scan jamais démarré, et il faut recompter
+    // les réponses à la main pour savoir où il s'est arrêté.
+    const totalPaires = (questions?.length ?? 0) * moteurs.length;
+    await supabaseAdmin
+      .from("scans")
+      .update({
+        phase: "interrogation",
+        progress: totalPaires ? Math.round((deja.size / totalPaires) * 100) : 0,
+      })
+      .eq("id", id);
 
     const coutCumule = (
       await supabaseAdmin.from("cost_log").select("cost_eur").eq("scan_id", id)
@@ -437,6 +476,7 @@ async function finaliser(id: string) {
     .update({
       status: "done",
       phase: "termine",
+      progress: 100,
       completed_at: new Date().toISOString(),
       score_global: s.global,
       score_chatgpt: s.parMoteur["ChatGPT"],

@@ -31,15 +31,26 @@ const CreerInput = z.object({
 export const lancerScan = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => CreerInput.parse(d))
   .handler(async ({ data }) => {
-    const { hacherIp, quotaAtteint, creerScan } = await import("@/lib/orchestrateur.server");
+    const { hacherIp, quotaAtteint, creerScan, chercherCache, cleDomaine, PLAFOND_SCANS_PAR_IP } =
+      await import("@/lib/orchestrateur.server");
     const req = getRequest();
     const ip =
       req?.headers.get("cf-connecting-ip") ??
       req?.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
       "inconnue";
     const ipHash = hacherIp(ip);
-    if (await quotaAtteint(ipHash)) {
-      return { erreur: "Limite de 3 scans par jour atteinte pour cette connexion." as const };
+
+    // Le plafond ne s'applique qu'aux mesures réellement nouvelles. Un scan
+    // déjà en cache est resservi tel quel, sans coût et sans compter.
+    const enCache = await chercherCache(
+      cleDomaine(data.url ?? null, data.marque, data.secteur, data.ville ?? null),
+      data.mode
+    );
+    if (!enCache && (await quotaAtteint(ipHash))) {
+      return {
+        erreur:
+          `Limite de ${PLAFOND_SCANS_PAR_IP} scans par jour atteinte pour cette connexion.` as const,
+      };
     }
     const scan = await creerScan({
       marque: data.marque,
