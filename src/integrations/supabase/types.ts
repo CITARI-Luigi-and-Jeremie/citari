@@ -14,6 +14,159 @@ export type Database = {
   }
   public: {
     Tables: {
+      mentions: {
+        Row: {
+          brand: string
+          created_at: string
+          id: string
+          is_recommended: boolean
+          position: number | null
+          response_id: string
+          scan_id: string
+          sentiment: string | null
+        }
+        Insert: {
+          brand: string
+          created_at?: string
+          id?: string
+          is_recommended?: boolean
+          position?: number | null
+          response_id: string
+          scan_id: string
+          sentiment?: string | null
+        }
+        Update: {
+          brand?: string
+          created_at?: string
+          id?: string
+          is_recommended?: boolean
+          position?: number | null
+          response_id?: string
+          scan_id?: string
+          sentiment?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mentions_response_id_fkey"
+            columns: ["response_id"]
+            isOneToOne: false
+            referencedRelation: "responses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mentions_response_id_fkey"
+            columns: ["response_id"]
+            isOneToOne: false
+            referencedRelation: "responses_meta"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mentions_scan_id_fkey"
+            columns: ["scan_id"]
+            isOneToOne: false
+            referencedRelation: "scans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mentions_scan_id_fkey"
+            columns: ["scan_id"]
+            isOneToOne: false
+            referencedRelation: "scans_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      queries: {
+        Row: {
+          created_at: string
+          id: string
+          position: number
+          scan_id: string
+          text: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          position: number
+          scan_id: string
+          text: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          position?: number
+          scan_id?: string
+          text?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "queries_scan_id_fkey"
+            columns: ["scan_id"]
+            isOneToOne: false
+            referencedRelation: "scans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "queries_scan_id_fkey"
+            columns: ["scan_id"]
+            isOneToOne: false
+            referencedRelation: "scans_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      responses: {
+        Row: {
+          created_at: string
+          engine: string
+          id: string
+          latency_ms: number | null
+          query_id: string
+          scan_id: string
+          text: string | null
+        }
+        Insert: {
+          created_at?: string
+          engine: string
+          id?: string
+          latency_ms?: number | null
+          query_id: string
+          scan_id: string
+          text?: string | null
+        }
+        Update: {
+          created_at?: string
+          engine?: string
+          id?: string
+          latency_ms?: number | null
+          query_id?: string
+          scan_id?: string
+          text?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "responses_query_id_fkey"
+            columns: ["query_id"]
+            isOneToOne: false
+            referencedRelation: "queries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "responses_scan_id_fkey"
+            columns: ["scan_id"]
+            isOneToOne: false
+            referencedRelation: "scans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "responses_scan_id_fkey"
+            columns: ["scan_id"]
+            isOneToOne: false
+            referencedRelation: "scans_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       scan_leads: {
         Row: {
           created_at: string
@@ -41,53 +194,165 @@ export type Database = {
             referencedRelation: "scans"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "scan_leads_scan_id_fkey"
+            columns: ["scan_id"]
+            isOneToOne: false
+            referencedRelation: "scans_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       scans: {
         Row: {
+          actions: Json | null
           brand: string
           competitors: string[]
+          cost_cents: number
           created_at: string
           domain: string
+          error: string | null
           id: string
-          responses: Json
+          progress: number
           score: number | null
           score_detail: Json | null
           sector: string | null
           share_of_voice: Json | null
+          started_at: string
           status: string
         }
         Insert: {
+          actions?: Json | null
           brand: string
           competitors?: string[]
+          cost_cents?: number
           created_at?: string
           domain: string
+          error?: string | null
           id?: string
-          responses?: Json
+          progress?: number
           score?: number | null
           score_detail?: Json | null
           sector?: string | null
           share_of_voice?: Json | null
+          started_at?: string
           status?: string
         }
         Update: {
+          actions?: Json | null
           brand?: string
           competitors?: string[]
+          cost_cents?: number
           created_at?: string
           domain?: string
+          error?: string | null
           id?: string
-          responses?: Json
+          progress?: number
           score?: number | null
           score_detail?: Json | null
           sector?: string | null
           share_of_voice?: Json | null
+          started_at?: string
           status?: string
         }
         Relationships: []
       }
     }
     Views: {
-      [_ in never]: never
+      responses_meta: {
+        Row: {
+          created_at: string | null
+          engine: string | null
+          id: string | null
+          latency_ms: number | null
+          query_id: string | null
+          scan_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          engine?: string | null
+          id?: string | null
+          latency_ms?: number | null
+          query_id?: string | null
+          scan_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          engine?: string | null
+          id?: string | null
+          latency_ms?: number | null
+          query_id?: string | null
+          scan_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "responses_query_id_fkey"
+            columns: ["query_id"]
+            isOneToOne: false
+            referencedRelation: "queries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "responses_scan_id_fkey"
+            columns: ["scan_id"]
+            isOneToOne: false
+            referencedRelation: "scans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "responses_scan_id_fkey"
+            columns: ["scan_id"]
+            isOneToOne: false
+            referencedRelation: "scans_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      scans_public: {
+        Row: {
+          brand: string | null
+          competitors: string[] | null
+          created_at: string | null
+          domain: string | null
+          id: string | null
+          progress: number | null
+          score: number | null
+          score_detail: Json | null
+          sector: string | null
+          share_of_voice: Json | null
+          started_at: string | null
+          status: string | null
+        }
+        Insert: {
+          brand?: string | null
+          competitors?: string[] | null
+          created_at?: string | null
+          domain?: string | null
+          id?: string | null
+          progress?: number | null
+          score?: number | null
+          score_detail?: Json | null
+          sector?: string | null
+          share_of_voice?: Json | null
+          started_at?: string | null
+          status?: string | null
+        }
+        Update: {
+          brand?: string | null
+          competitors?: string[] | null
+          created_at?: string | null
+          domain?: string | null
+          id?: string | null
+          progress?: number | null
+          score?: number | null
+          score_detail?: Json | null
+          sector?: string | null
+          share_of_voice?: Json | null
+          started_at?: string | null
+          status?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       [_ in never]: never

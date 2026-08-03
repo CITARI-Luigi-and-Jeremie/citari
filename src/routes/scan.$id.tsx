@@ -1,10 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
+import { useEffect, useRef, useState } from "react";
 import { getScan } from "@/lib/scan-result.functions";
-import { selectVerbatims, type ScanRecord } from "@/lib/scan-result";
+import { CONTACT_EMAIL } from "@/lib/site";
 import { Verdict, Breakdown, ByEngine, ShareOfVoice } from "@/components/scan-result/Metrics";
 import { VerbatimsSection } from "@/components/scan-result/Verbatims";
+import { LoadingScreen } from "@/components/scan-loading/LoadingScreen";
 
 const TITLE = "Votre scan de visibilité IA — Citari";
 const DESCRIPTION =
@@ -27,16 +29,33 @@ function ScanPage() {
   const { id } = Route.useParams();
   const fetchScan = useServerFn(getScan);
 
-  const { data, isPending, isError } = useQuery({
+  const { data, isPending, isError, errorUpdateCount } = useQuery({
     queryKey: ["scan", id],
     queryFn: () => fetchScan({ data: { id } }),
-    refetchInterval: (query) =>
-      (query.state.data as ScanRecord | null)?.status === "done" ? false : 4000,
+    retry: false,
+    // On garde le dernier état connu en cas d'échec réseau.
+    placeholderData: (previous) => previous,
+    refetchInterval: (query) => {
+      const status = query.state.data?.scan.status;
+      return status === "done" || status === "error" ? false : 1500;
+    },
   });
+
+  // 400 ms de papier nu entre la fin de l'analyse et la révélation.
+  const sawScoring = useRef(false);
+  const [held, setHeld] = useState(false);
+  const status = data?.scan.status;
+  if (status === "scoring" || status === "running") sawScoring.current = true;
+
+  useEffect(() => {
+    if (status !== "done" || !sawScoring.current || held) return;
+    const timer = window.setTimeout(() => setHeld(true), 400);
+    return () => window.clearTimeout(timer);
+  }, [status, held]);
 
   if (isPending) return <Notice title="Chargement du scan…" />;
 
-  if (isError)
+  if (isError && !data)
     return (
       <Notice
         title="Ce scan n'a pas pu être chargé."
@@ -45,24 +64,29 @@ function ScanPage() {
     );
 
   if (!data)
+    return <Notice title="Scan introuvable." body="Ce lien ne correspond à aucun scan." />;
+
+  const { scan, queries, meta, verbatimCount } = data;
+
+  if (scan.status === "error")
     return (
       <Notice
-        title="Scan introuvable."
-        body="Ce lien ne correspond à aucun scan."
+        title="Le scan s'est interrompu."
+        body={`Relancez-le depuis l'accueil — si ça se reproduit, écrivez-nous : ${CONTACT_EMAIL}.`}
       />
     );
 
-  const scan = data as unknown as ScanRecord;
-
-  if (scan.status !== "done" || scan.score === null) {
+  if (scan.status !== "done" || scan.score === null)
     return (
-      <Notice
-        title="Scan en cours."
-        body="Six moteurs sont interrogés en direct avec les questions de vos acheteurs. Cette page se met à jour toute seule."
-        mono={`${scan.brand} · ${scan.domain}`}
+      <LoadingScreen
+        scan={scan}
+        queries={queries}
+        meta={meta}
+        unstable={errorUpdateCount >= 10}
       />
     );
-  }
+
+  if (sawScoring.current && !held) return <section className="min-h-[60vh]" />;
 
   return (
     <>
@@ -70,20 +94,12 @@ function ScanPage() {
       <Breakdown scan={scan} />
       <ByEngine scan={scan} />
       <ShareOfVoice scan={scan} />
-      <VerbatimsSection scanId={scan.id} verbatims={selectVerbatims(scan)} />
+      <VerbatimsSection scanId={scan.id} verbatimCount={verbatimCount} />
     </>
   );
 }
 
-function Notice({
-  title,
-  body,
-  mono,
-}: {
-  title: string;
-  body?: string;
-  mono?: string;
-}) {
+function Notice({ title, body, mono }: { title: string; body?: string; mono?: string }) {
   return (
     <section>
       <div className="mx-auto max-w-5xl px-5 py-24 sm:px-8 sm:py-32">

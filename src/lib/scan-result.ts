@@ -31,6 +31,8 @@ export type ScanRecord = {
   brand: string;
   domain: string;
   status: string;
+  progress: number;
+  started_at: string | null;
   score: number | null;
   score_detail: {
     global?: {
@@ -44,14 +46,14 @@ export type ScanRecord = {
     byEngine?: Partial<Record<EngineKey, EngineDetail>>;
   } | null;
   share_of_voice: { share?: Record<string, number> } | null;
-  responses: ScanResponse[];
 };
 
-export type ScanResponse = {
-  engine?: string;
-  text?: string;
-  asked_at?: string;
-  mentions?: { brand?: string; is_recommended?: boolean }[];
+/** Ligne de réponse complète — accessible uniquement côté serveur. */
+export type ResponseRow = {
+  engine?: string | null;
+  text?: string | null;
+  created_at?: string | null;
+  mentions?: { brand?: string | null; is_recommended?: boolean | null }[] | null;
 };
 
 export type Verbatim = {
@@ -89,11 +91,14 @@ export function formatDate(iso: string | null) {
  * Un verbatim compromettant = une réponse où un concurrent est explicitement
  * recommandé alors que la marque cible n'est pas mentionnée dans la même réponse.
  */
-export function selectVerbatims(scan: ScanRecord, max = 5): Verbatim[] {
-  const brand = scan.brand.trim().toLowerCase();
-  const rows = Array.isArray(scan.responses) ? scan.responses : [];
+export function selectVerbatims(
+  brandName: string,
+  rows: ResponseRow[],
+  max = 5,
+): Verbatim[] {
+  const brand = brandName.trim().toLowerCase();
 
-  return rows
+  return (Array.isArray(rows) ? rows : [])
     .filter((response) => {
       if (!response?.text) return false;
       const mentions = response.mentions ?? [];
@@ -110,10 +115,10 @@ export function selectVerbatims(scan: ScanRecord, max = 5): Verbatim[] {
       engine: response.engine ?? "",
       engineLabel: ENGINE_LABEL[response.engine ?? ""] ?? (response.engine ?? ""),
       text: response.text as string,
-      askedAt: response.asked_at ?? null,
-      competitors: (response.mentions ?? [])
+      askedAt: response.created_at ?? null,
+      competitors: ((response.mentions ?? [])
         .filter((m) => m.is_recommended === true && m.brand)
-        .map((m) => m.brand as string),
+        .map((m) => m.brand) as string[]),
     }));
 }
 
