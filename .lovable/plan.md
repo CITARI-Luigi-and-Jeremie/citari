@@ -1,49 +1,78 @@
-# Faire tourner le scan pour de vrai + chargement vivant
+# Chargement vivant — prêt à brancher
 
-## Ce qui se passe aujourd'hui
+## Constat important
 
-Vérifié en base : les 4 derniers scans lancés sont tous restés à `generating_queries` avec 0 question et 0 réponse. Seul le scan de démonstration (`1111…`) contient des données, insérées à la main.
+Le fichier `src/lib/orchestrateur.server.ts` n'existe pas dans ce projet, et il n'y a
+aucune fonction `etatScan`. Le moteur que vous décrivez vit donc dans un autre projet
+ou n'a pas encore été importé ici. Rien n'est perdu : je prépare l'écran pour qu'il
+consomme exactement le contrat que vous décrivez, et le jour où le moteur arrive,
+il n'y a qu'à le déposer — aucun changement d'interface.
 
-Donc oui : **rien ne tourne**. Le formulaire crée bien une ligne en base, puis personne ne fait le travail. L'écran de chargement affiche fidèlement cet état vide — d'où l'écran figé de votre capture (pas de questions, pas de grille, pas de chrono).
-
-Il n'y a aucun moteur relié, aucune clé d'API, aucun code d'orchestration.
+Aujourd'hui l'app lit l'état via une fonction serveur équivalente (`readScanLive`)
+qui renvoie le scan, les questions et les métadonnées des réponses. Je garde ce
+point d'entrée unique et je l'aligne sur votre vocabulaire (`questions`,
+`collectees`, `total`, `progression`) pour que le branchement soit une substitution
+et pas une réécriture.
 
 ## Ce que je construis
 
-### 1. Le moteur du scan (le vrai travail)
+### 1. Un seul point d'entrée d'état
 
-Un pipeline en trois temps, exécuté côté serveur, qui écrit en base au fur et à mesure :
+Une fonction serveur unique renvoie l'état vivant : identité du scan, statut,
+questions réelles, cellules déjà collectées (question × moteur, avec latence),
+total attendu, progression. L'écran ne calcule rien d'inventé : il dessine ce qui
+est en base à l'instant du sondage. Quand votre moteur est branché, cette fonction
+délègue à lui et le reste ne bouge pas.
 
-1. **Génération des questions** — l'IA intégrée rédige 12 questions d'acheteur à partir du secteur, de la marque et du domaine. Écrites dans `queries`, statut → `running`.
-2. **Interrogation des moteurs** — chaque question est posée à chaque moteur disponible ; chaque réponse est enregistrée dans `responses` (texte + latence réelle) dès qu'elle arrive.
-3. **Analyse** — détection des marques citées, rang, recommandation, tonalité → `mentions`, puis calcul du score, de la ventilation et de la part de voix. Statut → `done`.
+### 2. Colonnes de moteurs déduites, pas codées
 
-**Registre de moteurs extensible** : je démarre avec les modèles réellement disponibles via l'IA intégrée. Un moteur sans clé n'est jamais affiché ni simulé — il apparaît automatiquement dès que sa clé est ajoutée (Perplexity, etc.). La grille de chargement s'adapte au nombre réel de moteurs actifs (plus de « 6 » codé en dur).
+Les colonnes de la grille sont déduites des moteurs réellement présents pour ce
+scan. 2, 4 ou 6 colonnes selon le mode, sans toucher au code.
 
-Durée cible : environ 3 minutes, calibrée par le nombre de questions × moteurs.
+En mode aperçu, les 4 moteurs absents apparaissent en plus, en colonnes verrouillées
+avec un cadenas : en-tête grisé, cellules barrées d'un filet, aucune donnée. C'est
+un levier de conversion assumé, pas un état d'erreur — le libellé le dit clairement.
 
-### 2. Le chargement devient vivant
+### 3. Les trois actes, réellement animés
 
-L'écran ne fait plus que lire : il **fait avancer** le scan. À chaque battement (~1,5 s) il demande au serveur d'accomplir le lot de travail suivant, puis affiche le résultat réel de ce lot. Conséquence directe : chaque case qui se remplit correspond à une réponse qui vient d'arriver. Rien n'est scripté.
+- **Génération des questions** — libellé mono + curseur clignotant, puis les vraies
+  questions tombent une à une en cascade au fur et à mesure qu'elles arrivent en base.
+  Une question déjà affichée ne re-anime jamais.
+- **Interrogation des moteurs** — la grille type carte perforée se remplit cellule
+  par cellule : chaque nouvelle réponse allume sa case avec une brève pulsation.
+  Compteur réel (`collectées / total`), chronomètre réel calculé depuis `started_at`,
+  ticker de latences qui défile sur les dernières réponses reçues.
+- **Analyse** — grille figée, filet balayeur, libellés de phase qui s'enchaînent,
+  puis fondu vers la vue résultat.
 
-Ce que le visiteur voit se succéder :
+### 4. Rien ne mouline dans le vide
 
-- **Étape 1** — les questions apparaissent une à une, en cascade, à mesure que l'IA les rédige. Les **trois premières en clair** (échantillon), les suivantes **floutées** jusqu'à la capture de l'email.
-- **Étape 2** — la grille type carte perforée se remplit case par case, avec compteur réel (`18/48`), chrono réel, ligne d'étape courante (« PERPLEXITY · Q07 · 2 340 MS ») et barre de progression fine.
-- **Étape 3** — grille figée, filet balayeur, labels d'analyse qui s'allument, puis bascule sur le résultat.
-- Au-delà de 2 min, rotation des trois points de méthode. En cas d'échec d'un moteur, le scan continue avec les autres ; seul un échec total passe en `error`.
+- Progression toujours ancrée sur une donnée : nombre de cellules réelles / total.
+- Si aucune donnée ne bouge pendant un moment, rotation des points de méthode
+  (questions scellées, API officielles, formule du score) au lieu d'un écran mort.
+- Statut d'erreur : message sec, relancer ou écrire à l'adresse du site.
+- Aucun compteur simulé, aucune barre scriptée côté client.
 
-Les animations sont renforcées : apparition en fondu/glissement des lignes, remplissage de case animé, transitions douces entre les trois actes, barre de progression fluide. Optimisé mobile (la grille passe en colonnes compactes sous 400 px, comme sur votre capture).
+### 5. Vérification
+
+Je pilote le parcours en navigateur sur les trois actes et je capture des vues,
+en simulant l'avancée uniquement par écritures en base (jamais côté client) — c'est
+la preuve que l'écran est bien une fonction de l'état serveur.
 
 ## Détails techniques
 
-- Un endpoint de travail `src/routes/api/public/scan-tick.ts` : chaque appel exécute une tranche courte de pipeline (une génération, ou N réponses) et rend la main. Idempotent, verrouillé par `scan_id` pour éviter le double travail si deux onglets sont ouverts. Ça évite les délais d'exécution du runtime serverless sur un scan de 3 minutes.
-- Le pipeline lui-même dans `src/lib/scan-engine.server.ts` (registre de moteurs, prompts, analyse) + `src/lib/scan-score.server.ts` (formule publiée : présence 50 %, rang 20 %, recommandation 20 %, tonalité 10 %).
-- Migration nécessaire : le texte des questions doit rester lisible en anonyme pour les 3 premières seulement → j'ajoute une vue `queries_public` qui n'expose le texte que pour `position <= 3`, le reste en `null`. La table `queries` perd son SELECT anonyme direct.
-- Le texte des réponses reste inaccessible en anonyme (inchangé) : seules les métadonnées via `responses_meta`.
-- Aucune donnée inventée : si un moteur ne répond pas, la case reste vide et le total baisse.
-- Le scan de démonstration est conservé pour les tests.
-
-## Hors périmètre
-
-Landing et vue résultat inchangées. Pas de tableau des 24 questions, pas de sources détaillées, pas de plan d'action.
+- `src/lib/scan-live.server.ts` : état vivant unique ; les moteurs sont dérivés par
+  `distinct(engine)` sur les métadonnées, plus la liste verrouillée en mode aperçu.
+  Le texte des réponses n'est jamais renvoyé — vues `scans_public` / `responses_meta`
+  uniquement, aucun SELECT anonyme sur `responses`.
+- `src/lib/scan-loading.ts` : dérivations pures (libellés, format chrono, latences,
+  clés de cellule, ensemble des moteurs, total attendu).
+- `src/components/scan-loading/LoadingScreen.tsx` : découpé en `QueryCascade`,
+  `EngineGrid`, `LatencyTicker`, `ScoringSweep`. Animations CSS uniquement
+  (opacité/translation), jamais de `setInterval` qui fabrique de la progression.
+- `src/routes/scan.$id.tsx` : sondage de l'état, transition vers le résultat.
+- Point ouvert, à trancher quand le moteur arrive : le mode (aperçu / complet /
+  contrôle interne) n'est aujourd'hui stocké nulle part sur `scans`. En attendant,
+  je le déduis du nombre de moteurs attendus ; si votre moteur écrit un champ de
+  mode, l'écran le lira en priorité.
+- Aucune modification du moteur, du back-office, de la landing ni de la vue résultat.
