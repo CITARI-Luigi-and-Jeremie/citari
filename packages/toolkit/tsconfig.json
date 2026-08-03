@@ -4,5 +4,8 @@
     "noEmit": true,
     "types": ["node"]
   },
-  "include": ["src", "tests"]
+  "include": ["src", "tests"],
+  // Le pilote s'exécute dans apps/citari, avec le tsconfig du site : il n'est
+  // pas typé ici, sinon l'alias « @/ » serait introuvable.
+  "exclude": ["src/lib/pilote-scan.mts"]
 }

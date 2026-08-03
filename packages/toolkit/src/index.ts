@@ -31,6 +31,7 @@ import { indexnow } from "./commands/indexnow.js";
 import { verifyCitations } from "./commands/verify-citations.js";
 import { verifyContents } from "./commands/verify-contents.js";
 import { controle45 } from "./commands/controle-45.js";
+import { scanLot } from "./commands/scan-lot.js";
 
 const program = new Command()
   .name("toolkit")
@@ -81,6 +82,24 @@ program
   .argument("<client>", "nom ou id du client")
   .description("Chantier 3 — cibles de citation priorisées + brouillons de pitchs presse")
   .action((client: string) => run(citationTargets(client)));
+
+program
+  .command("scan-lot")
+  .argument("<fichier>", "liste « Nom, site.fr » — une entreprise par ligne")
+  .requiredOption("-s, --secteur <secteur>", "secteur commun (ex. « Expertise comptable »)")
+  .option("-v, --ville <ville>", "ville ou zone")
+  .option("-m, --mode <mode>", "apercu (0,14 €) ou complet (1,06 €)", "apercu")
+  .option("-p, --parallele <n>", "scans menés de front (max 5)", "3")
+  .option("--sans-pipeline", "ne pas créer les prospects dans la base")
+  .description("Acquisition — scanne une liste d'entreprises et produit le classement du baromètre")
+  .action((fichier: string, o: Record<string, string | boolean>) =>
+    run(scanLot(fichier, {
+      secteur: String(o.secteur),
+      ville: o.ville ? String(o.ville) : undefined,
+      mode: o.mode === "complet" ? "complet" : "apercu",
+      parallele: Number(o.parallele) || 3,
+      pipeline: !o.sansPipeline,
+    })));
 
 program
   .command("controle-45")

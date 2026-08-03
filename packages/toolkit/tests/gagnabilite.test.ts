@@ -58,3 +58,21 @@ describe("preuves", () => {
     expect(analyserContenu("<p>rien</p>").jsonLd).toBe(false);
   });
 });
+
+import { parseListe } from "../src/commands/scan-lot";
+
+describe("liste d'entreprises du baromètre", () => {
+  it("lit nom et site, tolère les séparateurs et les commentaires", () => {
+    const l = parseListe("# Cabinets lyonnais\nDougs, dougs.fr\nPennylane;pennylane.com\n\nIn Extenso\t in-extenso.com\n");
+    expect(l).toHaveLength(3);
+    expect(l[0]).toEqual({ nom: "Dougs", site: "dougs.fr" });
+    expect(l[2]!.nom).toBe("In Extenso");
+  });
+  it("accepte une entreprise sans site", () => {
+    const l = parseListe("Cabinet Vaurel\n");
+    expect(l[0]).toEqual({ nom: "Cabinet Vaurel", site: null });
+  });
+  it("ignore les lignes vides et les entrées sans nom", () => {
+    expect(parseListe("\n\n  \n, site.fr\n")).toHaveLength(0);
+  });
+});
