@@ -5,6 +5,59 @@ d'une nouvelle session, après `CLAUDE.md`.
 
 ---
 
+## 2026-08-03 — Premier scan réel : la machine tient debout
+
+Scan complet sur Citari, 6 moteurs, 24 questions : **144/144 réponses, zéro
+erreur**, 1,06 € (contre 1,70 € estimé), 9 min 15. Toute la chaîne validée en
+conditions réelles : génération des questions, interrogation, analyse,
+scoring, part de voix, actions, question miroir, journal des coûts.
+
+**739 sources collectées** (Perplexity 453, Gemini 125, Claude 90, ChatGPT 71).
+C'était le risque principal — sans sources, le chantier citations est vide.
+Levé.
+
+**Score de Citari : 0/100, et c'est réel, pas un artefact.** Vérifié : 532
+marques distinctes extraites (HubSpot, Comète, 1min30, Publicis Lyon…), aucune
+ressemblant à « Citari », et citari.fr ne résout même pas en DNS. C'est
+exactement la distinction que le bug `is_target` empêchait de faire avant.
+
+### Base migrée sur un projet Supabase propre
+
+`ebcuhuhslrrsjouchiga`, région Paris (eu-west-3), possédée par Luigi. 15
+tables, 53 annuaires, RLS actif partout sans policy. Lovable garde sa propre
+base et devient un bac à sable de design. Deux colonnes rendues nullables au
+passage (`deliverables.sprint_id`, `citation_targets.sprint_id`) : en NOT NULL
+comme chez Lovable, le toolkit aurait planté au premier audit précédant la
+vente d'un sprint.
+
+### Passerelle Lovable supprimée
+
+Les six moteurs sont appelés directement. Motif principal : la passerelle
+interdisait la recherche web, donc ChatGPT et Gemini répondaient de mémoire
+alors que les vrais produits cherchent et citent leurs sources.
+
+Trois pièges rencontrés, tous résolus :
+- **Gemini** renvoyait 150 caractères et zéro source : `finishReason=MAX_TOKENS`.
+  Les modèles récents consomment le budget en « réflexion » avant d'écrire.
+  Porté à 4096 tokens → 1150 caractères et 125 sources sur le scan.
+- **Grok** a perdu la recherche web : xAI a supprimé `live_search` (HTTP 410).
+  Il répond de mémoire comme Le Chat. Les moteurs à recherche sont donc
+  ChatGPT, Gemini, Claude, Perplexity — quatre au lieu de trois.
+- **`gemini-2.5-flash`** est refusé aux nouveaux comptes. Modèles retenus :
+  `gpt-5.6-terra`, `gemini-3.6-flash`, `gemini-3.1-flash-lite`.
+
+### Statuts alignés sur la base
+
+`nouveau`/`contacte`/`rdv_pris`/`client`/`perdu`, `a_contacter` pour les
+citations, `en_cours`/`rescan_fait` pour les sprints. Ce sont des textes
+libres : rien n'aurait planté, les filtres de l'admin n'auraient simplement
+rien trouvé. Panne silencieuse, la pire espèce.
+
+### Ce qui reste avant un prospect
+
+L'interface du tunnel (verrous + Calendly) par Jérémie, le juridique, et le
+Calendly lui-même. Le produit, lui, fonctionne.
+
 ## 2026-08-02 (soir) — La machine des 90 jours est complète
 
 Tout ce qui était « à construire » dans LIVRAISON.md est codé, testé et poussé :
