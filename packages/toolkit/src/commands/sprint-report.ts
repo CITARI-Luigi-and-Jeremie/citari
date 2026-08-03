@@ -33,11 +33,12 @@ export async function sprintReport(clientRef: string): Promise<void> {
     ? (unwrap(await db.from("sprint_tasks").select("*").eq("sprint_id", sprint.id).order("position")) as any[])
     : [];
   const deliverables = unwrap(await db.from("deliverables").select("*").eq("client_id", client.id).order("created_at")) as any[];
-  // citation_targets est rattachée au sprint, pas au client (schéma du front).
-  const sprintIds = sprints.map((s) => s.id);
-  const citations = sprintIds.length
-    ? (unwrap(await db.from("citation_targets").select("*").in("sprint_id", sprintIds)) as any[])
-    : [];
+  // Rattachement par client : les cibles produites avant la vente d'un sprint
+  // n'ont pas de sprint_id, et une requête par sprint les rendait invisibles.
+  // Le rapport annonçait alors 0 citation alors que le travail était fait.
+  const citations = unwrap(
+    await db.from("citation_targets").select("*").eq("client_id", client.id)
+  ) as any[];
 
   // Les preuves : passages réels des robots IA et vérifications en ligne.
   const crawlerHits = unwrap(

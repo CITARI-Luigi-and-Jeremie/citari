@@ -5,6 +5,9 @@ export const dynamic = "force-dynamic";
 
 // Vocabulaire de la base : leads.status a pour défaut « nouveau ».
 const STATUS_LABELS: Record<string, string> = {
+  // Démarché par nous via le baromètre, sans email réel : à ne jamais relancer
+  // tant que le vrai contact n'a pas été trouvé.
+  prospect: "À qualifier",
   nouveau: "Nouveau",
   contacte: "Contacté",
   rdv_pris: "RDV réservé",

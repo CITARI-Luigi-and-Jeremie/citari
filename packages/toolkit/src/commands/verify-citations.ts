@@ -51,13 +51,11 @@ export async function verifyCitations(clientRef: string): Promise<void> {
   const slug = slugify(client.brand);
   const db = getDb();
 
-  const sprints = unwrap(await db.from("sprints").select("id").eq("client_id", client.id)) as { id: string }[];
-  if (sprints.length === 0) throw new Error(`${client.brand} n'a aucun sprint. Lancez d'abord citation-targets.`);
+  // On interroge par client et non par sprint : les cibles produites lors d'un
+  // audit de pré-vente n'ont pas encore de sprint, et exiger un sprint rendait
+  // la vérification impossible précisément quand elle sert à convaincre.
   const cibles = unwrap(
-    await db
-      .from("citation_targets")
-      .select("id, name, url, status")
-      .in("sprint_id", sprints.map((s) => s.id))
+    await db.from("citation_targets").select("id, name, url, status").eq("client_id", client.id)
   ) as { id: string; name: string; url: string | null; status: string | null }[];
 
   if (cibles.length === 0) throw new Error("Aucune cible de citation en base. Lancez d'abord citation-targets.");

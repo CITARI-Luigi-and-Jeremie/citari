@@ -123,6 +123,9 @@ Format : {"targets": [{...}]}`,
       await db
         .from("citation_targets")
         .insert({
+          // Le client d'abord : sprint_id reste vide sur un audit de
+          // pré-vente, et une cible sans client serait irrécupérable.
+          client_id: client.id,
           sprint_id: sprintId,
           name: t.source,
           url: t.url,

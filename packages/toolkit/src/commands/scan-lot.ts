@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import { getDb, unwrap } from "@geo/core";
 import { slugify, writeDeliverableFile } from "../lib/context.js";
+import { executerPilote } from "../lib/pilote.js";
 import { EMAIL_A_TROUVER, STATUT_PROSPECT } from "../lib/prospect.js";
 
 /**
@@ -66,16 +67,13 @@ export async function scanLot(fichier: string, opts: Options): Promise<void> {
     erreur?: string;
   };
 
-  const resultats = await piloterScans(cibles, {
-    secteur: opts.secteur,
-    ville: opts.ville ?? null,
-    mode,
-    parallele,
-    onResultat: (r: Resultat) => {
+  const resultats: Resultat[] = await executerPilote(
+    { cibles, secteur: opts.secteur, ville: opts.ville ?? null, mode, parallele },
+    (r: Resultat) => {
       const etiquette = r.erreur ? `✗ ${r.erreur.slice(0, 40)}` : `${String(r.score).padStart(3)}/100`;
       console.log(`  ${String(++faits).padStart(3)}/${cibles.length}  ${etiquette}  ${r.nom}`);
-    },
-  });
+    }
+  );
 
   // Du pire au meilleur : les plus mal classés sont les meilleurs prospects.
   const classes = resultats
@@ -147,65 +145,3 @@ rang 20 %, recommandation explicite 20 %, tonalité 10 %.*
   console.log(`→ ${chemin}`);
 }
 
-/** Le moteur vit dans apps/citari : import par chemin, hors du workspace pnpm. */
-async function chargerOrchestrateur(): Promise<{
-  creerScan: (i: Record<string, unknown>) => Promise<{ id: string }>;
-  avancerScan: (id: string) => Promise<void>;
-  etatScan: (id: string) => Promise<{ status: string } | null>;
-  teaserScan: (id: string) => Promise<any>;
-}> {
-  const { pathToFileURL } = await import("node:url");
-  const { join, dirname } = await import("node:path");
-  const { fileURLToPath } = await import("node:url");
-  const racine = join(dirname(fileURLToPath(import.meta.url)), "../../../..");
-  const chemin = join(racine, "apps/citari/src/lib/orchestrateur.server.ts");
-  return (await import(pathToFileURL(chemin).href)) as any;
-}
-
-/**
- * Lance le pilote dans apps/citari : c'est le seul dossier où l'alias « @/ »
- * du moteur se résout. Le toolkit orchestre, le site mesure, la frontière
- * reste nette.
- */
-async function piloterScans(
-  cibles: Cible[],
-  o: {
-    secteur: string;
-    ville: string | null;
-    mode: "apercu" | "complet";
-    parallele: number;
-    onResultat: (r: any) => void;
-  }
-): Promise<any[]> {
-  const { spawn } = await import("node:child_process");
-  const { join, dirname } = await import("node:path");
-  const { fileURLToPath } = await import("node:url");
-  const racine = join(dirname(fileURLToPath(import.meta.url)), "../../../..");
-  const pilote = join(racine, "packages/toolkit/src/lib/pilote-scan.mts");
-  const site = join(racine, "apps/citari");
-
-  return new Promise((resolve, reject) => {
-    const payload = JSON.stringify({ cibles, secteur: o.secteur, ville: o.ville, mode: o.mode, parallele: o.parallele });
-    const proc = spawn("npx", ["-y", "tsx", pilote, payload], { cwd: site, env: process.env });
-    const out: any[] = [];
-    let reste = "";
-    let erreurs = "";
-    proc.stdout.on("data", (chunk) => {
-      reste += chunk.toString();
-      const lignes = reste.split("\n");
-      reste = lignes.pop() ?? "";
-      for (const l of lignes) {
-        if (!l.startsWith("RESULT ")) continue;
-        const r = JSON.parse(l.slice(7));
-        out.push(r);
-        o.onResultat(r);
-      }
-    });
-    proc.stderr.on("data", (c) => (erreurs += c.toString()));
-    proc.on("close", (code) =>
-      code === 0 || out.length > 0
-        ? resolve(out)
-        : reject(new Error(`Le pilote a échoué (code ${code}) : ${erreurs.slice(0, 400)}`))
-    );
-  });
-}
