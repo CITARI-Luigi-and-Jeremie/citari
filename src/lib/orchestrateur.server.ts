@@ -13,7 +13,21 @@ export const PLAFOND_SCANS_PAR_IP = 3;
 // Mesurés sur le premier scan réel : 1,06 € pour 24 questions × 6 moteurs.
 // Contrôle J+45 = 4 moteurs à recherche ≈ 0,84 €, d'où un plafond à 1,5 €.
 export const PLAFONDS_EUR: Record<ModeScan, number> = { apercu: 0.25, complet: 3, controle: 1.5 };
-const LOT = 8; // paires (question × moteur) traitées à chaque appel
+/**
+ * Paires (question × moteur) traitées à chaque sondage du navigateur.
+ *
+ * L'aperçu est public et sa promesse est « 90 secondes » : mesuré à 2 min 17
+ * avec des lots de 8 (5 tours), il descend à ~1 min avec des lots de 20
+ * (2 tours). Les appels d'un lot partent en parallèle, donc un lot plus large
+ * ne coûte pas plus cher, il attend simplement le plus lent.
+ *
+ * Le mode complet garde des lots de 8 : il tourne hors de la présence du
+ * prospect, et 6 moteurs dont certains à 18 s de latence supportent mal
+ * d'être lancés par paquets de 20.
+ */
+function lotDuMode(mode: ModeScan): number {
+  return mode === "apercu" ? 20 : 8;
+}
 const CACHE_JOURS = 30;
 
 function moteursDuMode(mode: ModeScan): readonly Moteur[] {
@@ -321,6 +335,7 @@ export async function avancerScan(id: string) {
       .eq("scan_id", id);
 
     const moteurs = moteursDuMode((scan.mode as ModeScan) ?? "complet");
+    const lot = lotDuMode((scan.mode as ModeScan) ?? "complet");
     const deja = new Set((faites ?? []).map((r) => `${r.query_id}|${r.engine}`));
     const restant: { queryId: string; text: string; engine: string }[] = [];
     for (const q of questions ?? []) {
@@ -345,7 +360,7 @@ export async function avancerScan(id: string) {
     }
 
     await Promise.all(
-      restant.slice(0, LOT).map(async (item) => {
+      restant.slice(0, lot).map(async (item) => {
         const rep = await interroger(item.engine as Moteur, item.text, scan.language, {
           recherche: scan.mode !== "apercu",
         });
@@ -395,7 +410,7 @@ export async function avancerScan(id: string) {
       }),
     );
 
-    if (restant.length <= LOT) await finaliser(id);
+    if (restant.length <= lot) await finaliser(id);
   } catch (e) {
     await supabaseAdmin
       .from("scans")
