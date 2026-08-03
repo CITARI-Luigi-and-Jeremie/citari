@@ -5,6 +5,9 @@
 // À remplacer par l'URL Cal.com.
 export const CALENDAR_URL = "#";
 
+// URL de réservation utilisée par la vue résultat (embed Cal.com).
+export const BOOKING_URL = "https://cal.com/citari/diagnostic-30min";
+
 export const CONTACT_EMAIL = "contact@citari.fr";
 
 // Score public de Citari. Si SELF_SCORE est null, le bloc score est masqué.
