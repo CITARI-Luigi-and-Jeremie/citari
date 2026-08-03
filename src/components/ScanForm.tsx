@@ -167,7 +167,7 @@ export function ScanForm() {
                             selected ? "opacity-100 text-signal" : "opacity-0"
                           }`}
                         >
-                          ✕
+                          ■
                         </span>
                       </button>
                     );
