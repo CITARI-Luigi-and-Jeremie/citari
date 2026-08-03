@@ -163,8 +163,9 @@ export function VerbatimsSection({
                   className="w-full max-w-xl border border-ink bg-paper p-6 sm:p-8"
                 >
                   <p className="measure text-[20px] sm:text-[24px]">
-                    {verbatims.length} phrase{verbatims.length > 1 ? "s" : ""} où une IA
+                    {verbatimCount} phrase{verbatimCount > 1 ? "s" : ""} où une IA
                     recommande un concurrent à votre place. Votre email pour les lire.
+
                   </p>
                   <div className="mt-6 flex flex-col gap-2 sm:flex-row">
                     <label htmlFor="unlock-email" className="sr-only">
