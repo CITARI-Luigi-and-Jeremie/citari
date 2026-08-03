@@ -444,34 +444,10 @@ async function genererActions(
   score: number,
   pdv: { name: string; share: number }[],
 ): Promise<Action[]> {
-  const key = process.env.LOVABLE_API_KEY;
-  if (!key) return [];
+  if (!process.env.GOOGLE_AI_API_KEY) return [];
   try {
-    const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "Lovable-API-Key": key },
-      body: JSON.stringify({
-        model: "google/gemini-3.6-flash",
-        messages: [
-          {
-            role: "system",
-            content:
-              'Renvoie UNIQUEMENT du JSON : {"actions":[{"chantier":"Contenu|Citations|Technique","titre":"","pourquoi":"","effort":"faible|moyen|fort"}]}. Exactement 10 actions, classées de la plus prioritaire à la moins prioritaire, concrètes et exécutables en 30 jours.',
-          },
-          {
-            role: "user",
-            content: `Marque : ${marque}. Secteur : ${secteur}. Score de visibilité IA : ${score}/100. Concurrents dominants : ${pdv
-              .slice(0, 4)
-              .map((p) => p.name)
-              .join(", ")}.`,
-          },
-        ],
-      }),
-    });
-    const json = (await res.json()) as { choices: { message: { content: string } }[] };
-    const raw = json.choices[0]?.message?.content ?? "";
-    const m = raw.match(/\{[\s\S]*\}/);
-    return (JSON.parse(m ? m[0] : '{"actions":[]}') as { actions: Action[] }).actions ?? [];
+    const { genererActionsIA } = await import("@/lib/moteurs.server");
+    return await genererActionsIA(marque, secteur, score, pdv);
   } catch {
     return [];
   }
