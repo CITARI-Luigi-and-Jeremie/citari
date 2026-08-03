@@ -2,6 +2,18 @@
 // Aucun scraping des interfaces grand public.
 import type { Moteur } from "@/lib/typo";
 
+// Vite ne peuple que import.meta.env ; le code serveur lit process.env. Sans
+// ce chargement, aucune clé ne serait visible en développement local. En
+// production les variables viennent de l'hébergeur, et l'appel échoue sans
+// conséquence.
+if (typeof process !== "undefined" && !process.env.OPENAI_API_KEY) {
+  try {
+    process.loadEnvFile(new URL("../../.env.local", import.meta.url).pathname);
+  } catch {
+    /* pas de .env.local : variables déjà fournies par l'hébergeur */
+  }
+}
+
 export type ReponseMoteur = {
   text: string;
   sources: { title?: string; url: string }[];
@@ -31,7 +43,12 @@ async function gemini_(model: string, systeme: string, user: string, opts: { rec
       body: JSON.stringify({
         systemInstruction: { parts: [{ text: systeme }] },
         contents: [{ role: "user", parts: [{ text: user }] }],
-        generationConfig: { maxOutputTokens: opts.maxTokens ?? 1024 },
+        // 4096 par défaut, et ce n'est pas du confort : les modèles Gemini
+        // récents consomment une partie du budget en « réflexion » AVANT
+        // d'écrire. À 1024, la réponse était coupée à 150 caractères avec
+        // finishReason=MAX_TOKENS et zéro source. À 4096 : 1150 caractères
+        // et 5 sources.
+        generationConfig: { maxOutputTokens: opts.maxTokens ?? 4096 },
         ...(opts.recherche ? { tools: [{ google_search: {} }] } : {}),
       }),
     },
@@ -175,19 +192,21 @@ async function perplexity(q: string, langue: string): Promise<ReponseMoteur> {
   };
 }
 
-/** Grok — API xAI officielle (format OpenAI). `recherche` active la live search. */
-async function grok(q: string, langue: string, recherche: boolean): Promise<ReponseMoteur> {
+/**
+ * Grok — API xAI officielle (format OpenAI).
+ *
+ * Sans recherche web : xAI a supprimé `live_search` (HTTP 410) au profit d'une
+ * « Agent Tools API » au format différent. Grok répond donc de mémoire, comme
+ * Le Chat. À rebrancher si l'on veut ses sources : docs.x.ai/docs/guides/tools
+ */
+async function grok(q: string, langue: string): Promise<ReponseMoteur> {
   const t = Date.now();
   const key = process.env.XAI_API_KEY;
   if (!key) return manquant("Clé API xAI non configurée");
   const res = await fetch("https://api.x.ai/v1/chat/completions", {
     method: "POST",
     headers: { "content-type": "application/json", authorization: `Bearer ${key}` },
-    body: JSON.stringify({
-      model: "grok-4",
-      messages: prompt(q, langue),
-      ...(recherche ? { search_parameters: { mode: "auto", return_citations: true } } : {}),
-    }),
+    body: JSON.stringify({ model: process.env.XAI_MODEL || "grok-4", messages: prompt(q, langue) }),
   });
   if (!res.ok) return manquant(`xAI [${res.status}]`);
   const json = (await res.json()) as {
@@ -198,7 +217,7 @@ async function grok(q: string, langue: string, recherche: boolean): Promise<Repo
     text: json.choices[0]?.message?.content ?? "",
     sources: (json.citations ?? []).map((url) => ({ url })),
     latency: Date.now() - t,
-    cost: recherche ? 0.01 : 0.005,
+    cost: 0.005,
   };
 }
 
@@ -237,7 +256,7 @@ export async function interroger(
     if (moteur === "ChatGPT") return await chatgpt(question, langue, recherche);
     if (moteur === "Claude") return await claude(question, langue, recherche);
     if (moteur === "Gemini") return await gemini(question, langue, recherche);
-    if (moteur === "Grok") return await grok(question, langue, recherche);
+    if (moteur === "Grok") return await grok(question, langue);
     if (moteur === "Le Chat") return await lechat(question, langue);
     return await perplexity(question, langue);
   } catch (e) {
