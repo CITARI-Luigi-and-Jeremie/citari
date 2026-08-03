@@ -3,7 +3,18 @@
  * Usine de livraison Citari — CLI interne du fondateur.
  * Usage : pnpm toolkit <commande> [args]
  */
+import { fileURLToPath } from "node:url";
+import { join, dirname } from "node:path";
 import { Command } from "commander";
+
+// Charge le .env de la racine du dépôt dans process.env (Node 20.12+).
+// Sans ça, aucune commande ne verrait la clé Claude ni les accès Supabase :
+// requireEnv lèverait « variable d'environnement manquante » dès le départ.
+try {
+  process.loadEnvFile(join(dirname(fileURLToPath(import.meta.url)), "../../../.env"));
+} catch {
+  /* pas de .env : les variables sont peut-être déjà exportées dans le shell */
+}
 import { auditTechnique } from "./commands/audit-technique.js";
 import { generateFixes } from "./commands/generate-fixes.js";
 import { contentBrief } from "./commands/content-brief.js";

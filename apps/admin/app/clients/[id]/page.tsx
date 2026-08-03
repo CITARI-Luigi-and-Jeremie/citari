@@ -14,7 +14,7 @@ export const dynamic = "force-dynamic";
 
 /** Statuts canoniques des cibles de citation (les mêmes que le toolkit). */
 const CITATION_STATUSES: Record<string, string> = {
-  a_faire: "À contacter",
+  a_contacter: "À contacter",
   envoyee: "Envoyé",
   relancee: "Relancé",
   obtenue: "Obtenu",

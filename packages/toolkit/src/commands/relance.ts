@@ -110,11 +110,11 @@ export async function relance(leadRef: string, opts: { all?: boolean } = {}): Pr
   const db = getDb();
 
   const leads = opts.all
-    ? ((unwrap(await db.from("leads").select("*").eq("status", "new")) as any[]))
+    ? ((unwrap(await db.from("leads").select("*").eq("status", "nouveau")) as any[]))
     : await resolveLeads(leadRef);
 
   if (leads.length === 0) {
-    console.log("Aucun lead à relancer (statut « new » requis).");
+    console.log("Aucun lead à relancer (statut « nouveau » requis).");
     return;
   }
 

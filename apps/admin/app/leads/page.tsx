@@ -3,12 +3,13 @@ import { markFollowUpSent } from "@/app/actions";
 
 export const dynamic = "force-dynamic";
 
+// Vocabulaire de la base : leads.status a pour défaut « nouveau ».
 const STATUS_LABELS: Record<string, string> = {
-  new: "Nouveau",
-  contacted: "Contacté",
-  call_booked: "RDV réservé",
+  nouveau: "Nouveau",
+  contacte: "Contacté",
+  rdv_pris: "RDV réservé",
   client: "Client",
-  lost: "Perdu",
+  perdu: "Perdu",
 };
 
 /**
@@ -16,7 +17,7 @@ const STATUS_LABELS: Record<string, string> = {
  * premier. Un lead récent prime sur un ancien.
  */
 function priority(lead: any, scan: any): { level: "chaud" | "tiède" | "froid" | "traité"; reason: string } {
-  if (["client", "call_booked", "lost"].includes(lead.status)) {
+  if (["client", "rdv_pris", "perdu"].includes(lead.status)) {
     return { level: "traité", reason: STATUS_LABELS[lead.status] ?? lead.status };
   }
   const ageDays = (Date.now() - new Date(lead.created_at).getTime()) / 86400_000;

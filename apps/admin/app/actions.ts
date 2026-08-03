@@ -50,7 +50,7 @@ export async function convertLeadToClient(leadId: string) {
         started_on: plusDays(0),
         ends_on: plusDays(30),
         rescan_due_on: plusDays(90),
-        status: "cadrage",
+        status: "en_cours",
       })
       .select("id")
       .single()
@@ -111,7 +111,7 @@ export async function scheduleRescan(clientId: string, formData: FormData) {
   if (sprint) {
     await db.from("sprints").update({ rescan_due_on: date, rescan_reminder_sent: false }).eq("id", sprint.id);
   } else {
-    await db.from("sprints").insert({ client_id: clientId, rescan_due_on: date, status: "cadrage" });
+    await db.from("sprints").insert({ client_id: clientId, rescan_due_on: date, status: "en_cours" });
   }
   revalidatePath(`/clients/${clientId}`);
 }
@@ -170,7 +170,7 @@ export async function launchRescan(clientId: string) {
     .order("started_on", { ascending: false })
     .limit(1)
     .maybeSingle();
-  if (sprint) await db.from("sprints").update({ rescan_scan_id: rescan.id, status: "re-scan fait" }).eq("id", sprint.id);
+  if (sprint) await db.from("sprints").update({ rescan_scan_id: rescan.id, status: "rescan_fait" }).eq("id", sprint.id);
 
   revalidatePath(`/clients/${clientId}`);
 }
@@ -180,7 +180,7 @@ export async function markFollowUpSent(followUpId: string, leadId: string) {
   const db = getDb();
   await db.from("follow_ups").update({ sent_at: new Date().toISOString() }).eq("id", followUpId);
   const { data: lead } = await db.from("leads").select("status").eq("id", leadId).maybeSingle();
-  if (!lead?.status || lead.status === "new") await db.from("leads").update({ status: "contacted" }).eq("id", leadId);
+  if (!lead?.status || lead.status === "nouveau") await db.from("leads").update({ status: "contacte" }).eq("id", leadId);
   revalidatePath("/leads");
   revalidatePath(`/leads/${leadId}`);
 }
@@ -190,7 +190,7 @@ export async function stopFollowUps(leadId: string, reason: "replied" | "skipped
   const db = getDb();
   await db.from("follow_ups").update({ cancelled: true }).eq("lead_id", leadId).is("sent_at", null);
   if (reason === "replied") {
-    await db.from("leads").update({ status: "call_booked" }).eq("id", leadId);
+    await db.from("leads").update({ status: "rdv_pris" }).eq("id", leadId);
   }
   revalidatePath("/leads");
   revalidatePath(`/leads/${leadId}`);

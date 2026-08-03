@@ -111,7 +111,7 @@ Format : {"targets": [{...}]}`,
           sprint_id: sprintId,
           name: t.source,
           url: t.url,
-          status: "a_faire",
+          status: "a_contacter",
           notes: [`[${t.type} · ${t.difficulty}]`, t.reason, `→ ${t.action}`].filter(Boolean).join("\n"),
         })
         .select("id")

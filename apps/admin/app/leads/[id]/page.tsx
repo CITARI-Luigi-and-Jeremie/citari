@@ -4,7 +4,7 @@ import { convertLeadToClient, markFollowUpSent, saveLeadNotes, stopFollowUps, up
 
 export const dynamic = "force-dynamic";
 
-const STATUSES = ["new", "contacted", "call_booked", "client", "lost"];
+const STATUSES = ["nouveau", "contacte", "rdv_pris", "client", "perdu"];
 
 /** Statut dérivé d'une relance : il n'y a pas de colonne status en base. */
 function statutRelance(f: any): "envoyée" | "annulée" | "à envoyer" {
