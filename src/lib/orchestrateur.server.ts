@@ -458,6 +458,28 @@ export async function avancerScan(id: string) {
   }
 }
 
+/**
+ * Score d'un scan recalculé sur un sous-ensemble de moteurs.
+ *
+ * Un score global n'est comparable qu'à un score établi sur les mêmes moteurs.
+ * Le diagnostic complet en interroge six, le contrôle J+45 seulement les quatre
+ * qui lisent le web : opposer les deux notes telles quelles produit un écart
+ * artéfactuel, du genre qu'on annoncerait à un client comme une progression
+ * alors que rien n'a bougé. On repasse donc par `calculerScore`, la seule
+ * implémentation du score, en ne lui donnant que les moteurs voulus.
+ */
+export async function scoreSurMoteurs(scanId: string, moteurs: readonly string[]): Promise<number | null> {
+  const [{ data: reponses }, { data: mentions }] = await Promise.all([
+    supabaseAdmin.from("responses").select("id, engine").eq("scan_id", scanId),
+    supabaseAdmin.from("mentions").select("*").eq("scan_id", scanId),
+  ]);
+  const garder = new Set(moteurs);
+  const r = (reponses ?? []).filter((x) => garder.has(x.engine));
+  if (r.length === 0) return null;
+  const m = ((mentions ?? []) as unknown as LigneMention[]).filter((x) => garder.has(x.engine));
+  return calculerScore(r, m).global;
+}
+
 async function finaliser(id: string) {
   await supabaseAdmin.from("scans").update({ phase: "analyse" }).eq("id", id);
   const [{ data: reponses }, { data: mentions }, { data: scan }] = await Promise.all([
