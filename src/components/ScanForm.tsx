@@ -209,6 +209,111 @@ export function ScanForm() {
   );
 }
 
+function SectorSelect({
+  value,
+  onChange,
+}: {
+  value: string;
+  onChange: (value: string) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const [closing, setClosing] = useState(false);
+  const wrap = useRef<HTMLDivElement>(null);
+
+  const dismiss = () => {
+    if (!open) return;
+    setClosing(true);
+    window.setTimeout(() => {
+      setOpen(false);
+      setClosing(false);
+    }, 150);
+  };
+
+  useEffect(() => {
+    if (!open) return;
+    const onDown = (e: MouseEvent) => {
+      if (!wrap.current?.contains(e.target as Node)) dismiss();
+    };
+    document.addEventListener("mousedown", onDown);
+    return () => document.removeEventListener("mousedown", onDown);
+  }, [open]);
+
+  const index = SECTORS.indexOf(value);
+
+  return (
+    <div ref={wrap} className="relative">
+      <span className="mono block text-[13px] text-ink-2">Secteur</span>
+      <button
+        type="button"
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        onClick={() => (open ? dismiss() : setOpen(true))}
+        onKeyDown={(e) => {
+          if (e.key === "Escape" && open) {
+            e.stopPropagation();
+            dismiss();
+          }
+        }}
+        className={`option-row mt-1.5 ${open ? "option-row-on" : ""}`}
+      >
+        <span className={`mono text-[13px] ${open ? "text-signal" : "text-ink-2"}`}>
+          {index >= 0 ? String(index + 1).padStart(2, "0") : "--"}
+        </span>
+        <span className="flex-1">{value || "Choisir un secteur"}</span>
+        <span
+          aria-hidden
+          className="mono text-[13px] text-ink-2 transition-transform duration-200 ease-out"
+          style={{ transform: open ? "rotate(180deg)" : "rotate(0deg)" }}
+        >
+          ↓
+        </span>
+      </button>
+
+      {open ? (
+        <div
+          role="listbox"
+          aria-label="Secteur d'activité"
+          className={`absolute left-0 right-0 top-full z-10 mt-1 max-h-[46vh] overflow-y-auto border border-ink bg-paper p-1 ${
+            closing ? "anim-menu-out" : "anim-menu-in"
+          }`}
+        >
+          {SECTORS.map((s, i) => {
+            const selected = s === value;
+            return (
+              <button
+                key={s}
+                type="button"
+                role="option"
+                aria-selected={selected}
+                onClick={() => {
+                  onChange(s);
+                  dismiss();
+                }}
+                className={`flex w-full items-baseline gap-3 border-0 px-3 py-2.5 text-left transition-colors duration-150 hover:bg-paper-2 ${
+                  selected ? "bg-paper-2 font-semibold" : ""
+                }`}
+              >
+                <span
+                  className={`mono text-[13px] ${selected ? "text-signal" : "text-ink-2"}`}
+                >
+                  {String(i + 1).padStart(2, "0")}
+                </span>
+                <span className="flex-1">{s}</span>
+                {selected ? (
+                  <span aria-hidden className="mono text-[13px] text-signal">
+                    ■
+                  </span>
+                ) : null}
+              </button>
+            );
+          })}
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+
 function Field({
   id,
   label,
