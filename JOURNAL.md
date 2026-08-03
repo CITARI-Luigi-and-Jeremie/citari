@@ -5,6 +5,97 @@ d'une nouvelle session, après `CLAUDE.md`.
 
 ---
 
+## 2026-08-03 (soir) — Toute la chaîne de livraison exécutée en réel
+
+Les quatre commandes pilotées par un modèle n'avaient jamais tourné contre la
+vraie API. Elles l'ont fait, sur un client de test rattaché au scan Dougs, et
+elles ont révélé des défauts qu'aucune relecture n'aurait trouvés.
+
+### Deux bugs qui auraient fait mentir un chiffre vendu
+
+**Le contrôle J+45 comparait 4 moteurs à 6.** Le diagnostic complet en
+interroge six, le contrôle seulement les quatre qui lisent le web, et on
+opposait les deux notes globales. Mesuré sur Dougs : la référence vaut 24/100
+sur six moteurs mais **28/100 sur les quatre du contrôle**. L'écart annoncé
+passait donc d'un faux **+2** à un vrai **-2** — l'inverse de la réalité, sur
+le chiffre qui décide si on réoriente l'effort à mi-parcours. La référence est
+maintenant re-notée via `scoreSurMoteurs`, sur les moteurs réellement
+interrogés, lus depuis les réponses du scan lui-même plutôt que recopiés dans
+une constante qui aurait divergé un jour.
+
+**Le re-scan J+90 acceptait un aperçu comme point de départ.** Le delta vendu
+au client aurait été un artefact de méthode. La commande refuse désormais de
+partir si la référence n'est pas un diagnostic complet.
+
+Conséquence opérationnelle, à ne pas oublier : **lancer le diagnostic complet
+au moment de la vente**. C'est lui le point de départ, jamais l'aperçu gratuit.
+
+### draft-content ne pouvait pas aboutir
+
+Trois causes empilées, chacune masquant la suivante. Le délai d'appel était
+fixé à 75 s pour tous les appels, valeur calibrée pour un moteur pendant un
+scan : une rédaction de 1500 mots n'y tient pas. Le prompt demandait ensuite
+l'article deux fois, en markdown puis en HTML, doublant la sortie pour zéro
+valeur et laissant les deux versions diverger ; le HTML est maintenant dérivé
+du markdown par `marked`. Enfin la réponse était coupée par la limite de
+tokens, avec un message d'erreur (« Unterminated string ») qui envoyait
+chercher un défaut de prompt là où il fallait simplement plus de tokens.
+
+### Autres corrections
+
+- **Cibles de citation orphelines** : `citation_targets` ne pointait que vers
+un sprint, or on en produit avant la vente. `verify-citations` refusait de
+tourner et `sprint-report` annonçait 0 citation alors que le travail était
+fait. Ajout de `client_id`.
+- **Enums stricts sur la sortie du modèle** : douze briefs bien rédigés
+partaient à la poubelle parce que Claude répondait « Client vs Concurrent » au
+lieu de `comparatif`. `enumSouple` rattache au plus proche ; le prompt reste
+strict.
+- **Reprise sur incident trop mince** : un essai à 2 s ne survit pas à une
+surcharge Anthropic. Trois reprises, doublement exponentiel, `retry-after`
+respecté.
+- **Gagnabilité saturée** : chaque question portait 7 à 18 marques
+concurrentes et le malus plafonnait dès 10, donc les meilleures questions
+ressortaient à 9, 5, 3 sur 100. L'encombrement se juge maintenant par rapport
+à la médiane du scan.
+- **`controle-45` et `rescan` attendaient un navigateur** : ils déroulent
+maintenant la collecte eux-mêmes via le pilote extrait dans `lib/pilote.ts`.
+- **L'admin tournait en mode démonstration**, mot de passe « demo » et données
+simulées, depuis des semaines. Les secrets sont lus depuis le `.env` racine.
+
+### Cache et quota, sur décision de Luigi
+
+Cache **3 jours** au lieu de 30 : le GEO bouge, surtout quand une entreprise
+vient de découvrir son score et commence à agir. Resservir un mois plus tard
+une mesure périmée ferait mentir le chiffre. Plafond à **2 scans neufs** par
+jour et par connexion, et il ne s'applique plus aux résultats déjà en cache,
+qui ne coûtent aucun appel.
+
+### L'email devient un champ du scan
+
+Décision produit : on récolte les adresses pour faire de l'emailing. Le lead
+est créé au lancement, consentement horodaté. Deux effets à connaître : le
+verrou sur le verbatim ne sert plus à rien puisqu'un lead existe toujours (le
+seul palier restant est le diagnostic complet derrière un rendez-vous), et la
+priorité commerciale doit être posée par `finaliser()` et non à la saisie,
+sinon tout le pipeline arrive en « chaud » faute de score.
+
+### Chemins enfin exercés
+
+Le rapport a été affiché pour la première fois. L'échec montrait au visiteur
+le message technique brut (« api.anthropic.com → HTTP 529 ») : il lit
+désormais un message neutre, le détail restant en base. Le plafond de dépense
+n'avait jamais déclenché ; testé en le forçant à 0,02 €, il arrête bien la
+collecte après un lot, et il est devenu réglable par variable
+d'environnement.
+
+**Coût de la journée : 5,35 €.** 12 scans, zéro erreur.
+
+Reste non prouvable sans un vrai client : les trois `verify-*`, qui vérifient
+qu'un travail est réellement publié en ligne.
+
+---
+
 ## 2026-08-03 — Premier scan réel : la machine tient debout
 
 Scan complet sur Citari, 6 moteurs, 24 questions : **144/144 réponses, zéro
