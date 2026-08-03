@@ -1,6 +1,20 @@
 import type { Lang } from "../types";
 
+/**
+ * Délai d'un appel moteur pendant un scan : réponses courtes, prospect qui
+ * attend devant sa page. Au-delà, mieux vaut perdre la réponse que la visite.
+ */
 export const PROVIDER_TIMEOUT_MS = 75_000;
+
+/**
+ * Délai d'une génération longue (rédaction d'un contenu de 1500 mots).
+ *
+ * Rien à voir avec un appel de scan : personne n'attend devant l'écran, et
+ * écrire un article prend plusieurs minutes. À 75 s, `draft-content` échouait
+ * systématiquement en timeout ; ce n'était pas un incident passager mais une
+ * limite mal calibrée, empruntée au chemin du scan.
+ */
+export const REDACTION_TIMEOUT_MS = 300_000;
 
 const URL_RE = /https?:\/\/[^\s)\]}"'<>]+/g;
 
@@ -43,7 +57,14 @@ function attenteMs(res: Response, attempt: number): number {
  * sur `draft-content`, où une rédaction de plusieurs minutes déjà payée était
  * perdue pour un incident passager de quelques secondes.
  */
-export async function postJson(url: string, headers: Record<string, string>, body: unknown, retries = 3): Promise<any> {
+export async function postJson(
+  url: string,
+  headers: Record<string, string>,
+  body: unknown,
+  opts: { retries?: number; timeoutMs?: number } = {}
+): Promise<any> {
+  const retries = opts.retries ?? 3;
+  const timeoutMs = opts.timeoutMs ?? PROVIDER_TIMEOUT_MS;
   for (let attempt = 0; ; attempt++) {
     let res: Response;
     try {
@@ -51,7 +72,7 @@ export async function postJson(url: string, headers: Record<string, string>, bod
         method: "POST",
         headers: { "Content-Type": "application/json", ...headers },
         body: JSON.stringify(body),
-        signal: AbortSignal.timeout(PROVIDER_TIMEOUT_MS),
+        signal: AbortSignal.timeout(timeoutMs),
       });
     } catch (e) {
       if (attempt < retries) {

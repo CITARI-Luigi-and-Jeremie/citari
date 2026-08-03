@@ -1,10 +1,19 @@
 import { z } from "zod";
+import { marked } from "marked";
 import { askClaudeJson, getDb, unwrap } from "@geo/core";
 import { recordDeliverable, resolveClient, slugify, writeDeliverableFile } from "../lib/context.js";
 
+/**
+ * Le modèle ne rédige QUE le markdown, plus le bloc schema.org.
+ *
+ * Il produisait aussi le HTML, c'est-à-dire le même article une seconde fois :
+ * sortie doublée, coût doublé, et surtout deux versions qui pouvaient diverger.
+ * Sur un article de 1500 mots, cela dépassait la limite de tokens et la réponse
+ * revenait tronquée au milieu d'une chaîne JSON. Le HTML se dérive du markdown
+ * de façon déterministe, alors on le dérive.
+ */
 const DraftSchema = z.object({
   markdown: z.string().min(500),
-  html: z.string().min(500),
   jsonld: z.string(),
 });
 
@@ -40,16 +49,16 @@ Contraintes de rédaction STRICTES :
 
 Produis :
 - "markdown" : le contenu complet en markdown
-- "html" : le même contenu en HTML propre (article autonome, sans <html>/<head>)
 - "jsonld" : bloc schema.org adapté (FAQPage pour une FAQ, Article sinon) sérialisé
 
-Format : {"markdown": "...", "html": "...", "jsonld": "{...}"}`,
+Format : {"markdown": "...", "jsonld": "{...}"}`,
     DraftSchema,
-    { maxTokens: 8192 }
+    { maxTokens: 16384 }
   );
 
   const name = slugify(b.title).slice(0, 60);
-  const htmlDoc = `${out.html}\n<script type="application/ld+json">\n${out.jsonld}\n</script>\n`;
+  const html = marked.parse(out.markdown, { async: false }) as string;
+  const htmlDoc = `${html}\n<script type="application/ld+json">\n${out.jsonld}\n</script>\n`;
   const mdPath = writeDeliverableFile(slug, `contents/${name}.md`, out.markdown);
   const htmlPath = writeDeliverableFile(slug, `contents/${name}.html`, htmlDoc);
 

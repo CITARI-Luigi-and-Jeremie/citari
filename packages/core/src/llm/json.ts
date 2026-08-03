@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { requireEnv, optionalEnv } from "../env";
-import { postJson } from "../providers/base";
+import { postJson, PROVIDER_TIMEOUT_MS, REDACTION_TIMEOUT_MS } from "../providers/base";
 import { costCents } from "../cost";
 
 export interface LLMUsage {
@@ -31,7 +31,10 @@ export async function askClaudeJson<T>(
           (opts.system ? opts.system + "\n" : "") +
           "Réponds UNIQUEMENT avec du JSON valide, sans balises markdown, sans texte autour.",
         messages,
-      }
+      },
+      // Le délai suit la longueur demandée : une génération de plusieurs
+      // milliers de tokens dépasse largement le délai d'un appel de scan.
+      { timeoutMs: (opts.maxTokens ?? 4096) > 4096 ? REDACTION_TIMEOUT_MS : PROVIDER_TIMEOUT_MS }
     );
     const raw: string = (data.content ?? [])
       .filter((b: any) => b.type === "text")
@@ -42,6 +45,17 @@ export async function askClaudeJson<T>(
       outputTokens: data.usage?.output_tokens ?? 0,
       costCents: costCents("anthropic-internal", data.usage?.input_tokens ?? 0, data.usage?.output_tokens ?? 0),
     });
+
+    // Une réponse coupée par la limite de tokens donne un JSON tronqué, dont
+    // l'erreur (« Unterminated string ») envoie sur une fausse piste : on
+    // cherche un défaut de prompt là où il faut simplement plus de tokens.
+    // Inutile de réessayer, la seconde tentative sera coupée au même endroit.
+    if (data.stop_reason === "max_tokens") {
+      throw new Error(
+        `Réponse coupée à ${opts.maxTokens ?? 4096} tokens : la sortie demandée est trop longue. ` +
+          `Augmentez maxTokens ou réduisez ce qui est demandé au modèle.`
+      );
+    }
 
     try {
       const jsonText = extractJson(raw);
