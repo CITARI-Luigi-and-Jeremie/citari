@@ -40,6 +40,13 @@ export async function prioriser(clientRef: string): Promise<void> {
     }
   };
 
+  // Médiane des marques citées, toutes questions confondues : c'est l'étalon
+  // de l'encombrement du secteur. Sans lui, la notation sature.
+  const parQuestion = queries.map(
+    (q) => new Set(mentions.filter((m) => m.query_id === q.id && !m.is_target).map((m) => m.brand)).size
+  ).sort((a, b) => a - b);
+  const medianeMarques = parQuestion.length ? (parQuestion[Math.floor(parQuestion.length / 2)] ?? 0) : 0;
+
   const perdues: { texte: string; g: ReturnType<typeof scoreGagnabilite> }[] = [];
   for (const q of queries) {
     const rs = responses.filter((r) => r.query_id === q.id);
@@ -67,6 +74,7 @@ export async function prioriser(clientRef: string): Promise<void> {
       marquesCitees: marques,
       dominantPresent: dominant !== null && marques.includes(dominant),
       domainesSources: domaines,
+      medianeMarques,
     };
     perdues.push({ texte: q.text, g: scoreGagnabilite(entree) });
   }
@@ -77,6 +85,7 @@ export async function prioriser(clientRef: string): Promise<void> {
   }
 
   perdues.sort((a, b) => b.g.score - a.g.score);
+  console.log(`Encombrement du secteur : ${medianeMarques} marques citées par question (médiane).\n`);
 
   const md = `# Questions gagnables — ${client.brand}
 

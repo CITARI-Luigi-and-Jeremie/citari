@@ -10,15 +10,24 @@ describe("gagnabilité", () => {
     expect(g.format).toContain("locale");
   });
 
-  it("comparative nationale encombrée avec forteresse = quasi nul", () => {
+  it("comparative encombrée au-delà de la médiane, avec forteresse = quasi nul", () => {
     const g = scoreGagnabilite({
       ...base,
       intent: "comparative",
-      marquesCitees: ["A", "B", "C", "D", "E", "F", "G", "H"],
+      marquesCitees: Array.from({ length: 16 }, (_, i) => `M${i}`),
+      medianeMarques: 8,
       dominantPresent: true,
       domainesSources: ["www.capterra.fr", "monblog.fr"],
     });
     expect(g.score).toBeLessThanOrEqual(10);
+  });
+
+  it("l'encombrement se juge en relatif, pas en absolu", () => {
+    // Mêmes 10 concurrents : peu disputée dans un secteur saturé,
+    // très disputée dans un secteur clairsemé.
+    const secteurSature = scoreGagnabilite({ ...base, intent: "locale", marquesCitees: Array.from({length:10},(_,i)=>`M${i}`), medianeMarques: 20 });
+    const secteurClair = scoreGagnabilite({ ...base, intent: "locale", marquesCitees: Array.from({length:10},(_,i)=>`M${i}`), medianeMarques: 4 });
+    expect(secteurSature.score).toBeGreaterThan(secteurClair.score);
   });
 
   it("le dominant absent rend la question plus gagnable que présent", () => {
@@ -75,4 +84,19 @@ describe("liste d'entreprises du baromètre", () => {
   it("ignore les lignes vides et les entrées sans nom", () => {
     expect(parseListe("\n\n  \n, site.fr\n")).toHaveLength(0);
   });
+});
+
+import { enumSouple } from "../src/lib/enum-souple";
+
+describe("enum souple face aux libellés inventés par un modèle", () => {
+  const format = enumSouple(
+    ["comparatif", "alternatives", "faq", "guide"] as const,
+    { comparatif: ["compar", " vs ", "versus"], alternatives: ["alternativ"], faq: ["faq"], guide: ["guide"] },
+    "guide",
+  );
+  it("accepte la valeur exacte", () => expect(format.parse("faq")).toBe("faq"));
+  it("rattrape « Client vs Concurrent »", () => expect(format.parse("Client vs Concurrent")).toBe("comparatif"));
+  it("rattrape « Alternatives à [leader] »", () => expect(format.parse("Alternatives à [leader]")).toBe("alternatives"));
+  it("ignore les accents et la casse", () => expect(format.parse("COMPARATIF détaillé")).toBe("comparatif"));
+  it("retombe sur le défaut si rien ne correspond", () => expect(format.parse("n'importe quoi")).toBe("guide"));
 });

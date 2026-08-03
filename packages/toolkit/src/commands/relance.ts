@@ -1,4 +1,5 @@
 import { getDb, unwrap } from "@geo/core";
+import { EMAIL_A_TROUVER } from "../lib/prospect.js";
 import { buildScanInsights, pct, type ScanInsights } from "../lib/insights.js";
 import { slugify, writeDeliverableFile } from "../lib/context.js";
 
@@ -109,12 +110,23 @@ Vous ne recevrez plus d'email de ma part concernant ce scan.`,
 export async function relance(leadRef: string, opts: { all?: boolean } = {}): Promise<void> {
   const db = getDb();
 
-  const leads = opts.all
+  const bruts = opts.all
     ? ((unwrap(await db.from("leads").select("*").eq("status", "nouveau")) as any[]))
     : await resolveLeads(leadRef);
 
+  // Garde-fou : les prospects issus du baromètre portent une adresse fictive
+  // (« @barometre.local ») tant que le vrai contact n'a pas été trouvé. Leur
+  // statut suffit normalement à les écarter, mais une relance envoyée à une
+  // adresse inventée est une erreur qu'on ne peut pas rattraper : on la bloque
+  // ici aussi, quel que soit le statut.
+  const leads = bruts.filter((l: any) => !String(l.email ?? "").endsWith(EMAIL_A_TROUVER));
+  const ecartes = bruts.length - leads.length;
+  if (ecartes > 0) {
+    console.log(`${ecartes} prospect(s) sans email réel écarté(s) : trouvez le contact avant de relancer.`);
+  }
+
   if (leads.length === 0) {
-    console.log("Aucun lead à relancer (statut « nouveau » requis).");
+    console.log("Aucun lead à relancer (statut « nouveau » et email réel requis).");
     return;
   }
 

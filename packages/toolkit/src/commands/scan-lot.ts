@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import { getDb, unwrap } from "@geo/core";
 import { slugify, writeDeliverableFile } from "../lib/context.js";
+import { EMAIL_A_TROUVER, STATUT_PROSPECT } from "../lib/prospect.js";
 
 /**
  * Scanne une liste d'entreprises et produit le classement.
@@ -127,9 +128,9 @@ rang 20 %, recommandation explicite 20 %, tonalité 10 %.*
       // colonne email est obligatoire. On utilise un marqueur explicite.
       await db.from("leads").insert({
         scan_id: r.scanId,
-        email: `a-trouver+${slugify(r.nom)}@barometre.local`,
+        email: `a-trouver+${slugify(r.nom)}${EMAIL_A_TROUVER}`,
         company: r.nom,
-        status: "nouveau",
+        status: STATUT_PROSPECT,
         priority: (r.score ?? 100) < 30 ? "chaud" : (r.score ?? 100) < 55 ? "tiede" : "froid",
         notes: `Baromètre ${opts.secteur}${opts.ville ? ` ${opts.ville}` : ""} — score ${r.score}/100, cité ${r.cite} fois contre ${r.concurrents} pour ses concurrents.`,
       });

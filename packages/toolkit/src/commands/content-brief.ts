@@ -1,12 +1,22 @@
 import { z } from "zod";
 import { askClaudeJson, fetchHomeText, getDb, unwrap } from "@geo/core";
 import { recordDeliverable, requireUrl, resolveClient, slugify, writeDeliverableFile } from "../lib/context.js";
+import { enumSouple } from "../lib/enum-souple.js";
 
 const BriefsSchema = z.object({
   briefs: z.array(
     z.object({
       target_query: z.string(),
-      format: z.enum(["comparatif", "alternatives", "faq", "guide"]),
+      format: enumSouple(
+        ["comparatif", "alternatives", "faq", "guide"] as const,
+        {
+          comparatif: ["compar", " vs ", "versus", "contre"],
+          alternatives: ["alternativ"],
+          faq: ["faq", "questions frequentes"],
+          guide: ["guide", "tutoriel", "mode d'emploi"],
+        },
+        "guide"
+      ),
       title: z.string(),
       outline: z.array(z.string()).min(3),
       data_needed: z.array(z.string()),

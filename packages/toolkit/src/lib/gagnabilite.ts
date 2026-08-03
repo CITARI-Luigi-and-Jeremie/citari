@@ -34,6 +34,16 @@ export interface QuestionPerdue {
   intent: string | null;
   /** Marques distinctes citées par les moteurs sur cette question. */
   marquesCitees: string[];
+  /**
+   * Médiane des marques citées sur l'ensemble du scan.
+   *
+   * L'encombrement ne se juge qu'en relatif. Mesuré sur un vrai scan : toutes
+   * les questions portaient 7 à 18 marques. Un malus absolu saturait donc dès
+   * la première, et les meilleures questions ressortaient à 3/100, ce qui
+   * laissait croire qu'aucune n'était gagnable. Comparé à la médiane du
+   * secteur, 7 devient « peu disputé » et 18 « saturé ».
+   */
+  medianeMarques?: number;
   /** Le concurrent dominant du scan (1er en part de voix) y est-il cité ? */
   dominantPresent: boolean;
   /** Domaines des sources consultées par les moteurs sur cette question. */
@@ -65,13 +75,17 @@ export function scoreGagnabilite(q: QuestionPerdue): Gagnabilite {
   let score = BASE_PAR_INTENT[q.intent ?? ""] ?? 20;
   raisons.push(`intention ${q.intent ?? "inconnue"} (base ${score})`);
 
-  if (q.marquesCitees.length === 0) {
+  const nb = q.marquesCitees.length;
+  if (nb === 0) {
     score += 25;
     raisons.push("terrain vide : aucun moteur ne cite personne (+25)");
   } else {
-    const malus = Math.min(30, q.marquesCitees.length * 3);
-    score -= malus;
-    raisons.push(`${q.marquesCitees.length} marques déjà citées (−${malus})`);
+    const mediane = q.medianeMarques && q.medianeMarques > 0 ? q.medianeMarques : nb;
+    // Moitié moins de concurrents que la médiane → +25 ; deux fois plus → −25.
+    const ajustement = Math.max(-25, Math.min(25, Math.round((1 - nb / mediane) * 25)));
+    score += ajustement;
+    const comparatif = ajustement > 0 ? "moins disputée que la moyenne" : ajustement < 0 ? "plus disputée que la moyenne" : "dans la moyenne";
+    raisons.push(`${nb} marques citées, ${comparatif} du secteur (médiane ${mediane}) : ${ajustement >= 0 ? "+" : ""}${ajustement}`);
   }
 
   if (q.dominantPresent) {

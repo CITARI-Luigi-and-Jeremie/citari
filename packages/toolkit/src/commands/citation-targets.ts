@@ -1,16 +1,31 @@
 import { z } from "zod";
 import { askClaudeJson, getDb, unwrap } from "@geo/core";
 import { currentSprintId, recordDeliverable, resolveClient, slugify, writeDeliverableFile } from "../lib/context.js";
+import { enumSouple } from "../lib/enum-souple.js";
 
 const TargetsSchema = z.object({
   targets: z.array(
     z.object({
       source: z.string(),
       url: z.string().nullable(),
-      type: z.enum(["annuaire", "comparateur", "presse", "forum", "fiche", "autre"]),
+      type: enumSouple(
+        ["annuaire", "comparateur", "presse", "forum", "fiche", "autre"] as const,
+        {
+          annuaire: ["annuaire", "repertoire", "directory"],
+          comparateur: ["comparateur", "comparat", "classement", "avis"],
+          presse: ["presse", "media", "magazine", "journal", "blog"],
+          forum: ["forum", "communaute", "reddit"],
+          fiche: ["fiche", "profil", "page entreprise"],
+        },
+        "autre"
+      ),
       reason: z.string(),
       action: z.string(),
-      difficulty: z.enum(["easy", "medium", "hard"]),
+      difficulty: enumSouple(
+        ["easy", "medium", "hard"] as const,
+        { easy: ["easy", "facile", "simple"], medium: ["medium", "moyen"], hard: ["hard", "difficile", "eleve"] },
+        "medium"
+      ),
       pitch_draft: z.string().nullable(),
     })
   ).min(5),
