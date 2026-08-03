@@ -1,5 +1,6 @@
 import { publicClient } from "./supabase-public.server";
 import type { ScanRecord } from "./scan-result";
+import { deriveEngines } from "./scan-loading";
 
 export type QueryRow = { id: string; position: number; text: string };
 export type MetaRow = {
@@ -13,6 +14,16 @@ export type ScanLive = {
   scan: ScanRecord;
   queries: QueryRow[];
   meta: MetaRow[];
+  /** Moteurs réellement interrogés pour ce scan. */
+  engines: string[];
+  /** Moteurs absents du mode courant, affichés verrouillés. */
+  locked: string[];
+  /** Réponses attendues (questions × moteurs actifs). */
+  total: number;
+  /** Réponses déjà collectées. */
+  collectees: number;
+  /** Progression 0 → 1, ancrée sur les données. */
+  progression: number;
 };
 
 /**
@@ -43,12 +54,26 @@ export async function readScanLive(id: string): Promise<ScanLive | null> {
   if (queriesRes.error) throw new Error(queriesRes.error.message);
   if (metaRes.error) throw new Error(metaRes.error.message);
 
+  const scan = scanRes.data as unknown as ScanRecord;
+  const queries = (queriesRes.data ?? []) as QueryRow[];
+  const meta = (metaRes.data ?? []) as MetaRow[];
+  const { engines, locked } = deriveEngines(meta.map((row) => row.engine));
+
+  const total = queries.length * engines.length;
+  const collectees = meta.length;
+
   return {
-    scan: scanRes.data as unknown as ScanRecord,
-    queries: (queriesRes.data ?? []) as QueryRow[],
-    meta: (metaRes.data ?? []) as MetaRow[],
+    scan,
+    queries,
+    meta,
+    engines,
+    locked,
+    total,
+    collectees,
+    progression: total > 0 ? Math.min(1, collectees / total) : 0,
   };
 }
+
 
 export async function insertScanLead(scanId: string, email: string) {
   const supabase = publicClient();

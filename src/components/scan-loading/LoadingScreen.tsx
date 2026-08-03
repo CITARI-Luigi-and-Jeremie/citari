@@ -1,5 +1,6 @@
-import { useEffect, useMemo, useState } from "react";
-import { ENGINES, type ScanRecord } from "@/lib/scan-result";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { ENGINE_LABEL } from "@/lib/scan-result";
+import type { ScanLive } from "@/lib/scan-live.server";
 import type { MetaRow, QueryRow } from "@/lib/scan-live.server";
 import {
   METHOD_POINTS,
@@ -11,12 +12,7 @@ import {
   queryLabel,
 } from "@/lib/scan-loading";
 
-type Props = {
-  scan: ScanRecord;
-  queries: QueryRow[];
-  meta: MetaRow[];
-  unstable: boolean;
-};
+type Props = { live: ScanLive; unstable: boolean };
 
 /** Chrono du temps réellement écoulé depuis started_at. */
 function useElapsed(startedAt: string | null) {
@@ -34,7 +30,8 @@ function useElapsed(startedAt: string | null) {
   return Math.max(0, now - start);
 }
 
-export function LoadingScreen({ scan, queries, meta, unstable }: Props) {
+export function LoadingScreen({ live, unstable }: Props) {
+  const { scan, queries, meta, engines, locked, total, collectees, progression } = live;
   const elapsed = useElapsed(scan.started_at);
   const scoring = scan.status === "scoring";
 
@@ -44,21 +41,19 @@ export function LoadingScreen({ scan, queries, meta, unstable }: Props) {
     return set;
   }, [meta]);
 
-  const total = queries.length * ENGINES.length;
-  const collected = meta.length;
   const ticker = useMemo(() => meta.slice(-3).reverse(), [meta]);
 
   // Titre d'onglet : compteur réel.
   useEffect(() => {
     if (scan.status !== "running" || total === 0) return;
     const previous = document.title;
-    document.title = `${collected}/${total} — Citari`;
+    document.title = `${collectees}/${total} — Citari`;
     return () => {
       document.title = previous;
     };
-  }, [collected, total, scan.status]);
+  }, [collectees, total, scan.status]);
 
-  // Acte 3 : les deux labels de phase s'allument successivement.
+  // Acte 3 : les labels de phase s'allument successivement.
   const [scoringStep, setScoringStep] = useState(0);
   useEffect(() => {
     if (!scoring) return;
@@ -83,8 +78,11 @@ export function LoadingScreen({ scan, queries, meta, unstable }: Props) {
     scan.status === "scoring"
       ? PHASE_LABELS.scoring
       : scan.status === "running"
-        ? PHASE_LABELS.running
+        ? `INTERROGATION DES MOTEURS — ${engines.length} INTERROGÉS`
         : PHASE_LABELS.generating_queries;
+
+  // Progression : questions écrites en base pendant l'acte 1, cellules ensuite.
+  const ratio = scan.status === "generating_queries" ? 0 : progression;
 
   return (
     <section>
@@ -109,12 +107,28 @@ export function LoadingScreen({ scan, queries, meta, unstable }: Props) {
           <>
             <div className="mono mt-12 flex flex-wrap items-baseline justify-between gap-3 text-[12px] tracking-[0.10em] text-ink-2">
               <span>
-                RÉPONSES COLLECTÉES {collected}/{total}
+                RÉPONSES COLLECTÉES {collectees}/{total}
               </span>
               <span>{formatElapsed(elapsed)}</span>
             </div>
 
-            <PunchCard queries={queries} filled={filled} frozen={scoring} />
+            <div className="progress-rail mt-3" aria-hidden>
+              <span className="progress-fill" style={{ width: `${Math.round(ratio * 100)}%` }} />
+            </div>
+
+            <PunchCard
+              queries={queries}
+              engines={engines}
+              locked={locked}
+              filled={filled}
+              frozen={scoring}
+            />
+
+            {locked.length > 0 ? (
+              <p className="mono mt-4 text-[12px] tracking-[0.10em] text-ink-2">
+                ▢ {locked.length} MOTEURS VERROUILLÉS — SCAN COMPLET
+              </p>
+            ) : null}
 
             {scoring ? (
               <div className="mono mt-6 space-y-2 text-[12px] tracking-[0.10em]">
@@ -131,12 +145,7 @@ export function LoadingScreen({ scan, queries, meta, unstable }: Props) {
               <p className="mono mt-6 truncate text-[12px] tracking-[0.10em] text-ink-2">
                 {ticker.length === 0
                   ? "—"
-                  : ticker
-                      .map(
-                        (row) =>
-                          `${(row.engine ?? "").toUpperCase()} · ${formatLatency(row.latency_ms)}`,
-                      )
-                      .join("   /   ")}
+                  : ticker.map((row) => tickerLine(row)).join("   /   ")}
               </p>
             )}
           </>
@@ -158,49 +167,95 @@ export function LoadingScreen({ scan, queries, meta, unstable }: Props) {
   );
 }
 
-/** ACTE 1 — cascade des vraies questions, une entrée toutes les ~130 ms. */
+function tickerLine(row: MetaRow) {
+  const label = ENGINE_LABEL[row.engine] ?? row.engine;
+  return `${label.toUpperCase()} · ${formatLatency(row.latency_ms)}`;
+}
+
+/**
+ * ACTE 1 — cascade des vraies questions.
+ * Une question déjà affichée ne re-anime jamais : seules les nouvelles tombent.
+ */
 function QueryCascade({ queries }: { queries: QueryRow[] }) {
-  if (queries.length === 0) return null;
+  const seen = useRef<Set<string>>(new Set());
+  const fresh: string[] = [];
+  for (const query of queries) {
+    if (!seen.current.has(query.id)) fresh.push(query.id);
+  }
+  useEffect(() => {
+    for (const query of queries) seen.current.add(query.id);
+  }, [queries]);
+
+  if (queries.length === 0) {
+    return (
+      <p className="mono mt-12 text-[13px] text-ink-2">
+        Les questions de vos acheteurs s'écrivent…
+      </p>
+    );
+  }
+
   return (
     <ul className="mt-12 border-t border-rule">
-      {queries.map((query, index) => (
-        <li
-          key={query.id}
-          className="anim-step flex items-baseline gap-4 border-b border-rule py-3"
-          style={{ animationDelay: `${index * 130}ms` }}
-        >
-          <span className="mono shrink-0 text-[12px] text-ink-2">
-            {queryLabel(query.position)}
-          </span>
-          <span className="measure">{query.text}</span>
-        </li>
-      ))}
+      {queries.map((query) => {
+        const index = fresh.indexOf(query.id);
+        const isNew = index !== -1;
+        return (
+          <li
+            key={query.id}
+            className={`flex items-baseline gap-4 border-b border-rule py-3${
+              isNew ? " anim-step" : ""
+            }`}
+            style={isNew ? { animationDelay: `${index * 110}ms` } : undefined}
+          >
+            <span className="mono shrink-0 text-[12px] text-ink-2">
+              {queryLabel(query.position)}
+            </span>
+            <span className="measure">{query.text}</span>
+          </li>
+        );
+      })}
     </ul>
   );
 }
 
-/** ACTE 2 / 3 — grille type carte perforée, une ligne par question. */
+/** ACTE 2 / 3 — grille type carte perforée : une ligne par question, colonnes déduites. */
 function PunchCard({
   queries,
+  engines,
+  locked,
   filled,
   frozen,
 }: {
   queries: QueryRow[];
+  engines: string[];
+  locked: string[];
   filled: Set<string>;
   frozen: boolean;
 }) {
   if (queries.length === 0) return null;
 
+  const columns = [
+    ...engines.map((key) => ({ key, locked: false })),
+    ...locked.map((key) => ({ key, locked: true })),
+  ];
+  const template = `3rem repeat(${columns.length}, minmax(0,1fr))`;
+
   return (
     <div className={frozen ? "sweep-host relative mt-6 text-ink-2" : "relative mt-6"}>
-      <div className="grid grid-cols-[3rem_repeat(6,minmax(0,1fr))] items-end gap-y-1 border-b border-rule pb-2">
+      <div
+        className="grid items-end gap-y-1 border-b border-rule pb-2"
+        style={{ gridTemplateColumns: template }}
+      >
         <span />
-        {ENGINES.map((engine) => (
+        {columns.map((column) => (
           <span
-            key={engine.key}
-            className="mono text-[9px] leading-none tracking-[0.10em] text-ink-2 [writing-mode:vertical-rl] sm:text-[10px] sm:[writing-mode:horizontal-tb]"
+            key={column.key}
+            className={`mono text-[9px] leading-none tracking-[0.10em] text-ink-2 [writing-mode:vertical-rl] sm:text-[10px] sm:[writing-mode:horizontal-tb]${
+              column.locked ? " locked-col" : ""
+            }`}
           >
-            {engine.label.toUpperCase()}
+            {(ENGINE_LABEL[column.key] ?? column.key).toUpperCase()}
+            {column.locked ? " ▢" : ""}
           </span>
         ))}
       </div>
@@ -208,14 +263,24 @@ function PunchCard({
       {queries.map((query) => (
         <div
           key={query.id}
-          className="grid grid-cols-[3rem_repeat(6,minmax(0,1fr))] items-center border-b border-rule py-1.5"
+          className="grid items-center border-b border-rule py-1.5"
+          style={{ gridTemplateColumns: template }}
         >
           <span className="mono text-[11px] text-ink-2">{queryLabel(query.position)}</span>
-          {ENGINES.map((engine) => {
-            const isFilled = filled.has(cellKey(query.id, engine.key));
-            if (isFilled) {
+          {columns.map((column) => {
+            if (column.locked) {
               return (
-                <span key={engine.key} className="flex">
+                <span key={column.key} className="locked-col flex">
+                  <span
+                    className="block h-px w-[11px]"
+                    style={{ backgroundColor: "var(--rule-strong)" }}
+                  />
+                </span>
+              );
+            }
+            if (filled.has(cellKey(query.id, column.key))) {
+              return (
+                <span key={column.key} className="flex">
                   <span
                     className="anim-cell block size-[11px]"
                     style={{ backgroundColor: frozen ? "var(--ink-2)" : "var(--ink)" }}
@@ -224,7 +289,7 @@ function PunchCard({
               );
             }
             return (
-              <span key={engine.key} className="flex">
+              <span key={column.key} className="flex">
                 {frozen ? (
                   <span className="mono text-[11px] leading-none text-ink-2">–</span>
                 ) : (
@@ -239,7 +304,9 @@ function PunchCard({
         </div>
       ))}
 
-      {frozen ? <span className="anim-sweep pointer-events-none absolute inset-x-0 top-0 h-px" /> : null}
+      {frozen ? (
+        <span className="anim-sweep pointer-events-none absolute inset-x-0 top-0 h-px" />
+      ) : null}
     </div>
   );
 }
