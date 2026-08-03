@@ -390,7 +390,7 @@ function Modal({
         role="dialog"
         aria-modal="true"
         aria-label={STEP_LABEL[step]}
-        className="anim-panel my-auto max-h-[calc(100dvh-2rem)] w-full max-w-lg overflow-y-auto border border-rule-strong bg-paper p-5 will-change-transform sm:max-h-[calc(100dvh-3rem)] sm:p-7"
+        className="anim-panel my-auto w-full max-w-lg overflow-visible border border-rule-strong bg-paper p-5 will-change-transform sm:p-7"
       >
 
         <div className="flex items-baseline justify-between">
