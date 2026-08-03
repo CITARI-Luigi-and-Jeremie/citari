@@ -273,9 +273,10 @@ function SectorSelect({
         <div
           role="listbox"
           aria-label="Secteur d'activité"
-          className={`absolute left-0 right-0 top-full z-10 mt-1 max-h-[46vh] overflow-y-auto border border-ink bg-paper p-1 ${
+          className={`absolute left-0 right-0 top-full z-30 mt-1 max-h-[min(52dvh,20rem)] overflow-y-auto overscroll-contain border border-ink bg-paper p-1 shadow-[0_10px_24px_-16px_rgb(23_22_15_/_0.35)] ${
             closing ? "anim-menu-out" : "anim-menu-in"
           }`}
+
         >
           {SECTORS.map((s, i) => {
             const selected = s === value;
@@ -390,7 +391,7 @@ function Modal({
         role="dialog"
         aria-modal="true"
         aria-label={STEP_LABEL[step]}
-        className="anim-panel my-auto max-h-[calc(100dvh-2rem)] w-full max-w-lg overflow-y-auto border border-rule-strong bg-paper p-5 will-change-transform sm:max-h-[calc(100dvh-3rem)] sm:p-7"
+        className="anim-panel my-auto w-full max-w-lg overflow-visible border border-rule-strong bg-paper p-5 will-change-transform sm:p-7"
       >
 
         <div className="flex items-baseline justify-between">
