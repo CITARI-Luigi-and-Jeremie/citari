@@ -21,6 +21,14 @@ const CreerInput = z.object({
       { message: "Le nom de marque doit contenir au moins deux lettres ou chiffres." },
     ),
   url: z.string().trim().max(200).optional().nullable(),
+  // L'email est le produit du scan gratuit : sans lui, un visiteur consulte
+  // son score et disparaît sans qu'on puisse jamais le rappeler.
+  email: z
+    .string()
+    .trim()
+    .toLowerCase()
+    .max(160)
+    .email({ message: "Cette adresse email ne semble pas valide." }),
   secteur: z.string().trim().min(1).max(80),
   ville: z.string().trim().max(80).optional().nullable(),
   concurrents: z.array(z.string().trim().max(80)).max(3).default([]),
@@ -31,8 +39,15 @@ const CreerInput = z.object({
 export const lancerScan = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => CreerInput.parse(d))
   .handler(async ({ data }) => {
-    const { hacherIp, quotaAtteint, creerScan, chercherCache, cleDomaine, PLAFOND_SCANS_PAR_IP } =
-      await import("@/lib/orchestrateur.server");
+    const {
+      hacherIp,
+      quotaAtteint,
+      creerScan,
+      chercherCache,
+      cleDomaine,
+      enregistrerLead,
+      PLAFOND_SCANS_PAR_IP,
+    } = await import("@/lib/orchestrateur.server");
     const req = getRequest();
     const ip =
       req?.headers.get("cf-connecting-ip") ??
@@ -62,6 +77,18 @@ export const lancerScan = createServerFn({ method: "POST" })
       ipHash,
       mode: data.mode,
     });
+
+    // Y compris sur un scan resservi du cache : c'est une personne de plus qui
+    // s'intéresse à cette entreprise, et donc un contact de plus à rappeler.
+    // Tolérant : une écriture ratée ne doit pas empêcher le scan de démarrer.
+    // Perdre un email est ennuyeux, perdre le prospect sur une page en erreur
+    // l'est davantage.
+    try {
+      await enregistrerLead({ scanId: scan.id, email: data.email });
+    } catch {
+      /* le scan continue */
+    }
+
     return { id: scan.id, cached: scan.cached ?? false };
   });
 

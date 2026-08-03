@@ -349,11 +349,14 @@ function Formulaire() {
     const f = new FormData(e.currentTarget);
     const marque = String(f.get("marque") ?? "").trim();
     if (!marque) return setErreur("Le nom de la marque est obligatoire.");
+    const email = String(f.get("email") ?? "").trim();
+    if (!email) return setErreur("Votre email est nécessaire pour recevoir le rapport.");
     setEnvoi(true);
     try {
       const res = await demarrer({
         data: {
           marque,
+          email,
           url: String(f.get("url") ?? "").trim() || null,
           secteur: String(f.get("secteur") ?? SECTEURS[0]),
           ville: String(f.get("ville") ?? "").trim() || null,
@@ -388,7 +391,7 @@ function Formulaire() {
             {fr("Votre score de visibilité dans ChatGPT, Claude, Gemini, Perplexity, Grok et Le Chat.")}
           </p>
         </div>
-        <span className="label-xs shrink-0">sans inscription</span>
+        <span className="label-xs shrink-0">90 secondes</span>
       </div>
       <Rule className="my-6" />
 
@@ -398,6 +401,17 @@ function Formulaire() {
       <div className="grid gap-5">
         <Field label="Marque">
           <Champ name="marque" required maxLength={80} placeholder="Cabinet Vaurel" />
+        </Field>
+        <Field label="Email professionnel">
+          <Champ
+            name="email"
+            type="email"
+            required
+            maxLength={160}
+            placeholder="vous@cabinet-vaurel.fr"
+            inputMode="email"
+            autoComplete="email"
+          />
         </Field>
         <Field label="Site web">
           <Champ name="url" maxLength={200} placeholder="https://…" inputMode="url" />
@@ -441,11 +455,11 @@ function Formulaire() {
         {envoi ? "Lancement…" : "Lancer mon scan gratuit"}
       </Btn>
       <p className="mt-4 text-center text-[12px] leading-snug text-ink-3">
-        Gratuit · Sans compte · Sans carte bancaire · Résultat en 90 secondes
+        Gratuit · Sans carte bancaire · Résultat en 90 secondes
       </p>
       <p className="mt-2 text-center text-[12px] leading-snug text-ink-3">
         {fr(
-          "3 scans par jour et par connexion. Aucune donnée n’est transmise à un tiers en dehors des moteurs interrogés.",
+          "Votre email sert à vous envoyer ce rapport et, sauf refus de votre part, nos analyses sur la visibilité IA de votre secteur. Désinscription en un clic dans chaque message. 2 scans par jour et par connexion. Aucune donnée n’est transmise à un tiers en dehors des moteurs interrogés.",
         )}
       </p>
     </form>

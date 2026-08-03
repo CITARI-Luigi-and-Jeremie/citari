@@ -8,11 +8,35 @@ export type PdvItem = { name: string; count: number; share: number; target: bool
 export type Action = { chantier: string; titre: string; pourquoi: string; effort: string };
 
 export const PLAFOND_SCANS_PAR_IP = 2;
-// Aperçu : gratuit et public, le plafond est un fusible anti-dérive.
-// Complet : déclenché uniquement pour un rendez-vous réservé, on paye la qualité.
-// Mesurés sur le premier scan réel : 1,06 € pour 24 questions × 6 moteurs.
-// Contrôle J+45 = 4 moteurs à recherche ≈ 0,84 €, d'où un plafond à 1,5 €.
-export const PLAFONDS_EUR: Record<ModeScan, number> = { apercu: 0.25, complet: 3, controle: 1.5 };
+/**
+ * Plafond de dépense par scan, au-delà duquel la collecte s'arrête et le scan
+ * est finalisé avec ce qu'il a déjà.
+ *
+ * Aperçu : gratuit et public, le plafond est un fusible anti-dérive.
+ * Complet : déclenché uniquement pour un rendez-vous réservé, on paye la qualité.
+ * Mesurés sur le premier scan réel : 1,06 € pour 24 questions × 6 moteurs.
+ * Contrôle J+45 = 4 moteurs à recherche ≈ 0,84 €, d'où un plafond à 1,5 €.
+ *
+ * Réglables par variable d'environnement : le jour où un éditeur double ses
+ * tarifs, on veut pouvoir resserrer le fusible en une minute, sans redéployer.
+ */
+function plafond(mode: ModeScan, defaut: number): number {
+  const brut = process.env[`PLAFOND_EUR_${mode.toUpperCase()}`];
+  const v = brut === undefined ? NaN : Number(brut);
+  return Number.isFinite(v) && v > 0 ? v : defaut;
+}
+
+export const PLAFONDS_EUR: Record<ModeScan, number> = {
+  get apercu() {
+    return plafond("apercu", 0.25);
+  },
+  get complet() {
+    return plafond("complet", 3);
+  },
+  get controle() {
+    return plafond("controle", 1.5);
+  },
+};
 /**
  * Paires (question × moteur) traitées à chaque sondage du navigateur.
  *
@@ -315,6 +339,11 @@ type ScanRow = {
   website_url: string | null;
 };
 
+/** Ce que lit un visiteur quand la mesure a échoué. Neutre, et actionnable. */
+const MESSAGE_ECHEC_PUBLIC =
+  "La mesure s’est interrompue avant la fin. Relancez-la : les réponses déjà collectées sont conservées, " +
+  "et rien ne vous est facturé. Si cela se reproduit, écrivez-nous et nous la relançons nous-mêmes.";
+
 export async function etatScan(id: string) {
   const { data: scan } = await supabaseAdmin
     .from("scans")
@@ -333,7 +362,11 @@ export async function etatScan(id: string) {
     id: scan.id,
     status: scan.status,
     phase: scan.phase,
-    error: scan.error_message,
+    // Le message technique reste en base pour nous ; le visiteur ne doit jamais
+    // lire « api.anthropic.com → HTTP 529 ». Cela fuiterait notre tuyauterie et
+    // donnerait l'impression d'un produit cassé là où la bonne conduite à tenir
+    // est simplement de réessayer.
+    error: scan.error_message ? MESSAGE_ECHEC_PUBLIC : null,
     brand: scan.brand_name,
     reportToken: scan.report_token,
     questions: questions ?? [],
@@ -515,6 +548,14 @@ async function finaliser(id: string) {
       actions: actions as unknown as never,
     })
     .eq("id", id);
+
+  // La priorité commerciale ne peut être posée qu'ici : l'email est saisi au
+  // lancement, quand le score n'existe pas encore. Sans cette reprise, tout le
+  // pipeline resterait classé « chaud » et le tri ne servirait plus à rien.
+  await supabaseAdmin
+    .from("leads")
+    .update({ priority: prioriteDuScore(s.global) })
+    .eq("scan_id", id);
 }
 
 async function genererActions(
@@ -578,6 +619,28 @@ export async function rapportParJeton(jeton: string) {
   return { scan, questions: questions ?? [], reponses: reponses ?? [], mentions: mentions ?? [], precedent };
 }
 
+/** Priorité commerciale déduite du score : plus il est bas, plus le besoin est fort. */
+export function prioriteDuScore(score: number): "chaud" | "tiede" | "froid" {
+  return score < 25 ? "chaud" : score < 55 ? "tiede" : "froid";
+}
+
+/**
+ * Enregistre l'adresse saisie au lancement d'un scan.
+ *
+ * C'est la contrepartie du scan gratuit : sans email, un visiteur consulte son
+ * score puis disparaît. Le lead porte le scan, donc ses données réelles, ce qui
+ * permet aux relances de citer ses vrais chiffres plutôt qu'un gabarit.
+ *
+ * La priorité n'est PAS calculée ici : à la saisie, le scan vient d'être créé
+ * et n'a pas encore de score. La déduire de zéro classerait tout le monde
+ * « chaud » et rendrait le tri du pipeline inutile. C'est `finaliser` qui la
+ * pose, une fois le score connu.
+ *
+ * Idempotent et tolérant aux échecs : relancer le même scan avec la même
+ * adresse ne crée pas de doublon, et une erreur d'écriture n'empêche jamais le
+ * scan de démarrer. Perdre un email est ennuyeux ; perdre le prospect parce que
+ * la page a planté l'est davantage.
+ */
 export async function enregistrerLead(input: {
   scanId: string;
   email: string;
@@ -592,7 +655,14 @@ export async function enregistrerLead(input: {
   if (!scan) throw new Error("Scan introuvable");
 
   const score = Number(scan.score_global ?? 0);
-  const priorite = score < 25 ? "chaud" : score < 55 ? "tiede" : "froid";
+
+  const { data: deja } = await supabaseAdmin
+    .from("leads")
+    .select("id")
+    .eq("scan_id", scan.id)
+    .ilike("email", input.email)
+    .maybeSingle();
+  if (deja) return { reportToken: scan.report_token };
 
   const { data: lead } = await supabaseAdmin
     .from("leads")
@@ -602,7 +672,10 @@ export async function enregistrerLead(input: {
       first_name: input.prenom ?? null,
       phone: input.telephone ?? null,
       company: scan.brand_name,
-      priority: priorite,
+      // Horodatage du consentement : la preuve exigée par le RGPD vaut à
+      // l'instant de la saisie.
+      consent_at: new Date().toISOString(),
+      ...(scan.score_global === null ? {} : { priority: prioriteDuScore(score) }),
     })
     .select("id")
     .single();

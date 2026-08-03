@@ -109,8 +109,8 @@ export const FAQ = [
     r: "Un seul client par secteur et par zone. Le premier arrivé bloque la place.",
   },
   {
-    q: "Le scan est-il vraiment gratuit et sans inscription ?",
-    r: "Oui. Vous renseignez votre marque, votre secteur et jusqu’à trois concurrents, et la mesure démarre. L’email n’est demandé qu’au moment de débloquer le rapport complet, une fois le score affiché.",
+    q: "Le scan est-il vraiment gratuit ?",
+    r: "Oui, et sans carte bancaire. Vous renseignez votre marque, votre email professionnel, votre secteur et jusqu’à trois concurrents, et la mesure démarre. L’email sert à vous envoyer le rapport et à vous recontacter ; vous pouvez vous désinscrire en un clic dans chaque message.",
   },
   {
     q: "Comment le score est-il calculé ?",
