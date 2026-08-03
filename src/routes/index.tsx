@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ScanForm } from "@/components/ScanForm";
 import { Exhibit } from "@/components/Exhibit";
-import { CALENDAR_URL, SELF_SCORE, SELF_SCORE_DATE } from "@/lib/site";
+import { SELF_SCORE, SELF_SCORE_DATE } from "@/lib/site";
 
 const TITLE = "Citari — scan de visibilité dans les réponses des IA";
 const DESCRIPTION =
