@@ -14,7 +14,77 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      scan_leads: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          scan_id: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          scan_id: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          scan_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "scan_leads_scan_id_fkey"
+            columns: ["scan_id"]
+            isOneToOne: false
+            referencedRelation: "scans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      scans: {
+        Row: {
+          brand: string
+          competitors: string[]
+          created_at: string
+          domain: string
+          id: string
+          responses: Json
+          score: number | null
+          score_detail: Json | null
+          sector: string | null
+          share_of_voice: Json | null
+          status: string
+        }
+        Insert: {
+          brand: string
+          competitors?: string[]
+          created_at?: string
+          domain: string
+          id?: string
+          responses?: Json
+          score?: number | null
+          score_detail?: Json | null
+          sector?: string | null
+          share_of_voice?: Json | null
+          status?: string
+        }
+        Update: {
+          brand?: string
+          competitors?: string[]
+          created_at?: string
+          domain?: string
+          id?: string
+          responses?: Json
+          score?: number | null
+          score_detail?: Json | null
+          sector?: string | null
+          share_of_voice?: Json | null
+          status?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
