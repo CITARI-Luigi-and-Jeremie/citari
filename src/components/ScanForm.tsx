@@ -370,9 +370,17 @@ function Modal({
     return () => document.removeEventListener("keydown", onKey);
   }, [onClose]);
 
+  useEffect(() => {
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, []);
+
   return (
     <div
-      className="anim-veil fixed inset-0 z-50 flex items-end justify-center bg-ink/35 p-0 sm:items-center sm:p-6"
+      className="anim-veil fixed inset-0 z-50 flex items-center justify-center overflow-y-auto overscroll-contain bg-ink/35 p-4 sm:p-6"
       onMouseDown={(e) => {
         if (!ref.current?.contains(e.target as Node)) onClose();
       }}
@@ -382,8 +390,9 @@ function Modal({
         role="dialog"
         aria-modal="true"
         aria-label={STEP_LABEL[step]}
-        className="anim-panel w-full max-w-lg border border-rule-strong bg-paper p-5 sm:p-7"
+        className="anim-panel my-auto max-h-[calc(100dvh-2rem)] w-full max-w-lg overflow-y-auto border border-rule-strong bg-paper p-5 will-change-transform sm:max-h-[calc(100dvh-3rem)] sm:p-7"
       >
+
         <div className="flex items-baseline justify-between">
           <p className="mono text-[13px] text-ink-2">Étape {step} / 3</p>
           <button
