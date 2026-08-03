@@ -61,9 +61,17 @@ export type Moteur = (typeof MOTEURS)[number];
 export const MOTEURS_APERCU = ["ChatGPT", "Gemini"] as const satisfies readonly Moteur[];
 
 /**
- * Contrôle interne J+45 : uniquement les moteurs à recherche, les seuls qui
- * peuvent avoir bougé à mi-parcours. Jamais montré au client comme un score.
+ * Contrôle interne J+45 : uniquement les moteurs qui LISENT LE WEB au moment
+ * de répondre, les seuls susceptibles d'avoir bougé à mi-parcours.
+ *
+ * Grok en est sorti le 2026-08-03 : xAI a supprimé son API de recherche
+ * (`live_search`, HTTP 410) au profit d'un format différent. Il répond
+ * désormais de mémoire, comme Le Chat, donc il ne peut rien révéler à J+45.
+ * ChatGPT et Gemini l'ont rejoint depuis le passage aux clés directes, qui
+ * a débloqué leur recherche web.
+ *
+ * Jamais montré au client comme un score : c'est de la télémétrie.
  */
-export const MOTEURS_CONTROLE = ["Claude", "Perplexity", "Grok"] as const satisfies readonly Moteur[];
+export const MOTEURS_CONTROLE = ["ChatGPT", "Gemini", "Claude", "Perplexity"] as const satisfies readonly Moteur[];
 
 export type ModeScan = "apercu" | "complet" | "controle";

@@ -10,7 +10,9 @@ export type Action = { chantier: string; titre: string; pourquoi: string; effort
 export const PLAFOND_SCANS_PAR_IP = 3;
 // Aperçu : gratuit et public, le plafond est un fusible anti-dérive.
 // Complet : déclenché uniquement pour un rendez-vous réservé, on paye la qualité.
-export const PLAFONDS_EUR: Record<ModeScan, number> = { apercu: 0.25, complet: 3, controle: 1 };
+// Mesurés sur le premier scan réel : 1,06 € pour 24 questions × 6 moteurs.
+// Contrôle J+45 = 4 moteurs à recherche ≈ 0,84 €, d'où un plafond à 1,5 €.
+export const PLAFONDS_EUR: Record<ModeScan, number> = { apercu: 0.25, complet: 3, controle: 1.5 };
 const LOT = 8; // paires (question × moteur) traitées à chaque appel
 const CACHE_JOURS = 30;
 
