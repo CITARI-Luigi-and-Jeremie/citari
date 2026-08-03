@@ -38,6 +38,7 @@
   --ink-2: #5c5a52;
   --signal: #c0371d;
   --signal-tint: #f6dfd8;
+  --verdict: #1f3a5c;
   --rule: color-mix(in srgb, var(--ink) 15%, transparent);
   --rule-strong: color-mix(in srgb, var(--ink) 20%, transparent);
 }
