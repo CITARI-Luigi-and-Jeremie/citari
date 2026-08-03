@@ -273,9 +273,10 @@ function SectorSelect({
         <div
           role="listbox"
           aria-label="Secteur d'activité"
-          className={`absolute left-0 right-0 top-full z-10 mt-1 max-h-[46vh] overflow-y-auto border border-ink bg-paper p-1 ${
+          className={`absolute left-0 right-0 top-full z-30 mt-1 max-h-[min(52dvh,20rem)] overflow-y-auto overscroll-contain border border-ink bg-paper p-1 shadow-[0_10px_24px_-16px_rgb(23_22_15_/_0.35)] ${
             closing ? "anim-menu-out" : "anim-menu-in"
           }`}
+
         >
           {SECTORS.map((s, i) => {
             const selected = s === value;
