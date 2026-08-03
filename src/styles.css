@@ -279,13 +279,36 @@
 }
 
 @utility anim-cell {
-  animation: citari-cell 120ms linear both;
+  animation: citari-cell 180ms cubic-bezier(0.16, 0.8, 0.3, 1) both;
 }
 
 @utility anim-sweep {
   background-color: var(--ink);
   animation: citari-sweep 1400ms cubic-bezier(0.4, 0, 0.2, 1) infinite;
 }
+
+/* Barre de progression : ancrée sur des données réelles, jamais scriptée. */
+@utility progress-rail {
+  position: relative;
+  height: 2px;
+  width: 100%;
+  background-color: var(--rule);
+  overflow: hidden;
+}
+
+@utility progress-fill {
+  display: block;
+  height: 100%;
+  background-color: var(--ink);
+  transition: width 520ms cubic-bezier(0.16, 0.8, 0.3, 1);
+}
+
+/* Colonne de moteur verrouillée (mode aperçu) */
+@utility locked-col {
+  color: var(--ink-2);
+  opacity: 0.45;
+}
+
 
 @media (prefers-reduced-motion: reduce) {
   *,
