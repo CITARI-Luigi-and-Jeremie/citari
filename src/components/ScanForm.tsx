@@ -137,47 +137,14 @@ export function ScanForm() {
             ) : null}
 
             {step === 2 ? (
-              <fieldset>
-                <legend className="mono text-[13px] text-ink-2">Secteur</legend>
-                <div
-                  className="mt-2 grid gap-2"
-                  role="radiogroup"
-                  aria-label="Secteur d'activité"
-                >
-                  {SECTORS.map((s, i) => {
-                    const selected = s === sector;
-                    return (
-                      <button
-                        key={s}
-                        type="button"
-                        role="radio"
-                        aria-checked={selected}
-                        onClick={() => setSector(s)}
-                        className={`option-row ${selected ? "option-row-on" : ""}`}
-                      >
-                        <span
-                          className={`mono text-[13px] ${selected ? "text-signal" : "text-ink-2"}`}
-                        >
-                          {String(i + 1).padStart(2, "0")}
-                        </span>
-                        <span className="flex-1">{s}</span>
-                        <span
-                          aria-hidden
-                          className={`mono text-[13px] transition-opacity duration-150 ${
-                            selected ? "opacity-100 text-signal" : "opacity-0"
-                          }`}
-                        >
-                          ■
-                        </span>
-                      </button>
-                    );
-                  })}
-                </div>
+              <div>
+                <SectorSelect value={sector} onChange={setSector} />
                 <p className="mono mt-3 text-[13px] text-ink-2">
                   Les questions posées aux moteurs sont générées pour ce secteur.
                 </p>
-              </fieldset>
+              </div>
             ) : null}
+
 
             {step === 3 ? (
               <fieldset>
