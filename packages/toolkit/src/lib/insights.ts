@@ -44,8 +44,22 @@ export interface ScanInsights {
   reportUrl: string | null;
   competitors: string[];
   /** Concurrent le plus cité, et sa part de voix. */
-  topCompetitor: { name: string; share: number } | null;
+  topCompetitor: { name: string; share: number; count: number } | null;
   brandShare: number;
+  /**
+   * Nombre brut de citations, marque contre concurrents.
+   *
+   * Les pourcentages font réfléchir, les nombres bruts font mal : « cité 19
+   * fois contre 253 » se comprend sans calcul et se retient. C'est la phrase
+   * qui ouvre les emails de prospection.
+   */
+  citationsCible: number;
+  citationsConcurrents: number;
+  /** Robots d'IA explicitement bloqués par le robots.txt du site. */
+  botsBloques: string[];
+  /** Vrai si l'audit a pu lire le robots.txt : sans lui, ne rien affirmer. */
+  auditFait: boolean;
+  llmstxtAbsent: boolean;
   /** Moteur où la marque est la plus faible (angle d'attaque). */
   weakestEngine: EngineScore | null;
   bestEngine: EngineScore | null;
@@ -73,6 +87,7 @@ type ScanDb = {
   report_token: string | null;
   competitors: unknown;
   share_of_voice: unknown;
+  audit: unknown;
 } & Partial<Record<(typeof ENGINE_SCORE_COLUMN)[EngineLabel], number | null>>;
 
 type PdvItem = { name: string; count: number; share: number; target: boolean };
@@ -133,9 +148,24 @@ export async function buildScanInsights(scanId: string): Promise<ScanInsights> {
   const pdv: PdvItem[] = Array.isArray(scan.share_of_voice) ? (scan.share_of_voice as PdvItem[]) : [];
   const competitorShares = pdv.filter((p) => !p.target).sort((a, b) => b.share - a.share);
   const topCompetitor = competitorShares[0]
-    ? { name: competitorShares[0].name, share: competitorShares[0].share }
+    ? { name: competitorShares[0].name, share: competitorShares[0].share, count: competitorShares[0].count }
     : null;
   const brandShare = pdv.find((p) => p.target)?.share ?? 0;
+  const citationsCible = pdv.find((p) => p.target)?.count ?? 0;
+  const citationsConcurrents = pdv.filter((p) => !p.target).reduce((a, p) => a + p.count, 0);
+
+  // L'audit flash : robots.txt et llms.txt, tels que le moteur les a lus.
+  // `auditFait` distingue « rien de bloqué » de « on n'a pas pu vérifier » :
+  // affirmer qu'un site est ouvert sans l'avoir lu serait une faute.
+  const audit = (scan.audit ?? null) as {
+    ok?: boolean;
+    bots?: Record<string, string>;
+    llmstxt?: boolean;
+  } | null;
+  const auditFait = Boolean(audit?.ok);
+  const botsBloques = audit?.bots
+    ? Object.keys(audit.bots).filter((b) => audit.bots?.[b] === "bloque")
+    : [];
 
   // Un moteur ne compte que s'il a réellement produit un score.
   const engineScores: EngineScore[] = (Object.keys(ENGINE_SCORE_COLUMN) as EngineLabel[])
@@ -193,6 +223,11 @@ export async function buildScanInsights(scanId: string): Promise<ScanInsights> {
     competitors,
     topCompetitor,
     brandShare,
+    citationsCible,
+    citationsConcurrents,
+    botsBloques,
+    auditFait,
+    llmstxtAbsent: auditFait && audit?.llmstxt === false,
     weakestEngine: sorted[0] ?? null,
     bestEngine: sorted[sorted.length - 1] ?? null,
     missedQueries: missed.map((q) => q.text),
