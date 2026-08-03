@@ -60,17 +60,18 @@ function VerbatimText({ verbatim }: { verbatim: Verbatim }) {
 /** 5. VERBATIMS VERROUILLÉS + 6. SECTION RÉVÉLÉE APRÈS EMAIL. */
 export function VerbatimsSection({
   scanId,
-  verbatims,
+  verbatimCount,
 }: {
   scanId: string;
-  verbatims: Verbatim[];
+  verbatimCount: number;
 }) {
   const [email, setEmail] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [status, setStatus] = useState<"idle" | "sending" | "unlocked">("idle");
+  const [verbatims, setVerbatims] = useState<Verbatim[]>([]);
   const submitLead = useServerFn(saveScanLead);
 
-  if (verbatims.length === 0) {
+  if (verbatimCount === 0) {
     return (
       <section className="border-t border-rule">
         <div className="mx-auto max-w-5xl px-5 py-16 sm:px-8 sm:py-20">
@@ -97,7 +98,8 @@ export function VerbatimsSection({
     setError(null);
     setStatus("sending");
     try {
-      await submitLead({ data: { scanId, email: parsed.data } });
+      const result = await submitLead({ data: { scanId, email: parsed.data } });
+      setVerbatims(result.verbatims);
       setStatus("unlocked");
     } catch {
       setStatus("idle");
@@ -116,29 +118,43 @@ export function VerbatimsSection({
           </h2>
 
           <div className="relative mt-10">
-            <ul
-              className={unlocked ? "space-y-8" : "space-y-8 select-none"}
-              style={
-                unlocked
-                  ? undefined
-                  : { filter: "blur(6px)", pointerEvents: "none", userSelect: "none" }
-              }
-              aria-hidden={unlocked ? undefined : true}
-            >
-              {verbatims.map((verbatim, index) => (
-                <li key={index} className="border border-rule-strong bg-paper-2 p-6 sm:p-8">
-                  <blockquote className="quote-serif measure text-[21px] leading-[1.45] sm:text-[24px]">
-                    « <VerbatimText verbatim={verbatim} /> »
-                  </blockquote>
-                  <p className="mono mt-5 text-[13px] text-ink-2">
-                    — {verbatim.engineLabel}
-                    {formatDate(verbatim.askedAt)
-                      ? `, interrogé le ${formatDate(verbatim.askedAt)}`
-                      : ""}
-                  </p>
-                </li>
-              ))}
-            </ul>
+            {unlocked ? (
+              <ul className="space-y-8">
+                {verbatims.map((verbatim, index) => (
+                  <li key={index} className="border border-rule-strong bg-paper-2 p-6 sm:p-8">
+                    <blockquote className="quote-serif measure text-[21px] leading-[1.45] sm:text-[24px]">
+                      « <VerbatimText verbatim={verbatim} /> »
+                    </blockquote>
+                    <p className="mono mt-5 text-[13px] text-ink-2">
+                      — {verbatim.engineLabel}
+                      {formatDate(verbatim.askedAt)
+                        ? `, interrogé le ${formatDate(verbatim.askedAt)}`
+                        : ""}
+                    </p>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              // Aucun texte de réponse n'est envoyé au client avant la capture :
+              // le verrou affiche des blocs neutres, pas des phrases floutées.
+              <ul
+                className="space-y-8 select-none"
+                style={{ filter: "blur(6px)", pointerEvents: "none" }}
+                aria-hidden
+              >
+                {Array.from({ length: verbatimCount }).map((_, index) => (
+                  <li key={index} className="border border-rule-strong bg-paper-2 p-6 sm:p-8">
+                    <div className="space-y-3">
+                      <span className="block h-4 w-full bg-rule" />
+                      <span className="block h-4 w-[92%] bg-rule" />
+                      <span className="block h-4 w-[64%] bg-rule" />
+                    </div>
+                    <span className="mt-5 block h-3 w-40 bg-rule" />
+                  </li>
+                ))}
+              </ul>
+            )}
+
 
             {unlocked ? null : (
               <div className="absolute inset-0 flex items-start justify-center p-4">
