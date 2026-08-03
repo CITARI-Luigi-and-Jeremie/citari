@@ -680,23 +680,19 @@ export async function enregistrerLead(input: {
     .select("id")
     .single();
 
-  if (lead) {
-    const jours = [2, 5, 12];
-    await supabaseAdmin.from("follow_ups").insert(
-      jours.map((j, i) => ({
-        lead_id: lead.id,
-        step: i + 1,
-        due_on: new Date(Date.now() + j * 86400000).toISOString().slice(0, 10),
-        subject: `${scan.brand_name} — votre score de visibilité IA`,
-        body:
-          i === 0
-            ? `Bonjour,\n\nVotre rapport est en ligne : score ${Math.round(score)}/100.\nJe vous propose 30 minutes pour le passer en revue ensemble.\n\n— Citari`
-            : i === 1
-              ? `Bonjour,\n\nUne question rapide : avez-vous regardé les sources citées par Perplexity pour vos concurrents ? C'est là que tout se joue.\n\n— Citari`
-              : `Bonjour,\n\nJe clôture votre dossier sauf contre-ordre. Le rapport reste accessible par votre lien.\n\n— Citari`,
-      })),
-    );
-  }
+  // Aucune relance n'est écrite ici, volontairement.
+  //
+  // Trois messages génériques étaient créés à cet endroit, au moment même où le
+  // lead naît. Depuis que l'email est saisi au lancement du scan, cela se
+  // produit AVANT que le score existe : les textes ne pouvaient donc contenir
+  // aucun chiffre réel. Pire, ils occupaient les étapes 1 à 3, et la commande
+  // `relance` du toolkit, qui rédige les vrais messages à partir des données du
+  // scan, refuse d'écraser une relance existante. La mauvaise version gagnait
+  // systématiquement, et elle n'avait même pas de mention de désinscription.
+  //
+  // Les emails sont désormais préparés par `pnpm toolkit relance`, une fois le
+  // scan terminé et le score connu.
+  void lead;
 
   return { reportToken: scan.report_token };
 }
