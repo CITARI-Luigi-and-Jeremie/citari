@@ -22,7 +22,7 @@ export type ParamsPilote =
       mode: "apercu" | "complet";
       parallele: number;
     }
-  | { scanIds: string[]; parallele: number };
+  | { scanIds: string[]; parallele: number; referenceScanId?: string };
 
 export function executerPilote(params: ParamsPilote, onResultat: (r: any) => void): Promise<any[]> {
   const racine = join(dirname(fileURLToPath(import.meta.url)), "../../../..");

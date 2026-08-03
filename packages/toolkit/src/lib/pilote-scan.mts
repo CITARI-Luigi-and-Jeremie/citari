@@ -20,12 +20,23 @@ const params = JSON.parse(process.argv[2] ?? "{}") as {
   secteur?: string;
   ville?: string | null;
   mode?: "apercu" | "complet";
+  /** Scan de référence, à re-noter sur les moteurs réellement utilisés ici. */
+  referenceScanId?: string;
   parallele: number;
 };
 
-const { creerScan, avancerScan, etatScan, teaserScan } = (await import(
+const { creerScan, avancerScan, etatScan, teaserScan, scoreSurMoteurs } = (await import(
   new URL("./src/lib/orchestrateur.server.ts", `file://${process.cwd()}/`).href
 )) as any;
+const { supabaseAdmin } = (await import(
+  new URL("./src/integrations/supabase/client.server.ts", `file://${process.cwd()}/`).href
+)) as any;
+
+/** Les moteurs effectivement interrogés par un scan, lus depuis ses réponses. */
+async function moteursDuScan(scanId: string): Promise<string[]> {
+  const { data } = await supabaseAdmin.from("responses").select("engine").eq("scan_id", scanId);
+  return [...new Set((data ?? []).map((r: { engine: string }) => r.engine))];
+}
 
 /** Déroule la collecte exactement comme le fait le navigateur, jusqu'au bout. */
 async function derouler(scanId: string) {
@@ -71,7 +82,13 @@ async function traiterScan(scanId: string) {
   try {
     const t = await derouler(scanId);
     if (!t) return { scanId, erreur: "scan non terminé" };
-    return { scanId, ...resume(t) };
+    // Base de comparaison recalculée sur les moteurs réellement interrogés
+    // ici, lus depuis les réponses de ce scan : aucune liste à tenir à jour,
+    // et l'écart ne peut pas mesurer une différence de méthode.
+    const scoreReference = params.referenceScanId
+      ? await scoreSurMoteurs(params.referenceScanId, await moteursDuScan(scanId))
+      : null;
+    return { scanId, scoreReference, ...resume(t) };
   } catch (e) {
     return { scanId, erreur: e instanceof Error ? e.message : "erreur inconnue" };
   }
