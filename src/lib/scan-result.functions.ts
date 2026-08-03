@@ -1,20 +1,19 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
-import { publicClient } from "@/lib/supabase-public.server";
-
 
 export const getScan = createServerFn({ method: "GET" })
   .inputValidator((input) => z.object({ id: z.string().uuid() }).parse(input))
   .handler(async ({ data }) => {
-    const supabase = publicClient();
-    const { data: scan, error } = await supabase
-      .from("scans")
-      .select("id, brand, domain, status, score, score_detail, share_of_voice, responses")
-      .eq("id", data.id)
-      .maybeSingle();
+    const { readScanLive } = await import("@/lib/scan-live.server");
+    const live = await readScanLive(data.id);
+    if (!live) return null;
 
-    if (error) throw new Error(error.message);
-    return scan;
+    let verbatimCount = 0;
+    if (live.scan.status === "done") {
+      const { countVerbatims } = await import("@/lib/scan-verbatims.server");
+      verbatimCount = await countVerbatims(data.id);
+    }
+    return { ...live, verbatimCount };
   });
 
 export const saveScanLead = createServerFn({ method: "POST" })
@@ -27,11 +26,8 @@ export const saveScanLead = createServerFn({ method: "POST" })
       .parse(input),
   )
   .handler(async ({ data }) => {
-    const supabase = publicClient();
-    const { error } = await supabase
-      .from("scan_leads")
-      .insert({ scan_id: data.scanId, email: data.email.toLowerCase() });
-
-    if (error) throw new Error(error.message);
-    return { ok: true };
+    const { insertScanLead } = await import("@/lib/scan-live.server");
+    const { buildVerbatims } = await import("@/lib/scan-verbatims.server");
+    await insertScanLead(data.scanId, data.email);
+    return { verbatims: await buildVerbatims(data.scanId) };
   });
