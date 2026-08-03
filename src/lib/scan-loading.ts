@@ -3,6 +3,32 @@
  * Aucune valeur n'est inventée : tout est calculé depuis l'état serveur.
  */
 
+import { ENGINES } from "./scan-result";
+
+/** Ordre canonique d'affichage des colonnes. */
+const ENGINE_ORDER = ENGINES.map((engine) => engine.key as string);
+
+/**
+ * Les colonnes sont déduites des moteurs réellement présents en base.
+ * Mode aperçu (≤ 2 moteurs) : les moteurs manquants sont renvoyés verrouillés,
+ * c'est le mécanisme de conversion, pas un défaut d'affichage.
+ */
+export function deriveEngines(seen: string[]): { engines: string[]; locked: string[] } {
+  const present = Array.from(new Set(seen.filter(Boolean)));
+  if (present.length === 0) return { engines: ENGINE_ORDER, locked: [] };
+
+  const rank = (key: string) => {
+    const index = ENGINE_ORDER.indexOf(key);
+    return index === -1 ? ENGINE_ORDER.length : index;
+  };
+  const engines = present.sort((a, b) => rank(a) - rank(b));
+  const locked =
+    engines.length <= 2 ? ENGINE_ORDER.filter((key) => !engines.includes(key)) : [];
+
+  return { engines, locked };
+}
+
+
 export const PHASE_LABELS = {
   generating_queries: "GÉNÉRATION DES QUESTIONS DE VOS ACHETEURS",
   running: "INTERROGATION DES SIX MOTEURS",
