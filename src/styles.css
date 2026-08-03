@@ -14,6 +14,7 @@
   --color-ink-2: var(--ink-2);
   --color-signal: var(--signal);
   --color-signal-tint: var(--signal-tint);
+  --color-verdict: var(--verdict);
   --color-rule: var(--rule);
   --color-rule-strong: var(--rule-strong);
 
