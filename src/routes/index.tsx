@@ -73,27 +73,6 @@ function Index() {
         </div>
       </section>
 
-      <section className="border-t border-rule">
-        <div className="mx-auto max-w-5xl px-5 py-16 sm:px-8 sm:py-24">
-          <div className="border border-ink p-6 sm:p-12">
-            <h2 className="measure text-[26px] sm:text-[34px]">
-              Le scan gratuit s'arrête ici. Le diagnostic complet se fait en direct.
-            </h2>
-            <p className="measure mt-6 text-ink-2">
-              30 minutes en visio : les 24 questions une par une, les sources sur lesquelles
-              les IA s'appuient pour recommander vos concurrents, et les trois corrections
-              prioritaires pour votre cas. Ce n'est pas un rendez-vous commercial : vous
-              repartez avec votre diagnostic, que vous travailliez avec nous ou non. Et si
-              votre score est bon, on vous le dit et on ne vous vend rien.
-            </p>
-            <p className="mt-8">
-              <a href={CALENDAR_URL} className="cta">
-                Réserver mes 30 minutes
-              </a>
-            </p>
-          </div>
-        </div>
-      </section>
 
       <section className="border-t border-rule">
         <div className="mx-auto max-w-5xl px-5 py-16 sm:px-8 sm:py-24">
