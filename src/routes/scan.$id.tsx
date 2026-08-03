@@ -14,8 +14,9 @@ export const Route = createFileRoute("/scan/$id")({
       { title: "Mesure en cours — Citari" },
       {
         name: "description",
-        content:
-          "Interrogation de ChatGPT, Claude, Gemini et Perplexity sur 24 questions d’intention d’achat.",
+        // Volontairement sans chiffres : le nombre de questions et la liste des
+        // moteurs dépendent du mode, et cette balise est statique.
+        content: "Interrogation des moteurs d’IA sur des questions d’intention d’achat.",
       },
       { name: "robots", content: "noindex" },
       { property: "og:title", content: "Mesure en cours — Citari" },
@@ -200,7 +201,11 @@ function Teaser({ id }: { id: string }) {
       <header className="mt-14 border-b border-rule pb-8">
         <Label>score de visibilité IA · {data.marque}</Label>
         <p className="mt-3 text-[15px] text-ink-2">
-          Sur 24 questions posées par vos acheteurs potentiels
+          {/* Le vrai compte, jamais une constante : l'aperçu pose 20 questions
+              et le diagnostic complet 24. Annoncer 24 sur un aperçu était un
+              chiffre faux affiché au prospect, sur la page qui doit justement
+              établir que nous mesurons pour de vrai. */}
+          Sur {data.comptage.questions} questions posées par vos acheteurs potentiels
         </p>
         <div className="mt-5 flex flex-wrap items-end gap-x-14 gap-y-4">
           <div className="font-display text-[130px] font-light leading-[0.76] tracking-[-0.03em] sm:text-[196px]">
