@@ -89,7 +89,7 @@ export function ScanForm() {
             onChange={(e) => setDomain(e.target.value)}
             required
           />
-          <button type="submit" className="cta shrink-0">
+          <button type="submit" className="cta shrink-0 transition-opacity hover:opacity-90">
             Lancer le scan gratuit
           </button>
         </div>
@@ -111,92 +111,118 @@ export function ScanForm() {
             next();
           }}
         >
-          {step === 1 ? (
-            <div className="grid gap-4">
-              <Field
-                id="w-domain"
-                label="Adresse de votre site"
-                value={domain}
-                onChange={(v) => {
-                  setDomain(v);
-                  setBrand(brandFromDomain(v));
-                }}
-                placeholder="votre-site.fr"
-                autoFocus
-                required
-              />
-              <Field
-                id="w-brand"
-                label="Nom de la marque"
-                value={brand}
-                onChange={setBrand}
-                required
-              />
-            </div>
-          ) : null}
-
-          {step === 2 ? (
-            <div>
-              <label htmlFor="w-sector" className="mono block text-[13px] text-ink-2">
-                Secteur
-              </label>
-              <select
-                id="w-sector"
-                className="field mt-1.5"
-                value={sector}
-                onChange={(e) => setSector(e.target.value)}
-              >
-                {SECTORS.map((s) => (
-                  <option key={s} value={s}>
-                    {s}
-                  </option>
-                ))}
-              </select>
-              <p className="mono mt-3 text-[13px] text-ink-2">
-                Les questions posées aux moteurs sont générées pour ce secteur.
-              </p>
-            </div>
-          ) : null}
-
-          {step === 3 ? (
-            <fieldset>
-              <legend className="mono text-[13px] text-ink-2">
-                Concurrents (optionnel, 3 maximum)
-              </legend>
-              <div className="mt-1.5 grid gap-2">
-                {competitors.map((value, index) => (
-                  <div key={index}>
-                    <label htmlFor={`w-competitor-${index}`} className="sr-only">
-                      Concurrent {index + 1}
-                    </label>
-                    <input
-                      id={`w-competitor-${index}`}
-                      className="field"
-                      value={value}
-                      onChange={(e) => {
-                        const nextValues = [...competitors];
-                        nextValues[index] = e.target.value;
-                        setCompetitors(nextValues);
-                      }}
-                    />
-                  </div>
-                ))}
+          <div key={step} className="anim-step">
+            {step === 1 ? (
+              <div className="grid gap-4">
+                <Field
+                  id="w-domain"
+                  label="Adresse de votre site"
+                  value={domain}
+                  onChange={(v) => {
+                    setDomain(v);
+                    setBrand(brandFromDomain(v));
+                  }}
+                  placeholder="votre-site.fr"
+                  autoFocus
+                  required
+                />
+                <Field
+                  id="w-brand"
+                  label="Nom de la marque"
+                  value={brand}
+                  onChange={setBrand}
+                  required
+                />
               </div>
-            </fieldset>
-          ) : null}
+            ) : null}
+
+            {step === 2 ? (
+              <fieldset>
+                <legend className="mono text-[13px] text-ink-2">Secteur</legend>
+                <div
+                  className="mt-2 grid gap-2"
+                  role="radiogroup"
+                  aria-label="Secteur d'activité"
+                >
+                  {SECTORS.map((s, i) => {
+                    const selected = s === sector;
+                    return (
+                      <button
+                        key={s}
+                        type="button"
+                        role="radio"
+                        aria-checked={selected}
+                        onClick={() => setSector(s)}
+                        className={`option-row ${selected ? "option-row-on" : ""}`}
+                      >
+                        <span
+                          className={`mono text-[13px] ${selected ? "text-signal" : "text-ink-2"}`}
+                        >
+                          {String(i + 1).padStart(2, "0")}
+                        </span>
+                        <span className="flex-1">{s}</span>
+                        <span
+                          aria-hidden
+                          className={`mono text-[13px] transition-opacity duration-150 ${
+                            selected ? "opacity-100 text-signal" : "opacity-0"
+                          }`}
+                        >
+                          ✕
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+                <p className="mono mt-3 text-[13px] text-ink-2">
+                  Les questions posées aux moteurs sont générées pour ce secteur.
+                </p>
+              </fieldset>
+            ) : null}
+
+            {step === 3 ? (
+              <fieldset>
+                <legend className="mono text-[13px] text-ink-2">
+                  Concurrents (optionnel, 3 maximum)
+                </legend>
+                <div className="mt-1.5 grid gap-2">
+                  {competitors.map((value, index) => (
+                    <div key={index}>
+                      <label htmlFor={`w-competitor-${index}`} className="sr-only">
+                        Concurrent {index + 1}
+                      </label>
+                      <input
+                        id={`w-competitor-${index}`}
+                        className="field transition-colors focus:border-ink"
+                        value={value}
+                        onChange={(e) => {
+                          const nextValues = [...competitors];
+                          nextValues[index] = e.target.value;
+                          setCompetitors(nextValues);
+                        }}
+                      />
+                    </div>
+                  ))}
+                </div>
+              </fieldset>
+            ) : null}
+          </div>
 
           <div className="mt-6 flex items-center gap-3">
             {step > 1 ? (
               <button
                 type="button"
-                className="mono text-[13px] text-ink-2 underline underline-offset-4"
+                className="mono text-[13px] text-ink-2 underline underline-offset-4 transition-colors hover:text-ink"
                 onClick={() => setStep((s) => (s === 3 ? 2 : 1))}
                 disabled={status === "sending"}
               >
                 ← Retour
               </button>
             ) : null}
-            <button type="submit" className="cta ml-auto" disabled={status === "sending"}>
+            <button
+              type="submit"
+              className="cta ml-auto transition-opacity hover:opacity-90 disabled:opacity-60"
+              disabled={status === "sending"}
+            >
               {step === 3
                 ? status === "sending"
                   ? "Lancement…"
@@ -240,7 +266,7 @@ function Field({
       </label>
       <input
         id={id}
-        className="field mt-1.5"
+        className="field mt-1.5 transition-colors focus:border-ink"
         value={value}
         placeholder={placeholder}
         required={required}
@@ -274,7 +300,7 @@ function Modal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end justify-center bg-ink/40 p-0 sm:items-center sm:p-6"
+      className="anim-veil fixed inset-0 z-50 flex items-end justify-center bg-ink/35 p-0 sm:items-center sm:p-6"
       onMouseDown={(e) => {
         if (!ref.current?.contains(e.target as Node)) onClose();
       }}
@@ -284,19 +310,34 @@ function Modal({
         role="dialog"
         aria-modal="true"
         aria-label={STEP_LABEL[step]}
-        className="w-full max-w-lg border border-rule-strong bg-paper p-5 sm:p-7"
+        className="anim-panel w-full max-w-lg border border-rule-strong bg-paper p-5 sm:p-7"
       >
         <div className="flex items-baseline justify-between">
           <p className="mono text-[13px] text-ink-2">Étape {step} / 3</p>
           <button
             type="button"
             onClick={onClose}
-            className="mono text-[13px] text-ink-2 underline underline-offset-4"
+            className="mono text-[13px] text-ink-2 underline underline-offset-4 transition-colors hover:text-ink"
           >
             Fermer
           </button>
         </div>
-        <h2 className="mt-2 text-[22px] sm:text-[26px]">{STEP_LABEL[step]}</h2>
+
+        <div
+          className="mt-3 h-[3px] w-full bg-paper-2"
+          role="progressbar"
+          aria-valuemin={1}
+          aria-valuemax={3}
+          aria-valuenow={step}
+          aria-label="Progression du scan"
+        >
+          <div
+            className="h-full bg-ink transition-[width] duration-500 ease-out"
+            style={{ width: `${(step / 3) * 100}%` }}
+          />
+        </div>
+
+        <h2 className="mt-4 text-[22px] sm:text-[26px]">{STEP_LABEL[step]}</h2>
         <form onSubmit={onSubmit} className="mt-5">
           {children}
         </form>
