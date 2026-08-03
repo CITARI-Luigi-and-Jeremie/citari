@@ -66,7 +66,7 @@ function ScanPage() {
   if (!data)
     return <Notice title="Scan introuvable." body="Ce lien ne correspond à aucun scan." />;
 
-  const { scan, queries, meta, verbatimCount } = data;
+  const { scan, verbatimCount } = data;
 
   if (scan.status === "error")
     return (
@@ -77,14 +77,8 @@ function ScanPage() {
     );
 
   if (scan.status !== "done" || scan.score === null)
-    return (
-      <LoadingScreen
-        scan={scan}
-        queries={queries}
-        meta={meta}
-        unstable={errorUpdateCount >= 10}
-      />
-    );
+    return <LoadingScreen live={data} unstable={errorUpdateCount >= 10} />;
+
 
   if (sawScoring.current && !held) return <section className="min-h-[60vh]" />;
 
