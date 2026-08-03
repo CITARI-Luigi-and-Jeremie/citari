@@ -5,8 +5,9 @@ import { recordDeliverable, resolveClient } from "../lib/context.js";
  * Contrôle interne J+45 : mi-parcours du délai d'intégration des moteurs.
  *
  * Ouvre un scan en mode « controle » : mêmes questions que le scan initial,
- * mais uniquement Claude, Perplexity et Grok, les trois moteurs qui lisent le
- * web en direct et peuvent donc avoir déjà bougé. Coût ~0,40 €.
+ * mais uniquement les quatre moteurs qui lisent le web au moment de répondre
+ * (ChatGPT, Gemini, Claude, Perplexity) : les seuls susceptibles d'avoir déjà
+ * bougé à mi-parcours. Coût ~0,84 €, déduit du premier scan réel.
  *
  * ⚠ Jamais montré au client comme un score. C'est de la télémétrie : si rien
  * ne bouge à J+45, on réoriente l'effort citations avant qu'il ne soit trop
@@ -53,7 +54,7 @@ export async function controle45(clientRef: string): Promise<void> {
   });
 
   console.log(`\nContrôle J+45 ouvert pour ${client.brand} (interne, jamais montré au client).`);
-  console.log(`Mêmes questions que le scan initial, moteurs : Claude, Perplexity, Grok.`);
+  console.log(`Mêmes questions que le scan initial, moteurs : ChatGPT, Gemini, Claude, Perplexity.`);
   console.log(`Ouvrez cette page pour lancer la collecte :`);
   console.log(`→ ${scanUrl}`);
 }

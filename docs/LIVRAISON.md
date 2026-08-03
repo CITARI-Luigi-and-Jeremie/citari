@@ -12,11 +12,19 @@ J+90. Ce que la machine fait toute seule, ce que nous faisons à la main.
 questions, elles sont gelées, le re-scan reposera exactement les mêmes.
 Chaque question où le client est absent est une cible précise.
 
-**Règle 2 : 3 moteurs bougent vite, 3 bougent lentement.** Perplexity, Grok
-et Claude lisent le web au moment de répondre : ils peuvent changer d'avis en
-quelques semaines. ChatGPT, Gemini et Le Chat répondent de mémoire : ils
-mettent des mois. Le progrès à J+90 viendra surtout des 3 premiers, et on le
-dit au client dès le cadrage :
+**Règle 2 : 4 moteurs bougent vite, 2 bougent lentement.**
+
+| Moteurs | Comment ils répondent | Délai pour bouger |
+|---|---|---|
+| **ChatGPT, Gemini, Claude, Perplexity** | ils lisent le web au moment de répondre, et citent leurs sources | **semaines** |
+| Grok, Le Chat | de mémoire, depuis leur entraînement | mois |
+
+Mesuré sur le premier scan réel : les quatre premiers ont ramené 739 sources,
+les deux autres zéro. Grok en faisait partie jusqu'au 2026-08-03, date à
+laquelle xAI a supprimé son API de recherche.
+
+Le progrès à J+90 viendra surtout des quatre premiers, et on le dit au client
+dès le cadrage :
 
 > « Les moteurs qui lisent le web bougeront d'abord. Ceux qui répondent de
 > mémoire suivront : c'est le travail qui paye sur douze mois. »
@@ -136,8 +144,9 @@ On ne crée plus rien, on fait aboutir.
 **Le seul moment où l'on peut encore infléchir le J+90.** Au-delà de J+60,
 une nouvelle action n'a plus le temps d'être intégrée.
 
-- `controle-45` : mini-mesure interne, mêmes questions, uniquement Claude,
-  Perplexity et Grok — les trois seuls qui peuvent déjà avoir bougé (~0,40 €)
+- `controle-45` : mini-mesure interne, mêmes questions, uniquement les quatre
+  moteurs à recherche (ChatGPT, Gemini, Claude, Perplexity) — les seuls qui
+  peuvent déjà avoir bougé (~0,84 €)
 - Analyser : ont-ils bougé par rapport au scan initial ?
 - Si plat, diagnostiquer : robots bloqués ? contenus indexés ? citations
   réellement obtenues ?
@@ -188,7 +197,7 @@ checklist divergent, c'est ce document qui fait foi.
 | **Le back-office** | ✅ Reconstruit sur le schéma réel : leads priorisés, conversion en client (crée le sprint + la checklist des 90 jours), fiche client, relances, livrables, citations avec statuts, ouverture du re-scan J+90. Il n'exécute jamais de mesure lui-même : le seul moteur est celui du front. |
 | **verify-citations** | ✅ Crawle chaque cible, cherche la marque (entités HTML décodées, comparaison normalisée), met à jour les statuts. Une cible « obtenue » où la marque a disparu est reclassée : le rapport n'affirme jamais une citation invérifiable. |
 | **verify-contents** | ✅ Chaque contenu publié : la page répond, porte du JSON-LD, figure dans llms.txt. |
-| **controle-45** | ✅ Mode « controle » côté moteur : mêmes questions que le scan initial, Claude + Perplexity + Grok seulement, plafond 1 €, ni audit ni miroir. Le re-scan J+90 ne le confond jamais avec lui. |
+| **controle-45** | ✅ Mode « controle » côté moteur : mêmes questions que le scan initial, les 4 moteurs à recherche seulement, plafond 1,5 €, ni audit ni miroir. Le re-scan J+90 ne le confond jamais avec lui. |
 | **sprint-report à preuves** | ✅ Le rapport intègre les passages réels des robots (table crawler_hits, alimentée par crawler-log) et les vérifications en ligne. |
 | **La checklist des 90 jours** | ✅ Encodée dans l'admin (créée à chaque conversion) : S1 technique, S2 contenu, S3 placement, S4 preuves, puis J+45 et J+90. C'est l'exécutable de ce document. |
 
