@@ -570,6 +570,16 @@ export async function teaserScan(id: string) {
     .maybeSingle();
   if (!scan || scan.status !== "done") return null;
 
+  // Le verbatim est la contrepartie de l'email : tant qu'aucun lead n'existe
+  // pour ce scan, il ne QUITTE PAS le serveur. Un floutage CSS ne protège
+  // rien — le texte reste dans la charge utile et s'ouvre en deux clics dans
+  // les outils du navigateur.
+  const { count: nbLeads } = await supabaseAdmin
+    .from("leads")
+    .select("id", { count: "exact", head: true })
+    .eq("scan_id", id);
+  const emailCapture = (nbLeads ?? 0) > 0;
+
   const [{ data: mentions }, { data: questions }, { count: nbReponses }] = await Promise.all([
     supabaseAdmin.from("mentions").select("brand, is_target, engine, verbatim, query_id").eq("scan_id", id),
     supabaseAdmin.from("queries").select("id, text, intent").eq("scan_id", id).order("rank"),
@@ -628,8 +638,19 @@ export async function teaserScan(id: string) {
       questionsPerdues: questionsPerdues.length,
     },
     pdv: (Array.isArray(scan.share_of_voice) ? scan.share_of_voice : []) as unknown as PdvItem[],
+    emailCapture,
+    // Avant l'email : on annonce qu'un verbatim existe, sans le livrer.
+    // Le front affiche l'amorce et le cadenas ; le texte n'est envoyé
+    // qu'une fois le lead enregistré.
     verbatim: preuve
-      ? { texte: preuve.verbatim as string, moteur: preuve.engine, marque: preuve.brand, question: question?.text ?? "" }
+      ? emailCapture
+        ? {
+            texte: preuve.verbatim as string,
+            moteur: preuve.engine,
+            marque: preuve.brand,
+            question: question?.text ?? "",
+          }
+        : { verrouille: true as const, moteur: preuve.engine, marque: preuve.brand }
       : null,
     // Les aguiches du diagnostic complet.
     aguiches: {

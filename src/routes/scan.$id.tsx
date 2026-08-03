@@ -231,7 +231,19 @@ function Teaser({ id }: { id: string }) {
           <h2 className="text-[30px] leading-none">
             Voici ce que l’IA a répondu. Mot pour mot.
           </h2>
-          {data.verbatim ? (
+          {data.verbatim && "verrouille" in data.verbatim ? (
+            /* Le texte n'est pas encore descendu du serveur : on annonce ce
+               qui attend derrière l'email, sans rien livrer. */
+            <figure className="mt-5 border-t border-rule-strong pt-3">
+              <blockquote className="mt-3 font-display text-[24px] leading-[1.25] text-ink-3">
+                « … »
+              </blockquote>
+              <figcaption className="num mt-3 text-[11px] text-ink-3">
+                {data.verbatim.moteur} recommande {data.verbatim.marque}. La phrase exacte se
+                débloque avec votre email.
+              </figcaption>
+            </figure>
+          ) : data.verbatim ? (
             <figure className="mt-5 border-t border-rule-strong pt-3">
               <p className="num text-[12px] text-ink-3">{fr(data.verbatim.question)}</p>
               <blockquote className="mt-3 font-display text-[24px] leading-[1.25]">
