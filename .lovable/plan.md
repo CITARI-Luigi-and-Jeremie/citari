@@ -8,11 +8,16 @@ simulerai pas.
 
 ## Précision sur « connecter GitHub »
 
-Ce que je peux lire aujourd'hui, c'est le **projet Lovable** de Luigi, [CITARI](/projects/150f9fa5-b533-49e7-a797-19c52f94db36),
-parce qu'il est dans le même espace de travail : j'y vois bien `src/lib/orchestrateur.server.ts`
-(avec `etatScan`, `rapportParJeton`, `enregistrerLead`, `teaserScan`) et `src/lib/scan.functions.ts`.
-Ce n'est pas la même chose qu'une connexion GitHub : ce projet-ci n'est relié à aucun dépôt,
-donc rien de ce que je fais ne se pousse chez Luigi, et rien de ce qu'il pousse n'arrive ici.
+Non, je n'ai pas accès à `github.com/LuigiRevelli/citari.git` : c'est un dépôt privé, et je
+n'ai pas d'identifiants GitHub. En revanche j'ai accès au **projet Lovable** de Luigi,
+[CITARI](/projects/150f9fa5-b533-49e7-a797-19c52f94db36), parce qu'il est dans le même espace
+de travail — et comme ce projet est synchronisé avec ce dépôt, je lis le même code : j'y vois
+bien `src/lib/orchestrateur.server.ts` (`etatScan`, `rapportParJeton`, `enregistrerLead`,
+`teaserScan`) et `src/lib/scan.functions.ts`. Donc pour la lecture du moteur, tout va bien.
+
+Ce qui manque, c'est l'inverse : **ce projet-ci n'est relié à aucun dépôt**, donc rien de ce
+que je construis ne remonte chez Luigi.
+
 
 Deux choses distinctes, donc :
 
