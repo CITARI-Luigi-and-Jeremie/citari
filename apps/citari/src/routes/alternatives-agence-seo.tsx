@@ -52,7 +52,10 @@ const OPTIONS: { titre: string; cout: string; delai: string; pour: string; contr
   },
   {
     titre: "Le Sprint GEO",
-    cout: `${euros(2900)}, paiement unique 50/50`,
+    // « HT » n'est pas un détail : sans lui, un client de bonne foi peut
+    // comprendre 2 900 € tout compris et découvrir 580 € de TVA à la facture.
+    // La mention figure sur la page d'offre, elle doit figurer partout.
+    cout: `${euros(2900)} HT, paiement unique 50/50`,
     delai: "30 jours de mission, mesure à J+90",
     pour: "Mesure avant/après sur un échantillon figé, livrables énumérés à l’avance, aucun abonnement.",
     contre: "Un fondateur seul : le nombre de missions simultanées est limité, et l’agence n’a pas encore d’historique client à montrer.",
