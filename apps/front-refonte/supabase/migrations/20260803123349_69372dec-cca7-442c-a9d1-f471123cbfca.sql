@@ -1,3 +1,0 @@
-GRANT INSERT ON public.scans TO anon, authenticated;
-CREATE POLICY "Anyone can request a scan" ON public.scans FOR INSERT TO anon, authenticated
-WITH CHECK (status = 'pending' AND score IS NULL AND score_detail IS NULL AND share_of_voice IS NULL AND char_length(domain) <= 255 AND char_length(brand) <= 120 AND array_length(competitors, 1) IS DISTINCT FROM 0 AND coalesce(array_length(competitors, 1), 0) <= 3);
