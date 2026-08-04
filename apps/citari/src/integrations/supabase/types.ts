@@ -592,6 +592,7 @@ export type Database = {
           city: string | null
           competitors: string[]
           completed_at: string | null
+          concurrent_classes: Json
           created_at: string
           audit: Json | null
           domain_key: string | null
@@ -629,6 +630,7 @@ export type Database = {
           city?: string | null
           competitors?: string[]
           completed_at?: string | null
+          concurrent_classes?: Json
           created_at?: string
           audit?: Json | null
           domain_key?: string | null
@@ -666,6 +668,7 @@ export type Database = {
           city?: string | null
           competitors?: string[]
           completed_at?: string | null
+          concurrent_classes?: Json
           created_at?: string
           audit?: Json | null
           domain_key?: string | null

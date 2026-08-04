@@ -308,6 +308,66 @@ export async function analyser(texte: string, marque: string): Promise<Analyse> 
   }
 }
 
+/**
+ * Classe les concurrents relevés selon qu'ils sont atteignables ou non.
+ *
+ * Une PME lyonnaise de quinze personnes ne prendra jamais la place de Deloitte.
+ * Annoncer « vos concurrents sont cités 707 fois » sans distinguer est exact et
+ * inutile : le chiffre écrase, il n'indique aucune action. Séparer rend le
+ * rapport actionnable, et surtout permet à la priorisation des contenus de voir
+ * qu'une question occupée par les seuls grands groupes est PLUS gagnable
+ * localement qu'une question disputée par cinq cabinets de la même taille.
+ *
+ * Le classement est **relatif au client**, jamais absolu : Pennylane est un
+ * rival direct pour un cabinet en ligne et un simple outil pour un cabinet
+ * traditionnel. D'où le contexte passé au modèle.
+ *
+ * ⚠ Ceci ne touche PAS au score. La formule est publiée et le J+90 n'a de sens
+ * que si elle ne bouge jamais. On change ce qu'on montre et ce qu'on priorise.
+ */
+export type ClasseConcurrent = "rival" | "geant" | "outil";
+
+export async function classerConcurrents(
+  contexte: { marque: string; secteur: string; ville?: string | null },
+  noms: string[],
+): Promise<Record<string, ClasseConcurrent>> {
+  // Sans clé ou sans concurrent, tout reste « rival » : c'est le classement le
+  // plus prudent, celui qui ne retire rien au client.
+  if (!process.env.GOOGLE_AI_API_KEY || noms.length === 0) return {};
+  try {
+    const { text: raw } = await gemini_(
+      process.env.GEMINI_ANALYSE_MODEL || "gemini-3.1-flash-lite",
+      "Tu classes des entreprises citées par une IA, du point de vue d'une entreprise précise. " +
+        'Renvoie UNIQUEMENT du JSON valide de la forme {"classes":[{"nom":"","classe":"rival|geant|outil"}]}. ' +
+        "rival = concurrent de taille et de nature comparables, que l'entreprise suivie peut réellement " +
+        "dépasser dans les réponses d'IA. " +
+        "geant = groupe national ou international, réseau majeur, acteur dont la notoriété est hors " +
+        "de portée d'une PME. " +
+        "outil = logiciel, plateforme, place de marché, annuaire : occupe la réponse mais n'est pas un " +
+        "prestataire de même nature. " +
+        "En cas de doute, réponds rival : mieux vaut sur-estimer un concurrent que rassurer à tort.",
+      `Entreprise suivie : « ${contexte.marque} », secteur « ${contexte.secteur} »${
+        contexte.ville ? `, à ${contexte.ville}` : ""
+      }.\n\nEntreprises à classer :\n${noms.slice(0, 60).join("\n")}`,
+      { maxTokens: 2048 },
+    );
+    const match = raw.match(/\{[\s\S]*\}/);
+    const parsed = JSON.parse(match ? match[0] : "{}") as {
+      classes?: { nom: string; classe: string }[];
+    };
+    const out: Record<string, ClasseConcurrent> = {};
+    for (const c of parsed.classes ?? []) {
+      if (!c?.nom) continue;
+      out[c.nom] = c.classe === "geant" || c.classe === "outil" ? c.classe : "rival";
+    }
+    return out;
+  } catch {
+    // Un classement raté ne doit jamais faire échouer un scan : sans lui, tout
+    // reste « rival » et le rapport ressemble à ce qu'il était avant.
+    return {};
+  }
+}
+
 /** Génération de l'échantillon : 24 questions d'intention d'achat, figées ensuite. */
 export async function genererQuestions(input: {
   marque: string;

@@ -15,6 +15,17 @@ export async function prioriser(clientRef: string): Promise<void> {
   if (!client.initialScanId) throw new Error(`${client.brand} n'a pas de scan initial rattaché.`);
   const db = getDb();
 
+  // Le classement des concurrents, posé par le moteur à la fin du scan.
+  // Un géant national et un cabinet voisin n'encombrent pas de la même façon :
+  // le premier occupe la réponse sans être délogeable, le second est le vrai
+  // combat. Sans cette distinction, une question tenue par les seuls Big Four
+  // paraît saturée alors qu'elle est justement la plus prenable localement.
+  const scanRow = unwrap(
+    await db.from("scans").select("concurrent_classes").eq("id", client.initialScanId).single()
+  ) as { concurrent_classes: Record<string, string> | null };
+  const classes = scanRow.concurrent_classes ?? {};
+  const estRival = (marque: string) => (classes[marque] ?? "rival") === "rival";
+
   const queries = unwrap(
     await db.from("queries").select("id,text,intent").eq("scan_id", client.initialScanId).order("rank")
   ) as { id: string; text: string; intent: string | null }[];
@@ -28,7 +39,7 @@ export async function prioriser(clientRef: string): Promise<void> {
   // Le concurrent dominant du scan : la marque non-cible la plus citée.
   const compte = new Map<string, number>();
   for (const m of mentions) {
-    if (!m.is_target) compte.set(m.brand, (compte.get(m.brand) ?? 0) + 1);
+    if (!m.is_target && estRival(m.brand)) compte.set(m.brand, (compte.get(m.brand) ?? 0) + 1);
   }
   const dominant = [...compte.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] ?? null;
 
@@ -43,7 +54,10 @@ export async function prioriser(clientRef: string): Promise<void> {
   // Médiane des marques citées, toutes questions confondues : c'est l'étalon
   // de l'encombrement du secteur. Sans lui, la notation sature.
   const parQuestion = queries.map(
-    (q) => new Set(mentions.filter((m) => m.query_id === q.id && !m.is_target).map((m) => m.brand)).size
+    (q) =>
+      new Set(
+        mentions.filter((m) => m.query_id === q.id && !m.is_target && estRival(m.brand)).map((m) => m.brand)
+      ).size
   ).sort((a, b) => a - b);
   const medianeMarques = parQuestion.length ? (parQuestion[Math.floor(parQuestion.length / 2)] ?? 0) : 0;
 
@@ -54,7 +68,10 @@ export async function prioriser(clientRef: string): Promise<void> {
     const ms = mentions.filter((m) => m.query_id === q.id);
     if (ms.some((m) => m.is_target)) continue; // le client y est déjà
 
-    const marques = [...new Set(ms.filter((m) => !m.is_target).map((m) => m.brand))];
+    // Seuls les rivaux comptent dans l'encombrement. Les géants et les outils
+    // restent visibles dans le rapport, mais ils ne doivent pas décourager
+    // d'écrire sur une question qu'un acteur local peut prendre.
+    const marques = [...new Set(ms.filter((m) => !m.is_target && estRival(m.brand)).map((m) => m.brand))];
     const domaines: string[] = [];
     for (const r of rs) {
       const urls = Array.isArray(r.sources)
@@ -85,7 +102,7 @@ export async function prioriser(clientRef: string): Promise<void> {
   }
 
   perdues.sort((a, b) => b.g.score - a.g.score);
-  console.log(`Encombrement du secteur : ${medianeMarques} marques citées par question (médiane).\n`);
+  console.log(`Encombrement : ${medianeMarques} rivaux comparables par question (médiane), géants et outils exclus.\n`);
 
   const md = `# Questions gagnables — ${client.brand}
 

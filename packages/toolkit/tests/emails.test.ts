@@ -16,6 +16,7 @@ const scan = (patch: Partial<ScanInsights> = {}): ScanInsights =>
     brandShare: 0.1,
     citationsCible: 12,
     citationsConcurrents: 108,
+    citationsRivaux: 41,
     botsBloques: [],
     auditFait: true,
     llmstxtAbsent: false,
@@ -54,6 +55,24 @@ describe("situationDuScan", () => {
 
   it("traite en invisible une marque jamais citée", () => {
     expect(situationDuScan(scan({ citationsCible: 0, brandShare: 0 }))).toBe("invisible");
+  });
+});
+
+describe("concurrents comparables", () => {
+  it("annonce l'écart avec les rivaux, jamais avec le total", () => {
+    // 108 concurrents dont 41 comparables : c'est 41 qu'il faut écrire.
+    // Annoncer 108 à une PME quand les deux tiers sont des Big Four est exact
+    // et décourageant, et surtout ça n'indique aucune action possible.
+    const e = emailImmediat(scan({ citationsCible: 0, brandShare: 0 }));
+    expect(e.body).toContain("41 fois");
+    expect(e.body).not.toContain("108");
+  });
+
+  it("reste prudent quand rien n'est classé", () => {
+    // Sans classement, citationsRivaux vaut le total : on ne retire rien au
+    // client, et le message reste celui d'avant.
+    const e = emailImmediat(scan({ citationsCible: 0, brandShare: 0, citationsRivaux: 108 }));
+    expect(e.body).toContain("108 fois");
   });
 });
 

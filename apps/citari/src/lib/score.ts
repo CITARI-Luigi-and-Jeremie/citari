@@ -86,8 +86,20 @@ export function calculerScore(
   };
 }
 
-/** Part de voix = mentions de la marque / mentions totales (marque + concurrents). */
-export function partDeVoix(mentions: LigneMention[]): { name: string; count: number; share: number; target: boolean }[] {
+/**
+ * Part de voix = mentions de la marque / mentions totales (marque + concurrents).
+ *
+ * `classe` sépare les concurrents atteignables des autres. Elle est posée après
+ * coup par `finaliser`, à partir de `classerConcurrents` : cette fonction reste
+ * un pur calcul, sans appel réseau, pour rester testable et déterministe.
+ */
+export function partDeVoix(mentions: LigneMention[]): {
+  name: string;
+  count: number;
+  share: number;
+  target: boolean;
+  classe?: "rival" | "geant" | "outil";
+}[] {
   const compte = new Map<string, { count: number; target: boolean }>();
   for (const m of mentions) {
     const clef = m.brand.trim();

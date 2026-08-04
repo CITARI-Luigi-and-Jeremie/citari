@@ -42,6 +42,10 @@ CREATE TABLE scans (
   share_of_voice jsonb NOT NULL DEFAULT '[]',
   actions jsonb NOT NULL DEFAULT '[]',
   audit jsonb, miroir jsonb,
+  -- Classement des concurrents relatif au client suivi :
+  -- { "Deloitte": "geant", "Cabinet Odicéo": "rival", "QuickBooks": "outil" }
+  -- Vide = tout est rival, le parti pris prudent.
+  concurrent_classes jsonb NOT NULL DEFAULT '{}',
   report_token text NOT NULL DEFAULT encode(gen_random_bytes(24), 'hex'),
   previous_scan_id uuid,
   ip_hash text,

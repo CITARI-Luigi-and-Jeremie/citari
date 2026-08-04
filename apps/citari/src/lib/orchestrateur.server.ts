@@ -1,10 +1,17 @@
 import { createHash } from "node:crypto";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
-import { interroger, analyser, genererQuestions, questionMiroir } from "@/lib/moteurs.server";
+import { interroger, analyser, genererQuestions, questionMiroir, classerConcurrents } from "@/lib/moteurs.server";
 import { calculerScore, partDeVoix, type LigneMention } from "@/lib/score";
 import { MOTEURS, MOTEURS_APERCU, MOTEURS_CONTROLE, type ModeScan, type Moteur } from "@/lib/typo";
 
-export type PdvItem = { name: string; count: number; share: number; target: boolean };
+export type PdvItem = {
+  name: string;
+  count: number;
+  share: number;
+  target: boolean;
+  /** Posé par finaliser : rival atteignable, géant hors de portée, ou outil. */
+  classe?: "rival" | "geant" | "outil";
+};
 export type Action = { chantier: string; titre: string; pourquoi: string; effort: string };
 
 export const PLAFOND_SCANS_PAR_IP = 2;
@@ -524,6 +531,25 @@ async function finaliser(id: string) {
   const s = calculerScore(reponses ?? [], lignes);
   const pdv = partDeVoix(lignes);
 
+  // Classement des concurrents, du point de vue de CE client.
+  //
+  // On ne classe que les plus cités : ils portent l'essentiel du comptage, et
+  // la longue traîne reste « rival » par défaut, ce qui est prudent. Un scan
+  // relève parfois 500 marques distinctes, les envoyer toutes coûterait cher
+  // pour classer des noms vus une seule fois.
+  const lesPlusCites = [...new Set(lignes.filter((m) => !m.is_target).map((m) => m.brand))]
+    .map((nom) => ({ nom, n: lignes.filter((m) => m.brand === nom).length }))
+    .sort((a, b) => b.n - a.n)
+    .slice(0, 40)
+    .map((x) => x.nom);
+  const classes = await classerConcurrents(
+    { marque: scan?.brand_name ?? "", secteur: scan?.sector ?? "", ville: scan?.city },
+    lesPlusCites,
+  );
+  for (const item of pdv) {
+    if (!item.target) item.classe = classes[item.name] ?? "rival";
+  }
+
   const actions = await genererActions(scan?.brand_name ?? "", scan?.sector ?? "", s.global, pdv);
 
   await supabaseAdmin
@@ -545,6 +571,7 @@ async function finaliser(id: string) {
       reco_rate: s.recoRate,
       sentiment_score: s.sentiment,
       share_of_voice: pdv,
+      concurrent_classes: classes as unknown as never,
       actions: actions as unknown as never,
     })
     .eq("id", id);
@@ -710,7 +737,7 @@ export async function teaserScan(id: string) {
   const { data: scan } = await supabaseAdmin
     .from("scans")
     .select(
-      "id, brand_name, status, mode, score_global, score_chatgpt, score_claude, score_gemini, score_perplexity, score_grok, score_mistral, share_of_voice, audit, miroir",
+      "id, brand_name, status, mode, score_global, score_chatgpt, score_claude, score_gemini, score_perplexity, score_grok, score_mistral, share_of_voice, concurrent_classes, audit, miroir",
     )
     .eq("id", id)
     .maybeSingle();
@@ -735,6 +762,16 @@ export async function teaserScan(id: string) {
   const lignes = mentions ?? [];
   const nbCible = lignes.filter((m) => m.is_target).length;
   const nbConcurrents = lignes.length - nbCible;
+
+  // L'écart qui compte n'est pas celui avec TOUS les concurrents, c'est celui
+  // avec ceux que le client peut réellement dépasser. Annoncer 707 à un cabinet
+  // de quinze personnes quand la moitié sont des Big Four est exact et
+  // décourageant : le chiffre écrase au lieu d'indiquer une action.
+  // Non classé = rival, le parti pris prudent.
+  const classement = (scan.concurrent_classes ?? {}) as Record<string, string>;
+  const nbRivaux = lignes.filter((m) => !m.is_target && (classement[m.brand] ?? "rival") === "rival").length;
+  const nbGeants = lignes.filter((m) => !m.is_target && classement[m.brand] === "geant").length;
+  const nbOutils = lignes.filter((m) => !m.is_target && classement[m.brand] === "outil").length;
 
   // Questions où la marque n'apparaît sur aucun moteur : l'argument du manque.
   const citeSur = new Set(lignes.filter((m) => m.is_target).map((m) => m.query_id));
@@ -781,6 +818,9 @@ export async function teaserScan(id: string) {
       questions: (questions ?? []).length,
       citationsCible: nbCible,
       citationsConcurrents: nbConcurrents,
+      citationsRivaux: nbRivaux,
+      citationsGeants: nbGeants,
+      citationsOutils: nbOutils,
       questionsPerdues: questionsPerdues.length,
     },
     pdv: (Array.isArray(scan.share_of_voice) ? scan.share_of_voice : []) as unknown as PdvItem[],

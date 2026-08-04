@@ -55,6 +55,14 @@ export interface ScanInsights {
    */
   citationsCible: number;
   citationsConcurrents: number;
+  /**
+   * Citations des seuls concurrents comparables, géants et outils exclus.
+   *
+   * C'est ce chiffre qu'il faut annoncer. Dire à un cabinet de quinze personnes
+   * que ses concurrents sont cités 707 fois est exact et décourageant quand la
+   * moitié sont des Big Four : ça écrase au lieu d'indiquer une action.
+   */
+  citationsRivaux: number;
   /** Robots d'IA explicitement bloqués par le robots.txt du site. */
   botsBloques: string[];
   /** Vrai si l'audit a pu lire le robots.txt : sans lui, ne rien affirmer. */
@@ -88,6 +96,7 @@ type ScanDb = {
   competitors: unknown;
   share_of_voice: unknown;
   audit: unknown;
+  concurrent_classes: unknown;
 } & Partial<Record<(typeof ENGINE_SCORE_COLUMN)[EngineLabel], number | null>>;
 
 type PdvItem = { name: string; count: number; share: number; target: boolean };
@@ -146,13 +155,23 @@ export async function buildScanInsights(scanId: string): Promise<ScanInsights> {
 
   // `share_of_voice` est un tableau [{name, count, share, target}], pas un dictionnaire.
   const pdv: PdvItem[] = Array.isArray(scan.share_of_voice) ? (scan.share_of_voice as PdvItem[]) : [];
-  const competitorShares = pdv.filter((p) => !p.target).sort((a, b) => b.share - a.share);
+
+  // Classement posé par le moteur. Non classé = rival, le parti pris prudent.
+  const classes = (scan.concurrent_classes ?? {}) as Record<string, string>;
+  const estRival = (nom: string) => (classes[nom] ?? "rival") === "rival";
+
+  // Le concurrent mis en avant doit être un rival : nommer Deloitte à une PME
+  // ne lui apprend rien et ne lui donne aucune prise.
+  const competitorShares = pdv
+    .filter((p) => !p.target && estRival(p.name))
+    .sort((a, b) => b.share - a.share);
   const topCompetitor = competitorShares[0]
     ? { name: competitorShares[0].name, share: competitorShares[0].share, count: competitorShares[0].count }
     : null;
   const brandShare = pdv.find((p) => p.target)?.share ?? 0;
   const citationsCible = pdv.find((p) => p.target)?.count ?? 0;
-  const citationsConcurrents = pdv.filter((p) => !p.target).reduce((a, p) => a + p.count, 0);
+  const citationsConcurrents = mentions.filter((m) => !m.is_target).length;
+  const citationsRivaux = mentions.filter((m) => !m.is_target && estRival(m.brand)).length;
 
   // L'audit flash : robots.txt et llms.txt, tels que le moteur les a lus.
   // `auditFait` distingue « rien de bloqué » de « on n'a pas pu vérifier » :
@@ -225,6 +244,7 @@ export async function buildScanInsights(scanId: string): Promise<ScanInsights> {
     brandShare,
     citationsCible,
     citationsConcurrents,
+    citationsRivaux,
     botsBloques,
     auditFait,
     llmstxtAbsent: auditFait && audit?.llmstxt === false,

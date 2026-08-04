@@ -195,7 +195,7 @@ export function emailImmediat(i: ScanInsights): Email {
         `Bonjour,`,
         `Votre scan est terminé : ${i.score}/100.`,
         lienRapport(i),
-        `Le chiffre qui compte n'est pas le score, c'est l'écart. Sur les ${i.totalQueries} questions d'achat testées dans votre secteur, ${i.brand} est cité ${jamais ? "zéro fois" : `${i.citationsCible} fois`}. Vos concurrents, ${i.citationsConcurrents} fois.${
+        `Le chiffre qui compte n'est pas le score, c'est l'écart. Sur les ${i.totalQueries} questions d'achat testées dans votre secteur, ${i.brand} est cité ${jamais ? "zéro fois" : `${i.citationsCible} fois`}. Vos concurrents comparables, ${i.citationsRivaux} fois.${
           i.topCompetitor ? ` ${i.topCompetitor.name} à lui seul en récolte ${i.topCompetitor.count}.` : ""
         }`,
         i.missedCount >= i.totalQueries
@@ -223,7 +223,7 @@ export function emailImmediat(i: ScanInsights): Email {
         `${i.brand} est cité ${i.citationsCible} fois, ce qui vous place déjà devant beaucoup d'entreprises de votre secteur. Votre problème est ailleurs, et il est plus précis.`,
         i.missedCount > 0
           ? `Vous êtes totalement absent sur ${i.missedCount} des ${i.totalQueries} questions testées. Par exemple : « ${i.missedQueries[0]} ». Sur celle-là, les moteurs citent ${rival(i)} et pas vous.`
-          : `Vos concurrents sont cités ${i.citationsConcurrents} fois contre ${i.citationsCible} pour vous.`,
+          : `Vos concurrents comparables sont cités ${i.citationsRivaux} fois contre ${i.citationsCible} pour vous.`,
         verbatim(i),
         defiVerifiable(i),
         `C'est la situation où le travail paye le plus vite. Quand une marque existe déjà mais manque les bonnes questions, il s'agit de combler des trous identifiés, pas de tout construire.`,
@@ -278,7 +278,7 @@ export function emailsDeRelance(i: ScanInsights): Email[] {
         `Vous avez mesuré la visibilité IA de ${i.brand} il y a deux jours.`,
         i.missedCount > 0
           ? `Une question, sincèrement : saviez-vous que vous n'apparaissiez sur aucune des ${i.missedCount} questions où vos prospects comparent avant de choisir ?`
-          : `Une question, sincèrement : saviez-vous que vos concurrents étaient cités ${i.citationsConcurrents} fois contre ${i.citationsCible} pour vous ?`,
+          : `Une question, sincèrement : saviez-vous que vos concurrents comparables étaient cités ${i.citationsRivaux} fois contre ${i.citationsCible} pour vous ?`,
         `Si la réponse est non, ça vaut trente minutes. Si c'est oui et que c'est assumé, dites-le-moi et je ne vous relance plus.`,
         `${BOOKING()}`,
         pied(),
