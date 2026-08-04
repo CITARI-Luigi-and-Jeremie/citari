@@ -588,6 +588,7 @@ export type Database = {
         Row: {
           actions: Json
           avg_position: number | null
+          brand_aliases: Json
           brand_name: string
           city: string | null
           competitors: string[]
@@ -664,6 +665,7 @@ export type Database = {
         Update: {
           actions?: Json
           avg_position?: number | null
+          brand_aliases?: Json
           brand_name?: string
           city?: string | null
           competitors?: string[]

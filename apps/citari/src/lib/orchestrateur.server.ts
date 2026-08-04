@@ -1,7 +1,7 @@
 import { createHash } from "node:crypto";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { interroger, analyser, genererQuestions, questionMiroir, classerConcurrents } from "@/lib/moteurs.server";
-import { calculerScore, partDeVoix, type LigneMention } from "@/lib/score";
+import { calculerScore, partDeVoix, regrouperMarques, type LigneMention } from "@/lib/score";
 import { MOTEURS, MOTEURS_APERCU, MOTEURS_CONTROLE, type ModeScan, type Moteur } from "@/lib/typo";
 
 export type PdvItem = {
@@ -529,7 +529,11 @@ async function finaliser(id: string) {
   ]);
   const lignes = (mentions ?? []) as unknown as LigneMention[];
   const s = calculerScore(reponses ?? [], lignes);
-  const pdv = partDeVoix(lignes);
+  // Les variantes d'écriture se regroupent AVANT tout comptage : « Amarris »
+  // et « Amarris Direct » sont une seule entreprise, et la compter deux fois
+  // fausserait la part de voix comme la priorisation des contenus.
+  const alias = regrouperMarques(lignes);
+  const pdv = partDeVoix(lignes, alias);
 
   // Classement des concurrents, du point de vue de CE client.
   //
@@ -537,8 +541,9 @@ async function finaliser(id: string) {
   // la longue traîne reste « rival » par défaut, ce qui est prudent. Un scan
   // relève parfois 500 marques distinctes, les envoyer toutes coûterait cher
   // pour classer des noms vus une seule fois.
-  const lesPlusCites = [...new Set(lignes.filter((m) => !m.is_target).map((m) => m.brand))]
-    .map((nom) => ({ nom, n: lignes.filter((m) => m.brand === nom).length }))
+  const nomRetenu = (b: string) => alias[b] ?? b;
+  const lesPlusCites = [...new Set(lignes.filter((m) => !m.is_target).map((m) => nomRetenu(m.brand)))]
+    .map((nom) => ({ nom, n: lignes.filter((m) => nomRetenu(m.brand) === nom).length }))
     .sort((a, b) => b.n - a.n)
     .slice(0, 40)
     .map((x) => x.nom);
@@ -571,6 +576,7 @@ async function finaliser(id: string) {
       reco_rate: s.recoRate,
       sentiment_score: s.sentiment,
       share_of_voice: pdv,
+      brand_aliases: alias as unknown as never,
       concurrent_classes: classes as unknown as never,
       actions: actions as unknown as never,
     })
@@ -737,7 +743,7 @@ export async function teaserScan(id: string) {
   const { data: scan } = await supabaseAdmin
     .from("scans")
     .select(
-      "id, brand_name, status, mode, score_global, score_chatgpt, score_claude, score_gemini, score_perplexity, score_grok, score_mistral, share_of_voice, concurrent_classes, audit, miroir",
+      "id, brand_name, status, mode, score_global, score_chatgpt, score_claude, score_gemini, score_perplexity, score_grok, score_mistral, share_of_voice, concurrent_classes, brand_aliases, audit, miroir",
     )
     .eq("id", id)
     .maybeSingle();
@@ -769,9 +775,11 @@ export async function teaserScan(id: string) {
   // décourageant : le chiffre écrase au lieu d'indiquer une action.
   // Non classé = rival, le parti pris prudent.
   const classement = (scan.concurrent_classes ?? {}) as Record<string, string>;
-  const nbRivaux = lignes.filter((m) => !m.is_target && (classement[m.brand] ?? "rival") === "rival").length;
-  const nbGeants = lignes.filter((m) => !m.is_target && classement[m.brand] === "geant").length;
-  const nbOutils = lignes.filter((m) => !m.is_target && classement[m.brand] === "outil").length;
+  const aliasScan = (scan.brand_aliases ?? {}) as Record<string, string>;
+  const classeDe = (b: string) => classement[aliasScan[b] ?? b] ?? "rival";
+  const nbRivaux = lignes.filter((m) => !m.is_target && classeDe(m.brand) === "rival").length;
+  const nbGeants = lignes.filter((m) => !m.is_target && classeDe(m.brand) === "geant").length;
+  const nbOutils = lignes.filter((m) => !m.is_target && classeDe(m.brand) === "outil").length;
 
   // Questions où la marque n'apparaît sur aucun moteur : l'argument du manque.
   const citeSur = new Set(lignes.filter((m) => m.is_target).map((m) => m.query_id));

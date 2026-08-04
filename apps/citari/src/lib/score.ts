@@ -87,13 +87,79 @@ export function calculerScore(
 }
 
 /**
+ * Regroupe les variantes d'écriture d'une même entreprise.
+ *
+ * Les moteurs nomment rarement une entreprise deux fois pareil. Relevé sur nos
+ * données réelles : 177 marques sur 1220 sont des variantes d'une autre, et
+ * une seule société apparaissait six fois (« Amarris », « Amarris Direct »,
+ * « Amarris Contact », « Amarris Contact Lyon », « Amarris Groupe », « Amarris
+ * Expertise Comptable »).
+ *
+ * Trois dégâts, dont le dernier coûte de l'argent au client. La part de voix
+ * sous-estime les leaders puisque leur poids est éclaté. La comparaison J+90
+ * se fausse si l'IA écrit « Amarris » en janvier et « Amarris Direct » en
+ * avril. Et la priorisation croit qu'une question oppose six concurrents là où
+ * il n'y en a qu'un, donc elle la juge ingagnable et fait écrire le mauvais
+ * contenu.
+ *
+ * La règle est volontairement prudente : forme compacte identique, ou préfixe
+ * d'au moins quatre caractères. Le seuil écarte les faux positifs sur les
+ * sigles courts (« EY », « BDO »), où une inclusion libre rapprocherait
+ * n'importe quoi. Mieux vaut laisser deux variantes séparées que fusionner
+ * deux entreprises distinctes.
+ *
+ * Le nom retenu est le plus cité, pas le plus court : c'est la façon dont les
+ * moteurs désignent réellement l'entreprise, donc celle que le client
+ * reconnaîtra dans son rapport.
+ *
+ * @returns variante → nom retenu, pour les seules marques regroupées.
+ */
+export function regrouperMarques(mentions: { brand: string }[]): Record<string, string> {
+  const compte = new Map<string, number>();
+  for (const m of mentions) {
+    const nom = m.brand.trim();
+    if (nom) compte.set(nom, (compte.get(nom) ?? 0) + 1);
+  }
+
+  const compact = (s: string) =>
+    s
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[̀-ͯ]/g, "")
+      .replace(/[^a-z0-9]/g, "");
+
+  // Du plus cité au moins cité : le premier rencontré devient le nom retenu,
+  // et les suivants s'y rattachent.
+  const noms = [...compte.entries()].sort((a, b) => b[1] - a[1] || a[0].length - b[0].length).map(([n]) => n);
+
+  const alias: Record<string, string> = {};
+  const retenus: { nom: string; cle: string }[] = [];
+  for (const nom of noms) {
+    const cle = compact(nom);
+    if (cle.length < 2) continue;
+    const parent = retenus.find(
+      (r) =>
+        r.cle === cle ||
+        (r.cle.length >= 4 && cle.startsWith(r.cle)) ||
+        (cle.length >= 4 && r.cle.startsWith(cle)),
+    );
+    if (parent) alias[nom] = parent.nom;
+    else retenus.push({ nom, cle });
+  }
+  return alias;
+}
+
+/**
  * Part de voix = mentions de la marque / mentions totales (marque + concurrents).
  *
  * `classe` sépare les concurrents atteignables des autres. Elle est posée après
  * coup par `finaliser`, à partir de `classerConcurrents` : cette fonction reste
  * un pur calcul, sans appel réseau, pour rester testable et déterministe.
  */
-export function partDeVoix(mentions: LigneMention[]): {
+export function partDeVoix(
+  mentions: LigneMention[],
+  alias: Record<string, string> = {},
+): {
   name: string;
   count: number;
   share: number;
@@ -102,8 +168,11 @@ export function partDeVoix(mentions: LigneMention[]): {
 }[] {
   const compte = new Map<string, { count: number; target: boolean }>();
   for (const m of mentions) {
-    const clef = m.brand.trim();
-    if (!clef) continue;
+    const brut = m.brand.trim();
+    if (!brut) continue;
+    // Les variantes se rangent sous le nom retenu : sans ça, une entreprise
+    // citée sous six écritures paraît six fois plus faible qu'elle ne l'est.
+    const clef = alias[brut] ?? brut;
     const prev = compte.get(clef) ?? { count: 0, target: m.is_target };
     compte.set(clef, { count: prev.count + 1, target: prev.target || m.is_target });
   }

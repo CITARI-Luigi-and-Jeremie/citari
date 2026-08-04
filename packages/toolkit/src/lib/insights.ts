@@ -97,6 +97,7 @@ type ScanDb = {
   share_of_voice: unknown;
   audit: unknown;
   concurrent_classes: unknown;
+  brand_aliases: unknown;
 } & Partial<Record<(typeof ENGINE_SCORE_COLUMN)[EngineLabel], number | null>>;
 
 type PdvItem = { name: string; count: number; share: number; target: boolean };
@@ -158,7 +159,10 @@ export async function buildScanInsights(scanId: string): Promise<ScanInsights> {
 
   // Classement posé par le moteur. Non classé = rival, le parti pris prudent.
   const classes = (scan.concurrent_classes ?? {}) as Record<string, string>;
-  const estRival = (nom: string) => (classes[nom] ?? "rival") === "rival";
+  // Variantes d'écriture regroupées sous le nom retenu par le moteur.
+  const alias = (scan.brand_aliases ?? {}) as Record<string, string>;
+  const nomRetenu = (nom: string) => alias[nom] ?? nom;
+  const estRival = (nom: string) => (classes[nomRetenu(nom)] ?? "rival") === "rival";
 
   // Le concurrent mis en avant doit être un rival : nommer Deloitte à une PME
   // ne lui apprend rien et ne lui donne aucune prise.

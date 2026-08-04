@@ -46,6 +46,10 @@ CREATE TABLE scans (
   -- { "Deloitte": "geant", "Cabinet Odicéo": "rival", "QuickBooks": "outil" }
   -- Vide = tout est rival, le parti pris prudent.
   concurrent_classes jsonb NOT NULL DEFAULT '{}',
+  -- Variantes d'écriture regroupées sous le nom retenu :
+  -- { "Exco Lyon": "Exco", "Fiducial Expertise": "Fiducial" }
+  -- Les noms bruts restent intacts dans `mentions` : c'est la mesure.
+  brand_aliases jsonb NOT NULL DEFAULT '{}',
   report_token text NOT NULL DEFAULT encode(gen_random_bytes(24), 'hex'),
   previous_scan_id uuid,
   ip_hash text,
