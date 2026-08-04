@@ -1,0 +1,446 @@
+@import "tailwindcss" source(none);
+@source "../src";
+
+/*
+ * Citari — système « maison ».
+ * Porcelaine, graphite, bronze. Beaucoup d'air, très peu de traits,
+ * une seule couleur d'accent. Aucune couleur en dur dans les composants.
+ */
+
+@theme inline {
+  --color-background: var(--paper);
+  --color-foreground: var(--ink);
+  --color-paper: var(--paper);
+  --color-paper-2: var(--paper-2);
+  --color-paper-3: var(--paper-3);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-ink-3: var(--ink-3);
+  --color-rule: var(--rule);
+  --color-rule-strong: var(--rule-strong);
+  --color-bordeaux: var(--accent);
+  --color-accent-line: var(--accent);
+  --color-bordeaux-wash: var(--accent-wash);
+  --color-highlight: var(--accent-wash);
+  --color-primary: var(--ink);
+  --color-primary-foreground: var(--paper);
+  --color-muted: var(--paper-2);
+  --color-muted-foreground: var(--ink-3);
+  --color-border: var(--rule);
+  --color-input: var(--rule-strong);
+  --color-ring: var(--accent);
+  --color-card: var(--surface);
+  --color-card-foreground: var(--ink);
+  --color-popover: var(--surface);
+  --color-popover-foreground: var(--ink);
+  --color-accent: var(--paper-2);
+  --color-accent-foreground: var(--ink);
+  --color-secondary: var(--paper-2);
+  --color-secondary-foreground: var(--ink);
+  --color-destructive: var(--danger);
+  --color-destructive-foreground: var(--paper);
+
+  --font-display: "Cormorant Garamond", "Iowan Old Style", Georgia, serif;
+  --font-sans: "Manrope", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+
+  --radius-sm: 2px;
+  --radius-md: 3px;
+  --radius-lg: 4px;
+  --radius-xl: 6px;
+
+  --shadow-soft: var(--elev-1);
+  --shadow-lift: var(--elev-2);
+}
+
+:root {
+  /* Surfaces : blanc cassé légèrement chaud. */
+  --paper: #faf9f6;
+  --paper-2: oklch(0.965 0.005 85);
+  --paper-3: oklch(0.938 0.006 85);
+  --surface: oklch(1 0 0);
+
+  /* Traitement de fond : réglages. */
+  --grain-opacity: 0.03;
+  --champ-opacity: 0.045;
+
+
+  /* Encre : graphite profond, jamais de noir pur. */
+  --ink: oklch(0.215 0.008 250);
+  --ink-2: oklch(0.375 0.008 250);
+  --ink-3: oklch(0.52 0.008 250);
+
+  /* Filets : quasi invisibles. */
+  --rule: oklch(0.912 0.003 250);
+  --rule-strong: oklch(0.845 0.004 250);
+
+  /* Accent unique : bronze patiné. */
+  --accent: oklch(0.545 0.072 68);
+  --accent-wash: oklch(0.955 0.022 78);
+  --danger: oklch(0.5 0.13 25);
+
+  --elev-1: 0 1px 2px oklch(0.215 0.008 250 / 0.04), 0 6px 20px -12px oklch(0.215 0.008 250 / 0.14);
+  --elev-2: 0 1px 2px oklch(0.215 0.008 250 / 0.05), 0 22px 48px -24px oklch(0.215 0.008 250 / 0.22);
+
+  /* ——— Marque Citari : tout le logotype se règle ici. ——— */
+  --marque-couleur: var(--ink);
+  --marque-accent: var(--accent);
+  --marque-h: 20px; /* hauteur du logotype */
+  --marque-ratio: 2.61; /* largeur / hauteur du signe */
+  --marque-opacite: 0.92;
+  --marque-opacite-hover: 1;
+  --marque-ecart: 0.42em; /* signe ↔ point */
+  --marque-point-taille: 0.115em; /* relatif à la hauteur */
+  --marque-transition: 460ms cubic-bezier(0.2, 0.7, 0.2, 1);
+
+
+  --radius: 3px;
+}
+
+
+@layer base {
+  * {
+    border-color: var(--rule);
+    min-width: 0;
+  }
+
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    background-color: var(--paper);
+    color: var(--ink);
+    font-family: var(--font-sans);
+    font-size: 16px;
+    line-height: 1.6;
+    font-weight: 400;
+    letter-spacing: -0.005em;
+    font-feature-settings: "kern" 1;
+  }
+
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+    font-weight: 300;
+    letter-spacing: -0.018em;
+    line-height: 1.04;
+  }
+
+  ::selection {
+    background: var(--accent-wash);
+    color: var(--ink);
+  }
+
+  input,
+  select,
+  textarea,
+  button {
+    font: inherit;
+    color: inherit;
+  }
+
+  :focus-visible {
+    outline: 1px solid var(--accent);
+    outline-offset: 2px;
+  }
+}
+
+/* Chiffres : toujours tabulaires, jamais brutaux. */
+@utility num {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+  letter-spacing: -0.03em;
+}
+
+/* Micro-titre : sans-serif, capitales fines, très espacées. */
+@utility label-xs {
+  font-family: var(--font-sans);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+
+@utility rule-t {
+  border-top: 1px solid var(--rule);
+}
+
+@utility rule-b {
+  border-bottom: 1px solid var(--rule);
+}
+
+/* Surface élevée : la carte remplace le cadre. */
+@utility carte {
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--elev-1);
+}
+
+@utility carte-lift {
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--elev-2);
+}
+
+@utility ink-link {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  text-decoration-thickness: 1px;
+  text-decoration-color: var(--rule-strong);
+  transition:
+    color 200ms cubic-bezier(0.2, 0.7, 0.2, 1),
+    text-decoration-color 200ms cubic-bezier(0.2, 0.7, 0.2, 1);
+
+  &:hover {
+    color: var(--accent);
+    text-decoration-color: var(--accent);
+  }
+}
+
+/* ——— Logotype Citari : entièrement piloté par les variables --marque-*. ——— */
+@utility marque {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--marque-ecart);
+  opacity: var(--marque-opacite);
+  line-height: 1;
+  user-select: none;
+  transition: opacity var(--marque-transition);
+}
+
+/* Le signe est peint par masque alpha : sa couleur suit --marque-couleur. */
+@utility marque-signe {
+  display: block;
+  height: var(--marque-h);
+  width: calc(var(--marque-h) * var(--marque-ratio));
+  background-color: var(--marque-couleur);
+  mask-image: var(--marque-src);
+  mask-repeat: no-repeat;
+  mask-position: left center;
+  mask-size: contain;
+  -webkit-mask-image: var(--marque-src);
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-position: left center;
+  -webkit-mask-size: contain;
+  transition: background-color var(--marque-transition);
+}
+
+/* Point bronze final : le seul écart de couleur autorisé dans la marque. */
+@utility marque-point {
+  display: block;
+  width: calc(var(--marque-h) * var(--marque-point-taille));
+  height: calc(var(--marque-h) * var(--marque-point-taille));
+  border-radius: 999px;
+  background: var(--marque-accent);
+  transform: translateY(calc(var(--marque-h) * 0.26));
+  transition:
+    background-color var(--marque-transition),
+    transform var(--marque-transition);
+}
+
+
+@utility marque-i {
+  &:hover {
+    opacity: var(--marque-opacite-hover);
+  }
+
+  &:hover .marque-point {
+    background: var(--marque-accent);
+    transform: translateY(calc(var(--marque-h) * 0.26)) scale(1.35);
+  }
+}
+
+
+@keyframes geo-rise {
+
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@utility rise {
+  animation: geo-rise 520ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Apparition au défilement : discrète, une seule fois. */
+@utility apparait {
+  opacity: 0;
+  transform: translateY(16px);
+  transition:
+    opacity 760ms cubic-bezier(0.16, 1, 0.3, 1),
+    transform 760ms cubic-bezier(0.16, 1, 0.3, 1);
+  transition-delay: var(--delai, 0ms);
+  will-change: opacity, transform;
+
+  &[data-vu="1"] {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Lien de navigation : filet bronze qui se déploie. */
+@utility lien-nav {
+  position: relative;
+  transition: color 240ms cubic-bezier(0.2, 0.7, 0.2, 1);
+
+  &::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -5px;
+    height: 1px;
+    background: var(--accent);
+    transform: scaleX(0);
+    transform-origin: right center;
+    transition: transform 380ms cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+
+  &:hover {
+    color: var(--ink);
+  }
+
+  &:hover::after {
+    transform: scaleX(1);
+    transform-origin: left center;
+  }
+}
+
+/* Surface interactive : élévation à peine perceptible. */
+@utility carte-i {
+  transition:
+    box-shadow 460ms cubic-bezier(0.2, 0.7, 0.2, 1),
+    transform 460ms cubic-bezier(0.2, 0.7, 0.2, 1),
+    border-color 460ms cubic-bezier(0.2, 0.7, 0.2, 1);
+
+  &:hover {
+    box-shadow: var(--elev-2);
+    border-color: var(--rule-strong);
+    transform: translateY(-2px);
+  }
+}
+
+/* Ligne de liste : la marge gauche respire au survol. */
+@utility ligne-i {
+  transition:
+    background-color 380ms cubic-bezier(0.2, 0.7, 0.2, 1),
+    padding-left 380ms cubic-bezier(0.2, 0.7, 0.2, 1);
+
+  &:hover {
+    background-color: var(--paper-2);
+    padding-left: 0.75rem;
+  }
+}
+
+/* Sélecteur éditorial dans le bloc de preuve. */
+@utility select-edito {
+  appearance: none;
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid color-mix(in oklab, var(--accent) 45%, transparent);
+  color: var(--accent);
+  display: inline-block;
+  width: auto;
+  max-width: 100%;
+  field-sizing: content;
+  padding-bottom: 2px;
+  cursor: pointer;
+  outline: none;
+  transition:
+    border-color 300ms cubic-bezier(0.2, 0.7, 0.2, 1),
+    background-color 300ms cubic-bezier(0.2, 0.7, 0.2, 1);
+
+  &:hover {
+    border-bottom-color: var(--accent);
+    background-color: var(--accent-wash);
+  }
+}
+
+/* COUCHE 2 — grain de papier : bruit SVG inline, fixe, imperceptible. */
+@utility grain {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  opacity: var(--grain-opacity);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 240px 240px;
+}
+
+/* COUCHE 3 — champ de texte derrière le hero. */
+@utility champ-texte {
+  position: absolute;
+  inset: -2rem -1rem auto -1rem;
+  height: calc(100% + 4rem);
+  overflow: hidden;
+  z-index: 0;
+  pointer-events: none;
+  user-select: none;
+  color: var(--ink);
+  opacity: var(--champ-opacity);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  line-height: 1.32;
+  text-align: justify;
+  hyphens: auto;
+  columns: 2;
+  column-gap: 2.5rem;
+  mask-image:
+    radial-gradient(120% 90% at 50% 45%, transparent 0%, transparent 34%, black 78%),
+    linear-gradient(to right, transparent, black 12%, black 88%, transparent),
+    linear-gradient(to bottom, transparent, black 14%, black 82%, transparent);
+  mask-composite: intersect;
+  -webkit-mask-image:
+    radial-gradient(120% 90% at 50% 45%, transparent 0%, transparent 34%, black 78%),
+    linear-gradient(to right, transparent, black 12%, black 88%, transparent),
+    linear-gradient(to bottom, transparent, black 14%, black 82%, transparent);
+  -webkit-mask-composite: source-in;
+}
+
+@media (max-width: 640px) {
+  .champ-texte {
+    columns: 1;
+  }
+}
+
+
+@media print {
+  body {
+    background: #fff;
+  }
+  .no-print {
+    display: none !important;
+  }
+  a[href^="http"]::after {
+    content: " (" attr(href) ")";
+    font-size: 10px;
+    font-family: var(--font-mono);
+  }
+  section,
+  .avoid-break {
+    break-inside: avoid;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
