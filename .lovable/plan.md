@@ -6,13 +6,24 @@ son dépôt possède la mesure, ce projet possède les écrans. J'ai vérifié s
 `score.ts`, `typo.ts`, plus la migration du schéma). Je ne le reconstruirai pas, et je ne le
 simulerai pas.
 
-## Ce que vous devez faire, vous (2 minutes)
+## Précision sur « connecter GitHub »
 
-1. Menu **+** en bas à gauche du chat → **GitHub** → **Connect project**.
-2. Envoyez l'URL du dépôt à votre ami. Il pousse le moteur, son `AGENTS.md` et le jeu
-   d'exemple.
+Ce que je peux lire aujourd'hui, c'est le **projet Lovable** de Luigi, [CITARI](/projects/150f9fa5-b533-49e7-a797-19c52f94db36),
+parce qu'il est dans le même espace de travail : j'y vois bien `src/lib/orchestrateur.server.ts`
+(avec `etatScan`, `rapportParJeton`, `enregistrerLead`, `teaserScan`) et `src/lib/scan.functions.ts`.
+Ce n'est pas la même chose qu'une connexion GitHub : ce projet-ci n'est relié à aucun dépôt,
+donc rien de ce que je fais ne se pousse chez Luigi, et rien de ce qu'il pousse n'arrive ici.
 
-Aucune clé API n'entre ici. Je n'en demanderai pas.
+Deux choses distinctes, donc :
+
+- **Pour concevoir maintenant** : pas besoin de GitHub. Je peux copier le moteur de CITARI
+  dans ce projet tel quel, sans le modifier, et construire les écrans autour.
+- **Pour la boucle de travail que décrit son IA** (il récupère vos pages, il vérifie, il déploie) :
+  là oui, il faut connecter ce projet à un dépôt GitHub et lui donner l'URL — sinon il n'a
+  aucun moyen de recevoir vos pages. C'est le seul but de l'étape. Menu **+** → **GitHub** → **Connect project**.
+
+Dans les deux cas : aucune clé API n'entre ici, je n'en demanderai pas.
+
 
 ## Ce que je fais de mon côté
 
