@@ -262,7 +262,7 @@ n'est pas éternelle.
 Si tu ne l'es pas, cette partie ne te sert pas, saute-la.
 
 **Le site public** vit dans un projet Lovable (React, TanStack Start,
-TypeScript), synchronisé avec le dépôt GitHub `sprint-voice-insight`. Ce n'est
+TypeScript), dans le dépôt unique `citari`. Ce n'est
 pas qu'un front : son orchestrateur côté serveur interroge les six moteurs,
 calcule le score et écrit en base. Il traite les questions par lots de huit à
 chaque sondage du navigateur, ce qui le rend insensible aux limites de durée

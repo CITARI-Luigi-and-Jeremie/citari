@@ -15,31 +15,40 @@ Perplexity, Grok et Le Chat.
 
 | Dossier | Quoi | Dépôt Git | Outillage |
 |---|---|---|---|
-| `apps/citari` | Le front **et son moteur de scan** : landing, scan, teaser, rapport, lead | [sprint-voice-insight](https://github.com/LuigiRevelli/sprint-voice-insight) — autonome | bun, TanStack Start |
+| `apps/citari` | Le site **et son moteur de scan** : landing, scan, teaser, rapport, lead | ce dépôt | bun, TanStack Start |
 | `apps/admin` | Back-office de livraison : sprints, livrables, relances, citations | ce dépôt | pnpm, Next.js |
 | `packages/*` | Toolkit CLI + socle partagé | ce dépôt | pnpm |
 
-### `apps/citari` est un sous-module Git
+### Un seul dépôt, depuis le 2026-08-04
 
-Il pointe sur le dépôt `sprint-voice-insight`, branche `citari`, que **Lovable
-possède et synchronise**. C'est pour cela qu'il y a deux dépôts : la
-synchronisation bidirectionnelle de Lovable ne fonctionne qu'avec le sien.
-Fusionner le front dans ce dépôt casserait la possibilité d'éditer le design
-sur Lovable.
+Tout vit dans `LuigiRevelli/citari`. `apps/citari` était auparavant un
+sous-module pointant sur `sprint-voice-insight`, héritage de la synchronisation
+Lovable d'origine. Cette configuration imposait deux `git push` par session et
+laissait le `main` du dépôt du site figé loin derrière la branche de travail,
+donc une page GitHub qui affichait une version périmée.
 
-Le sous-module résout le problème : `citari` est le point d'entrée unique et
-contient le front, sans rompre le lien avec Lovable.
+Le site a été absorbé par `git subtree`, donc son historique est conservé :
+`git log` et `git blame` fonctionnent normalement sur `apps/citari`.
+`sprint-voice-insight` est désormais une archive, plus rien n'y est poussé.
 
 ```bash
-# Cloner le tout d'un coup
-git clone --recurse-submodules https://github.com/LuigiRevelli/citari.git
-
-# Récupérer les modifications faites sur Lovable
-git -C apps/citari pull
-
-# Enregistrer la nouvelle version du front dans ce dépôt
-git add apps/citari && git commit -m "front: synchro Lovable"
+git clone https://github.com/LuigiRevelli/citari.git
 ```
+
+`apps/citari` reste hors du workspace pnpm, ce qui n'a rien à voir avec
+l'ancien sous-module : il a son propre gestionnaire de paquets (bun) et son
+propre verrou de dépendances. Le toolkit ne l'importe jamais, il pilote son
+moteur en sous-processus (`packages/toolkit/src/lib/pilote.ts`).
+
+### Le front en cours de refonte vit ailleurs, temporairement
+
+Jérémie reconstruit l'interface dans le projet Lovable `citari-ai-audit`
+(dépôt du même nom), sur la même pile technique. Lovable exige un dépôt à lui
+pour se synchroniser, c'est la seule raison de cette exception. Ce projet ne
+contient aucun moteur : il affiche des données de démonstration aux formes
+exactes des fonctions serveur d'ici, et son code sera rapatrié dans
+`apps/citari` une fois terminé. Le contrat est écrit dans `apps/citari/AGENTS.md`
+et dans les instructions permanentes du projet Lovable.
 
 Il reste **exclu du workspace pnpm** (`!apps/citari`) : outillage bun, pas pnpm.
 

@@ -5,6 +5,36 @@ d'une nouvelle session, après `CLAUDE.md`.
 
 ---
 
+## 2026-08-04 — Un seul dépôt
+
+Décision de Luigi : « JE VEUX TOUT ICI et nulle part ailleurs ». Le site était
+un sous-module pointant sur `sprint-voice-insight`, héritage de la
+synchronisation Lovable d'origine. Il est désormais dans ce dépôt.
+
+Ce que cette configuration coûtait vraiment : deux `git push` par session, un
+`main` figé 81 commits derrière la branche de travail côté site, donc une page
+GitHub qui montrait une version périmée à qui l'ouvrait, et un clone
+inutilisable sans `--recurse-submodules`.
+
+Absorbé par `git subtree` et non par une copie, pour garder l'historique :
+`git log` et `git blame` continuent de fonctionner sur `apps/citari`.
+`sprint-voice-insight` devient une archive.
+
+Vérifié après l'opération, parce qu'une manipulation d'historique se contrôle :
+les quatre paquets compilent, 54 tests passent, le pilote retrouve le moteur, et
+le moteur répond sur la vraie base. Les clés d'API ont été sorties du dossier
+avant la suppression du sous-module, puis remises, et elles restent ignorées par
+git à leur nouvel emplacement.
+
+Une exception subsiste, temporaire : `citari-ai-audit`, où Jérémie reconstruit
+le front. Lovable exige un dépôt à lui pour se synchroniser, il n'y a pas de
+contournement. Ce projet ne contient aucun moteur et son code sera rapatrié dans
+`apps/citari` une fois terminé. Le contrat qui rend ce portage mécanique est
+écrit des deux côtés : `apps/citari/AGENTS.md` ici, et les instructions
+permanentes du projet là-bas.
+
+---
+
 ## 2026-08-03 (soir) — Toute la chaîne de livraison exécutée en réel
 
 Les quatre commandes pilotées par un modèle n'avaient jamais tourné contre la
