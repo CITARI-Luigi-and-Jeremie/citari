@@ -14,9 +14,21 @@
 Ce projet contient **le site ET le moteur de mesure** dans la même application
 (TanStack Start). Le design est libre. Le moteur ne se touche pas.
 
-Jérémie travaille le front et l'expérience. Luigi travaille le moteur. Ce
-fichier est le contrat entre les deux : le respecter permet de travailler en
-parallèle sans jamais se marcher dessus.
+## Où se construit le nouveau front
+
+Jérémie refait l'interface **à partir de zéro dans un projet Lovable séparé**,
+`citari-ai-audit` (b884a38f-24b7-40f9-b447-f184da6cf740), qui tourne sur la
+même pile. Ce projet-là ne contient aucun moteur : il affiche des données de
+démonstration aux formes exactes de ce que renvoient les fonctions serveur
+listées plus bas. Ses instructions permanentes portent le même contrat que ce
+fichier.
+
+Quand son travail est prêt, on recopie ses `src/routes/*` et `src/components/*`
+ici, et on remplace ses imports de démonstration par des appels aux fonctions
+serveur. Même pile des deux côtés, donc le portage est mécanique.
+
+Conséquence : ce dépôt reste la seule source de vérité de la mesure, et le
+moteur ne dépend jamais de l'avancement du design.
 
 ## Interdits absolus
 
