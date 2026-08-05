@@ -2,6 +2,7 @@ import { getDb, unwrap } from "@geo/core";
 import { EMAIL_A_TROUVER } from "../lib/prospect.js";
 import { buildScanInsights } from "../lib/insights.js";
 import { tousLesEmails, situationDuScan } from "../lib/emails.js";
+import { accrochesClassees } from "../lib/accroches.js";
 import { slugify, writeDeliverableFile } from "../lib/context.js";
 
 /**
@@ -42,9 +43,18 @@ export async function relance(leadRef: string, opts: { all?: boolean } = {}): Pr
     const emails = tousLesEmails(insights);
     const createdAt = new Date(lead.created_at ?? Date.now());
 
+    // Le classement des accroches est affiché avant les messages : c'est la
+    // décision commerciale du scan, et elle mérite d'être relue avant l'envoi.
+    const accroches = accrochesClassees(insights);
     const lines = [
       `# Emails — ${insights.brand} (${lead.email})\n`,
       `Score ${insights.score}/100 · situation détectée : **${situationDuScan(insights)}**\n`,
+      `## Ce qui donne le plus envie d'appeler, dans ce scan\n`,
+      ...accroches.map(
+        (a, n) =>
+          `${n === 0 ? "**→**" : "  "} \`${String(a.force).padStart(3)}\` **${a.type}** — ${a.pourquoi}`,
+      ),
+      `\nLa première sert d'objet et d'ouverture. Les autres suivent dans le corps.\n`,
     ];
 
     for (const e of emails) {
@@ -74,7 +84,8 @@ export async function relance(leadRef: string, opts: { all?: boolean } = {}): Pr
     }
 
     const path = writeDeliverableFile(`relances/${slugify(insights.brand)}`, "emails.md", lines.join("\n"));
-    console.log(`✓ ${insights.brand} (${lead.email}) — ${situationDuScan(insights)} · ${emails.length} emails · ${path}`);
+    console.log(`✓ ${insights.brand} (${lead.email}) — ${situationDuScan(insights)} · accroche « ${accroches[0]?.type ?? "aucune"} » · ${emails.length} emails`);
+    console.log(`  → ${path}`);
   }
 
   console.log(`\n${leads.length} lead(s) traité(s). Relisez dans l'admin avant d'envoyer.`);

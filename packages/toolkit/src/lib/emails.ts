@@ -1,4 +1,5 @@
 import { pct, type ScanInsights } from "./insights.js";
+import { meilleureAccroche, type TypeAccroche } from "./accroches.js";
 
 /**
  * Les emails envoyés après un scan gratuit.
@@ -180,75 +181,62 @@ export function emailImmediat(i: ScanInsights): Email {
   const situation = situationDuScan(i);
   const base = { step: 0, offsetDays: 0 };
 
-  if (situation === "bloque") {
-    const liste = i.botsBloques.join(", ");
+  if (situation !== "solide") {
+    // L'objet et l'ouverture viennent du fait le plus vendeur du scan, pas
+    // d'un ordre décidé à l'avance. Voir lib/accroches.ts : le blocage
+    // technique y est volontairement bas, parce qu'il souffle au dirigeant
+    // que le problème est petit et gratuit à régler.
+    const a = meilleureAccroche(i);
+    const dit = (t: TypeAccroche) => a?.type === t;
+
+    // Le reste du scan suit dans le corps, sans jamais répéter l'ouverture :
+    // relire deux fois le même chiffre donne l'impression d'un gabarit.
     const site = (i.url ?? "").replace(/\/$/, "");
     return {
       ...base,
-      subject: `${i.brand} : votre site bloque ${i.botsBloques[0]}`,
-      body: bloc(
-        `Bonjour,`,
-        `Votre scan de visibilité IA est terminé.`,
-        lienRapport(i),
-        `Avant même de parler du score, il y a plus urgent, et c'est une bonne nouvelle déguisée.`,
-        `Votre fichier robots.txt bloque ${liste}. Ces robots sont ceux par lesquels les IA lisent le web. Tant qu'ils sont bloqués, ces moteurs ne peuvent tout simplement pas lire votre site : quoi que vous publiiez, ils ne le verront jamais.`,
-        site
-          ? `Vérifiez en trente secondes : ouvrez ${site}/robots.txt et cherchez ${i.botsBloques[0]}.`
-          : `Vérifiez en trente secondes : ouvrez votre robots.txt et cherchez ${i.botsBloques[0]}.`,
-        `C'est presque toujours involontaire. Beaucoup de sites ont hérité ce réglage d'un CMS ou d'une extension installée en 2023, à une époque où bloquer les robots d'IA passait pour une précaution. Depuis, ces robots sont devenus le chemin par lequel vos clients vous trouvent.`,
-        `Pourquoi c'est une bonne nouvelle : c'est une ligne à changer, votre développeur le fait en dix minutes, et c'est le préalable à tout le reste.`,
-        verbatim(i),
-        offreDiagnostic(),
-        pied(),
-      ),
-    };
-  }
-
-  if (situation === "invisible") {
-    const jamais = i.citationsCible === 0;
-    return {
-      ...base,
-      subject: i.topCompetitor
-        ? `${i.topCompetitor.name} est cité ${i.topCompetitor.count} fois. ${i.brand}, ${jamais ? "jamais" : String(i.citationsCible)}.`
-        : `${i.brand} : ${i.score}/100 de visibilité dans les IA`,
+      subject: a?.sujet ?? `${i.brand} : ${i.score}/100 de visibilité dans les IA`,
       body: bloc(
         `Bonjour,`,
         `Votre scan est terminé : ${i.score}/100.`,
         lienRapport(i),
-        `Le chiffre qui compte n'est pas le score, c'est l'écart. Sur les ${i.totalQueries} questions d'achat testées dans votre secteur, ${i.brand} est cité ${jamais ? "zéro fois" : `${i.citationsCible} fois`}. Vos concurrents comparables, ${i.citationsRivaux} fois.${
-          i.topCompetitor ? ` ${i.topCompetitor.name} à lui seul en récolte ${i.topCompetitor.count}.` : ""
-        }`,
-        i.missedCount >= i.totalQueries
-          ? `Sur les ${i.totalQueries} questions, sans exception, aucun moteur ne mentionne ${i.brand}. Ce sont des questions que vos prospects posent vraiment, avec l'intention d'acheter.`
-          : i.missedCount > 0
-            ? `Sur ${i.missedCount} de ces ${i.totalQueries} questions, aucun moteur ne mentionne ${i.brand}. Ce sont des questions que vos prospects posent vraiment, avec l'intention d'acheter.`
-            : "",
-        concurrentsNommes(i),
-        verbatim(i),
-        defiVerifiable(i),
-        `Ce n'est presque jamais une question de budget ni de notoriété. Dans la grande majorité des cas que nous mesurons, l'essentiel vient de trois causes techniques et éditoriales identifiables en une vingtaine de minutes.`,
-        offreDiagnostic(),
-        pied(),
-      ),
-    };
-  }
+        a?.ouverture ?? "",
 
-  if (situation === "marginal") {
-    return {
-      ...base,
-      subject: `${i.brand} : absent sur ${i.missedCount} des ${i.totalQueries} questions testées`,
-      body: bloc(
-        `Bonjour,`,
-        `Votre scan est terminé : ${i.score}/100.`,
-        lienRapport(i),
-        `${i.brand} est cité ${i.citationsCible} fois, ce qui vous place déjà devant beaucoup d'entreprises de votre secteur. Votre problème est ailleurs, et il est plus précis.`,
-        i.missedCount > 0
-          ? `Vous êtes totalement absent sur ${i.missedCount} des ${i.totalQueries} questions testées. Par exemple : « ${i.missedQueries[0]} ». Sur celle-là, les moteurs citent ${rival(i)} et pas vous.`
-          : `Vos concurrents comparables sont cités ${i.citationsRivaux} fois contre ${i.citationsCible} pour vous.`,
+        // L'écart, s'il n'a pas déjà servi d'ouverture.
+        dit("ecart") || dit("absence") || dit("concurrent-nomme")
+          ? ""
+          : i.citationsCible === 0
+            ? `Sur les ${i.totalQueries} questions testées, ${i.brand} n'est cité aucune fois. Vos concurrents comparables, ${i.citationsRivaux} fois.`
+            : `${i.brand} est cité ${i.citationsCible} fois. Vos concurrents comparables, ${i.citationsRivaux} fois.`,
+
+        // Les questions perdues.
+        dit("questions-perdues") || i.missedCount === 0
+          ? ""
+          : i.missedCount >= i.totalQueries
+            ? `Sur les ${i.totalQueries} questions, sans exception, aucun moteur ne mentionne ${i.brand}. Ce sont des questions que vos prospects posent au moment de choisir.`
+            : `Vous êtes absent sur ${i.missedCount} de ces ${i.totalQueries} questions, celles où vos prospects comparent avant de trancher.`,
+
+        // Les concurrents qu'il a nommés : la liste complète garde sa valeur
+        // même quand l'un d'eux a servi d'ouverture, à cause du cas « jamais
+        // cité non plus », qui désamorce l'idée qu'on cherche à faire peur.
         concurrentsNommes(i),
-        verbatim(i),
+
+        dit("verbatim") ? "" : verbatim(i),
+
+        // Le blocage technique : jamais perdu, même quand il n'est pas
+        // l'accroche. C'est notre meilleure preuve de sérieux, et la seule
+        // chose du message qu'il peut vérifier lui-même en trente secondes.
+        i.botsBloques.length === 0
+          ? ""
+          : dit("technique")
+            ? `C'est presque toujours involontaire : beaucoup de sites ont hérité ce réglage d'un CMS installé en 2023, quand bloquer les robots d'IA passait pour une précaution. Vérifiez en trente secondes, ouvrez ${site || "votre site"}/robots.txt et cherchez ${i.botsBloques[0]}.`
+            : `Une cause probable, et c'est une bonne nouvelle : votre fichier robots.txt bloque ${i.botsBloques.join(", ")}. Ces moteurs ne peuvent donc pas lire votre site. Vérifiez en trente secondes sur ${site || "votre site"}/robots.txt. C'est une ligne à changer, dix minutes pour votre développeur, et c'est le préalable à tout le reste.`,
+
         defiVerifiable(i),
-        `C'est la situation où le travail paye le plus vite. Quand une marque existe déjà mais manque les bonnes questions, il s'agit de combler des trous identifiés, pas de tout construire.`,
+
+        situation === "marginal"
+          ? `C'est la situation où le travail paye le plus vite. Quand une marque existe déjà mais manque les bonnes questions, il s'agit de combler des trous identifiés, pas de tout construire.`
+          : `Ce n'est presque jamais une question de budget ni de notoriété. Dans la grande majorité des cas que nous mesurons, l'essentiel vient de trois causes techniques et éditoriales identifiables en une vingtaine de minutes.`,
+
         offreDiagnostic(),
         pied(),
       ),
