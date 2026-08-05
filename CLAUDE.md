@@ -1,5 +1,31 @@
 # Citari — plateforme d'agence GEO
 
+## Reprendre ce projet à froid
+
+Si vous découvrez ce dépôt, lisez ce fichier puis `JOURNAL.md`, qui garde les
+décisions et surtout les raisons. Rien d'autre n'est nécessaire pour commencer.
+
+**Où en est le projet, au 2026-08-05.** Le back est terminé et éprouvé en
+conditions réelles : 11 scans, 904 réponses de moteurs, zéro erreur, les trois
+modes de scan et les 19 commandes de livraison ont toutes tourné contre la vraie
+base. 80 tests passent.
+
+**Ce qui empêche de vendre n'est plus du code.** Il manque trois comptes :
+l'hébergement, le nom de domaine `citari.fr`, et Resend pour l'envoi des
+emails. Tant qu'ils n'existent pas, tout tourne sur le Mac de Luigi et nulle
+part ailleurs. Voir `docs/DEPLOIEMENT.md`.
+
+**Deux dettes ouvertes, assumées.** Aucune commande n'efface les données d'une
+personne qui invoque son droit RGPD, alors qu'on collecte des emails avec
+consentement horodaté. Et les relances J+2 à J+21 sont rédigées à l'avance :
+au moment de les envoyer, il faudra revérifier ce qui a pu changer depuis, par
+exemple un `robots.txt` corrigé entre-temps.
+
+**Connexions attendues.** Le travail suppose deux MCP : Supabase (projet
+`ebcuhuhslrrsjouchiga`, région Paris) et Notion (espace CITARI, où vit toute la
+documentation commerciale). Les clés d'API des six moteurs sont dans
+`apps/citari/.env.local`, jamais versionnées.
+
 **Citari** : agence GEO (Generative Engine Optimization) pour PME/ETI francophones.
 On fait apparaître les marques clientes dans les réponses de ChatGPT, Claude, Gemini,
 Perplexity, Grok et Le Chat.
@@ -139,13 +165,45 @@ un index unique `(sector, url)` qui rend le seed idempotent.
 pas (le client Supabase y est typé `any`) — c'est le prochain morceau.
 
 ## Commandes
-- `pnpm install` puis `pnpm test` (vitest) et `pnpm typecheck`.
-- Scan en CLI : `pnpm --filter @geo/core scan:cli -- --brand "X" --url https://x.fr --sector "..." --competitors "A,B"`.
+
+`pnpm install`, puis `pnpm -r test` et `pnpm -r typecheck`. Le site
+(`apps/citari`) a son propre gestionnaire de paquets et se vérifie à part avec
+`npx tsc --noEmit`.
+
+Les 19 commandes du toolkit s'appellent par `pnpm toolkit <commande>`.
+
+**Chantier 1, la lisibilité du site**
+`audit-technique` crawle le site comme un robot d'IA · `generate-fixes` écrit
+les correctifs prêts à poser · `verify-fixes` contrôle qu'ils sont en ligne ·
+`crawler-log` compte les passages réels des robots dans les logs du client.
+
+**Chantier 2, les contenus**
+`prioriser` classe les questions perdues par gagnabilité · `content-brief`
+prépare les plans · `draft-content` rédige · `verify-contents` contrôle ·
+`indexnow` prévient Bing, donc ChatGPT, en quelques heures au lieu de semaines.
+
+**Chantier 3, les citations**
+`citation-targets` liste où il faut être · `verify-citations` vérifie que la
+marque y figure vraiment.
+
+**Mesure et suivi**
+`controle-45` prend la température à mi-parcours, en interne · `rescan` rejoue
+les mêmes questions à J+90 · `sprint-report` assemble les preuves.
+
+**Commercial**
+`relance` prépare les 4 emails d'un prospect · `reponses` prépare les 8 réponses
+aux objections · `proposition` génère la proposition · `concurrents` relit et
+corrige le classement des concurrents · `scan-lot` scanne une liste entière pour
+le baromètre.
 
 ## Mode démo
-`GEO_MOCK=1` remplace les 6 providers ET Supabase par des simulations
-(`packages/core/src/mock/`). Base en mémoire persistée dans un fichier du dossier
-temporaire, partagée entre process. Ne jamais laisser en production.
+
+`GEO_MOCK=1` remplace les 6 moteurs et Supabase par des simulations
+(`packages/core/src/mock/`), utile pour les tests de `packages/core`.
+
+⚠ Ne jamais l'activer ailleurs. `apps/admin` a tourné des semaines dessus sans
+que rien ne le signale hors d'un bandeau : le poste de pilotage affichait des
+données inventées pendant qu'on croyait lire la vraie base.
 
 ## Règles métier à ne pas casser
 - **6 moteurs** : ChatGPT, Claude, Gemini, Perplexity, Grok, Le Chat (Mistral).
