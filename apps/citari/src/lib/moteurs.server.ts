@@ -296,7 +296,9 @@ export async function analyser(texte: string, marque: string): Promise<Analyse> 
       "Tu extrais des données d'une réponse d'IA. Renvoie UNIQUEMENT du JSON valide, sans commentaire ni bloc de code, de la forme " +
         '{"brands":[{"name":"","position":1,"recommended":false,"sentiment":"positif|neutre|negatif","verbatim":""}]}. ' +
         "position = ordre d'apparition (1 = première marque citée). verbatim = la phrase exacte où la marque apparaît. " +
-        "N'inclus que des noms d'entreprises ou de prestataires, jamais des villes ni des catégories.",
+        "N'inclus que des noms d'entreprises ou de prestataires. Jamais de villes, de catégories, " +
+        "ni d'organismes publics, ordres professionnels, syndicats, chambres consulaires ou " +
+        "administrations : ils apparaissent dans les réponses sans être des concurrents.",
       `Marque suivie : « ${marque} ».\n\nRéponse à analyser :\n${texte.slice(0, 4000)}`,
       { maxTokens: 2048 },
     );
@@ -325,7 +327,7 @@ export async function analyser(texte: string, marque: string): Promise<Analyse> 
  * ⚠ Ceci ne touche PAS au score. La formule est publiée et le J+90 n'a de sens
  * que si elle ne bouge jamais. On change ce qu'on montre et ce qu'on priorise.
  */
-export type ClasseConcurrent = "rival" | "geant" | "outil";
+export type ClasseConcurrent = "rival" | "geant" | "outil" | "institution";
 
 export async function classerConcurrents(
   contexte: { marque: string; secteur: string; ville?: string | null },
@@ -338,13 +340,15 @@ export async function classerConcurrents(
     const { text: raw } = await gemini_(
       process.env.GEMINI_ANALYSE_MODEL || "gemini-3.1-flash-lite",
       "Tu classes des entreprises citées par une IA, du point de vue d'une entreprise précise. " +
-        'Renvoie UNIQUEMENT du JSON valide de la forme {"classes":[{"nom":"","classe":"rival|geant|outil"}]}. ' +
+        'Renvoie UNIQUEMENT du JSON valide de la forme {"classes":[{"nom":"","classe":"rival|geant|outil|institution"}]}. ' +
         "rival = concurrent de taille et de nature comparables, que l'entreprise suivie peut réellement " +
         "dépasser dans les réponses d'IA. " +
         "geant = groupe national ou international, réseau majeur, acteur dont la notoriété est hors " +
         "de portée d'une PME. " +
         "outil = logiciel, plateforme, place de marché, annuaire : occupe la réponse mais n'est pas un " +
         "prestataire de même nature. " +
+        "institution = ordre professionnel, syndicat, chambre de commerce, administration, organisme " +
+        "public ou fédération : cité comme référence, jamais comme prestataire à choisir. " +
         "En cas de doute, réponds rival : mieux vaut sur-estimer un concurrent que rassurer à tort.",
       `Entreprise suivie : « ${contexte.marque} », secteur « ${contexte.secteur} »${
         contexte.ville ? `, à ${contexte.ville}` : ""
@@ -358,7 +362,8 @@ export async function classerConcurrents(
     const out: Record<string, ClasseConcurrent> = {};
     for (const c of parsed.classes ?? []) {
       if (!c?.nom) continue;
-      out[c.nom] = c.classe === "geant" || c.classe === "outil" ? c.classe : "rival";
+      out[c.nom] =
+        c.classe === "geant" || c.classe === "outil" || c.classe === "institution" ? c.classe : "rival";
     }
     return out;
   } catch {

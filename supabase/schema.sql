@@ -228,6 +228,21 @@ CREATE TABLE crawler_hits (
   CONSTRAINT crawler_hits_pkey PRIMARY KEY (id),
   CONSTRAINT crawler_hits_client_id_fkey FOREIGN KEY (client_id) REFERENCES clients(id) ON DELETE CASCADE);
 
+CREATE TABLE brand_overrides (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  created_at timestamptz NOT NULL DEFAULT now(),
+  -- Forme normalisée : « Exco Lyon » et « exco-lyon » ne demandent qu'une
+  -- seule correction.
+  brand_key text NOT NULL,
+  brand_label text NOT NULL,
+  -- Chaîne vide = vaut partout. Un NULL aurait été plus parlant, mais deux
+  -- NULL sont distincts pour Postgres, donc l'unicité ne tiendrait pas et
+  -- ON CONFLICT ne saurait pas s'y raccrocher.
+  sector text NOT NULL DEFAULT '',
+  classe text NOT NULL CHECK (classe IN ('rival', 'geant', 'outil', 'institution')),
+  notes text,
+  CONSTRAINT brand_overrides_pkey PRIMARY KEY (id));
+
 -- ─────────────────────────────── INDEX ───────────────────────────────
 
 CREATE UNIQUE INDEX directories_sector_url_uidx ON directories (sector, url);
@@ -260,6 +275,8 @@ CREATE INDEX deliverables_sprint_idx ON deliverables (sprint_id);
 CREATE INDEX citation_targets_client_idx ON citation_targets (client_id);
 CREATE INDEX citation_targets_sprint_idx ON citation_targets (sprint_id);
 CREATE INDEX crawler_hits_client_idx ON crawler_hits (client_id, measured_on DESC);
+-- Une seule décision humaine par entreprise et par portée.
+CREATE UNIQUE INDEX brand_overrides_uidx ON brand_overrides (brand_key, sector);
 
 -- ──────────────────────────────── RLS ────────────────────────────────
 -- Activé partout, AUCUNE policy : refus total pour la clé publique.
@@ -280,3 +297,4 @@ ALTER TABLE sprint_tasks     ENABLE ROW LEVEL SECURITY;
 ALTER TABLE deliverables     ENABLE ROW LEVEL SECURITY;
 ALTER TABLE citation_targets ENABLE ROW LEVEL SECURITY;
 ALTER TABLE crawler_hits     ENABLE ROW LEVEL SECURITY;
+ALTER TABLE brand_overrides  ENABLE ROW LEVEL SECURITY;

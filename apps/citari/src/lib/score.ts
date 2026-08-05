@@ -164,21 +164,38 @@ export function partDeVoix(
   count: number;
   share: number;
   target: boolean;
-  classe?: "rival" | "geant" | "outil";
+  classe?: "rival" | "geant" | "outil" | "institution";
+  /**
+   * Écritures regroupées sous ce nom, quand il y en a.
+   *
+   * Le regroupement réunit parfois des cabinets juridiquement indépendants du
+   * même réseau (« Exco Lyon », « Exco Anthenor »). C'est le bon compte pour
+   * mesurer une force concurrentielle, mais il ne doit rien cacher : les
+   * variantes restent affichables, et un client qui relève le détail y trouve
+   * la réponse plutôt qu'une approximation silencieuse.
+   */
+  variantes?: string[];
 }[] {
-  const compte = new Map<string, { count: number; target: boolean }>();
+  const compte = new Map<string, { count: number; target: boolean; variantes: Set<string> }>();
   for (const m of mentions) {
     const brut = m.brand.trim();
     if (!brut) continue;
     // Les variantes se rangent sous le nom retenu : sans ça, une entreprise
     // citée sous six écritures paraît six fois plus faible qu'elle ne l'est.
     const clef = alias[brut] ?? brut;
-    const prev = compte.get(clef) ?? { count: 0, target: m.is_target };
-    compte.set(clef, { count: prev.count + 1, target: prev.target || m.is_target });
+    const prev = compte.get(clef) ?? { count: 0, target: m.is_target, variantes: new Set<string>() };
+    if (brut !== clef) prev.variantes.add(brut);
+    compte.set(clef, { count: prev.count + 1, target: prev.target || m.is_target, variantes: prev.variantes });
   }
   const total = [...compte.values()].reduce((a, b) => a + b.count, 0) || 1;
   return [...compte.entries()]
-    .map(([name, v]) => ({ name, count: v.count, share: v.count / total, target: v.target }))
+    .map(([name, v]) => ({
+      name,
+      count: v.count,
+      share: v.count / total,
+      target: v.target,
+      ...(v.variantes.size ? { variantes: [...v.variantes].sort() } : {}),
+    }))
     .sort((a, b) => b.count - a.count)
     .slice(0, 10);
 }

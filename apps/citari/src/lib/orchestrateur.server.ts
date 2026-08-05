@@ -10,7 +10,9 @@ export type PdvItem = {
   share: number;
   target: boolean;
   /** Posé par finaliser : rival atteignable, géant hors de portée, ou outil. */
-  classe?: "rival" | "geant" | "outil";
+  classe?: "rival" | "geant" | "outil" | "institution";
+  /** Écritures regroupées sous ce nom : rien n'est caché au client. */
+  variantes?: string[];
 };
 export type Action = { chantier: string; titre: string; pourquoi: string; effort: string };
 
@@ -551,6 +553,24 @@ async function finaliser(id: string) {
     { marque: scan?.brand_name ?? "", secteur: scan?.sector ?? "", ville: scan?.city },
     lesPlusCites,
   );
+
+  // Les corrections humaines écrasent le modèle, toujours.
+  //
+  // Le classement automatique devine bien mais il devine, et personne ne veut
+  // reprendre la même correction à chaque scan. Une fois qu'un humain a
+  // tranché sur une entreprise, sa décision s'applique et le modèle ne peut
+  // plus la contredire. C'est ce qui rend le classement fiable à la longue :
+  // il s'améliore avec l'usage au lieu de rejouer les mêmes approximations.
+  const { data: corrections } = await supabaseAdmin
+    .from("brand_overrides")
+    .select("brand_key, classe, sector");
+  for (const nom of lesPlusCites) {
+    const cle = normaliserNom(nom).replace(/ /g, "");
+    const c = (corrections ?? []).find(
+      (o) => o.brand_key === cle && (o.sector === "" || o.sector === scan?.sector),
+    );
+    if (c) classes[nom] = c.classe as typeof classes[string];
+  }
   for (const item of pdv) {
     if (!item.target) item.classe = classes[item.name] ?? "rival";
   }
@@ -801,6 +821,10 @@ export async function teaserScan(id: string) {
   const nbRivaux = lignes.filter((m) => !m.is_target && classeDe(m.brand) === "rival").length;
   const nbGeants = lignes.filter((m) => !m.is_target && classeDe(m.brand) === "geant").length;
   const nbOutils = lignes.filter((m) => !m.is_target && classeDe(m.brand) === "outil").length;
+  // Les institutions (ordres, chambres, administrations) sont citées comme
+  // références, jamais comme prestataires à choisir : elles ne sont pas des
+  // concurrents et ne doivent alourdir aucun comptage.
+  const nbInstitutions = lignes.filter((m) => !m.is_target && classeDe(m.brand) === "institution").length;
 
   // Questions où la marque n'apparaît sur aucun moteur : l'argument du manque.
   const citeSur = new Set(lignes.filter((m) => m.is_target).map((m) => m.query_id));
@@ -850,6 +874,7 @@ export async function teaserScan(id: string) {
       citationsRivaux: nbRivaux,
       citationsGeants: nbGeants,
       citationsOutils: nbOutils,
+      citationsInstitutions: nbInstitutions,
       questionsPerdues: questionsPerdues.length,
     },
     pdv: (Array.isArray(scan.share_of_voice) ? scan.share_of_voice : []) as unknown as PdvItem[],

@@ -27,6 +27,7 @@ import { relance } from "./commands/relance.js";
 import { proposition } from "./commands/proposition.js";
 import { rescan } from "./commands/rescan.js";
 import { prioriser } from "./commands/prioriser.js";
+import { concurrents } from "./commands/concurrents.js";
 import { indexnow } from "./commands/indexnow.js";
 import { verifyCitations } from "./commands/verify-citations.js";
 import { verifyContents } from "./commands/verify-contents.js";
@@ -63,6 +64,16 @@ program
   .option("--dry-run", "affiche le payload sans l'envoyer")
   .action((client: string, urls: string[], opts: { dryRun?: boolean }) =>
     run(indexnow(client, urls, opts)));
+
+program
+  .command("concurrents")
+  .argument("<client>", "nom ou id du client")
+  .option("--corriger <marque=classe...>", "corrige un classement, pour tous les scans suivants")
+  .option("--secteur", "limite la correction au secteur de ce client")
+  .description("Relit et corrige le classement des concurrents (rival | geant | outil | institution)")
+  .action((client: string, o: { corriger?: string[]; secteur?: boolean }) =>
+    run(concurrents(client, o)),
+  );
 
 program
   .command("content-brief")

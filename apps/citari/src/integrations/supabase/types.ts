@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      brand_overrides: {
+        Row: {
+          brand_key: string
+          brand_label: string
+          classe: string
+          created_at: string
+          id: string
+          notes: string | null
+          sector: string
+        }
+        Insert: {
+          brand_key: string
+          brand_label: string
+          classe: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          sector?: string | null
+        }
+        Update: {
+          brand_key?: string
+          brand_label?: string
+          classe?: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          sector?: string | null
+        }
+        Relationships: []
+      }
       citation_targets: {
         Row: {
           contacted_on: string | null
