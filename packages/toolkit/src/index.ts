@@ -24,6 +24,7 @@ import { verifyFixes } from "./commands/verify-fixes.js";
 import { crawlerLog } from "./commands/crawler-log.js";
 import { sprintReport } from "./commands/sprint-report.js";
 import { relance } from "./commands/relance.js";
+import { reponses } from "./commands/reponses.js";
 import { proposition } from "./commands/proposition.js";
 import { rescan } from "./commands/rescan.js";
 import { prioriser } from "./commands/prioriser.js";
@@ -156,6 +157,12 @@ program
     }
     run(relance(lead ?? "", opts));
   });
+
+program
+  .command("reponses")
+  .argument("<lead>", "id, email ou marque du prospect")
+  .description("Commercial — réponses aux objections, remplies avec ses vrais chiffres")
+  .action((lead: string) => run(reponses(lead)));
 
 program
   .command("proposition")

@@ -286,6 +286,16 @@ export function emailImmediat(i: ScanInsights): Email {
  * relances apporte donc autre chose, et la dernière sait s'arrêter.
  */
 export function emailsDeRelance(i: ScanInsights): Email[] {
+  const situation = situationDuScan(i);
+
+  // Aucune relance quand le score est bon.
+  //
+  // Le premier message dit « je n'ai rien à vous vendre, rien ne presse ».
+  // Enchaîner trois relances qui poussent le diagnostic contredirait
+  // frontalement cette phrase, et détruirait la confiance qu'elle construit.
+  // Une promesse tenue vaut plus qu'un rendez-vous arraché.
+  if (situation === "solide") return [];
+
   const site = (i.url ?? "").replace(/\/$/, "");
   const sources = i.competitorSources.slice(0, 3);
 
@@ -298,9 +308,11 @@ export function emailsDeRelance(i: ScanInsights): Email[] {
       body: bloc(
         `Bonjour,`,
         `Vous avez mesuré la visibilité IA de ${i.brand} il y a deux jours.`,
-        i.missedCount > 0
-          ? `Une question, sincèrement : saviez-vous que vous n'apparaissiez sur aucune des ${i.missedCount} questions où vos prospects comparent avant de choisir ?`
-          : `Une question, sincèrement : saviez-vous que vos concurrents comparables étaient cités ${i.citationsRivaux} fois contre ${i.citationsCible} pour vous ?`,
+        situation === "bloque"
+          ? `Une question, sincèrement : saviez-vous que votre site interdisait l'accès à ${i.botsBloques[0]} ?`
+          : i.missedCount > 0
+            ? `Une question, sincèrement : saviez-vous que vous n'apparaissiez sur aucune des ${i.missedCount} questions où vos prospects comparent avant de choisir ?`
+            : `Une question, sincèrement : saviez-vous que vos concurrents comparables étaient cités ${i.citationsRivaux} fois contre ${i.citationsCible} pour vous ?`,
         `Si la réponse est non, ça vaut trente minutes. Si c'est oui et que c'est assumé, dites-le-moi et je ne vous relance plus.`,
         `${BOOKING()}`,
         pied(),
@@ -320,7 +332,11 @@ export function emailsDeRelance(i: ScanInsights): Email[] {
           : `Ouvrez ${site || "votre site"}/robots.txt et cherchez GPTBot, ClaudeBot et PerplexityBot. S'ils y sont bloqués, aucune IA ne peut lire votre site, et tout le reste devient inutile tant que ce n'est pas corrigé.`,
         sources.length > 0
           ? `Autre chose, tirée de votre scan : quand les moteurs recommandent vos concurrents, ils s'appuient régulièrement sur ces sources :\n${sources.map((s) => `  . ${s}`).join("\n")}\n\nY figurer est souvent plus rentable qu'un mois de publicité. Vous pouvez commencer par la première cette semaine, sans nous.`
-          : "",
+          : situation === "marginal" && i.missedQueries[0]
+            ? `Et une piste précise, puisque vous êtes déjà cité ailleurs : la question « ${i.missedQueries[0]} » vous échappe complètement. Une page qui y répond en moins de quarante mots, en tête d'article, suffit souvent à y entrer.`
+            : i.llmstxtAbsent
+              ? `Deuxième chose, plus rapide : votre site n'a pas de fichier llms.txt. C'est un résumé court de votre offre et de vos zones, que les moteurs lisent en priorité. Une heure de travail, et personne ne le fait dans votre secteur.`
+              : "",
         `Si vous préférez qu'on déroule ça ensemble sur ${i.brand} : ${BOOKING()}`,
         pied(),
       ),
@@ -352,4 +368,73 @@ Vous ne recevrez plus d'email de ma part concernant ce scan.`,
 /** Les quatre messages d'un lead, dans l'ordre. */
 export function tousLesEmails(i: ScanInsights): Email[] {
   return [emailImmediat(i), ...emailsDeRelance(i)];
+}
+
+/* ─────────────────────────── la version HTML ─────────────────────────── */
+
+const echapper = (s: string) =>
+  s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+/**
+ * Habille un message en HTML sobre.
+ *
+ * Volontairement minimal : aucune image, aucun tableau de mise en page, aucune
+ * feuille de style externe, uniquement des styles en ligne et des polices
+ * système. Les clients mail sont un champ de ruines et tout ce qui est
+ * sophistiqué finit cassé quelque part, ou en indésirables.
+ *
+ * ⚠ À n'utiliser qu'une fois le domaine chauffé. Un domaine neuf qui envoie du
+ * HTML avec des liens part beaucoup plus facilement en spam que le même texte
+ * brut. Les cent premiers envois doivent rester en texte : c'est aussi ce qui
+ * convertit le mieux en B2B, parce qu'un message qui ressemble à une vraie
+ * lettre est lu comme une vraie lettre.
+ *
+ * Le texte brut reste la version de référence et doit toujours accompagner le
+ * HTML dans l'envoi : les clients qui refusent le HTML l'afficheront, et les
+ * filtres anti-spam pénalisent un message HTML sans équivalent texte.
+ */
+export function enHtml(email: Email, i: ScanInsights): string {
+  const ENCRE = "#1a1a1a";
+  const DOUX = "#666";
+  const TRAIT = "#e5e5e5";
+  const ACCENT = "#8b2942";
+
+  // Le bloc de score ne s'affiche que sur le premier message : c'est le seul
+  // qui annonce un résultat. Le mettre partout en ferait un ornement.
+  const score =
+    email.step === 0
+      ? `<div style="border:1px solid ${TRAIT};padding:24px;margin:28px 0;">
+  <div style="font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:${DOUX};">Votre score de visibilité IA</div>
+  <div style="font-size:52px;line-height:1;font-weight:300;color:${ENCRE};margin:10px 0 4px;">${i.score}<span style="font-size:20px;color:${DOUX};"> / 100</span></div>
+  <div style="font-size:14px;color:${DOUX};">${echapper(i.brand)} cité ${i.citationsCible} fois · concurrents comparables ${i.citationsRivaux} fois</div>
+</div>`
+      : "";
+
+  // Le corps est déjà écrit en paragraphes séparés par des lignes vides : on
+  // s'appuie dessus plutôt que d'inventer un balisage.
+  const corps = email.body
+    .split(/\n{2,}/)
+    .map((p) => {
+      const t = p.trim();
+      if (!t) return "";
+      // Les URL seules deviennent un bouton, le reste un paragraphe.
+      if (/^https?:\/\/\S+$/.test(t)) {
+        return `<p style="margin:26px 0;"><a href="${t}" style="display:inline-block;background:${ACCENT};color:#fff;text-decoration:none;padding:13px 26px;font-size:15px;">Réserver mon diagnostic</a></p>`;
+      }
+      if (t.startsWith("--")) {
+        return `<p style="margin:28px 0 0;padding-top:16px;border-top:1px solid ${TRAIT};font-size:12px;color:${DOUX};">${echapper(t.replace(/^--\s*/, "")).replace(/\n/g, "<br>")}</p>`;
+      }
+      // Un extrait entre guillemets français : on le détache visuellement.
+      if (t.startsWith("«") && t.endsWith("»")) {
+        return `<blockquote style="margin:22px 0;padding:14px 18px;border-left:3px solid ${TRAIT};font-style:italic;color:${ENCRE};">${echapper(t)}</blockquote>`;
+      }
+      return `<p style="margin:16px 0;">${echapper(t).replace(/\n/g, "<br>")}</p>`;
+    })
+    .join("\n");
+
+  return `<div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;font-size:15px;line-height:1.6;color:${ENCRE};max-width:560px;margin:0 auto;padding:8px;">
+${corps.split("\n")[0] ?? ""}
+${score}
+${corps.split("\n").slice(1).join("\n")}
+</div>`;
 }

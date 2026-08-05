@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { emailImmediat, situationDuScan } from "../src/lib/emails.js";
+import { emailImmediat, emailsDeRelance, enHtml, situationDuScan } from "../src/lib/emails.js";
 import type { ScanInsights } from "../src/lib/insights.js";
 
 /** Un scan plausible, que chaque test déforme sur le seul point qui l'intéresse. */
@@ -103,6 +103,47 @@ describe("concurrents nommés par le prospect", () => {
 
   it("n'écrit rien quand le prospect n'en a nommé aucun", () => {
     expect(emailImmediat(scan()).body).not.toContain("Vous nous aviez cité");
+  });
+});
+
+describe("cohérence de la séquence", () => {
+  it("n'envoie aucune relance quand on a dit qu'on ne vendait rien", () => {
+    // Le premier message dit « rien ne presse ». Trois relances qui poussent
+    // le diagnostic le contrediraient et détruiraient la confiance construite.
+    expect(emailsDeRelance(scan({ score: 72 }))).toHaveLength(0);
+  });
+
+  it("relance normalement dans les autres situations", () => {
+    expect(emailsDeRelance(scan({ score: 30 }))).toHaveLength(3);
+    expect(emailsDeRelance(scan({ botsBloques: ["GPTBot"] }))).toHaveLength(3);
+  });
+
+  it("adapte la question de J+2 au blocage technique", () => {
+    const [j2] = emailsDeRelance(scan({ botsBloques: ["GPTBot"] }));
+    expect(j2!.body).toContain("interdisait l'accès à GPTBot");
+  });
+});
+
+describe("enHtml", () => {
+  it("échappe le contenu, sans quoi une marque avec un chevron casserait la page", () => {
+    const s = scan({ brand: "Dupont & <Fils>" });
+    const html = enHtml(emailImmediat(s), s);
+    expect(html).toContain("Dupont &amp; &lt;Fils&gt;");
+    expect(html).not.toContain("<Fils>");
+  });
+
+  it("n'affiche le bloc de score que sur le premier message", () => {
+    const s = scan();
+    expect(enHtml(emailImmediat(s), s)).toContain("Votre score de visibilité IA");
+    expect(enHtml(emailsDeRelance(s)[0]!, s)).not.toContain("Votre score de visibilité IA");
+  });
+
+  it("n'embarque ni image ni feuille de style externe", () => {
+    // Tout ce qui est externe déclenche les filtres et casse chez la moitié
+    // des clients mail.
+    const s = scan();
+    const html = enHtml(emailImmediat(s), s);
+    expect(html).not.toMatch(/<img|<link|<style|background-image/);
   });
 });
 
