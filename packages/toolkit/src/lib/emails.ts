@@ -102,6 +102,26 @@ ${competitor} est nommé. ${i.brand} n'apparaît pas.`;
 }
 
 /**
+ * Les concurrents que le prospect a nommés lui-même.
+ *
+ * Rien ne frappe plus fort : ce sont SES noms, pas les nôtres. Et le cas à
+ * zéro citation vaut d'être dit aussi, il désamorce l'idée que le scan
+ * chercherait à faire peur.
+ */
+function concurrentsNommes(i: ScanInsights): string {
+  const suivis = i.concurrentsSuivis.filter((c) => c.saisi);
+  if (suivis.length === 0) return "";
+  const lignes = suivis.map((c) =>
+    c.citations > 0
+      ? `  . ${c.saisi} : cité ${c.citations} fois`
+      : `  . ${c.saisi} : jamais cité non plus`,
+  );
+  return `Vous nous aviez cité ${suivis.length === 1 ? "un concurrent" : `${suivis.length} concurrents`}. Voici ce que les moteurs en disent, face à vos ${i.citationsCible} citations :
+
+${lignes.join("\n")}`;
+}
+
+/**
  * L'invitation à vérifier soi-même.
  *
  * Contre-intuitif mais décisif : on donne une vraie question du scan et on
@@ -203,6 +223,7 @@ export function emailImmediat(i: ScanInsights): Email {
           : i.missedCount > 0
             ? `Sur ${i.missedCount} de ces ${i.totalQueries} questions, aucun moteur ne mentionne ${i.brand}. Ce sont des questions que vos prospects posent vraiment, avec l'intention d'acheter.`
             : "",
+        concurrentsNommes(i),
         verbatim(i),
         defiVerifiable(i),
         `Ce n'est presque jamais une question de budget ni de notoriété. Dans la grande majorité des cas que nous mesurons, l'essentiel vient de trois causes techniques et éditoriales identifiables en une vingtaine de minutes.`,
@@ -224,6 +245,7 @@ export function emailImmediat(i: ScanInsights): Email {
         i.missedCount > 0
           ? `Vous êtes totalement absent sur ${i.missedCount} des ${i.totalQueries} questions testées. Par exemple : « ${i.missedQueries[0]} ». Sur celle-là, les moteurs citent ${rival(i)} et pas vous.`
           : `Vos concurrents comparables sont cités ${i.citationsRivaux} fois contre ${i.citationsCible} pour vous.`,
+        concurrentsNommes(i),
         verbatim(i),
         defiVerifiable(i),
         `C'est la situation où le travail paye le plus vite. Quand une marque existe déjà mais manque les bonnes questions, il s'agit de combler des trous identifiés, pas de tout construire.`,

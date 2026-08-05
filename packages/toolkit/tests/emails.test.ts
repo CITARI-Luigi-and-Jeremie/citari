@@ -17,6 +17,7 @@ const scan = (patch: Partial<ScanInsights> = {}): ScanInsights =>
     citationsCible: 12,
     citationsConcurrents: 108,
     citationsRivaux: 41,
+    concurrentsSuivis: [],
     botsBloques: [],
     auditFait: true,
     llmstxtAbsent: false,
@@ -73,6 +74,35 @@ describe("concurrents comparables", () => {
     // client, et le message reste celui d'avant.
     const e = emailImmediat(scan({ citationsCible: 0, brandShare: 0, citationsRivaux: 108 }));
     expect(e.body).toContain("108 fois");
+  });
+});
+
+describe("concurrents nommés par le prospect", () => {
+  it("les met en avant avec leurs vrais chiffres", () => {
+    const e = emailImmediat(
+      scan({
+        citationsCible: 12,
+        concurrentsSuivis: [
+          { saisi: "Fiducial", releve: "Fiducial", citations: 42 },
+          { saisi: "Exco", releve: "Exco", citations: 30 },
+        ],
+      })
+    );
+    expect(e.body).toContain("Vous nous aviez cité 2 concurrents");
+    expect(e.body).toContain("Fiducial : cité 42 fois");
+    expect(e.body).toContain("face à vos 12 citations");
+  });
+
+  it("dit aussi quand le concurrent redouté n'est pas cité", () => {
+    // Cas fréquent et utile : il désamorce l'idée qu'on cherche à faire peur.
+    const e = emailImmediat(
+      scan({ concurrentsSuivis: [{ saisi: "Cabinet Untel", releve: null, citations: 0 }] })
+    );
+    expect(e.body).toContain("Cabinet Untel : jamais cité non plus");
+  });
+
+  it("n'écrit rien quand le prospect n'en a nommé aucun", () => {
+    expect(emailImmediat(scan()).body).not.toContain("Vous nous aviez cité");
   });
 });
 

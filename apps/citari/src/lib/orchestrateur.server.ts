@@ -525,7 +525,7 @@ async function finaliser(id: string) {
   const [{ data: reponses }, { data: mentions }, { data: scan }] = await Promise.all([
     supabaseAdmin.from("responses").select("id, engine").eq("scan_id", id),
     supabaseAdmin.from("mentions").select("*").eq("scan_id", id),
-    supabaseAdmin.from("scans").select("brand_name, sector, city").eq("id", id).single(),
+    supabaseAdmin.from("scans").select("brand_name, sector, city, competitors").eq("id", id).single(),
   ]);
   const lignes = (mentions ?? []) as unknown as LigneMention[];
   const s = calculerScore(reponses ?? [], lignes);
@@ -555,6 +555,26 @@ async function finaliser(id: string) {
     if (!item.target) item.classe = classes[item.name] ?? "rival";
   }
 
+  // Les concurrents que le prospect a nommés lui-même, rapprochés de ce que
+  // les moteurs ont cité. Ce sont les seuls noms qu'il a choisis : « Fiducial,
+  // que vous nous avez cité, apparaît 42 fois, vous 25 » porte bien plus qu'un
+  // classement anonyme.
+  //
+  // Le rapprochement se fait ICI, après l'extraction, et jamais en soufflant
+  // les noms à l'extracteur : ce serait l'inciter à les trouver, donc fausser
+  // la mesure que nous vendons.
+  const saisis = Array.isArray(scan?.competitors) ? (scan.competitors as string[]) : [];
+  const comptesParNom = new Map<string, number>();
+  for (const m of lignes) {
+    if (m.is_target) continue;
+    const nom = nomRetenu(m.brand);
+    comptesParNom.set(nom, (comptesParNom.get(nom) ?? 0) + 1);
+  }
+  const suivis = saisis.filter(Boolean).map((saisi) => {
+    const releve = [...comptesParNom.keys()].find((nom) => memeMarque(nom, saisi)) ?? null;
+    return { saisi, releve, citations: releve ? (comptesParNom.get(releve) ?? 0) : 0 };
+  });
+
   const actions = await genererActions(scan?.brand_name ?? "", scan?.sector ?? "", s.global, pdv);
 
   await supabaseAdmin
@@ -577,6 +597,7 @@ async function finaliser(id: string) {
       sentiment_score: s.sentiment,
       share_of_voice: pdv,
       brand_aliases: alias as unknown as never,
+      concurrents_suivis: suivis as unknown as never,
       concurrent_classes: classes as unknown as never,
       actions: actions as unknown as never,
     })
@@ -743,7 +764,7 @@ export async function teaserScan(id: string) {
   const { data: scan } = await supabaseAdmin
     .from("scans")
     .select(
-      "id, brand_name, status, mode, score_global, score_chatgpt, score_claude, score_gemini, score_perplexity, score_grok, score_mistral, share_of_voice, concurrent_classes, brand_aliases, audit, miroir",
+      "id, brand_name, status, mode, score_global, score_chatgpt, score_claude, score_gemini, score_perplexity, score_grok, score_mistral, share_of_voice, concurrent_classes, brand_aliases, concurrents_suivis, audit, miroir",
     )
     .eq("id", id)
     .maybeSingle();
@@ -832,6 +853,11 @@ export async function teaserScan(id: string) {
       questionsPerdues: questionsPerdues.length,
     },
     pdv: (Array.isArray(scan.share_of_voice) ? scan.share_of_voice : []) as unknown as PdvItem[],
+    // Les concurrents nommés par le prospect : à mettre en avant, ce sont les
+    // seuls noms qu'il a choisis lui-même.
+    concurrentsSuivis: (Array.isArray(scan.concurrents_suivis)
+      ? scan.concurrents_suivis
+      : []) as unknown as { saisi: string; releve: string | null; citations: number }[],
     emailCapture,
     // Avant l'email : on annonce qu'un verbatim existe, sans le livrer.
     // Le front affiche l'amorce et le cadenas ; le texte n'est envoyé

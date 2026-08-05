@@ -83,6 +83,16 @@ export interface ScanInsights {
    * les sources observées — et la proposition ne doit pas promettre le contraire.
    */
   sourcesUnavailable: boolean;
+  /**
+   * Les concurrents que le prospect a nommés lui-même dans le formulaire,
+   * rapprochés de ce que les moteurs ont cité.
+   *
+   * Ce sont les seuls noms qu'il a choisis : « Fiducial, que vous nous avez
+   * cité, apparaît 42 fois, vous 25 » porte bien plus qu'un classement
+   * anonyme. Un concurrent à zéro citation est une information utile aussi :
+   * celui qu'il redoute n'est peut-être pas cité non plus.
+   */
+  concurrentsSuivis: { saisi: string; releve: string | null; citations: number }[];
   /** Verbatim où un concurrent est cité et pas la marque. */
   killerQuote: { query: string; engine: string; excerpt: string; competitor: string } | null;
 }
@@ -98,6 +108,7 @@ type ScanDb = {
   audit: unknown;
   concurrent_classes: unknown;
   brand_aliases: unknown;
+  concurrents_suivis: unknown;
 } & Partial<Record<(typeof ENGINE_SCORE_COLUMN)[EngineLabel], number | null>>;
 
 type PdvItem = { name: string; count: number; share: number; target: boolean };
@@ -249,6 +260,9 @@ export async function buildScanInsights(scanId: string): Promise<ScanInsights> {
     citationsCible,
     citationsConcurrents,
     citationsRivaux,
+    concurrentsSuivis: (Array.isArray(scan.concurrents_suivis)
+      ? scan.concurrents_suivis
+      : []) as ScanInsights["concurrentsSuivis"],
     botsBloques,
     auditFait,
     llmstxtAbsent: auditFait && audit?.llmstxt === false,

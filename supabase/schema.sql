@@ -50,6 +50,9 @@ CREATE TABLE scans (
   -- { "Exco Lyon": "Exco", "Fiducial Expertise": "Fiducial" }
   -- Les noms bruts restent intacts dans `mentions` : c'est la mesure.
   brand_aliases jsonb NOT NULL DEFAULT '{}',
+  -- Concurrents nommés par le prospect, rapprochés de ce qui a été cité :
+  -- [{ "saisi": "Fiducial", "releve": "Fiducial", "citations": 42 }]
+  concurrents_suivis jsonb NOT NULL DEFAULT '[]',
   report_token text NOT NULL DEFAULT encode(gen_random_bytes(24), 'hex'),
   previous_scan_id uuid,
   ip_hash text,

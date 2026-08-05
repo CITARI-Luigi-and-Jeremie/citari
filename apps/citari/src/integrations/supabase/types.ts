@@ -594,6 +594,7 @@ export type Database = {
           competitors: string[]
           completed_at: string | null
           concurrent_classes: Json
+          concurrents_suivis: Json
           created_at: string
           audit: Json | null
           domain_key: string | null
@@ -632,6 +633,7 @@ export type Database = {
           competitors?: string[]
           completed_at?: string | null
           concurrent_classes?: Json
+          concurrents_suivis?: Json
           created_at?: string
           audit?: Json | null
           domain_key?: string | null
@@ -671,6 +673,7 @@ export type Database = {
           competitors?: string[]
           completed_at?: string | null
           concurrent_classes?: Json
+          concurrents_suivis?: Json
           created_at?: string
           audit?: Json | null
           domain_key?: string | null
