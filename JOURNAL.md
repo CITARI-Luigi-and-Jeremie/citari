@@ -441,6 +441,33 @@ gelées permettant d'arbitrer sans litige.
 
 ## Pièges rencontrés, à ne pas redécouvrir
 
+- **Il existe DEUX back-offices**, découvert le 06/08/2026 en cherchant
+  simplement à quoi servait `ADMIN_PASSWORD`. `apps/admin` (Next, port 3001,
+  844 lignes) est celui qu'on utilise ; la route `/admin` du site
+  (`apps/citari/src/routes/admin.tsx`, 404 lignes) en est un second, plus
+  pauvre, qui écrit dans les mêmes tables. Leurs listes de statuts divergent
+  (`prospect`/`rdv_pris`/`client` d'un côté, `call_planifié`/`proposition`/
+  `gagné` de l'autre) et `leads.status` est un `text` sans contrainte : la base
+  accepte les deux. Les trois leads réels sont en `prospect`, que la route du
+  site ne sait pas afficher. C'est le problème des deux moteurs de scan, à
+  l'identique : deux implémentations d'une même chose finissent toujours par
+  diverger, et ici c'est le suivi commercial qui devient faux.
+  S'y ajoute un risque de sécurité, celui qui presse : la route du site lit
+  `apps/citari/.env.local`, où traîne le texte littéral
+  `choisissez-un-mot-de-passe-solide`. Ce n'est pas un hasard, c'est la commande
+  que `SETUP.md` donnait, et elle visait le mauvais fichier : `apps/admin` lit
+  le `.env` de la racine, chargé explicitement par son `next.config.ts`. Une
+  fois le site en ligne, `/admin` s'ouvrirait donc avec un mot de passe publié
+  en clair dans ce dépôt, sur des emails de prospects. À supprimer avant la mise
+  en ligne.
+- **`ADMIN_PASSWORD` n'a jamais manqué.** Il était annoncé absent dans
+  `CLAUDE.md`, `README.md`, `SETUP.md` et Notion, en tête des bloquants, alors
+  qu'il était renseigné dans le `.env` de la racine depuis le début. Le
+  back-office était utilisable pendant tout ce temps. La leçon n'est pas sur le
+  mot de passe : une consigne d'installation qui vise le mauvais fichier crée
+  une panne imaginaire, on la recopie de document en document, et personne ne
+  vérifie parce que quatre documents ne peuvent pas tous se tromper. Vérifier
+  avant d'écrire qu'une chose manque.
 - **Un prompt de construction périmé traînait en `apps/citari/README.md`**,
   sans le bandeau d'avertissement qui protège `LOVABLE.md` et `SPEC.md`. À
   l'endroit exact où l'on cherche « c'est quoi cette app », il contredisait

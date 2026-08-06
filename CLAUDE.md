@@ -11,9 +11,13 @@ ont tourné contre la vraie base. 90 tests passent.
 
 **Ce qui empêche de vendre n'est pas du code.**
 
-1. `ADMIN_PASSWORD` n'est pas renseigné : le back-office est inutilisable, alors
-   que c'est là qu'on relit les emails avant envoi. C'est le seul vrai bloquant
-   qui reste, et il se règle en une ligne (`SETUP.md`).
+1. **Il y a deux back-offices**, et l'un doit disparaître avant la mise en
+   ligne. `apps/admin` (Next, port 3001) est celui qu'on utilise, et il
+   fonctionne : `ADMIN_PASSWORD` est renseigné dans le `.env` de la racine, le
+   fichier que son `next.config.ts` charge. La route `/admin` du site en est un
+   second, qui lit `apps/citari/.env.local` où traîne un mot de passe bidon
+   publié en clair dans ce dépôt. Leurs listes de statuts divergent et
+   `leads.status` n'a aucune contrainte. Détail dans `SETUP.md`.
 2. Resend et mise en ligne : voir `SETUP.md` et `docs/DEPLOIEMENT.md`. Le
    domaine est acheté, chez Hostinger. Le site part sur **Cloudflare Workers**,
    puis basculera sur le **VPS Hostinger** quand tout le reste sera fini.

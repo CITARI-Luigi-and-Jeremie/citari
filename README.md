@@ -102,11 +102,14 @@ npm --prefix apps/citari run build
 Le code est prêt et éprouvé sur des scans réels. Ce qui manque n'est pas du
 code, ce sont des comptes :
 
-1. `ADMIN_PASSWORD` absent de `.env.local` : le back-office est inutilisable.
-   C'est le seul vrai bloquant qui reste.
+1. **Deux back-offices coexistent**, et l'un doit disparaître avant la mise en
+   ligne : `apps/admin` (celui qu'on utilise, et qui fonctionne) et la route
+   `/admin` du site, protégée par un mot de passe bidon publié en clair ici.
+   Leurs listes de statuts divergent. Voir [SETUP.md](SETUP.md).
 2. Resend et mise en ligne : voir [SETUP.md](SETUP.md). Le domaine `citari.fr`
    est acheté chez Hostinger ; le site part sur Cloudflare Workers, puis
    basculera sur le VPS Hostinger.
 
 Le crédit Anthropic, longtemps le bloquant n° 1, est rechargé depuis le
-06/08/2026 : les six moteurs répondent de nouveau.
+06/08/2026 : les six moteurs répondent de nouveau. `ADMIN_PASSWORD`, longtemps
+annoncé comme absent, est en fait renseigné dans le `.env` de la racine.
