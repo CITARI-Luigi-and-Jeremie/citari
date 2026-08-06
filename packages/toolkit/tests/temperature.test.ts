@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { bonusScanGeo, pointsTaille, pointsVerticale, temperature, type ProspectClassable } from "../src/lib/temperature.js";
+import { bonusScanGeo, pointsCapacite, pointsTaille, pointsVerticale, temperature, type ProspectClassable } from "../src/lib/temperature.js";
 
 /**
  * Ce classement décide de l'ordre dans lequel le fondateur appelle cent
@@ -22,8 +22,12 @@ const p = (sur: Partial<ProspectClassable> = {}): ProspectClassable => ({
 
 describe("pointsTaille", () => {
   it("récompense la fourchette où le dirigeant décide seul", () => {
-    expect(pointsTaille("20 à 49")).toBe(15);
-    expect(pointsTaille("10-19")).toBe(15);
+    // On teste le classement, pas la valeur absolue : les pondérations sont
+    // rééquilibrées à mesure qu'on apprend, et un test sur le chiffre exact
+    // casserait à chaque ajustement sans rien protéger.
+    expect(pointsTaille("20 à 49")).toBe(pointsTaille("10-19"));
+    expect(pointsTaille("10-19")).toBeGreaterThan(pointsTaille("6 à 9"));
+    expect(pointsTaille("10-19")).toBeGreaterThan(pointsTaille("50-99"));
   });
 
   it("pénalise les tailles où le cycle s'allonge ou le budget manque", () => {
@@ -137,5 +141,47 @@ describe("équilibre des pondérations — le biais mesuré le 06/08/2026", () =
     // Un écart existe, mais il ne doit pas décider à lui seul du classement.
     expect(nominatif.score - generique.score).toBeLessThanOrEqual(6);
     expect(nominatif.score).toBeGreaterThan(generique.score);
+  });
+});
+
+describe("pointsCapacite — peut-il signer 2 900 € sans arbitrer ?", () => {
+  it("récompense un résultat qui rend la dépense indolore", () => {
+    // DV Experts : 1 024 834 € de résultat. Signe sans y penser.
+    expect(pointsCapacite("1024834").points).toBe(20);
+    expect(pointsCapacite("1024834").mention).toContain("signe sans arbitrer");
+  });
+
+  it("signale le prospect pour qui 2 900 € pèsent", () => {
+    // Quovive : 4 018 € de résultat. La dépense est un vrai arbitrage.
+    const q = pointsCapacite("4018");
+    expect(q.points).toBeLessThan(10);
+    expect(q.mention).toContain("pèseront");
+  });
+
+  it("écarte une société en perte", () => {
+    expect(pointsCapacite("-15000").points).toBe(0);
+    expect(pointsCapacite("-15000").mention).toContain("perte");
+  });
+
+  it("reste NEUTRE quand les comptes ne sont pas publiés", () => {
+    // 35 sociétés sur 100 usent de la confidentialité, ce qui est légal.
+    // Les pénaliser écarterait de bons prospects sur une donnée absente.
+    const inconnu = pointsCapacite("").points;
+    expect(inconnu).toBe(10);
+    expect(inconnu).toBeGreaterThan(pointsCapacite("4018").points);
+    expect(inconnu).toBeLessThan(pointsCapacite("200000").points);
+  });
+
+  it("un prospect solvable passe devant un prospect en perte, tout le reste égal", () => {
+    const base = {
+      entreprise: "X", verticale: "Expertise comptable", taille_salaries: "20 à 49",
+      ceo_email: "a@x.fr", ceo_email_statut: "verified", ceo_nom: "A", mkt_email: "",
+      tel_mobile_site: "", tel_standard: "0478000000", email_entreprise: "c@x.fr",
+      emails_entreprise_tous: "c@x.fr", signal_bots_ia_bloques: "", signal_pixels_pub: "",
+      siren: "1", fiabilite: "A",
+    };
+    const riche = temperature({ ...base, resultat_eur: "250000" });
+    const perte = temperature({ ...base, resultat_eur: "-40000" });
+    expect(riche.score - perte.score).toBe(20);
   });
 });

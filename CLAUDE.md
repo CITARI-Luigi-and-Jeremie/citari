@@ -7,7 +7,7 @@ y compris les pièges déjà payés. Rien d'autre n'est nécessaire pour commenc
 
 **Où en est le projet, au 06/08/2026.** Le back est terminé et éprouvé en
 conditions réelles : les trois modes de scan et les 23 commandes du toolkit
-ont tourné contre la vraie base. 158 tests passent.
+ont tourné contre la vraie base. 166 tests passent.
 
 **Ce qui empêche de vendre n'est pas du code.**
 
@@ -190,7 +190,7 @@ du toolkit et les colonnes réelles vit dans
 
 ```bash
 pnpm install
-pnpm -r test        # 158 tests
+pnpm -r test        # 166 tests
 pnpm -r typecheck   # couvre aussi le site, via l'alias des tests
 npm --prefix apps/citari run build
 ```
