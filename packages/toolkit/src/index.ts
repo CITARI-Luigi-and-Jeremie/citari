@@ -37,6 +37,7 @@ import { scanLot } from "./commands/scan-lot.js";
 import { sourcer } from "./commands/sourcer.js";
 import { verifierBase } from "./commands/verifier-base.js";
 import { classerLeads } from "./commands/classer-leads.js";
+import { signauxGeo } from "./commands/signaux-geo.js";
 import { enrichir } from "./commands/enrichir.js";
 
 const program = new Command()
@@ -98,6 +99,15 @@ program
   .argument("<client>", "nom ou id du client")
   .description("Chantier 3 — cibles de citation priorisées + brouillons de pitchs presse")
   .action((client: string) => run(citationTargets(client)));
+
+program
+  .command("signaux-geo")
+  .argument("<fichier>", "CSV de prospects avec une colonne site_web")
+  .option("-o, --sortie <fichier>", "CSV produit (défaut : <fichier>-signaux-geo.csv)")
+  .option("-p, --parallele <n>", "sites lus de front (max 8)", "6")
+  .description("Acquisition — lit sur chaque site son matériau GEO : rythme de publication, taille, avis balisés, FAQ, llms.txt, et l'angle commercial que ça autorise")
+  .action((fichier: string, o: Record<string, string>) =>
+    run(signauxGeo(fichier, { sortie: o.sortie, parallele: Number(o.parallele) || 6 })));
 
 program
   .command("classer-leads")

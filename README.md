@@ -18,7 +18,7 @@ back-office et l'usine de livraison.
 |---|---|---|
 | `apps/citari` | Site public **et moteur de scan** | TanStack Start, port 8080 |
 | `apps/admin` | Back-office : leads, clients, sprints, relances | Next.js, port 3001 |
-| `packages/toolkit` | 23 commandes de livraison et d'acquisition en CLI | tsx |
+| `packages/toolkit` | 24 commandes de livraison et d'acquisition en CLI | tsx |
 | `packages/core` | Briques partagées : accès Supabase, appels JSON au modèle, crawl |  |
 
 **Un seul moteur de scan existe** : `apps/citari/src/lib/orchestrateur.server.ts`.
@@ -89,7 +89,7 @@ pnpm -r typecheck
 pnpm -r test
 ```
 
-166 tests, qui couvrent ce qui coûte de l'argent ou de la crédibilité :
+180 tests, qui couvrent ce qui coûte de l'argent ou de la crédibilité :
 regroupement des marques, part de voix, rédaction des emails, gagnabilité,
 modèles figés. Le site se vérifie en le construisant :
 
