@@ -220,7 +220,13 @@ async function grok(q: string, langue: string): Promise<ReponseMoteur> {
   const res = await fetch("https://api.x.ai/v1/chat/completions", {
     method: "POST",
     headers: { "content-type": "application/json", authorization: `Bearer ${key}` },
-    body: JSON.stringify({ model: process.env.XAI_MODEL || "grok-4", messages: prompt(q, langue) }),
+    body: JSON.stringify({
+      // Figé sur grok-4.5 le 06/08/2026. Le code demandait « grok-4 », un
+      // alias que xAI redirigeait déjà silencieusement vers grok-4.3 : la
+      // version mesurée changeait sans que personne ne touche au code.
+      model: process.env.XAI_MODEL || "grok-4.5",
+      messages: prompt(q, langue),
+    }),
   });
   if (!res.ok) return manquant(`xAI [${res.status}]`);
   const json = (await res.json()) as {
@@ -244,7 +250,10 @@ async function lechat(q: string, langue: string): Promise<ReponseMoteur> {
     method: "POST",
     headers: { "content-type": "application/json", authorization: `Bearer ${key}` },
     body: JSON.stringify({
-      model: process.env.MISTRAL_MODEL || "mistral-large-latest",
+      // Version datée, jamais « -latest » : un alias veut dire « la dernière
+      // en date », donc Mistral peut la remplacer du jour au lendemain et
+      // déplacer notre règle graduée sans prévenir.
+      model: process.env.MISTRAL_MODEL || "mistral-large-2512",
       messages: prompt(q, langue),
     }),
   });

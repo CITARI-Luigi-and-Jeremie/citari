@@ -469,10 +469,23 @@ gelées permettant d'arbitrer sans litige.
   celui qui porte le meilleur argument. « Invisible » signifie désormais
   jamais cité, rien d'autre ; la part de voix informe le rapport sans décider
   du message.
-- **Modèle Claude figé sur `claude-sonnet-5`** le 06/08/2026, décision de
-  Luigi. Le modèle interrogé fait partie de la mesure : en changer après un
-  premier scan client ferait varier la note sans que rien n'ait bougé chez
-  lui. Le choix se fait donc avant le premier client, et ne doit plus bouger.
+- **Les six modèles interrogés sont figés** le 06/08/2026, et un test le fait
+  désormais respecter. Le modèle fait partie de la mesure : en changer après
+  un premier scan client ferait varier la note sans que rien n'ait bougé chez
+  lui. Deux dérives réelles ont motivé la règle.
+  Le code demandait `grok-4` et **xAI servait déjà `grok-4.3`** : la version
+  mesurée avait changé sans que personne ne touche au code. `Le Chat` pointait
+  sur `mistral-large-latest`, un alias que l'éditeur peut remplacer du jour au
+  lendemain. Et `.env.example` annonçait `gpt-4o` et `gemini-2.0-flash` quand
+  le code utilisait `gpt-5.6-terra` et `gemini-3.6-flash`.
+  Retenus : ChatGPT `gpt-5.6-terra`, Claude `claude-sonnet-5`, Gemini
+  `gemini-3.6-flash`, Grok `grok-4.5`, Le Chat `mistral-large-2512`, analyse
+  `gemini-3.1-flash-lite`. Tous vérifiés en appel réel.
+  Perplexity `sonar` est le seul non figeable, l'éditeur ne publiant aucune
+  version datée : risque subi et assumé.
+  `tests/modeles.test.ts` refuse tout alias en `-latest`, tout nom de famille
+  sans numéro de version, et toute divergence entre le code et
+  `.env.example`. Vérifié : le test échoue bien quand on réintroduit l'alias.
 - **Chaque scan coûtait le double, et personne ne pouvait le voir.**
   Mesuré : 80 appels de moteur facturés pour 40 réponses conservées. Deux
   causes empilées. D'abord `scan.$id.tsx` gardait le drapeau « boucle active »
