@@ -8,11 +8,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="fr" className={fontVariables}>
       <body>
-        {process.env.GEO_MOCK === "1" && (
-          <div className="border-b border-signal bg-signal px-4 py-1 text-center font-mono text-micro uppercase text-paper">
-            Mode démonstration (GEO_MOCK=1) — données simulées en mémoire.
-          </div>
-        )}
+        {/* Le bandeau « mode démonstration » a été retiré le 06/08/2026, en
+            même temps que la base simulée qu'il annonçait. Il ne protégeait
+            de rien : l'admin a tourné des semaines sur des données inventées
+            sans que le bandeau empêche quiconque de les prendre au sérieux.
+            `getDb()` ne renvoie plus que la vraie base. */}
         <nav className="border-b border-rule bg-paper-raised px-6 py-3">
           <div className="mx-auto flex max-w-5xl items-center gap-6 text-sm font-medium">
             <span className="font-bold text-signal">Citari · Admin</span>

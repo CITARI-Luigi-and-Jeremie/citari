@@ -1,79 +1,108 @@
-# Citari — plateforme complète
+# Citari
 
-Agence GEO (Generative Engine Optimization) : scanner de visibilité IA (lead magnet), landing de vente du Sprint GEO, back-office et usine de livraison CLI. Cahier des charges complet : [SPEC.md](SPEC.md).
+Agence GEO : on mesure si une marque est citée par les IA, puis on l'y fait
+apparaître. Ce dépôt contient tout, le site public, le moteur de mesure, le
+back-office et l'usine de livraison.
 
-## Mode démo (aucune clé requise)
+- **Reprendre le projet à froid** : [CLAUDE.md](CLAUDE.md), lu automatiquement
+  par Claude Code.
+- **Pourquoi les choses sont comme elles sont** : [JOURNAL.md](JOURNAL.md).
+  C'est le document le plus utile du dépôt, il garde les décisions ET leurs
+  raisons, y compris les pièges déjà payés.
+- **Mettre en ligne** : [docs/DEPLOIEMENT.md](docs/DEPLOIEMENT.md).
+- **Ce qu'il reste à créer comme comptes** : [SETUP.md](SETUP.md).
 
-`GEO_MOCK=1` (déjà actif dans `apps/*/.env.local`) simule les 4 moteurs IA et la base de données
-(fichier partagé entre web et admin). Tout le parcours fonctionne : scan → teaser → rapport →
-lead → client → checklist → re-scan J+90 avec comparaison. Un bandeau jaune signale le mode démo.
-Mot de passe admin démo : `demo`. Pour passer en réel : suivre [SETUP.md](SETUP.md).
+## Ce qu'il y a dans le dépôt
 
-## Démarrage
+| Dossier | Rôle | Techno |
+|---|---|---|
+| `apps/citari` | Site public **et moteur de scan** | TanStack Start, port 8080 |
+| `apps/admin` | Back-office : leads, clients, sprints, relances | Next.js, port 3001 |
+| `packages/toolkit` | 19 commandes de livraison en CLI | tsx |
+| `packages/core` | Briques partagées : accès Supabase, appels JSON au modèle, crawl |  |
+
+**Un seul moteur de scan existe** : `apps/citari/src/lib/orchestrateur.server.ts`.
+Il y en a eu un second dans `packages/core`, resté sur un schéma périmé ; il a
+été supprimé le 06/08/2026. N'en recréez pas.
+
+## Démarrer
 
 ```bash
 pnpm install
-cp .env.example .env   # remplir les clés (les apps Next lisent .env à la racine via leur cwd : copier aussi dans apps/admin/.env.local, ou exporter les variables)
 ```
 
-1. **Base de données** : créer un projet Supabase, puis exécuter `supabase/migrations/0001_init.sql` (SQL Editor ou `supabase db push`).
-2. **PDF (optionnel)** : `pnpm --filter web exec playwright install chromium` pour joindre le PDF aux emails.
-3. **Lancer** :
+Les clés vivent dans `apps/citari/.env.local`, jamais versionné. Le modèle des
+variables est dans [.env.example](.env.example), qui documente aussi pourquoi
+les modèles interrogés sont figés.
 
 ```bash
-pnpm dev            # web sur :3000 + admin sur :3001
+npm --prefix apps/citari run dev   # site + moteur, http://localhost:8080
+pnpm --filter admin dev            # back-office, http://localhost:3001
 ```
 
-## Valider le pipeline sans UI (Phase 1)
+Le site est **hors du workspace pnpm** (`!apps/citari` dans
+`pnpm-workspace.yaml`) : il a son propre gestionnaire de paquets. Un
+`pnpm --filter tanstack_start_ts …` répond « No projects matched ». C'est npm
+pour lui, pnpm pour tout le reste.
+
+La base est déjà en place, Supabase région Paris. Son schéma fidèle est dans
+[supabase/schema.sql](supabase/schema.sql) : 16 tables, RLS activé sans aucune
+politique, donc tout passe par la clé de service, côté serveur uniquement.
+
+## Le scan en trois modes
+
+| Mode | Questions × moteurs | Recherche web | Coût réel | Plafond |
+|---|---|---|---|---|
+| `apercu` | 20 × 2 (ChatGPT, Gemini) | non | ~0,14 € | 0,25 € |
+| `complet` | 24 × 6 | oui | ~1,06 € | 3 € |
+| `controle` | 24 × 4 | oui | ~0,84 € | 1,50 € |
+
+Deux scans par jour et par adresse IP, résultat mis en cache trois jours. Le
+navigateur pilote la mesure en sondant le serveur, et chaque réponse est écrite
+individuellement, donc une requête coupée ne perd rien.
+
+**La formule du score est figée** : présence 50 %, rang 20 %, recommandation
+explicite 20 %, tonalité 10 %. Elle ne doit pas bouger, sinon la comparaison
+J+90 vendue au client perd son sens. Les modèles interrogés sont figés pour la
+même raison, et un test le fait respecter.
+
+## Livrer un sprint
 
 ```bash
-pnpm --filter @geo/core scan:cli -- --brand "Acme" --url https://acme.fr --sector "logiciel RH" --competitors "PayFit,Lucca"
+pnpm toolkit --help
+pnpm toolkit audit-technique https://client.fr --client "Client"
+pnpm toolkit relance --all
+pnpm toolkit concurrents
+pnpm toolkit controle-45 "Client"
 ```
 
-À faire sur 3 vraies marques avant de servir des prospects ; vérifier manuellement la détection de mentions sur 5 scans réels (définition de « terminé », §11).
+Le manuel complet : [docs/LIVRAISON.md](docs/LIVRAISON.md). Les sorties
+atterrissent dans `deliverables/<client>/`, le suivi se fait dans l'admin.
 
-## Livraison d'un sprint (toolkit)
+**Rien n'est envoyé automatiquement.** Le toolkit prépare, un humain relit et
+envoie.
 
-### Cycle commercial (avant la vente)
+## Vérifier
 
 ```bash
-pnpm toolkit relance --all                    # 3 relances personnalisées (J+2/J+7/J+21) pour tous les leads non traités
-pnpm toolkit relance "contact@prospect.fr"    # ou un lead précis
-pnpm toolkit proposition "Prospect"           # proposition post-call avec ses chiffres réels
-pnpm toolkit proposition "Prospect" -o domination
+pnpm -r typecheck
+pnpm -r test
 ```
 
-Les relances apparaissent dans l'admin (`/leads`) le jour où elles sont dues : copier, envoyer depuis votre boîte,
-marquer comme envoyé. La séquence s'arrête d'un clic dès que le prospect répond.
-
-### Livraison du sprint
+88 tests, qui couvrent ce qui coûte de l'argent ou de la crédibilité :
+regroupement des marques, part de voix, rédaction des emails, gagnabilité,
+modèles figés. Le site se vérifie en le construisant :
 
 ```bash
-pnpm toolkit audit-technique https://client.fr --client "Client"   # Chantier 1 : audit
-pnpm toolkit generate-fixes "Client"                               # Chantier 1 : robots.txt, llms.txt, JSON-LD, specs
-pnpm toolkit content-brief "Client"                                # Chantier 2 : 4-6 briefs
-pnpm toolkit draft-content "Client" <brief-id>                     # Chantier 2 : rédaction (relecture obligatoire)
-pnpm toolkit citation-targets "Client"                             # Chantier 3 : cibles + pitchs
-pnpm toolkit verify-fixes "Client"                                  # Contrôle : les correctifs sont-ils en ligne ?
-pnpm toolkit crawler-log "Client" access.log                       # Preuve : les crawlers IA passent-ils ?
-pnpm toolkit sprint-report "Client"                                # Semaine 4 : rapport de fin de sprint
-pnpm toolkit rescan "Client"                                       # J+90 : mêmes requêtes, rapport avant/après
+npm --prefix apps/citari run build
 ```
 
-Sorties fichiers dans `deliverables/<client>/`, suivi dans l'admin (`/clients/<id>`).
+## Ce qui bloque aujourd'hui (06/08/2026)
 
-## Workflow business
+Le code est prêt et éprouvé sur des scans réels. Ce qui manque n'est pas du
+code, ce sont des comptes :
 
-1. Prospect scanne sur le site → teaser (score, part de voix, verbatim) → capture email → rapport complet + PDF.
-2. Call de restitution (BOOKING_URL) → vente du Sprint (2 900 € / Domination 4 900 €).
-3. Admin : lead → client (checklist 30 jours créée automatiquement) → livraison via toolkit.
-4. Re-scan J+90 (rappel email automatique via `GET /api/cron/rescan-reminder?secret=CRON_SECRET`, à appeler quotidiennement) → rapport avant/après → upsell.
-
-## Tests & qualité
-
-```bash
-pnpm test        # unitaires core (détection de mentions, scoring)
-pnpm typecheck   # tout le monorepo
-```
-
-Garde-fous intégrés : coût par scan loggé (`cost_log`) et plafonné à 1,50 €, rate limit 3 scans/jour/IP, Turnstile optionnel, APIs officielles uniquement (pas de scraping d'UI — limite mentionnée dans le rapport).
+1. **Crédit Anthropic épuisé.** Claude ne répond plus, le diagnostic complet
+   tourne donc à cinq moteurs sur six. Les cinq autres répondent.
+2. `ADMIN_PASSWORD` absent de `.env.local` : le back-office est inutilisable.
+3. Resend, hébergement, nom de domaine : voir [SETUP.md](SETUP.md).

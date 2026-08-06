@@ -1,4 +1,15 @@
-# Cahier des charges — Plateforme Citari (v2, complet)
+# Cahier des charges — Plateforme Citari (v2)
+
+> **Ce document dit CE QU'ON VEUT, pas comment c'est fait aujourd'hui.**
+>
+> Il a été écrit avant la construction et reste la référence sur le produit :
+> l'offre, les 3 chantiers, la checklist du sprint, les non-objectifs. Ces
+> parties sont toujours vraies.
+>
+> Pour l'état RÉEL du code, ne vous fiez pas à ce fichier : lisez
+> [CLAUDE.md](CLAUDE.md) et [JOURNAL.md](JOURNAL.md). Les sections techniques
+> ci-dessous ont été corrigées le 06/08/2026 là où elles étaient devenues
+> fausses, mais un cahier des charges vieillit toujours plus vite que le code.
 
 Il décrit TOUT ce qu'on construit : (A) le scanner gratuit qui génère les leads, (B) la landing qui vend le Sprint GEO, (C) l'usine de livraison interne pour exécuter les missions clients.
 
@@ -11,7 +22,7 @@ Il décrit TOUT ce qu'on construit : (A) le scanner gratuit qui génère les lea
   3. Sprint GEO — 2 900 € paiement unique : mission de 30 jours où on améliore sa visibilité (3 chantiers, §1). Option Sprint Domination à 4 900 €.
   4. Re-scan offert à J+90 : on mesure la progression → preuve → upsell (2e sprint ou maintenance mensuelle).
 - **L'équipe** : 1 fondateur + Claude Code. Maximiser le levier d'une personne seule.
-- **Le tunnel public (landing, scan, rapport) est servi par Lovable.** Ce dépôt porte `apps/admin` (back-office de livraison) et `packages/toolkit` (CLI de livraison).
+- **Tout vit dans ce dépôt** : `apps/citari` (site public ET moteur de scan), `apps/admin` (back-office), `packages/toolkit` (CLI de livraison). Le tunnel public a transité par Lovable entre le 01/08 et le 05/08/2026 ; seule la façade en avait été reprise, le moteur est ici.
 
 ## 1. Les 3 chantiers d'un Sprint
 
@@ -23,16 +34,16 @@ Il décrit TOUT ce qu'on construit : (A) le scanner gratuit qui génère les lea
 
 ## 2. Monorepo & stack
 
-- Turborepo — `apps/admin`, `packages/toolkit`, `packages/core`.
-- Next.js 15 (App Router), TypeScript strict, Tailwind + shadcn/ui, Supabase, Resend, Vercel.
-- Providers LLM (`packages/core`) : interface `LLMProvider.ask(query, lang) -> { text, citations[] }`, 4 implémentations : OpenAI (gpt-4o), Anthropic (Claude Sonnet), Google Gemini, Perplexity (sonar, retourne les citations — critiques pour le Chantier 3).
-- Clés API en env. Coût par scan loggé, plafonné (~30 requêtes × 4 moteurs). Rate limiting IP (3 scans/jour) + Cloudflare Turnstile.
+- Turborepo — `apps/citari`, `apps/admin`, `packages/toolkit`, `packages/core`.
+- `apps/citari` : TanStack Start, build vers Cloudflare Workers. `apps/admin` : Next.js. TypeScript strict, Tailwind, Supabase, Resend.
+- **6 moteurs**, appelés directement depuis `apps/citari/src/lib/moteurs.server.ts` : ChatGPT, Claude, Gemini, Perplexity, Grok, Le Chat. Perplexity et Gemini rendent leurs sources, ce qui alimente le Chantier 3. Les versions de modèles sont FIGÉES et un test l'impose : voir `.env.example`.
+- Clés API en env. Coût par scan journalisé et plafonné par mode (0,25 € aperçu, 3 € complet, 1,50 € contrôle). **2 scans par jour et par IP**, résultat mis en cache 3 jours.
 
-## 3. Le tunnel public — servi par Lovable
+## 3. Le tunnel public (`apps/citari`)
 
-> Section historique : ce tunnel était `apps/web` dans ce dépôt. Il est depuis le
-> 2026-08-01 servi par le projet Lovable, qui embarque aussi le moteur de scan.
-> Ce qui suit décrit toujours le comportement attendu du produit.
+> Section historique : ce tunnel a été `apps/web`, puis un projet Lovable. Il
+> est depuis le 05/08/2026 servi par `apps/citari`, dans ce dépôt, moteur de
+> scan compris. Ce qui suit décrit le comportement attendu du produit.
 
 ### 3.1 Landing
 - H1 : « Votre marque est-elle invisible dans ChatGPT ? »
@@ -43,13 +54,13 @@ Il décrit TOUT ce qu'on construit : (A) le scanner gratuit qui génère les lea
 
 ### 3.2 Scanner (flux)
 1. Formulaire : marque + URL, secteur (~20 choix + libre), jusqu'à 3 concurrents, langue (FR défaut, IT, EN).
-2. Génération de 20-30 requêtes « intention d'achat » via Claude (secteur + fetch home). Mix : 40 % comparatives, 25 % problème, 20 % locales si pertinent, 15 % confiance. JSON strict validé Zod.
+2. Génération des questions « intention d'achat » **via Gemini** : 20 en aperçu, 24 en complet. Le nom de la marque n'est JAMAIS prononcé dans la question, sinon on mesurerait la mémoire du moteur et non la découverte spontanée.
 3. Exécution asynchrone (job en base + polling, jamais de requête bloquante), progression temps réel, cible < 90 s.
-4. Teaser sans email : Score de Visibilité IA (0-100), part de voix vs concurrents, 1 verbatim où un concurrent est cité et pas la marque.
-5. Capture email → rapport complet (page à lien signé + PDF Playwright via Resend).
+4. Teaser : score (0-100), part de voix, écart de comptage avec les concurrents comparables. Le verbatim reste VERROUILLÉ côté serveur tant qu'aucun email n'est saisi ; un floutage CSS ne protégerait rien.
+5. L'email est demandé dès le formulaire, c'est la contrepartie du scan gratuit. Rapport complet accessible par jeton signé, sans compte.
 6. CTA : réservation du call (BOOKING_URL).
 
-### 3.3 Scoring (`packages/core`)
+### 3.3 Scoring (`apps/citari/src/lib/score.ts`)
 - Détection en 2 étapes : matching déterministe (nom, variantes, domaine) puis classification LLM en batch → `{ brand, mentioned, position, sentiment, is_recommended }`.
 - Score 0-100 : mention 50 %, position moyenne 20 %, recommandation explicite 20 %, sentiment 10 %. Détail par moteur et par requête.
 - Part de voix = mentions marque / mentions totales (marque + concurrents).
@@ -82,13 +93,13 @@ Chaque outil lit/écrit Supabase (rattaché à un client), produit des fichiers 
 - **Semaine 4** : relances citations → vérification technique finale → rapport de fin de sprint → programmation re-scan J+90.
 
 ## 7. Base de données
-`scans`, `queries`, `responses`, `mentions`, `leads`, `clients`, `sprints`, `sprint_tasks`, `deliverables`, `citation_targets`, `directories`, `client_data`.
+16 tables, schéma fidèle dans [supabase/schema.sql](supabase/schema.sql) : `scans`, `queries`, `responses`, `mentions`, `cost_log`, `leads`, `follow_ups`, `clients`, `client_data`, `sprints`, `sprint_tasks`, `deliverables`, `citation_targets`, `directories`, `crawler_hits`, `brand_overrides`. RLS activé sans aucune politique : tout passe par la clé de service.
 
 ## 8. Non-objectifs (à refuser)
 Pas de comptes/login prospects, pas de paiement en ligne (50/50 manuel), pas de scraping des UIs de chatbots (APIs uniquement, limite mentionnée dans le rapport), pas de multi-tenant, pas de dashboard de monitoring continu.
 
 ## 9. Plan de build (ordre imposé)
-- **Phase 1 (j1-4)** : schéma DB, `packages/core` (4 providers + tests détection), génération de requêtes, scan asynchrone, scoring. Validation CLI sur 3 vraies marques AVANT toute UI.
+- **Phase 1 (j1-4)** : schéma DB, moteurs, génération de questions, scan asynchrone, scoring. *(Plan d'origine, conservé pour mémoire. Le moteur a depuis été réécrit dans `apps/citari` ; celui de `packages/core` a été supprimé le 06/08/2026.)*
 - **Phase 2 (j5-9)** : scanner public complet + landing.
 - **Phase 3 (j10-11)** : admin, rate limiting, Turnstile, logs de coûts.
 - **Phase 4 (j12-16)** : les 6 outils du toolkit, testés sur cas réels.
@@ -100,4 +111,4 @@ Voir `.env.example`.
 ## 11. Définition de « terminé »
 - Un prospect inconnu peut : scanner, score < 2 min, email, PDF, call — sans intervention manuelle.
 - Le fondateur peut : convertir lead → client, dérouler la checklist, générer chaque livrable, programmer et exécuter le re-scan J+90 avec avant/après.
-- Coût par scan loggé < 1,50 €. Détection validée manuellement sur 5 scans réels.
+- Coût par scan journalisé et conforme au plafond du mode. Détection validée manuellement sur des scans réels.

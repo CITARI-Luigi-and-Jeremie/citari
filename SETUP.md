@@ -1,63 +1,84 @@
-# Mise en production — checklist
+# Ce qu'il reste à mettre en place
 
-Tout le code est prêt et testé en mode démo. Voici ce qu'il reste à faire, dans l'ordre, pour passer en réel.
+Le code est écrit, testé et éprouvé sur des scans réels. Ce qui bloque la vente
+n'est pas du code, ce sont des comptes à créer et des valeurs à renseigner.
 
-## 1. Supabase (~10 min)
-- [ ] Créer un projet sur https://supabase.com
-- [ ] SQL Editor → exécuter **dans l'ordre** `supabase/migrations/0001_init.sql`, `0002_seed_directories.sql`, `0003_follow_ups.sql`
-- [ ] Récupérer `SUPABASE_URL` et `SUPABASE_SERVICE_ROLE_KEY` (Settings → API)
+Le déploiement lui-même est décrit ailleurs, avec les commandes exactes :
+[docs/DEPLOIEMENT.md](docs/DEPLOIEMENT.md).
 
-## 2. Clés API des 6 moteurs
-- [ ] OpenAI : https://platform.openai.com/api-keys → `OPENAI_API_KEY`
-- [ ] Anthropic : https://console.anthropic.com → `ANTHROPIC_API_KEY`
-- [ ] Google AI Studio : https://aistudio.google.com/apikey → `GOOGLE_AI_API_KEY`
-- [ ] Perplexity : https://www.perplexity.ai/settings/api → `PERPLEXITY_API_KEY`
-- [ ] xAI (Grok) : https://console.x.ai → `XAI_API_KEY`
-- [ ] Mistral (Le Chat) : https://console.mistral.ai → `MISTRAL_API_KEY`
+## 1. Bloquant tout de suite
 
-## 3. Emails & réservation
-- [ ] Resend : https://resend.com → `RESEND_API_KEY`, vérifier le domaine d'envoi, remplir `RESEND_FROM`
-- [ ] Cal.com (ou Calendly) : créer l'événement « Call de restitution 30 min » → `BOOKING_URL`
-- [ ] `FOUNDER_EMAIL` (rappels J+90) et `ADMIN_PASSWORD` (fort)
+### Recharger la clé Anthropic
 
-## 4. Basculer hors mode démo
-- [ ] Remplir `apps/admin/.env.local` avec les vraies valeurs et **supprimer `GEO_MOCK=1`**
+Vérifié le 06/08/2026 : l'API répond `credit balance is too low`. **Claude ne
+répond plus du tout**, donc le diagnostic complet tourne à cinq moteurs sur six.
 
-## 4 bis. Obligations légales (bloquant pour la mise en ligne)
+Un moteur muet ne fausse plus le score, ses réponses manquantes sont exclues du
+calcul depuis le 06/08/2026, mais la mesure est amputée d'un sixième et le
+client paye pour six moteurs.
 
-Le site public est servi par **Lovable** — ces pages y vivent, pas dans ce dépôt :
+→ https://console.anthropic.com, Plans & Billing.
 
-- [ ] `src/routes/mentions-legales.tsx` : dénomination, SIRET, RCS, TVA, hébergeur — obligatoire, art. 6 III LCEN
-- [ ] `src/routes/confidentialite.tsx` : responsable de traitement, email de contact
-- [ ] Souscrire à un médiateur de la consommation agréé si vous vendez à des non-professionnels
-- [ ] Vérifier que le lien de désinscription est bien présent dans les emails Resend
+### Renseigner le mot de passe de l'admin
 
-## 5. Validation Phase 1 (obligatoire avant tout prospect)
-- [ ] 3 scans CLI sur de vraies marques : `pnpm --filter @geo/core scan:cli -- --brand … --url … --sector … --competitors …`
-- [ ] Vérifier manuellement la détection de mentions sur 5 scans réels
-- [ ] Vérifier le coût loggé (< 1,50 €/scan) dans la table `cost_log`
+Sans lui, le back-office affiche « ADMIN_PASSWORD n'est pas configuré » et reste
+inutilisable. C'est pourtant là que les emails se relisent avant envoi.
 
-## ⚠ Durée réelle d'un scan et hébergement
+```bash
+echo 'ADMIN_PASSWORD=choisissez-un-mot-de-passe-solide' >> apps/citari/.env.local
+```
 
-Un scan réel = ~96 appels moteurs (24 requêtes × 4) + ~20 appels de classification, soit **1,5 à 4 minutes**
-selon la latence des APIs (la classification est parallélisée, mais la cible < 90 s dépend des moteurs).
-Le scan tourne en tâche de fond après la réponse HTTP (`after()`), donc l'utilisateur voit la progression
-sans bloquer — mais la fonction serverless doit vivre assez longtemps :
+## 2. Avant le premier client
 
-Le scan est exécuté par Lovable, pas ici : son orchestrateur traite **8 paires
-(question × moteur) par appel**, la page appelant en boucle jusqu'à la fin. C'est
-précisément ce qui le rend insensible aux limites de durée du serverless — il n'y
-a donc rien à configurer côté timeout.
+### Emails, Resend
 
-- Premier scan réel : surveiller la table `cost_log` et le champ `scans.status` pour vérifier
-  qu'aucun scan ne reste bloqué en `running`.
+- Créer le compte sur https://resend.com, récupérer `RESEND_API_KEY`
+- Vérifier le domaine d'envoi et poser les enregistrements SPF et DKIM
+- Renseigner `RESEND_FROM`, `FOUNDER_EMAIL`, `FOUNDER_SIGNATURE`
 
-## 6. Déploiement Vercel
-- [ ] 1 projet Vercel (root `apps/admin`), toutes les env vars, `NEXT_PUBLIC_SITE_URL` = domaine public du site Lovable
-- [ ] Turnstile (anti-bot) : https://dash.cloudflare.com → `TURNSTILE_SECRET` + `NEXT_PUBLIC_TURNSTILE_SITE_KEY`
-- [ ] Le cron du rappel J+90 est déclaré dans `apps/admin/vercel.json` — définir `CRON_SECRET`
-- [ ] Après mise en ligne : lancer `pnpm toolkit audit-technique https://votre-domaine.fr` sur votre propre site (il doit être exemplaire)
+Sans domaine vérifié, les emails partent en indésirables. C'est la seule étape
+qui demande d'attendre une propagation DNS, donc à lancer en premier.
 
-## Mode démo (référence)
-`GEO_MOCK=1` simule les 6 moteurs et la base (fichier partagé dans le dossier temporaire).
-Utile pour : démo produit, tests UI, développement sans coût. Un bandeau jaune s'affiche sur toutes les pages.
+### Réservation
+
+Créer l'événement « diagnostic complet, 30 min » puis renseigner `BOOKING_URL`.
+Ce lien apparaît dans tous les emails et toutes les réponses aux objections.
+
+### Nom de domaine et hébergement
+
+Décidé : `citari.fr`. Cloudflare Registrar ne vend pas de `.fr`, il faut passer
+par un bureau d'enregistrement français. Pour l'hébergement, comparaison et
+choix dans [docs/DEPLOIEMENT.md](docs/DEPLOIEMENT.md).
+
+## 3. Obligations légales, bloquant la mise en ligne
+
+Les pages existent dans ce dépôt, `apps/citari/src/routes/`, mais leur contenu
+doit être complété une fois la structure juridique créée :
+
+- `mentions-legales.tsx` : dénomination, SIRET, RCS, TVA, hébergeur. Obligatoire,
+  article 6 III de la LCEN.
+- `confidentialite.tsx` : responsable de traitement, adresse de contact.
+- Le lien de désinscription doit être présent dans chaque email.
+
+## 4. Vérifier que tout tient, sans dépenser
+
+```bash
+pnpm -r typecheck
+pnpm -r test
+pnpm --filter tanstack_start_ts build
+```
+
+Puis un scan aperçu réel sur une marque jamais scannée, environ 0,14 €. À
+surveiller pendant qu'il tourne :
+
+- `scans.status` doit finir à `done`, jamais rester bloqué sur `running`
+- `cost_log` doit compter **autant de lignes que de réponses**. Plus de lignes
+  que de réponses signifie que des appels sont payés deux fois, ce qui est
+  arrivé et a été corrigé le 06/08/2026.
+
+## Ce qui n'existe pas, et n'est pas prévu
+
+Pas de comptes prospects, pas de paiement en ligne, le 50/50 est manuel. Pas de
+scraping des interfaces de chatbots, uniquement les API officielles. Pas de
+mode démo : il a existé, il faisait tourner l'admin sur des données simulées
+sans que personne ne s'en aperçoive, il a été retiré.

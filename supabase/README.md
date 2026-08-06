@@ -21,6 +21,6 @@ Après toute migration, réexporter depuis la base plutôt que d'éditer ce fich
 ## Ce que l'instantané ne contient pas
 
 Les données : les 57 annuaires de `directories` sont un jeu de départ, pas du
-schéma. Et les politiques RLS : les 15 tables ont RLS actif **sans aucune
+schéma. Et les politiques RLS : les 16 tables ont RLS actif **sans aucune
 policy**, ce qui vaut refus total. C'est voulu, tout passe par la clé de
 service côté serveur.

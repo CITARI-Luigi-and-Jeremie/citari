@@ -116,7 +116,7 @@ Bloc de preuve interactif — le plus important de la page. Une phrase à compl�
 
 Une statistique en exergue éditorial (pas un bandeau de trois chiffres, c'est un cliché) : « 46 % des utilisateurs d'IA démarrent leur recherche d'achat directement sur une IA », en grande serif. Sources citées en petit : Alchemer 2026, G2 Research 2026, Reuters.
 
-La mesure : 24 questions / 4 moteurs / 1 score.
+La mesure : 24 questions × 6 moteurs = 144 réponses, 1 score.
 
 L'offre : inventaire précis des livrables avant le prix — audit technique, cinq contenus rédigés, huit cibles de citation, rapport de fin de sprint, re-scan à J+90. Puis 2 900 €, paiement 50/50, sans abonnement.
 

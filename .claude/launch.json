@@ -3,14 +3,23 @@
   "configurations": [
     {
       "name": "citari-site",
-      "runtimeExecutable": "pnpm",
-      "runtimeArgs": ["--filter", "tanstack_start_ts", "dev"],
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "--prefix",
+        "apps/citari",
+        "run",
+        "dev"
+      ],
       "port": 8080
     },
     {
       "name": "citari-admin",
       "runtimeExecutable": "pnpm",
-      "runtimeArgs": ["--filter", "admin", "dev"],
+      "runtimeArgs": [
+        "--filter",
+        "admin",
+        "dev"
+      ],
       "port": 3001
     }
   ]

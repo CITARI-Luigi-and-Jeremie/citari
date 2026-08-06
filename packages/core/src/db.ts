@@ -1,12 +1,23 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { requireEnv } from "./env";
-import { createFakeDb } from "./mock/fakeDb";
-import { isMock } from "./mock/mockLlm";
 
 let client: SupabaseClient | null = null;
 
+/**
+ * La vraie base, toujours. Il n'y a plus de base simulée derrière cette
+ * fonction, et il ne doit pas y en avoir.
+ *
+ * `getDb()` renvoyait une fausse base dès que `GEO_MOCK=1` traînait dans
+ * l'environnement. C'est la fonction qu'utilise le toolkit pour rédiger les
+ * relances : une variable oubliée suffisait donc à produire des emails
+ * remplis de chiffres inventés, prêts à partir à de vrais prospects, sans
+ * qu'aucun message ne signale quoi que ce soit. Le piège avait déjà mordu une
+ * fois, l'admin ayant tourné des semaines sur des données simulées avec le mot
+ * de passe « demo ».
+ *
+ * Une base absente doit échouer bruyamment, jamais se remplacer en silence.
+ */
 export function getDb(): SupabaseClient {
-  if (isMock()) return createFakeDb() as SupabaseClient;
   if (!client) {
     client = createClient(requireEnv("SUPABASE_URL"), requireEnv("SUPABASE_SERVICE_ROLE_KEY"), {
       auth: { persistSession: false },
