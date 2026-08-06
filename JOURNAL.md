@@ -5,6 +5,64 @@ d'une nouvelle session, après `CLAUDE.md`.
 
 ---
 
+## 2026-08-06 (soir) — Audit global avant mise en ligne
+
+Relecture complète du moteur, du toolkit et de l'admin, à tête reposée, avant
+de brancher le domaine. Sept corrections, aucune ne touche à ce qui est figé.
+La base était saine : zéro scan bloqué, zéro scan en erreur, et les 76 réponses
+en panne sont l'épisode du crédit Anthropic, clos le jour même.
+
+**Le bouton « Reprendre » ne pouvait pas reprendre.** Quand une exception
+mettait un scan en statut `error`, le message public promettait « relancez-la :
+les réponses déjà collectées sont conservées », et le bouton rechargeait la
+page. Mais `avancerScan` ignorait tout scan qui n'était pas `running` : la
+relance promise était impossible, et le prospect repartait sur un scan neuf,
+payé une seconde fois. Désormais un scan en erreur sondé à nouveau repasse en
+`running` et continue où il s'était arrêté, dans la limite de la fenêtre de
+cache.
+
+**Le verrou d'analyse ne se reprenait jamais.** Celui des questions se libère
+au bout de deux minutes, précisément pour survivre à un processus tué net.
+Celui de `finaliser` n'avait pas d'échappatoire : un worker arrêté pendant
+l'analyse laissait le scan `running`/`analyse` pour toujours, chaque sondage
+suivant se heurtait au verrou, et le cache resservait ce scan mort pendant
+trois jours. Même remède, cinq minutes, avec `updated_at` comme battement de
+cœur. Sur Cloudflare, où un worker peut être arrêté à tout moment, ce n'était
+pas un cas d'école.
+
+**Le rapport public livrait nos coûts.** Le jeton se partage, c'est fait pour,
+et la charge utile embarquait les lignes `responses` entières : `cost_eur` et
+`latency_ms` par réponse, plus `ip_hash`, `domain_key` et le message d'erreur
+technique du scan. Rien de tout ça n'était affiché, tout était lisible dans
+l'onglet réseau. Colonnes explicites désormais, et l'erreur d'une réponse est
+réduite à un marqueur neutre, comme sur l'écran d'attente.
+
+**Un échantillon incomplet passait en silence.** « 24 questions » est un
+engagement écrit sur le site, et le J+90 rejoue ces questions-là pour toute la
+relation client. Si le générateur n'en rendait que 18, ou du JSON malformé, le
+scan tournait quand même, figé sur un échantillon réduit. Un tirage raté a
+droit à une seconde chance, puis on échoue franchement, et la reprise fait le
+reste.
+
+**Une panne totale sur une question passait pour une absence.** Dans
+`insights.ts`, une question dont toutes les réponses étaient des erreurs
+comptait comme « manquée », et l'email affirmait au prospect une absence que
+personne n'avait constatée. Même règle que le dénominateur du score : pas de
+mesure, pas d'affirmation.
+
+**Deux détails.** `ilike` interprète `%` et `_`, légaux dans un email :
+échappés, sinon « a_b@x.fr » retrouvait le lead de « acb@x.fr » et la vraie
+adresse n'était jamais enregistrée. Et un lead `prospect` (né d'un scan-lot)
+passe maintenant à `contacte` quand on marque sa relance envoyée, comme un
+lead `nouveau`.
+
+**Le llms.txt du site contredisait le site.** La vitrine GEO de Citari
+annonçait quatre moteurs en tête et six plus bas, attribuait au scan gratuit
+les 24 questions × 6 moteurs du diagnostic offert en rendez-vous, publiait
+l'ancien mix de questions, et disait « fondateur unique » alors que Jérémie
+est associé. C'est le premier fichier qu'un moteur lit : il est maintenant
+aligné sur les règles figées, mode par mode.
+
 ## 2026-08-04 — Un seul dépôt
 
 Décision de Luigi : « JE VEUX TOUT ICI et nulle part ailleurs ». Le site était

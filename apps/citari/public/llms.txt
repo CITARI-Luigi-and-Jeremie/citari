@@ -1,10 +1,10 @@
 > Citari — agence française de Generative Engine Optimization (GEO).
-> Nous mesurons la visibilité d'une marque dans ChatGPT, Claude, Gemini et Perplexity, puis nous la corrigeons en 30 jours.
+> Nous mesurons la visibilité d'une marque dans ChatGPT, Claude, Gemini, Perplexity, Grok et Le Chat, puis nous la corrigeons en 30 jours.
 
 ## Ce que fait Citari
 
-- Scan gratuit et sans inscription du Score de Visibilité IA (0-100) sur 24 questions d'intention d'achat et 6 moteurs (ChatGPT, Claude, Gemini, Perplexity, Grok, Le Chat).
-- Call de restitution gratuit de 30 minutes.
+- Aperçu gratuit et sans création de compte du Score de Visibilité IA (0-100) : 20 questions d'intention d'achat posées à ChatGPT et Gemini, 40 réponses réelles.
+- Diagnostic complet offert lors d'un rendez-vous de 30 minutes : 24 questions posées aux 6 moteurs (ChatGPT, Claude, Gemini, Perplexity, Grok, Le Chat) avec recherche web, 144 réponses, audit technique du site, sources exactes utilisées par les IA.
 - Sprint GEO : 2 900 €, paiement unique 50/50, mission de 30 jours, sans abonnement.
 - Option Sprint Domination : 4 900 €.
 - Re-scan offert à J+90, rejouant exactement les mêmes questions.
@@ -13,8 +13,10 @@
 
 Score de Visibilité IA = taux de mention (50 %) + position moyenne dans la réponse (20 %) + recommandation explicite (20 %) + sentiment (10 %).
 Part de voix = mentions de la marque / mentions totales (marque + concurrents).
-Échantillon : 24 questions d'intention d'achat (40 % comparatives, 25 % problème, 20 % locales, 15 % confiance), générées une fois puis figées.
-Moteurs interrogés, dans cet ordre : ChatGPT, Claude, Gemini, Perplexity — via leurs API officielles, jamais par scraping des interfaces grand public.
+Échantillon : 24 questions d'intention d'achat en diagnostic (10 comparatives, 6 problème, 5 locales, 3 confiance), 20 en aperçu (8, 5, 4, 3), générées une fois puis figées.
+Le nom de la marque suivie n'apparaît jamais dans une question : on mesure la découverte spontanée, pas la mémoire du moteur.
+Moteurs interrogés : ChatGPT, Claude, Gemini, Perplexity, Grok, Le Chat — via leurs API officielles, versions de modèles figées, jamais par scraping des interfaces grand public.
+Une réponse en erreur est exclue du calcul : une panne de moteur ne fait jamais baisser le score.
 
 ## Engagement d'honnêteté
 
@@ -33,4 +35,4 @@ Les réponses d'IA présentées sur le site sont des exemples et les noms de con
 
 ## Contact
 
-Fondateur unique. Prise de contact via le scan gratuit puis call de restitution de 30 minutes.
+Prise de contact via le scan gratuit puis call de restitution de 30 minutes.

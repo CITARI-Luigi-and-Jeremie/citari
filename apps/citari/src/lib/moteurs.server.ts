@@ -413,20 +413,40 @@ export async function genererQuestions(input: {
     nombre === 20
       ? "Exactement 20 questions : 8 comparatives, 5 problème, 4 locales, 3 confiance."
       : "Exactement 24 questions : 10 comparatives, 6 problème, 5 locales, 3 confiance.";
-  const { text: raw } = await gemini_(
-    process.env.GEMINI_MODEL || "gemini-3.6-flash",
-    "Tu génères un échantillon de questions réellement posées à une IA par un décideur en phase d'achat. " +
-      'Renvoie UNIQUEMENT du JSON : {"queries":[{"text":"","intent":"comparative|probleme|locale|confiance"}]}. ' +
-      mix +
-      " Jamais le nom de la marque suivie dans la question : on mesure si l'IA la cite spontanément.",
-    `Secteur : ${input.secteur}. Zone : ${input.ville ?? "France"}. Langue des questions : ${input.langue}.`,
-    { maxTokens: 4096 },
-  );
-  const match = raw.match(/\{[\s\S]*\}/);
-  const parsed = JSON.parse(match ? match[0] : '{"queries":[]}') as {
-    queries: { text: string; intent: string }[];
+  const tirage = async (): Promise<{ text: string; intent: string }[]> => {
+    const { text: raw } = await gemini_(
+      process.env.GEMINI_MODEL || "gemini-3.6-flash",
+      "Tu génères un échantillon de questions réellement posées à une IA par un décideur en phase d'achat. " +
+        'Renvoie UNIQUEMENT du JSON : {"queries":[{"text":"","intent":"comparative|probleme|locale|confiance"}]}. ' +
+        mix +
+        " Jamais le nom de la marque suivie dans la question : on mesure si l'IA la cite spontanément.",
+      `Secteur : ${input.secteur}. Zone : ${input.ville ?? "France"}. Langue des questions : ${input.langue}.`,
+      { maxTokens: 4096 },
+    );
+    const match = raw.match(/\{[\s\S]*\}/);
+    const parsed = JSON.parse(match ? match[0] : '{"queries":[]}') as {
+      queries: { text: string; intent: string }[];
+    };
+    return parsed.queries.filter((q) => q?.text).slice(0, nombre);
   };
-  return parsed.queries.filter((q) => q?.text).slice(0, nombre);
+
+  // L'échantillon est un engagement : « 24 questions » est écrit sur le site,
+  // et le J+90 rejouera exactement celles-ci. Un modèle qui n'en rend que 18,
+  // ou du JSON malformé, passait en silence : le scan tournait sur un
+  // échantillon réduit, figé pour toute la relation client. Une seconde
+  // chance absorbe les ratés ponctuels ; en dessous du compte, on préfère
+  // échouer franchement — le sondage suivant reprendra la génération.
+  let questions: { text: string; intent: string }[] = [];
+  try {
+    questions = await tirage();
+  } catch {
+    /* le second tirage tranche */
+  }
+  if (questions.length < nombre) questions = await tirage();
+  if (questions.length < nombre) {
+    throw new Error(`Échantillon incomplet : ${questions.length} questions sur ${nombre} attendues`);
+  }
+  return questions;
 }
 
 /** Les 10 actions prioritaires du rapport. Clé Google directe. */

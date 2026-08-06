@@ -180,7 +180,10 @@ export async function markFollowUpSent(followUpId: string, leadId: string) {
   const db = getDb();
   await db.from("follow_ups").update({ sent_at: new Date().toISOString() }).eq("id", followUpId);
   const { data: lead } = await db.from("leads").select("status").eq("id", leadId).maybeSingle();
-  if (!lead?.status || lead.status === "nouveau") await db.from("leads").update({ status: "contacte" }).eq("id", leadId);
+  // « prospect » aussi : les leads nés d'un scan-lot portent ce statut, et un
+  // email envoyé est un contact, quel que soit le chemin d'entrée.
+  const avantContact = !lead?.status || lead.status === "nouveau" || lead.status === "prospect";
+  if (avantContact) await db.from("leads").update({ status: "contacte" }).eq("id", leadId);
   revalidatePath("/leads");
   revalidatePath(`/leads/${leadId}`);
 }

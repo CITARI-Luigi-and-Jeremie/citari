@@ -462,7 +462,33 @@ export async function etatScan(id: string) {
 /** Traite un lot de paires (question × moteur). Appelé à chaque interrogation du client. */
 export async function avancerScan(id: string) {
   const { data: scan } = await supabaseAdmin.from("scans").select("*").eq("id", id).maybeSingle();
-  if (!scan || scan.status !== "running") return;
+  if (!scan) return;
+
+  // Un scan en erreur REPREND quand on le sonde à nouveau.
+  //
+  // Le message d'échec promet « relancez-la : les réponses déjà collectées
+  // sont conservées », et le bouton « Reprendre » recharge la page. Or cette
+  // fonction ignorait tout scan qui n'était pas « running » : la relance
+  // promise était impossible, le bouton ne faisait rien, et le prospect
+  // repartait sur un scan neuf, payé une seconde fois. On honore la promesse :
+  // le statut repasse à « running » et la collecte continue là où elle s'est
+  // arrêtée. L'écriture est conditionnelle pour que deux sondages simultanés
+  // ne reprennent pas deux fois, et la reprise s'interdit au-delà de la
+  // fenêtre de cache : au-delà, la mesure serait un patchwork de deux époques.
+  if (scan.status === "error") {
+    const age = Date.now() - new Date(scan.created_at as string).getTime();
+    if (age > CACHE_JOURS * 86400000) return;
+    const { data: repris } = await supabaseAdmin
+      .from("scans")
+      .update({ status: "running", error_message: null })
+      .eq("id", id)
+      .eq("status", "error")
+      .select("id")
+      .maybeSingle();
+    if (!repris) return;
+    scan.status = "running";
+  }
+  if (scan.status !== "running") return;
 
   try {
     // On ne génère PAS l'échantillon et n'interroge PAS les moteurs dans le
@@ -645,15 +671,26 @@ async function finaliser(id: string) {
   // (classement des concurrents, puis actions) : la faire deux fois, c'est
   // payer deux fois pour écrire le même résultat.
   //
-  // `neq("phase", "analyse")` couvre le cas où les deux sondages arrivent
-  // pendant que le premier analyse encore, `eq("status", "running")` celui où
-  // le scan est déjà terminé.
+  // `phase.neq.analyse` couvre le cas où les deux sondages arrivent pendant
+  // que le premier analyse encore, `eq("status", "running")` celui où le scan
+  // est déjà terminé.
+  //
+  // Et comme pour le verrou des questions, celui-ci se reprend, au bout de
+  // cinq minutes. Sans échappatoire, un processus tué net pendant l'analyse
+  // (chose banale sur un worker, qui peut être arrêté à tout moment) laissait
+  // le scan « running »/« analyse » pour toujours : chaque sondage suivant
+  // voyait zéro paire restante, appelait finaliser, se heurtait au verrou et
+  // repartait. Le cache resservait ce scan mort à tous les visiteurs du
+  // domaine pendant trois jours. L'analyse réelle dure moins d'une minute,
+  // cinq minutes ne peuvent donc rien voler à une analyse en cours ; le
+  // trigger touch_updated_at fait office de battement de cœur.
+  const perimeAnalyse = new Date(Date.now() - 300_000).toISOString();
   const { data: obtenu } = await supabaseAdmin
     .from("scans")
     .update({ phase: "analyse" })
     .eq("id", id)
     .eq("status", "running")
-    .neq("phase", "analyse")
+    .or(`phase.neq.analyse,updated_at.lt.${perimeAnalyse}`)
     .select("id")
     .maybeSingle();
   if (!obtenu) return;
@@ -792,7 +829,14 @@ export async function rapportParJeton(jeton: string) {
 
   const [{ data: questions }, { data: reponses }, { data: mentions }] = await Promise.all([
     supabaseAdmin.from("queries").select("*").eq("scan_id", scan.id).order("rank"),
-    supabaseAdmin.from("responses").select("*").eq("scan_id", scan.id),
+    // Colonnes explicites : `cost_eur` et `latency_ms` restent sur le serveur.
+    // Le jeton se partage (c'est fait pour), et la charge utile partait
+    // entière : n'importe qui pouvait y lire, réponse par réponse, ce que la
+    // mesure nous coûte. Le rapport n'affiche rien de tout ça.
+    supabaseAdmin
+      .from("responses")
+      .select("id, query_id, engine, raw_text, sources, error")
+      .eq("scan_id", scan.id),
     supabaseAdmin.from("mentions").select("*").eq("scan_id", scan.id),
   ]);
 
@@ -824,7 +868,18 @@ export async function rapportParJeton(jeton: string) {
       };
   }
 
-  return { scan, questions: questions ?? [], reponses: reponses ?? [], mentions: mentions ?? [], precedent };
+  // Même hygiène pour la ligne du scan : le hachage d'IP n'a rien à faire chez
+  // le prospect, la clé de cache non plus, et le message d'erreur technique
+  // encore moins. C'est la règle déjà appliquée à l'écran d'attente : le
+  // détail des pannes reste en base, pour nous. Le rapport, lui, ne teste que
+  // la présence d'une erreur par réponse, jamais son texte.
+  const { ip_hash: _ip, error_message: _err, domain_key: _dk, ...scanPublic } = scan;
+  const reponsesPubliques = (reponses ?? []).map((r) => ({
+    ...r,
+    error: r.error ? "indisponible" : null,
+  }));
+
+  return { scan: scanPublic, questions: questions ?? [], reponses: reponsesPubliques, mentions: mentions ?? [], precedent };
 }
 
 /** Priorité commerciale déduite du score : plus il est bas, plus le besoin est fort. */
@@ -864,11 +919,16 @@ export async function enregistrerLead(input: {
 
   const score = Number(scan.score_global ?? 0);
 
+  // `ilike` sert uniquement à ignorer la casse, mais il interprète `%` et `_`,
+  // deux caractères parfaitement légaux dans un email. Sans échappement,
+  // « a_b@x.fr » retrouvait le lead de « acb@x.fr » et l'adresse réelle
+  // n'était jamais enregistrée.
+  const emailLitteral = input.email.replace(/([%_\\])/g, "\\$1");
   const { data: deja } = await supabaseAdmin
     .from("leads")
     .select("id")
     .eq("scan_id", scan.id)
-    .ilike("email", input.email)
+    .ilike("email", emailLitteral)
     .maybeSingle();
   if (deja) return { reportToken: scan.report_token };
 

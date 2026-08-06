@@ -160,8 +160,16 @@ export async function buildScanInsights(scanId: string): Promise<ScanInsights> {
   // Requêtes où la marque n'apparaît dans aucune réponse, tous moteurs confondus.
   // `some` et non `every` : une requête sans aucune réponse collectée n'est pas
   // une requête manquée, elle n'a simplement pas été mesurée.
+  //
+  // Une réponse en panne ne compte pas non plus : le moteur n'a rien rendu
+  // (texte vide), donc il n'a rien mesuré. Sans ce filtre, une question dont
+  // toutes les réponses étaient des erreurs passait pour « manquée », et
+  // l'email affirmait au prospect une absence que personne n'a constatée.
+  // C'est la même règle que le dénominateur du score, pour la même raison.
   const missed = queries.filter((q) => {
-    const rs = responses.filter((r) => r.query_id === q.id);
+    const rs = responses.filter(
+      (r) => r.query_id === q.id && (r.raw_text ?? "").trim().length > 0,
+    );
     return rs.length > 0 && !rs.some((r) => targetCited(r.id));
   });
 
