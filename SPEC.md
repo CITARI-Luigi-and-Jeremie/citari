@@ -15,7 +15,7 @@ Il décrit TOUT ce qu'on construit : (A) le scanner gratuit qui génère les lea
 
 ## 0. Contexte business
 
-- **Le business** : agence GEO (Generative Engine Optimization) pour PME/ETI francophones. On fait apparaître les marques de nos clients dans les réponses de ChatGPT, Claude, Gemini et Perplexity.
+- **Le business** : agence GEO (Generative Engine Optimization) pour PME/ETI francophones. On fait apparaître les marques de nos clients dans les réponses de ChatGPT, Claude, Gemini, Perplexity, Grok et Le Chat.
 - **Le modèle** :
   1. Scan gratuit (lead magnet) : le prospect mesure sa visibilité IA, découvre qu'il est invisible face à ses concurrents.
   2. Call de restitution gratuit (30 min) : on commente ses résultats.
@@ -47,7 +47,7 @@ Il décrit TOUT ce qu'on construit : (A) le scanner gratuit qui génère les lea
 
 ### 3.1 Landing
 - H1 : « Votre marque est-elle invisible dans ChatGPT ? »
-- Sous-titre : « Testez gratuitement votre visibilité dans ChatGPT, Claude, Gemini et Perplexity en 90 secondes. »
+- Sous-titre : « Testez gratuitement votre visibilité dans ChatGPT, Claude, Gemini, Perplexity, Grok et Le Chat en 90 secondes. »
 - Formulaire au-dessus de la ligne de flottaison. Section offre Sprint GEO : promesse, 3 chantiers vulgarisés, livrables exacts, 2 900 € (Domination 4 900 €), « 3 sprints par mois maximum », paiement 50/50, re-scan J+90 inclus.
 - Honnêteté affichée : on garantit les actions livrées, pas un score exact (intégration en 4-12 semaines).
 - FAQ balisée, schema.org, llms.txt : le site est sa propre démonstration GEO.

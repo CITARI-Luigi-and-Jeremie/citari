@@ -441,6 +441,24 @@ gelées permettant d'arbitrer sans litige.
 
 ## Pièges rencontrés, à ne pas redécouvrir
 
+- **Un prompt de construction périmé traînait en `apps/citari/README.md`**,
+  sans le bandeau d'avertissement qui protège `LOVABLE.md` et `SPEC.md`. À
+  l'endroit exact où l'on cherche « c'est quoi cette app », il contredisait
+  trois règles figées : « GEO Sprint » (l'ancien nom), quatre moteurs au lieu
+  de six, et un mix de questions en 40/25/20/15 % au lieu de 24 questions en
+  10/6/5/3. Le danger n'est pas le fichier, c'est qu'un document sans date ni
+  statut se lit comme une consigne : les valeurs y étaient assez plausibles
+  pour être recopiées. Remplacé le 06/08/2026 par un vrai README du dossier ;
+  le brief d'origine reste dans `LOVABLE.md`, qui, lui, s'annonce comme
+  historique. Règle : tout document d'intention porte son bandeau, sinon il
+  devient une source d'erreur.
+- **La documentation dérive entre les trois surfaces** (dépôt, GitHub, Notion),
+  et toujours par les chiffres. Trouvé le 06/08/2026 : « 88 tests » alors que
+  90 passent, et un « cache 30 jours » dans la page Notion « L'offre » quand la
+  page « Le Scan » du même espace dit 3 jours et explique pourquoi pas 30. Une
+  contradiction interne à Notion est pire qu'une valeur périmée, on ne sait
+  plus laquelle croire. Les chiffres à surveiller sont ceux qui se répètent :
+  nombre de tests, coût du scan, durée du cache, nombre de moteurs.
 - Lovable pousse sur une branche `citari`, pas sur `main`. Les deux divergent.
 - Le front tourne en local sur le port **8080**, imposé par la config Lovable.
 - `bun` n'est pas installé sur cette machine : dépendances du front installées

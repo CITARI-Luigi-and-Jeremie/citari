@@ -89,7 +89,7 @@ pnpm -r typecheck
 pnpm -r test
 ```
 
-88 tests, qui couvrent ce qui coûte de l'argent ou de la crédibilité :
+90 tests, qui couvrent ce qui coûte de l'argent ou de la crédibilité :
 regroupement des marques, part de voix, rédaction des emails, gagnabilité,
 modèles figés. Le site se vérifie en le construisant :
 

@@ -7,7 +7,7 @@ y compris les pièges déjà payés. Rien d'autre n'est nécessaire pour commenc
 
 **Où en est le projet, au 06/08/2026.** Le back est terminé et éprouvé en
 conditions réelles : les trois modes de scan et les 19 commandes de livraison
-ont tourné contre la vraie base. 88 tests passent.
+ont tourné contre la vraie base. 90 tests passent.
 
 **Ce qui empêche de vendre n'est pas du code.**
 
@@ -33,9 +33,12 @@ jamais versionnées.
 les marques clientes dans les réponses de ChatGPT, Claude, Gemini, Perplexity,
 Grok et Le Chat.
 
-> Le produit vendu s'appelle **Sprint GEO** (2 900 € HT). Ne pas confondre avec
-> le nom de la société. « GEO Sprint » était l'ancien nom, il ne doit plus
-> apparaître nulle part.
+> Le produit vendu s'appelle **Sprint GEO** (2 900 € HT), avec une option
+> **Sprint Domination** (4 900 € HT) : dix contenus au lieu de cinq, seize
+> cibles de citation, deux langues. Le site l'affiche et `pnpm toolkit
+> proposition --offer domination` la génère. Ne pas confondre avec le nom de la
+> société. « GEO Sprint » était l'ancien nom, il ne doit plus apparaître nulle
+> part.
 
 ## Architecture
 
@@ -168,7 +171,7 @@ du toolkit et les colonnes réelles vit dans
 
 ```bash
 pnpm install
-pnpm -r test        # 88 tests
+pnpm -r test        # 90 tests
 pnpm -r typecheck   # couvre aussi le site, via l'alias des tests
 npm --prefix apps/citari run build
 ```
