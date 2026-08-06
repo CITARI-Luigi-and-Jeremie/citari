@@ -5,6 +5,42 @@ d'une nouvelle session, après `CLAUDE.md`.
 
 ---
 
+## 2026-08-07 — « A publié puis s'est arrêté » : le meilleur signal d'achat
+
+Nouvelle commande `signaux-geo`, la vingt-quatrième. Elle lit sur le site de
+chaque prospect ce dont un sprint disposerait chez lui, dans des formats qu'il
+publie volontairement : plan du site, flux RSS, API de son CMS, balisage
+schema.org. Sortie dans un **fichier séparé**, jamais fusionné avec la
+température : l'un dit qui rappeler, l'autre dit quoi lui dire.
+
+**Le segment qui vaut le plus n'est pas celui qui publie.** C'est celui qui a
+publié PUIS s'est arrêté : 26 sur 100. Ils ont déjà payé pour croire au
+contenu, l'outillage est en place, ils ont échoué faute de méthode — et c'est
+exactement ce que le sprint vend. Celui qui n'a jamais rien publié doit
+d'abord être convaincu que le contenu sert à quelque chose, ce qui est un autre
+métier et un cycle plus long. Répartition mesurée : 21 publient régulièrement,
+19 peu, 26 se sont arrêtés, 34 n'ont jamais publié.
+
+**Les deux classements sont orthogonaux, et il faut les deux.** Le croisement
+le prouve sans ambiguïté : Qwarks est **centième** au classement de température
+avec **200 contenus publiés** et 70/100 de matériau ; Archers Notaires est
+**huitième** avec 15/100 de matériau, donc rien à exploiter. La température
+mesure l'accès et la solvabilité, le matériau mesure la vitesse à laquelle le
+sprint produira un effet. Aucun ne remplace l'autre, et les fusionner en une
+note unique détruirait l'information.
+
+**Un des deux signaux espérés a échoué.** Les avis clients ne sont balisés en
+schema.org que par **3 sites sur 100**. L'intuition était bonne — « ses clients
+se renseignent en ligne » est le signal qualifiant de la doctrine — mais la
+donnée n'est pas récupérable gratuitement à l'échelle : Google Places est
+payant, et interroger Google directement serait du scraping d'un tiers. À
+laisser tomber plutôt qu'à bricoler.
+
+Détail technique qui compte : le `lastmod` du plan de site ne vaut que sur les
+URL d'articles. Celui d'une page « mentions légales » ne dit rien d'une
+politique de publication, et le prendre en compte ferait passer un site figé
+pour un site vivant.
+
 ## 2026-08-07 (fin) — Le crawl qui double les mobiles : arrêter de deviner les URLs
 
 **53 mobiles directs sur 100**, contre 27, et sans un crédit dépensé. Le gain
