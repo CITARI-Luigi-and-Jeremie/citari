@@ -35,6 +35,7 @@ import { verifyContents } from "./commands/verify-contents.js";
 import { controle45 } from "./commands/controle-45.js";
 import { scanLot } from "./commands/scan-lot.js";
 import { sourcer } from "./commands/sourcer.js";
+import { verifierBase } from "./commands/verifier-base.js";
 import { enrichir } from "./commands/enrichir.js";
 
 const program = new Command()
@@ -96,6 +97,15 @@ program
   .argument("<client>", "nom ou id du client")
   .description("Chantier 3 — cibles de citation priorisées + brouillons de pitchs presse")
   .action((client: string) => run(citationTargets(client)));
+
+program
+  .command("verifier-base")
+  .argument("<fichier>", "CSV de prospects à contrôler")
+  .option("-c, --communes <liste>", "communes de la zone, pour les entreprises dont l'INSEE masque le code postal")
+  .option("-o, --sortie <fichier>", "CSV annoté produit (défaut : <fichier>-verifie.csv)")
+  .description("Acquisition — contrôle la fiabilité d'une base : MX des domaines, doublons, zone, cohérence")
+  .action((fichier: string, o: Record<string, string>) =>
+    run(verifierBase(fichier, { communes: o.communes, sortie: o.sortie })));
 
 program
   .command("sourcer")

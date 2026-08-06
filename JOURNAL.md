@@ -5,6 +5,42 @@ d'une nouvelle session, après `CLAUDE.md`.
 
 ---
 
+## 2026-08-06 (nuit) — La base 100 est fiabilisée, et trois pièges de plus
+
+La première base de prospection (100 entreprises, Lyon, 3 verticales) a subi
+une passe qualité complète avant tout envoi. Résultat final : 98 lignes notées
+A (prêtes à contacter), 2 en B, zéro à écarter. 98 lignes sur 100 ont au moins
+un email dont le domaine reçoit réellement du courrier (vérifié en DNS), 93 ont
+un téléphone, 63 portent l'email nominatif vérifié du dirigeant.
+
+Nouvelle commande `verifier-base`, la vingt-deuxième : MX de chaque domaine
+d'email, doublons par SIREN et par domaine, zone géographique, cohérence
+email/site. Elle note de A à D et n'efface rien : écarter est une décision
+commerciale, pas technique.
+
+Trois pièges payés pendant cette passe :
+
+- **La localisation Apollo ment par extension.** « Lyon, France » chez Apollo
+  matche des sociétés qui ont un BUREAU à Lyon avec un siège à Carcassonne,
+  Paris ou Fréjus : 14 lignes sur 102, soit une sur sept, étaient hors zone.
+  Pour une agence qui vend l'exclusivité locale et un baromètre lyonnais,
+  c'était du poison silencieux. Le contrôle se fait sur le code postal du
+  SIÈGE, celui du registre officiel, jamais sur la localisation Apollo.
+- **Un même prospect peut sortir de deux verticales.** SDRA est apparu en
+  expertise comptable ET en gestion de patrimoine : deux NAF, deux recherches,
+  deux lignes. Recevoir deux fois le même email disqualifie. Dédoublonnage par
+  SIREN d'abord, par domaine ensuite.
+- **Un CSV ne se découpe jamais sur les retours à la ligne.** Les dirigeants
+  du RNE contiennent des retours à la ligne dans leurs champs : le premier
+  parseur transformait 102 lignes en 204 et le rapport était silencieusement
+  faux. Parseur réécrit en flux, avec le cas dans les tests.
+
+Et une règle de sélection : les remplaçants d'une ligne écartée se filtrent
+par **NAF réel**, pas par mot-clé. Sans ce filtre, « Baguette Academy » (une
+école) entrait en services informatiques et trois agences immobilières pures
+entraient en gestion de patrimoine, ce qui aurait pollué le baromètre ET le
+test A/B des trois verticales.
+
 ## 2026-08-06 (soir) — La prospection s'outille, la stratégie reste ouverte
 
 Nouvelle commande `sourcer`, la vingtième : elle interroge l'annuaire officiel
