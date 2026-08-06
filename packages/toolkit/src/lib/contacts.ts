@@ -76,12 +76,51 @@ export function extraireEmails(html: string, domaineSite?: string): string[] {
  * standard. Les faux positifs classiques sont les numéros SIRET, les dates et
  * les codes postaux collés, écartés par la longueur exacte.
  */
+/**
+ * Le numéro correspond-il à un bloc réellement attribué en France ?
+ *
+ * Dix chiffres commençant par zéro ne suffisent pas : un SIRET, un numéro de
+ * TVA ou une suite de dates découpée en paires produit la même forme. Trois
+ * faux numéros sont ainsi entrés dans la base du 06/08/2026, dont
+ * « 01 20 04 86 22 » et « 01 03 10 38 07 », deux préfixes qui n'existent pas.
+ * Un faux numéro coûte plus qu'un numéro absent : on appelle un inconnu, et
+ * on croit la fiche complète.
+ *
+ * Bornes ARCEP par indicatif, sur les deux chiffres suivants. Elles sont
+ * volontairement PERMISSIVES : jeter un vrai numéro coûte un prospect, alors
+ * qu'un faux se repère au premier appel. Un premier jeu de bornes trop serré
+ * a écarté vingt-trois numéros parfaitement valides, dont des `0980` et des
+ * `0413`.
+ *
+ * La forme internationale est normalisée avant tout contrôle : `+33 4 72 …`
+ * doit devenir `0472…`, faute de quoi il est rejeté pour mauvaise longueur.
+ */
+export function telephoneFrancaisPlausible(numero: string): boolean {
+  let n = (numero ?? "").replace(/[^\d+]/g, "");
+  if (n.startsWith("+33")) n = "0" + n.slice(3);
+  else if (n.startsWith("0033")) n = "0" + n.slice(4);
+  else if (n.startsWith("+")) return false; // indicatif étranger
+  n = n.replace(/\D/g, "");
+  if (!/^0\d{9}$/.test(n)) return false;
+  const indicatif = n.slice(0, 2);
+  const suite = Number(n.slice(2, 4));
+  if (indicatif === "06" || indicatif === "07") return true;
+  if (indicatif === "01") return suite >= 30 && suite <= 89; // Île-de-France
+  if (indicatif === "02") return suite >= 14;
+  if (indicatif === "03") return suite >= 10;
+  if (indicatif === "04") return suite >= 13;
+  if (indicatif === "05") return suite >= 16;
+  if (indicatif === "09") return suite >= 9; // non géographiques, 0909 à 0989
+  // 08 : numéros spéciaux et surtaxés, sans intérêt pour joindre un dirigeant.
+  return false;
+}
+
 export function extraireTelephones(texte: string): { mobiles: string[]; fixes: string[] } {
   const trouves = new Set<string>();
   const re = /(?:(?:\+|00)33\s?|0)\s?[1-9](?:[\s.\-]?\d{2}){4}\b/g;
   for (const m of texte.matchAll(re)) {
     const chiffres = m[0].replace(/[^\d+]/g, "").replace(/^\+33/, "0").replace(/^0033/, "0");
-    if (/^0\d{9}$/.test(chiffres)) trouves.add(chiffres);
+    if (telephoneFrancaisPlausible(chiffres)) trouves.add(chiffres);
   }
   const liste = [...trouves];
   return {
@@ -102,16 +141,57 @@ export function formaterTelephone(t: string): string {
  * plus souvent qu'une fiche achetée. Dans une PME, c'est presque toujours le
  * dirigeant, c'est-à-dire notre acheteur.
  */
+/**
+ * Mots qui ne peuvent pas faire partie d'un nom de personne.
+ *
+ * Sans ce filtre, la base s'est retrouvée avec des dirigeants nommés « est une
+ * personne », « et accompagnement » ou « du conseil syndical » : le texte qui
+ * suit « Le gérant » dans une phrase ordinaire. Un faux nom est pire qu'un nom
+ * absent, parce qu'il finit dans un email adressé à quelqu'un qui n'existe pas.
+ */
+const MOTS_INTERDITS = new Set([
+  "est", "sont", "et", "ou", "de", "du", "des", "le", "la", "les", "un", "une", "au", "aux",
+  "ce", "cette", "ces", "son", "sa", "ses", "votre", "vos", "notre", "nos", "leur", "leurs",
+  "personne", "physique", "morale", "societe", "société", "entreprise", "cabinet", "groupe",
+  "sas", "sarl", "sasu", "sci", "scop", "sa", "eurl", "selarl", "sadresser", "adresse",
+  "pourquoi", "comment", "contactez", "contact", "responsable", "direction", "directeur",
+  "gerant", "gérant", "president", "président", "forme", "juridique", "siege", "siège",
+  "social", "syndical", "conseil", "retraite", "partant", "travailler", "dans", "chez",
+  "pour", "par", "avec", "sur", "sous", "entre", "vers", "accompagnement", "expertise",
+  "actions", "fonds", "structure", "capital", "euros", "immatriculee", "immatriculée",
+  "representee", "représentée", "publication", "hebergeur", "hébergeur", "editeur", "éditeur",
+]);
+
+/** Chaque mot commence-t-il vraiment par une majuscule, sans mot interdit ? */
+function ressembleAUnNom(candidat: string): boolean {
+  const mots = candidat.trim().split(/\s+/);
+  if (mots.length < 2 || mots.length > 3) return false;
+  for (const mot of mots) {
+    const nu = mot.replace(/[^A-Za-zÀ-ÿ'-]/g, "");
+    if (nu.length < 2) return false;
+    // La casse est décisive : « Est » dans un titre reste un mot, pas un prénom,
+    // mais un mot entièrement minuscule ne peut pas être un nom propre.
+    if (nu[0] !== nu[0]!.toUpperCase()) return false;
+    if (MOTS_INTERDITS.has(nu.toLowerCase())) return false;
+  }
+  return true;
+}
+
 export function extraireResponsable(texte: string): string | null {
+  // Le nom se capture SANS le drapeau « insensible à la casse » : avec lui,
+  // `[A-ZÀ-Ý]` acceptait n'importe quelle lettre et « est une personne »
+  // passait pour un nom. Les variantes de casse du mot-clé sont donc écrites
+  // explicitement.
+  const CLE = "[Rr]esponsable|[Dd]irecteur|[Dd]irectrice|[Gg][ée]rant|[Gg][ée]rante|[Pp]r[ée]sident|[Pp]r[ée]sidente|[Dd]irigeant|[Ff]ondateur|[Ff]ondatrice";
+  const NOM = "([A-ZÀ-Ý][A-Za-zÀ-ÿ'-]+(?:\\s+[A-ZÀ-Ý][A-Za-zÀ-ÿ'-]+){1,2})";
   const motifs = [
-    /responsable\s+(?:de\s+la\s+)?publication\s*:?\s*(?:M(?:me|\.|onsieur|adame)?\s*)?([A-ZÀ-Ý][\wÀ-ÿ'-]+(?:\s+[A-ZÀ-Ý][\wÀ-ÿ'-]+){1,2})/i,
-    /directeur\s+(?:de\s+la\s+)?publication\s*:?\s*(?:M(?:me|\.|onsieur|adame)?\s*)?([A-ZÀ-Ý][\wÀ-ÿ'-]+(?:\s+[A-ZÀ-Ý][\wÀ-ÿ'-]+){1,2})/i,
-    /(?:gérant|président|dirigeant)\s*:?\s*(?:M(?:me|\.|onsieur|adame)?\s*)?([A-ZÀ-Ý][\wÀ-ÿ'-]+(?:\s+[A-ZÀ-Ý][\wÀ-ÿ'-]+){1,2})/i,
+    new RegExp(`(?:${CLE})\\s+(?:de\\s+la\\s+)?[Pp]ublication\\s*:?\\s*(?:M(?:me|\\.|onsieur|adame)?\\s+)?${NOM}`),
+    new RegExp(`(?:${CLE})\\s*:\\s*(?:M(?:me|\\.|onsieur|adame)?\\s+)?${NOM}`),
+    new RegExp(`${NOM}\\s*[,–—-]\\s*(?:${CLE})`),
   ];
   for (const re of motifs) {
-    const m = texte.match(re);
-    const nom = m?.[1]?.trim();
-    if (nom && nom.length >= 5 && nom.length <= 60) return nom;
+    const nom = texte.match(re)?.[1]?.trim();
+    if (nom && nom.length >= 5 && nom.length <= 60 && ressembleAUnNom(nom)) return nom;
   }
   return null;
 }

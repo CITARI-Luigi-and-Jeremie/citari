@@ -36,6 +36,7 @@ import { controle45 } from "./commands/controle-45.js";
 import { scanLot } from "./commands/scan-lot.js";
 import { sourcer } from "./commands/sourcer.js";
 import { verifierBase } from "./commands/verifier-base.js";
+import { classerLeads } from "./commands/classer-leads.js";
 import { enrichir } from "./commands/enrichir.js";
 
 const program = new Command()
@@ -97,6 +98,15 @@ program
   .argument("<client>", "nom ou id du client")
   .description("Chantier 3 — cibles de citation priorisées + brouillons de pitchs presse")
   .action((client: string) => run(citationTargets(client)));
+
+program
+  .command("classer-leads")
+  .argument("<fichier>", "CSV de prospects, idéalement déjà passé par verifier-base")
+  .option("-o, --sortie <fichier>", "CSV classé produit (défaut : <fichier>-classe.csv)")
+  .option("-t, --top <n>", "nombre de lignes détaillées à l'écran", "15")
+  .description("Acquisition — classe les prospects du plus chaud au plus froid, avec la raison")
+  .action((fichier: string, o: Record<string, string>) =>
+    run(classerLeads(fichier, { sortie: o.sortie, top: Number(o.top) || 15 })));
 
 program
   .command("verifier-base")

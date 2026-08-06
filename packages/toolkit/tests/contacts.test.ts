@@ -6,6 +6,7 @@ import {
   extraireResponsable,
   extraireTelephones,
   formaterTelephone,
+  telephoneFrancaisPlausible,
   texteVisible,
 } from "../src/lib/contacts.js";
 
@@ -97,5 +98,72 @@ describe("texteVisible", () => {
     const visible = texteVisible(html);
     expect(visible).toContain("04 78 12 34 56");
     expect(visible).not.toContain("0400000000");
+  });
+});
+
+describe("extraireResponsable — les faux noms observés en réel", () => {
+  it("refuse le texte ordinaire qui suit le mot-clé", () => {
+    // Tous ces « noms » ont réellement atterri dans la base du 06/08/2026,
+    // parce que le drapeau insensible à la casse acceptait n'importe quel mot.
+    for (const faux of [
+      "Le gérant est une personne physique",
+      "Notre directeur et accompagnement des dirigeants",
+      "Le président du conseil syndical",
+      "Gérant : de votre structure",
+      "Le dirigeant partant en retraite",
+      "Président : SAS Pourquoi travailler avec nous",
+    ]) {
+      expect(extraireResponsable(faux)).toBeNull();
+    }
+  });
+
+  it("garde les vrais noms, quelle que soit la tournure", () => {
+    expect(extraireResponsable("Responsable de la publication : Marie Durand")).toBe("Marie Durand");
+    expect(extraireResponsable("Directeur de la publication : M. Jean-Pierre Martin")).toBe("Jean-Pierre Martin");
+    expect(extraireResponsable("Gérant : Sylvain Badina")).toBe("Sylvain Badina");
+    expect(extraireResponsable("Fabien Gautheron — Président")).toBe("Fabien Gautheron");
+  });
+
+  it("refuse un mot seul : un nom de famille sans prénom n'est pas exploitable", () => {
+    expect(extraireResponsable("Gérant : Durand")).toBeNull();
+  });
+});
+
+describe("telephoneFrancaisPlausible — les faux numéros de la base", () => {
+  it("refuse les préfixes non attribués issus de SIRET ou de dates", () => {
+    // Trois de ces formes sont entrées dans la base du 06/08/2026.
+    expect(telephoneFrancaisPlausible("0120048622")).toBe(false);
+    expect(telephoneFrancaisPlausible("0103103807")).toBe(false);
+    expect(telephoneFrancaisPlausible("0100000000")).toBe(false);
+  });
+
+  it("accepte les vrais numéros lyonnais, mobiles et non géographiques", () => {
+    expect(telephoneFrancaisPlausible("0478123456")).toBe(true);
+    expect(telephoneFrancaisPlausible("04 72 56 08 87")).toBe(true);
+    expect(telephoneFrancaisPlausible("0612345678")).toBe(true);
+    expect(telephoneFrancaisPlausible("0972592012")).toBe(true);
+    expect(telephoneFrancaisPlausible("0130123456")).toBe(true);
+    // Formes internationales : normalisées avant contrôle, jamais rejetées
+    // pour leur seule écriture. Vingt-trois vrais numéros l'ont été une fois.
+    expect(telephoneFrancaisPlausible("+33 4 72 68 22 88")).toBe(true);
+    expect(telephoneFrancaisPlausible("0033472682288")).toBe(true);
+    // Bornes réelles : 0980 et 0413 existent, un premier jeu trop serré les niait.
+    expect(telephoneFrancaisPlausible("0980809094")).toBe(true);
+    expect(telephoneFrancaisPlausible("0413419890")).toBe(true);
+  });
+
+  it("refuse un indicatif étranger", () => {
+    expect(telephoneFrancaisPlausible("+86 21 3152 0261")).toBe(false);
+  });
+
+  it("refuse les surtaxés et les formes qui ne sont pas des numéros", () => {
+    expect(telephoneFrancaisPlausible("0899123456")).toBe(false);
+    expect(telephoneFrancaisPlausible("12345")).toBe(false);
+    expect(telephoneFrancaisPlausible("40123456789")).toBe(false);
+  });
+
+  it("filtre à la source : un SIRET dans le texte ne devient pas un téléphone", () => {
+    const t = extraireTelephones("SIRET 01200486 22 000 15 — tel 04 78 12 34 56");
+    expect(t.fixes).toEqual(["0478123456"]);
   });
 });

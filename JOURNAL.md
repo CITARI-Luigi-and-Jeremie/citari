@@ -5,6 +5,55 @@ d'une nouvelle session, après `CLAUDE.md`.
 
 ---
 
+## 2026-08-07 — 100 lignes complètes, et le classement qui s'est trompé
+
+La base 100 atteint **100/100 sur les trois axes** : un email dont le domaine
+reçoit du courrier, un téléphone français valide, un dirigeant nommé, pour
+chacune des cent lignes. Huit lignes irréparables ont été remplacées, pas
+rafistolées.
+
+Nouvelle commande `classer-leads`, la vingt-troisième : elle ordonne les
+prospects du plus chaud au plus froid, avec la raison en clair et le détail
+des points. Elle sait aussi que le score GEO, quand il existe, doit primer sur
+tous les indices — un prospect mesuré à 8/100 passe devant n'importe quelle
+fiche bien remplie, et un prospect à 78/100 est pénalisé, conformément à la
+promesse publique de ne rien vendre à qui n'en a pas besoin.
+
+**Le classement s'est trompé au premier essai, et c'est instructif.** Vingt des
+trente premiers étaient des sociétés informatiques. Non parce qu'elles étaient
+les meilleurs prospects, mais parce qu'Apollo couvre beaucoup mieux la tech que
+l'expertise comptable, et que les éditeurs de logiciel posent plus de pixels
+publicitaires que les cabinets. **La note mesurait la richesse de nos données,
+pas la chaleur du prospect.** La joignabilité est redescendue de 35 à 25 points,
+les signaux d'achat sont montés de 25 à 35, et la commande affiche désormais un
+avertissement quand une verticale rafle plus de dix-huit des trente premières
+places. La colonne `rang_verticale` permet de travailler les trois de front.
+
+**Quatre pièges de collecte, tous payés sur des données réelles :**
+
+- **Le drapeau `i` d'une expression régulière annulait une classe de
+  majuscules.** `[A-ZÀ-Ý]` devenait « n'importe quelle lettre », si bien que
+  « est une personne », « et accompagnement » ou « du conseil syndical » sont
+  entrés en base comme noms de dirigeants. Dix-huit faux noms. Le nom se
+  capture désormais sans ce drapeau, avec une liste de mots grammaticaux
+  interdits et un contrôle de casse mot à mot.
+- **Un SIRET découpé en paires ressemble à un téléphone.** « 01 20 04 86 22 »
+  et « 01 03 10 38 07 » sont entrés ainsi : deux préfixes qui n'existent pas.
+  Contrôle ARCEP ajouté sur les blocs réellement attribués.
+- **Mais un contrôle trop strict est pire.** Le premier jeu de bornes a écarté
+  vingt-trois numéros parfaitement valides, parce qu'il ne normalisait pas
+  `+33` avant de mesurer la longueur, et que ses bornes niaient les `0980` et
+  les `0413`. Restaurés. Règle : sur une donnée de contact, se tromper en
+  jetant coûte plus cher que se tromper en gardant, car le faux se voit au
+  premier appel et le manquant ne se voit jamais.
+- **Le téléphone trahit l'homonyme.** En cherchant des remplaçants par
+  devinette de domaine, un fixe `01` ou `04 67` a révélé à chaque fois qu'on
+  avait trouvé le site d'une société homonyme ailleurs en France. Le contrôle
+  géographique du numéro sert donc à valider une identité, pas seulement un
+  contact — mais uniquement sur les fiches à identité incertaine : sur une
+  fiche confirmée par SIREN, un indicatif inhabituel est le plus souvent un
+  numéro VoIP, et le jeter perdrait un vrai prospect.
+
 ## 2026-08-06 (nuit) — La base 100 est fiabilisée, et trois pièges de plus
 
 La première base de prospection (100 entreprises, Lyon, 3 verticales) a subi

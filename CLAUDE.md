@@ -6,8 +6,8 @@ Lisez ce fichier, puis `JOURNAL.md` qui garde les décisions ET leurs raisons,
 y compris les pièges déjà payés. Rien d'autre n'est nécessaire pour commencer.
 
 **Où en est le projet, au 06/08/2026.** Le back est terminé et éprouvé en
-conditions réelles : les trois modes de scan et les 22 commandes du toolkit
-ont tourné contre la vraie base. 135 tests passent.
+conditions réelles : les trois modes de scan et les 23 commandes du toolkit
+ont tourné contre la vraie base. 158 tests passent.
 
 **Ce qui empêche de vendre n'est pas du code.**
 
@@ -65,7 +65,7 @@ Grok et Le Chat.
 |---|---|---|
 | `apps/citari` | Le site **et son moteur de scan** : landing, scan, teaser, rapport, lead | **npm**, TanStack Start, port 8080 |
 | `apps/admin` | Back-office : leads, clients, sprints, relances, citations | pnpm, Next.js, port 3001 |
-| `packages/toolkit` | L'usine : 22 commandes de livraison et d'acquisition | pnpm |
+| `packages/toolkit` | L'usine : 23 commandes de livraison et d'acquisition | pnpm |
 | `packages/core` | Socle partagé : accès Supabase, appel JSON au modèle, crawl | pnpm |
 
 Tout vit dans `LuigiRevelli/citari`. `apps/citari` a été absorbé par
@@ -190,7 +190,7 @@ du toolkit et les colonnes réelles vit dans
 
 ```bash
 pnpm install
-pnpm -r test        # 135 tests
+pnpm -r test        # 158 tests
 pnpm -r typecheck   # couvre aussi le site, via l'alias des tests
 npm --prefix apps/citari run build
 ```
@@ -201,7 +201,7 @@ vitest, et par les `paths` de son `tsconfig.json` pour `tsc`. Effet de bord
 heureux : `orchestrateur.server.ts` et `score.ts` sont désormais typés, ce qui
 n'était jamais arrivé, le site n'ayant pas de script de typecheck à lui.
 
-Les 22 commandes s'appellent par `pnpm toolkit <commande>`.
+Les 23 commandes s'appellent par `pnpm toolkit <commande>`.
 
 **Chantier 1, la lisibilité du site**
 `audit-technique` crawle le site comme un robot d'IA · `generate-fixes` écrit
@@ -229,7 +229,8 @@ d'entreprises depuis l'annuaire officiel (API gouv, gratuite : NAF, zone,
 effectif, dirigeants) · `enrichir` extrait des sites ce qu'ils publient
 (emails, téléphones, responsable de publication, robots bloqués, pixels
 publicitaires) · `verifier-base` note la fiabilité d'une base avant tout envoi
-(MX des domaines, doublons, zone, cohérence) · `scan-lot` scanne cette liste
+(MX des domaines, doublons, zone, cohérence) · `classer-leads` ordonne les
+prospects du plus chaud au plus froid, avec la raison · `scan-lot` scanne cette liste
 entière pour le baromètre.
 
 ## Règles métier à ne pas casser
