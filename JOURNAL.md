@@ -5,6 +5,41 @@ d'une nouvelle session, après `CLAUDE.md`.
 
 ---
 
+## 2026-08-07 (fin) — Le crawl qui double les mobiles : arrêter de deviner les URLs
+
+**53 mobiles directs sur 100**, contre 27, et sans un crédit dépensé. Le gain
+ne vient pas d'un effort supplémentaire mais d'un changement de méthode.
+
+Les deux premiers passages **devinaient** les URLs : une liste de vingt-huit
+chemins probables, puis un suivi de liens filtré par mots-clés. Rendement,
+quatre mobiles sur cent sites. Le troisième **demande au site son propre
+plan** :
+
+- `sitemap.xml`, `sitemap_index.xml`, `wp-sitemap.xml`, en descendant d'un
+  niveau quand c'est un index de sitemaps ;
+- l'**API publique de WordPress** (`/wp-json/wp/v2/pages`), qui liste des pages
+  jamais présentes dans le menu. La majorité des sites de PME françaises sont
+  sous WordPress, et c'est là que vivent les fiches individuelles d'associés ;
+- les URLs sont ensuite triées : celles qui portent un mot de personne
+  (équipe, associé, conseiller, profil) d'abord, puis les plus profondes.
+
+Trois façons de lire un numéro que les passages précédents rataient :
+
+- **les numéros coupés par des balises.** `<span>06</span><span>12</span>` doit
+  se lire « 0612 », donc les balises se retirent SANS espace de remplacement —
+  puis on relit une seconde fois AVEC espace, pour ne pas coller deux nombres
+  voisins. Les deux lectures sont nécessaires ;
+- **JSON-LD et attributs `data-*`** : `"telephone": "…"`, `data-phone="…"` ;
+- **les entités HTML** décodées avant toute recherche.
+
+**Et un piège qui aurait coûté un appel :** `06 07 08 09 10`, publié sur le
+site d'un cabinet retenu. Format valide, indicatif valide, mais c'est le numéro
+d'exemple du thème que personne n'a remplacé. Même famille : `06 12 34 56 78`,
+`06 00 00 00 00`. Seule leur régularité les trahit, d'où `numeroFactice()` et
+ses tests. Cinq autres numéros à faible diversité de chiffres ont été gardés :
+un vrai mobile français peut répéter des chiffres, et la règle du 07/08 tient —
+jeter à tort coûte plus cher que garder à tort.
+
 ## 2026-08-07 (suite) — Le plafond de l'enrichissement, et un piège Apollo qui coûte cher
 
 Enrichissement poussé au maximum de ce qui est atteignable : emails nominatifs
