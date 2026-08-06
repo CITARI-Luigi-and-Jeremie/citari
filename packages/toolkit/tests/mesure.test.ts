@@ -108,17 +108,31 @@ describe("memeMarque", () => {
     expect(memeMarque("", "Amarris")).toBe(false);
   });
 
-  it("LIMITE CONNUE : un nom court se retrouve dans un nom plus long", () => {
-    // `memeMarque` cherche une sous-chaîne, pas un mot entier. Une marque
-    // nommée « Ora » capte donc les mentions d'« Orange » et son score monte
-    // pour de mauvaises raisons.
-    //
-    // Non corrigé volontairement : le resserrer changerait la mesure, et cette
-    // décision appartient à Luigi. Le cas est étroit (il faut un client dont le
-    // nom compact est court ET contenu dans celui d'une marque citée), mais il
-    // gonflerait la note d'un client, ce qui est le pire sens de l'erreur.
-    // Le jour où on le corrige, c'est le test à retourner.
-    expect(memeMarque("Ora", "Orange")).toBe(true);
+  it("ne capte plus un nom court noyé dans un nom plus long", () => {
+    // Corrigé le 06/08/2026. L'ancienne version cherchait une sous-chaîne :
+    // un client nommé « Ora » récoltait les mentions d'« Orange », et son
+    // score montait pour de mauvaises raisons. C'est le pire sens de l'erreur,
+    // puisqu'on aurait annoncé une visibilité qui se serait évaporée au J+90.
+    expect(memeMarque("Ora", "Orange")).toBe(false);
+    expect(memeMarque("Sage", "Message")).toBe(false);
+    expect(memeMarque("Axa", "Maxandre")).toBe(false);
+  });
+
+  it("garde les sigles courts quand ils forment un mot entier", () => {
+    // La frontière de mot est ce qui permet de resserrer sans casser : « BDO »
+    // reste reconnu dans « BDO France », mais pas au milieu d'un autre mot.
+    expect(memeMarque("BDO", "BDO France")).toBe(true);
+    expect(memeMarque("RSM", "RSM Rhône-Alpes")).toBe(true);
+    expect(memeMarque("EY", "EYbens Conseil")).toBe(false);
+  });
+
+  it("tolère une troncature, pas un préfixe quelconque", () => {
+    // Un moteur qui écorche un nom en produit une forme presque aussi longue.
+    // Le seuil de 80 % sépare « nutrismar » de « nutrismart » (90 %) d'un
+    // simple préfixe comme « ora » dans « orange » (50 %).
+    expect(memeMarque("NutriSmart", "NutriSmar")).toBe(true);
+    expect(memeMarque("Cerfrance", "Cerfranc")).toBe(true);
+    expect(memeMarque("Compta", "Comptabilité Générale du Rhône")).toBe(false);
   });
 });
 

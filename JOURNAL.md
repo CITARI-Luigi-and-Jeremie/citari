@@ -509,6 +509,21 @@ gelées permettant d'arbitrer sans litige.
   cas. `partDeVoix` garde désormais toujours la ligne du client, et
   `insights.ts` compte sur les mentions comme il le faisait déjà pour les
   concurrents.
+- **`memeMarque` ne cherche plus une sous-chaîne mais des mots entiers.**
+  Elle décide de `is_target`, donc du score, donc du chiffre facturé. Elle
+  faisait une simple recherche de sous-chaîne : un client nommé « Ora »
+  captait les mentions d'« Orange », « Sage » celles de « Message ». Le score
+  montait pour de mauvaises raisons, ce qui est le pire sens de l'erreur, on
+  aurait annoncé une visibilité qui se serait évaporée au contrôle J+90.
+  Deux souplesses bornées remplacent l'inclusion libre : un nom entier
+  contenu dans l'autre aux frontières de mots (« BDO » dans « BDO France »
+  reste reconnu, pas dans « EYbens »), et les formes compactes quand elles
+  sont à plus de 80 % identiques, ce qui préserve le cas d'origine
+  « nutri)smar » → « NutriSmart » sans laisser passer « ora » → « orange ».
+  Mesuré avant de pousser : sur **4 601 mentions et 11 scans terminés, zéro
+  changement de `is_target`**. La correction ferme un risque futur sans
+  toucher à une mesure existante, donc rien à recalculer et aucune
+  comparaison J+90 cassée.
 - **Le code mort de `packages/core` a été retiré** le 06/08/2026, dans la
   foulée du moteur mort : `providers/` (7 fichiers), `scoring/`, `report/`,
   `mock/`, `util/`. De 22 fichiers source à 8, environ 1 100 lignes en moins.

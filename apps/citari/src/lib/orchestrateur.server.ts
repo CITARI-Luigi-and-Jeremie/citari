@@ -93,23 +93,52 @@ export function normaliserNom(s: string): string {
     .trim();
 }
 
+/** `aiguille` apparaît-elle dans `foin` comme une suite de MOTS entiers ? */
+function contientCommeMots(foin: string, aiguille: string): boolean {
+  return ` ${foin} `.includes(` ${aiguille} `);
+}
+
 /**
  * Même marque ? Comparaison sur les formes normalisées.
- * Règle le 0/100 artefactuel : « nutri)smar » ne matchait jamais « NutriSmart »
- * avec l'ancien `includes` brut, et « L'Oréal » ne matchait pas « loreal ».
+ *
+ * Cette fonction décide de `is_target`, donc du score, donc du chiffre qu'on
+ * facture. Elle doit rattraper les noms écorchés sans jamais attribuer au
+ * client les citations d'un autre.
+ *
+ * Deux souplesses, chacune bornée, et l'ordre compte.
+ *
+ * 1. **Un nom entier contenu dans l'autre, aux frontières de mots.** C'est le
+ *    cas courant : « Amarris » dans « Amarris Direct », « Vaurel » dans
+ *    « Cabinet Vaurel », « BDO » dans « BDO France ». La frontière de mot est
+ *    tout l'intérêt : elle laisse passer les sigles courts quand ils forment un
+ *    mot, sans les laisser se noyer dans n'importe quelle chaîne.
+ *
+ * 2. **Les formes compactes, quand elles sont quasi identiques.** C'est ce qui
+ *    règle le bug d'origine : « nutri)smar » devient « nutri smar », donc
+ *    « nutrismar », et doit reconnaître « nutrismart ». Un moteur qui tronque
+ *    ou ponctue un nom produit une forme presque aussi longue que l'originale,
+ *    d'où le seuil de 80 %.
+ *
+ * Ce que ça corrige, le 06/08/2026 : l'ancienne version faisait une simple
+ * recherche de sous-chaîne. Un client nommé « Ora » captait donc les mentions
+ * d'« Orange », et son score montait pour de mauvaises raisons. C'est le pire
+ * sens de l'erreur, puisqu'on aurait annoncé au client une visibilité qu'il
+ * n'a pas, avant de la voir s'évaporer au contrôle J+90.
  */
 export function memeMarque(a: string, b: string): boolean {
   const na = normaliserNom(a);
   const nb = normaliserNom(b);
   if (na.length < 2 || nb.length < 2) return false;
-  if (na === nb || na.includes(nb) || nb.includes(na)) return true;
-  // Formes compactes, sans espaces : « nutri)smar » → « nutrismar » doit
-  // matcher « NutriSmart » → « nutrismart », et « L'Oréal » → « loreal ».
-  // C'est le cas exact du bug d'origine, attrapé par le test — la ponctuation
-  // devenue espace cassait l'inclusion.
+  if (na === nb) return true;
+
+  if (contientCommeMots(na, nb) || contientCommeMots(nb, na)) return true;
+
   const ca = na.replace(/ /g, "");
   const cb = nb.replace(/ /g, "");
-  return ca.length >= 3 && cb.length >= 3 && (ca.includes(cb) || cb.includes(ca));
+  if (ca === cb) return true;
+
+  const [court, long] = ca.length <= cb.length ? [ca, cb] : [cb, ca];
+  return court.length >= 4 && long.includes(court) && court.length / long.length >= 0.8;
 }
 
 /** Clé de cache : le domaine du site, sinon marque+secteur+ville normalisés. */
