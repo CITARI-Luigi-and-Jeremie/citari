@@ -452,6 +452,27 @@ gelées permettant d'arbitrer sans litige.
   Perplexity, Grok et Le Chat passent par des appels directs.
 - La table des prix `packages/core/src/cost.ts` est typée `Record<EngineId, …>`
   volontairement : ajouter un moteur sans son tarif ne compile pas.
+- **Un moteur en panne faisait baisser la note du client.** Le score divise
+  les citations par le nombre de réponses, et les réponses en ERREUR étaient
+  comptées au dénominateur. La clé Anthropic étant à court de crédit, les 24
+  réponses de Claude d'un scan complet étaient vides et pesaient quand même :
+  Dougs affiché 21 au lieu d'environ 26, et les deux contrôles 26 au lieu
+  d'environ 35, soit neuf points. Le vrai danger n'est pas le chiffre, c'est
+  le J+90 : si un moteur tombe entre la mesure d'avant et celle d'après, le
+  score bouge tout seul et la progression qu'on annonce au client devient un
+  artefact. Les réponses non obtenues sont désormais exclues du calcul, et le
+  comptage affiché au prospect ne les annonce plus non plus.
+- **« Invisible » voulait dire deux choses.** La règle basculait en
+  « invisible » sous 5 % de part de voix, si bien que Dougs, cité 25 fois dans
+  un secteur bondé, y tombait. Aucun email ne mentait, mais le message écrit
+  pour une marque absente partait aux prospects les plus mûrs, à la place de
+  celui qui porte le meilleur argument. « Invisible » signifie désormais
+  jamais cité, rien d'autre ; la part de voix informe le rapport sans décider
+  du message.
+- **Modèle Claude figé sur `claude-sonnet-5`** le 06/08/2026, décision de
+  Luigi. Le modèle interrogé fait partie de la mesure : en changer après un
+  premier scan client ferait varier la note sans que rien n'ait bougé chez
+  lui. Le choix se fait donc avant le premier client, et ne doit plus bouger.
 - **Chaque scan coûtait le double, et personne ne pouvait le voir.**
   Mesuré : 80 appels de moteur facturés pour 40 réponses conservées. Deux
   causes empilées. D'abord `scan.$id.tsx` gardait le drapeau « boucle active »

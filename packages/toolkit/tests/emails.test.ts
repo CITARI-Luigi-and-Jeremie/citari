@@ -50,8 +50,20 @@ describe("situationDuScan", () => {
     expect(situationDuScan(scan({ score: 21, citationsCible: 20, brandShare: 0.12 }))).toBe("marginal");
   });
 
-  it("traite en invisible une part de voix résiduelle", () => {
-    expect(situationDuScan(scan({ score: 31, citationsCible: 13, brandShare: 0.046 }))).toBe("invisible");
+  it("ne déclare plus invisible une marque citée mais noyée", () => {
+    // L'ancienne règle basculait en « invisible » sous 5 % de part de voix.
+    // Dans un secteur qui compte des centaines de cabinets, une marque citée
+    // treize fois pèse encore moins que ça : elle recevait donc l'email écrit
+    // pour une absente, au lieu de celui écrit pour une marque présente et
+    // mal placée, qui porte notre meilleur argument. La part de voix informe
+    // le rapport ; elle ne décide plus du message.
+    expect(situationDuScan(scan({ score: 31, citationsCible: 13, brandShare: 0.046 }))).toBe("marginal");
+  });
+
+  it("garde « invisible » pour son sens littéral : jamais cité", () => {
+    // Même avec une part de voix nulle et un score nul, c'est bien l'absence
+    // de citation qui tranche, et elle seule.
+    expect(situationDuScan(scan({ score: 4, citationsCible: 0, brandShare: 0 }))).toBe("invisible");
   });
 
   it("traite en invisible une marque jamais citée", () => {

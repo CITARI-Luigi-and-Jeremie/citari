@@ -570,13 +570,35 @@ export async function avancerScan(id: string) {
  * alors que rien n'a bougé. On repasse donc par `calculerScore`, la seule
  * implémentation du score, en ne lui donnant que les moteurs voulus.
  */
+/**
+ * Les réponses réellement mesurées : ni erreur, ni texte vide.
+ *
+ * Le score divise les citations par le NOMBRE DE RÉPONSES. Une réponse qu'un
+ * moteur n'a jamais rendue n'est pas une mesure : c'est une panne de notre
+ * côté. La compter au dénominateur revient à baisser la note du client parce
+ * que notre clé API est à court de crédit, ce qui est arrivé pour de vrai —
+ * les 24 réponses de Claude en erreur sur le scan complet de Dougs, noté 21
+ * au lieu de 25 environ.
+ *
+ * Plus grave que les quelques points : le contrôle J+90. Si un moteur tombe
+ * entre la mesure d'avant et celle d'après, le score bouge tout seul, et on
+ * annonce au client une progression ou une chute qu'il n'a pas vécue. C'est la
+ * promesse centrale du sprint qui s'effondre.
+ *
+ * Une question à laquelle un moteur EN MARCHE répond sans citer la marque
+ * reste évidemment comptée : c'est un vrai manque, et c'est ce qu'on vend.
+ */
+function mesurees<T extends { error?: string | null; raw_text?: string | null }>(lignes: T[]): T[] {
+  return lignes.filter((r) => !r.error && (r.raw_text ?? "").trim().length > 0);
+}
+
 export async function scoreSurMoteurs(scanId: string, moteurs: readonly string[]): Promise<number | null> {
   const [{ data: reponses }, { data: mentions }] = await Promise.all([
-    supabaseAdmin.from("responses").select("id, engine").eq("scan_id", scanId),
+    supabaseAdmin.from("responses").select("id, engine, error, raw_text").eq("scan_id", scanId),
     supabaseAdmin.from("mentions").select("*").eq("scan_id", scanId),
   ]);
   const garder = new Set(moteurs);
-  const r = (reponses ?? []).filter((x) => garder.has(x.engine));
+  const r = mesurees(reponses ?? []).filter((x) => garder.has(x.engine));
   if (r.length === 0) return null;
   const m = ((mentions ?? []) as unknown as LigneMention[]).filter((x) => garder.has(x.engine));
   return calculerScore(r, m).global;
@@ -603,12 +625,12 @@ async function finaliser(id: string) {
   if (!obtenu) return;
 
   const [{ data: reponses }, { data: mentions }, { data: scan }] = await Promise.all([
-    supabaseAdmin.from("responses").select("id, engine").eq("scan_id", id),
+    supabaseAdmin.from("responses").select("id, engine, error, raw_text").eq("scan_id", id),
     supabaseAdmin.from("mentions").select("*").eq("scan_id", id),
     supabaseAdmin.from("scans").select("brand_name, sector, city, competitors").eq("id", id).single(),
   ]);
   const lignes = (mentions ?? []) as unknown as LigneMention[];
-  const s = calculerScore(reponses ?? [], lignes);
+  const s = calculerScore(mesurees(reponses ?? []), lignes);
   // Les variantes d'écriture se regroupent AVANT tout comptage : « Amarris »
   // et « Amarris Direct » sont une seule entreprise, et la compter deux fois
   // fausserait la part de voix comme la priorisation des contenus.
@@ -881,7 +903,16 @@ export async function teaserScan(id: string) {
   const [{ data: mentions }, { data: questions }, { count: nbReponses }] = await Promise.all([
     supabaseAdmin.from("mentions").select("brand, is_target, engine, verbatim, query_id").eq("scan_id", id),
     supabaseAdmin.from("queries").select("id, text, intent").eq("scan_id", id).order("rank"),
-    supabaseAdmin.from("responses").select("id", { count: "exact", head: true }).eq("scan_id", id),
+    // Seules les réponses réellement obtenues sont annoncées. Afficher « 144
+    // réponses collectées » quand 24 sont des pannes reviendrait à gonfler
+    // l'ampleur de la mesure qu'on vend, sur le seul écran que le prospect
+    // regarde vraiment.
+    supabaseAdmin
+      .from("responses")
+      .select("id", { count: "exact", head: true })
+      .eq("scan_id", id)
+      .is("error", null)
+      .not("raw_text", "is", null),
   ]);
 
   const lignes = mentions ?? [];

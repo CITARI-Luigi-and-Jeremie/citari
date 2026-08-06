@@ -46,13 +46,24 @@ export type Situation = "bloque" | "invisible" | "marginal" | "solide";
 export function situationDuScan(i: ScanInsights): Situation {
   if (i.botsBloques.length > 0) return "bloque";
   if (i.score >= 55) return "solide";
-  // Le partage invisible/marginal se joue sur la PRÉSENCE, pas sur le score.
-  // Le score mélange présence, rang, recommandation et tonalité : une marque
-  // citée vingt fois mais mal placée y tombe sous 25, et recevrait alors un
-  // message lui expliquant qu'elle n'existe pas, ce qu'elle constaterait faux
-  // en ouvrant son propre rapport. Sous 5 % de part de voix, on est du bruit ;
-  // au-dessus, on existe et le problème est ailleurs.
-  if (i.citationsCible === 0 || i.brandShare < 0.05) return "invisible";
+  // « Invisible » veut dire jamais cité, rien d'autre.
+  //
+  // La règle a d'abord été « zéro citation OU moins de 5 % de part de voix ».
+  // Le seuil partait d'une bonne intention, distinguer une marque qui pèse
+  // d'une marque qui fait du bruit de fond, mais il se retournait contre les
+  // meilleurs prospects : dans un secteur qui compte des centaines de
+  // cabinets, être cité vingt-cinq fois pèse encore moins de 5 %. Dougs,
+  // vingt-cinq citations, tombait ainsi dans « invisible ».
+  //
+  // Aucun email ne prétendait qu'il n'existait pas, le texte restait exact.
+  // Mais il recevait le message écrit pour une marque absente au lieu de
+  // celui écrit pour une marque présente et mal placée, qui est le meilleur
+  // argument que nous ayons : « c'est la situation où le travail paye le plus
+  // vite ». Le mauvais argument partait donc aux prospects les plus mûrs.
+  //
+  // La part de voix reste dans le rapport, où elle informe. Elle ne décide
+  // plus de ce qu'on écrit.
+  if (i.citationsCible === 0) return "invisible";
   return "marginal";
 }
 

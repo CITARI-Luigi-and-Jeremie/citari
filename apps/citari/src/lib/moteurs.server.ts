@@ -145,10 +145,15 @@ async function claude(q: string, langue: string, recherche: boolean): Promise<Re
       "anthropic-version": "2023-06-01",
     },
     body: JSON.stringify({
-      // Surchargeable, comme les autres moteurs. Le défaut ne change PAS sans
-      // décision explicite : le modèle interrogé fait partie de la mesure, et
-      // en changer casse la comparaison J+90 qu'on vend au client.
-      model: process.env.ANTHROPIC_MODEL || "claude-sonnet-4-5",
+      // Figé sur Sonnet 5 le 06/08/2026, décision de Luigi.
+      //
+      // Le modèle interrogé fait partie de la mesure : une version différente
+      // ne répond pas pareil, donc le score bouge. Changer entre le scan
+      // initial et le contrôle J+90 ferait varier la note sans que le client
+      // ait rien fait, et la progression qu'on lui annonce serait un artefact.
+      // C'est pourquoi ce choix se fait maintenant, avant le premier client,
+      // et ne doit plus bouger ensuite.
+      model: process.env.ANTHROPIC_MODEL || "claude-sonnet-5",
       max_tokens: 1024,
       system: prompt(q, langue)[0]!.content,
       messages: [{ role: "user", content: q }],
