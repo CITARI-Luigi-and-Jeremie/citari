@@ -5,6 +5,40 @@ d'une nouvelle session, après `CLAUDE.md`.
 
 ---
 
+## 2026-08-07 (suite) — Le plafond de l'enrichissement, et un piège Apollo qui coûte cher
+
+Enrichissement poussé au maximum de ce qui est atteignable : emails nominatifs
+de dirigeants 61 → 70, mobiles directs 19 → 27, sur cent lignes qui gardent
+100/100 en email, téléphone et dirigeant nommé.
+
+Trois sources, par rendement décroissant :
+
+- **La recherche de personnes Apollo est gratuite**, seule la récupération des
+  emails coûte un crédit par personne. Interroger les organisations sans
+  contact nommé a donné dix-neuf dirigeants de plus, tous vérifiés, et tous
+  recoupés avec le registre ou le site.
+- **Les fiches d'organisation Apollo portaient déjà dix mobiles**, dans leur
+  champ de téléphone principal, que nous n'avions jamais lu. Dans une structure
+  de dix personnes, ce numéro EST celui du dirigeant. Donnée déjà payée,
+  jamais exploitée.
+- **Le crawl rend peu de mobiles** : quatre sur cent sites, même en suivant les
+  liens internes vers les fiches individuelles d'associés, sur vingt-huit pages
+  par site. Les PME françaises publient un standard, pas un portable.
+
+**Le piège, et il a coûté 608 crédits.** Les mobiles Apollo passent
+exclusivement par `reveal_phone_number`, qui est **asynchrone** : l'appel rend
+un ticket, et seul `webhook_result_show` l'échange contre les numéros. Cet
+outil refuse l'authentification alors que tout le reste du connecteur répond —
+un connecteur peut donc être à moitié autorisé. Les révélations lancées avant
+de le découvrir ont été facturées et leurs résultats sont perdus.
+
+Règle à retenir : **avant toute opération asynchrone et payante, vérifier que
+l'outil de récupération répond**, pas seulement que la connexion est vivante.
+Un appel de profil qui réussit ne prouve rien sur le reste.
+
+Piste testée et abandonnée : l'enrichissement d'organisation Apollo ne rend que
+des fixes déjà connus. Rendement nul en mobiles, arrêté après un lot de dix.
+
 ## 2026-08-07 — 100 lignes complètes, et le classement qui s'est trompé
 
 La base 100 atteint **100/100 sur les trois axes** : un email dont le domaine
