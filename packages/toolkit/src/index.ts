@@ -35,6 +35,7 @@ import { verifyContents } from "./commands/verify-contents.js";
 import { controle45 } from "./commands/controle-45.js";
 import { scanLot } from "./commands/scan-lot.js";
 import { sourcer } from "./commands/sourcer.js";
+import { enrichir } from "./commands/enrichir.js";
 
 const program = new Command()
   .name("toolkit")
@@ -114,6 +115,20 @@ program
       effectif: String(o.effectif ?? "10-249"),
       nom: o.nom ? String(o.nom) : undefined,
       etablissements: Boolean(o.etablissements),
+      max: Number(o.max) || 500,
+    })));
+
+program
+  .command("enrichir")
+  .argument("<fichier>", "CSV point-virgule avec une colonne de domaines")
+  .option("-c, --colonne <nom>", "colonne contenant le domaine", "domaine")
+  .option("-p, --parallele <n>", "sites visités de front (max 8)", "5")
+  .option("--max <n>", "plafond de sites visités", "500")
+  .description("Acquisition — complète un CSV avec les contacts que chaque site publie (emails, téléphones, mentions légales), les robots d'IA bloqués et les pixels publicitaires")
+  .action((fichier: string, o: Record<string, string>) =>
+    run(enrichir(fichier, {
+      colonne: o.colonne,
+      parallele: Number(o.parallele) || 5,
       max: Number(o.max) || 500,
     })));
 
