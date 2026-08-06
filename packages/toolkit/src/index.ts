@@ -34,6 +34,7 @@ import { verifyCitations } from "./commands/verify-citations.js";
 import { verifyContents } from "./commands/verify-contents.js";
 import { controle45 } from "./commands/controle-45.js";
 import { scanLot } from "./commands/scan-lot.js";
+import { sourcer } from "./commands/sourcer.js";
 
 const program = new Command()
   .name("toolkit")
@@ -94,6 +95,27 @@ program
   .argument("<client>", "nom ou id du client")
   .description("Chantier 3 — cibles de citation priorisées + brouillons de pitchs presse")
   .action((client: string) => run(citationTargets(client)));
+
+program
+  .command("sourcer")
+  .requiredOption("--naf <codes>", "codes NAF séparés par des virgules (ex. 69.20Z : experts-comptables, 69.10Z : avocats, 68.31Z : agences immobilières)")
+  .option("-d, --dept <numeros>", "départements du siège (ex. 69,01)")
+  .option("--cp <codes>", "codes postaux du siège (ex. 69001,69002)")
+  .option("-e, --effectif <plage>", "effectif salarié (tranches INSEE chevauchées)", "10-249")
+  .option("-n, --nom <slug>", "nom des fichiers produits (défaut : naf-zone-date)")
+  .option("--etablissements", "garder aussi les sièges hors zone qui y ont un établissement")
+  .option("--max <n>", "plafond d'entreprises retenues", "500")
+  .description("Acquisition — liste d'entreprises depuis l'annuaire officiel (API gouv, gratuite), prête pour scan-lot")
+  .action((o: Record<string, string | boolean>) =>
+    run(sourcer({
+      naf: String(o.naf),
+      dept: o.dept ? String(o.dept) : undefined,
+      cp: o.cp ? String(o.cp) : undefined,
+      effectif: String(o.effectif ?? "10-249"),
+      nom: o.nom ? String(o.nom) : undefined,
+      etablissements: Boolean(o.etablissements),
+      max: Number(o.max) || 500,
+    })));
 
 program
   .command("scan-lot")

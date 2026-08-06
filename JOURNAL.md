@@ -5,6 +5,41 @@ d'une nouvelle session, après `CLAUDE.md`.
 
 ---
 
+## 2026-08-06 (soir) — La prospection s'outille, la stratégie reste ouverte
+
+Nouvelle commande `sourcer`, la vingtième : elle interroge l'annuaire officiel
+des entreprises (API Recherche d'entreprises, données INSEE et RNE, gratuite et
+sans clé) et produit la liste « Nom, site » que `scan-lot` attend, plus un CSV
+de travail avec SIREN, commune, effectif et dirigeants. Prouvée en réel :
+279 cabinets d'expertise comptable côté API pour le Rhône, 190 retenus.
+
+Deux pièges de cette API, payés en la sondant avant d'écrire le code :
+
+- Ses filtres géographiques matchent les **établissements**, pas les sièges.
+  Chercher « Rhône » renvoie des sièges à Montluçon ou Paris qui y ont une
+  antenne : 89 sur 279 dans notre premier tirage réel. Le filtre par siège se
+  fait donc côté commande, `--etablissements` le désactive.
+- La tranche d'effectif existe au niveau entreprise ET au niveau siège, et les
+  deux divergent (le siège d'un groupe peut être « NN »). On lit toujours
+  celle de l'entreprise.
+
+La liste produite se **relit à la main** avant de dépenser un centime de scan.
+Le premier tirage l'a justifié tout seul : un office notarial déclaré en NAF
+6920Z (expertise comptable) sortait en tête de liste.
+
+**La stratégie de prospection n'est PAS arrêtée.** La formule proposée (univers
+officiel → sites web → scan-lot comme qualificateur → contact vérifié →
+relances aux vrais chiffres) est en discussion, Luigi n'est pas sûr. La
+commande, elle, sert quelle que soit la verticale choisie. Ne pas la considérer
+comme un engagement sur la méthode.
+
+**Piège découvert au passage : le MCP Apollo branché sur cette machine est
+connecté au compte d'un tiers** (« Thomas Motti », tmotti@snapdesk.co, société
+snapdesk.co). L'utiliser dépenserait les crédits de quelqu'un d'autre et
+verserait nos prospects dans son CRM. À déconnecter ou reconnecter sur un
+compte Citari avant tout usage. Vérifié par l'appel de profil, sans rien
+consommer.
+
 ## 2026-08-06 (soir) — Audit global avant mise en ligne
 
 Relecture complète du moteur, du toolkit et de l'admin, à tête reposée, avant
