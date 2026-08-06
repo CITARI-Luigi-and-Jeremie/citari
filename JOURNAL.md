@@ -509,6 +509,25 @@ gelées permettant d'arbitrer sans litige.
   cas. `partDeVoix` garde désormais toujours la ligne du client, et
   `insights.ts` compte sur les mentions comme il le faisait déjà pour les
   concurrents.
+- **Le code mort de `packages/core` a été retiré** le 06/08/2026, dans la
+  foulée du moteur mort : `providers/` (7 fichiers), `scoring/`, `report/`,
+  `mock/`, `util/`. De 22 fichiers source à 8, environ 1 100 lignes en moins.
+  Le paquet est enfin ce qu'il prétend être, quatre outils partagés.
+  Le vrai gain n'est pas la place gagnée. Les 15 tests de ce paquet portaient
+  sur `computeScore` et `detectMentions`, les ANCÊTRES morts de la mesure,
+  pendant que `calculerScore` et `memeMarque`, qui décident réellement du
+  chiffre facturé au client, n'étaient testés nulle part. Une suite verte
+  protégeait donc exactement ce qui ne tournait plus.
+  Corrigé : l'alias `@/` est résolu dans `vitest.config.ts` et dans les
+  `paths` du `tsconfig.json` du toolkit, si bien que les tests importent
+  désormais le VRAI code du site au lieu d'en recopier une version. Une copie
+  ne teste qu'elle-même et diverge en silence. 15 nouveaux tests couvrent la
+  formule du score, la détection de marque, la clé de cache et la priorité
+  commerciale.
+  Effet de bord heureux : `tsc` voit enfin les fichiers du site importés par
+  les tests, et y a immédiatement trouvé un trou de typage dans
+  `orchestrateur.server.ts`. Le site n'a pas de script de typecheck à lui, il
+  n'avait donc jamais été vérifié.
 - **`packages/core/src/scan/runScan.ts` était un SECOND moteur de scan**, resté
   sur le schéma d'avant Lovable (`brand`, `url`, `lang`, `queries.position`,
   `cost_log.cost_cents`). Il n'aurait jamais tourné contre la vraie base, mais

@@ -2,7 +2,17 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "noEmit": true,
-    "types": ["node"]
+    "types": ["node"],
+    // L'alias « @/ » du site, pour que `tsc` voie ce que vitest voit déjà.
+    //
+    // Les tests importent le VRAI code de mesure (`score.ts`,
+    // `orchestrateur.server.ts`) plutôt que d'en recopier une version : une
+    // copie ne teste qu'elle-même et diverge en silence dès que l'original
+    // bouge. Sans ce chemin, vitest passait mais le typecheck échouait sur
+    // « Cannot find module ».
+    "paths": {
+      "@/*": ["../../apps/citari/src/*"]
+    }
   },
   "include": ["src", "tests"],
   // Le pilote s'exécute dans apps/citari, avec le tsconfig du site : il n'est

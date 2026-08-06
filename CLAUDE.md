@@ -73,10 +73,11 @@ implémentations ne veut rien dire.
 d'avant Lovable et n'aurait jamais tourné contre la vraie base, mais restait
 exporté et lançable, et ses tests passaient sur une base simulée. Supprimé.
 
-Il reste dans `packages/core` du code mort de cette époque (`providers/`,
-`scoring/`, `report/`, `mock/`, `cost.ts`) : le toolkit n'en utilise que
-`getDb`, `unwrap`, `askClaudeJson` et `fetchHomeText`. À nettoyer un jour, sans
-urgence.
+Le code mort qui l'accompagnait (`providers/`, `scoring/`, `report/`, `mock/`,
+`util/`) a été retiré le 06/08/2026 : 22 fichiers source ramenés à 8, et
+`packages/core` est enfin ce qu'il prétend être, un socle de quatre outils.
+Le toolkit n'en utilise que `getDb`, `unwrap`, `askClaudeJson` et
+`fetchHomeText`.
 
 ### Il n'y a plus de mode démo
 
@@ -168,9 +169,15 @@ du toolkit et les colonnes réelles vit dans
 ```bash
 pnpm install
 pnpm -r test        # 88 tests
-pnpm -r typecheck
+pnpm -r typecheck   # couvre aussi le site, via l'alias des tests
 npm --prefix apps/citari run build
 ```
+
+**Les tests importent le vrai code du site**, ils n'en recopient plus une
+version. L'alias `@/` est résolu par `packages/toolkit/vitest.config.ts` pour
+vitest, et par les `paths` de son `tsconfig.json` pour `tsc`. Effet de bord
+heureux : `orchestrateur.server.ts` et `score.ts` sont désormais typés, ce qui
+n'était jamais arrivé, le site n'ayant pas de script de typecheck à lui.
 
 Les 19 commandes s'appellent par `pnpm toolkit <commande>`.
 

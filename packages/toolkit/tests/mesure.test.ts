@@ -1,0 +1,147 @@
+import { describe, expect, it } from "vitest";
+import { POIDS, calculerScore, type LigneMention } from "@/lib/score";
+import { cleDomaine, memeMarque, normaliserNom, prioriteDuScore } from "@/lib/orchestrateur.server";
+
+/**
+ * La mesure elle-même, enfin testée.
+ *
+ * `calculerScore` et `memeMarque` décident du chiffre qu'on annonce au client
+ * et de la progression qu'on lui facture. Aucun test ne les couvrait : ceux qui
+ * existaient portaient sur `computeScore` et `detectMentions`, leurs ancêtres
+ * de `packages/core`, que plus personne n'exécutait. Une suite verte donnait
+ * donc l'illusion de protéger la partie du produit qui compte le plus.
+ *
+ * Ces fonctions sont importées, pas recopiées : l'alias est posé dans
+ * `vitest.config.ts`. Importer `orchestrateur.server.ts` n'ouvre aucune
+ * connexion, son client Supabase étant construit paresseusement.
+ */
+
+const rep = (...moteurs: string[]) => moteurs.map((engine, i) => ({ id: `r${i}`, engine }));
+
+const mention = (o: Partial<LigneMention> = {}): LigneMention => ({
+  engine: "ChatGPT",
+  brand: "Nous",
+  is_target: true,
+  position: 1,
+  recommended: true,
+  sentiment: "positif",
+  ...o,
+});
+
+describe("la formule du score est figée", () => {
+  it("pèse 50 / 20 / 20 / 10, et pas autrement", () => {
+    // La formule est publiée au client et la comparaison J+90 n'a de sens que
+    // si elle ne bouge jamais. Ce test existe pour qu'un changement se voie.
+    expect(POIDS).toEqual({ mention: 0.5, position: 0.2, reco: 0.2, sentiment: 0.1 });
+    expect(POIDS.mention + POIDS.position + POIDS.reco + POIDS.sentiment).toBeCloseTo(1, 10);
+  });
+
+  it("rend 100 quand tout est parfait", () => {
+    const score = calculerScore(rep("ChatGPT", "Gemini"), [
+      mention({ engine: "ChatGPT" }),
+      mention({ engine: "Gemini" }),
+    ]);
+    expect(score.global).toBe(100);
+  });
+
+  it("rend 0 quand la marque n'est jamais citée", () => {
+    const score = calculerScore(rep("ChatGPT", "Gemini"), [
+      mention({ is_target: false, brand: "Rival" }),
+    ]);
+    expect(score.global).toBe(0);
+    expect(score.mentionRate).toBe(0);
+  });
+
+  it("divise par le nombre de RÉPONSES, pas de mentions", () => {
+    // Citée une fois sur deux réponses, en tête, recommandée, ton positif :
+    // 50 % × 0,5 + 20 % × 0,5 + 20 % × 0,5 + 10 % × 1 = 55.
+    const score = calculerScore(rep("ChatGPT", "Gemini"), [mention()]);
+    expect(score.global).toBe(55);
+  });
+
+  it("sanctionne un mauvais rang sans toucher à la présence", () => {
+    // Citée partout mais en cinquième position, jamais recommandée, ton neutre.
+    const score = calculerScore(
+      rep("ChatGPT", "Gemini"),
+      [
+        mention({ engine: "ChatGPT", position: 5, recommended: false, sentiment: "neutre" }),
+        mention({ engine: "Gemini", position: 5, recommended: false, sentiment: "neutre" }),
+      ],
+    );
+    expect(score.mentionRate).toBe(1);
+    expect(score.global).toBe(63);
+  });
+
+  it("laisse à null le score d'un moteur qui n'a rendu aucune réponse", () => {
+    // C'est ainsi que le rapport distingue « mal noté » de « pas mesuré ».
+    const score = calculerScore(rep("ChatGPT"), [mention()]);
+    expect(score.parMoteur["ChatGPT"]).toBe(100);
+    expect(score.parMoteur["Claude"]).toBeNull();
+    expect(score.parMoteur["Le Chat"]).toBeNull();
+  });
+});
+
+describe("memeMarque", () => {
+  it("reconnaît une marque massacrée par le moteur", () => {
+    // Le bug d'origine : « nutri)smar » ne matchait jamais « NutriSmart » et
+    // produisait un 0/100 artefactuel présenté comme un diagnostic.
+    expect(memeMarque("NutriSmart", "nutri)smar")).toBe(true);
+  });
+
+  it("ignore accents et apostrophes", () => {
+    expect(memeMarque("L'Oréal", "loreal")).toBe(true);
+    expect(normaliserNom("L'Oréal")).toBe("l oreal");
+  });
+
+  it("reconnaît une déclinaison du même nom", () => {
+    expect(memeMarque("Amarris", "Amarris Direct")).toBe(true);
+    expect(memeMarque("Cabinet Vaurel", "Vaurel")).toBe(true);
+  });
+
+  it("ne confond pas deux entreprises distinctes", () => {
+    expect(memeMarque("Fiducial", "Fidal")).toBe(false);
+    expect(memeMarque("KPMG", "BDO")).toBe(false);
+  });
+
+  it("refuse les libellés trop courts pour signifier quelque chose", () => {
+    expect(memeMarque("A", "Amarris")).toBe(false);
+    expect(memeMarque("", "Amarris")).toBe(false);
+  });
+
+  it("LIMITE CONNUE : un nom court se retrouve dans un nom plus long", () => {
+    // `memeMarque` cherche une sous-chaîne, pas un mot entier. Une marque
+    // nommée « Ora » capte donc les mentions d'« Orange » et son score monte
+    // pour de mauvaises raisons.
+    //
+    // Non corrigé volontairement : le resserrer changerait la mesure, et cette
+    // décision appartient à Luigi. Le cas est étroit (il faut un client dont le
+    // nom compact est court ET contenu dans celui d'une marque citée), mais il
+    // gonflerait la note d'un client, ce qui est le pire sens de l'erreur.
+    // Le jour où on le corrige, c'est le test à retourner.
+    expect(memeMarque("Ora", "Orange")).toBe(true);
+  });
+});
+
+describe("clé de cache et priorité commerciale", () => {
+  it("réduit une URL à son domaine, www ignoré", () => {
+    expect(cleDomaine("https://www.Amarris.fr/contact", "Amarris", "compta", "Nantes")).toBe(
+      "amarris.fr",
+    );
+    expect(cleDomaine("amarris.fr", "Amarris", "compta", null)).toBe("amarris.fr");
+  });
+
+  it("retombe sur marque + secteur + ville quand l'URL manque ou ne vaut rien", () => {
+    expect(cleDomaine(null, "Cabinet Vaurel", "Expertise comptable", "Lyon")).toBe(
+      "cabinet vaurel|expertise comptable|lyon",
+    );
+    expect(cleDomaine("pas une url", "Amarris", "compta", null)).toBe("amarris|compta|");
+  });
+
+  it("classe le prospect selon son score, le plus bas étant le plus chaud", () => {
+    expect(prioriteDuScore(0)).toBe("chaud");
+    expect(prioriteDuScore(24)).toBe("chaud");
+    expect(prioriteDuScore(25)).toBe("tiede");
+    expect(prioriteDuScore(54)).toBe("tiede");
+    expect(prioriteDuScore(55)).toBe("froid");
+  });
+});

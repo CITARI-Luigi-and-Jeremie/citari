@@ -246,7 +246,12 @@ export async function auditFlash(siteUrl: string | null): Promise<AuditFlash | n
       for (const brute of lignes) {
         const ligne = brute.replace(/#.*$/, "").trim();
         if (!ligne) continue;
-        const [clef, ...reste] = ligne.split(":");
+        // `split` rend toujours au moins un élément, mais le typage strict ne
+        // le sait pas : la valeur par défaut le lui dit, sans rien changer au
+        // comportement. Signalé la première fois que ce fichier a été typé,
+        // le 06/08/2026 — le site n'ayant pas de script de typecheck, personne
+        // ne l'avait jamais vérifié.
+        const [clef = "", ...reste] = ligne.split(":");
         const valeur = reste.join(":").trim();
         if (clef.trim().toLowerCase() === "user-agent") {
           if (!enTete) agents = [];

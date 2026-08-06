@@ -1,20 +1,27 @@
+/**
+ * Le socle partagé, réduit à ce qui sert vraiment.
+ *
+ * Ce paquet a hébergé un moteur de scan complet, avec ses six fournisseurs, sa
+ * détection de mentions, son scoring et son runner. Tout cela parlait le schéma
+ * d'avant Lovable et n'aurait jamais tourné contre la vraie base ; ses tests
+ * passaient parce qu'ils s'exécutaient sur une base simulée. Supprimé le
+ * 06/08/2026, avec le mode démo qui allait avec.
+ *
+ * Le seul moteur est `apps/citari/src/lib/orchestrateur.server.ts`. Ne pas en
+ * reconstruire un ici : l'intérêt du contrôle J+90 est l'écart avec la mesure
+ * initiale, et un écart entre deux implémentations ne veut rien dire.
+ *
+ * Ce qui reste tient en quatre outils, tous utilisés par le toolkit.
+ */
 export * from "./types";
+
+/** Accès à la base. Toujours la vraie, jamais de simulation. */
 export { getDb, unwrap } from "./db";
+
 export { requireEnv, optionalEnv } from "./env";
-export { costCents, MAX_SCAN_COST_CENTS } from "./cost";
-export { getProviders, OpenAIProvider, AnthropicProvider, GeminiProvider, PerplexityProvider, GrokProvider } from "./providers/index";
-export { extractUrls } from "./providers/base";
+
+/** Appel au modèle avec réponse JSON validée, pour les commandes du toolkit. */
 export { askClaudeJson, type LLMUsage } from "./llm/json";
-export { generateQueries, fetchHomeText } from "./queries/generate";
-export { detectMentions, brandVariants, firstMentionIndex, normalize } from "./scoring/detect";
-export { classifyMentions } from "./scoring/classify";
-export { computeScore, computeScoreDetail, computeShareOfVoice, type MentionForScoring } from "./scoring/score";
-export { generatePriorityActions } from "./report/actions";
-// `runScan` / `createRescan` ont été retirés le 06/08/2026. C'était un SECOND
-// moteur de scan, resté sur le schéma d'avant Lovable : il écrivait `brand`,
-// `url`, `lang`, `queries.position`, `cost_log.cost_cents`, colonnes qui
-// n'existent plus. Contre la vraie base il échouait ; ses tests passaient parce
-// qu'ils tournaient sur une base simulée. Le seul moteur est
-// `apps/citari/src/lib/orchestrateur.server.ts`.
-export { isMock } from "./mock/mockLlm";
-export { resetMockDb } from "./mock/fakeDb";
+
+/** Extrait le texte d'une page d'accueil, pour l'audit technique. */
+export { fetchHomeText } from "./queries/generate";
