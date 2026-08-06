@@ -115,6 +115,27 @@ export function telephoneFrancaisPlausible(numero: string): boolean {
   return false;
 }
 
+/**
+ * Numéro d'exemple laissé par un gabarit de site, jamais un vrai contact.
+ *
+ * Les modèles de site livrent des numéros de démonstration que personne ne
+ * remplace : `06 07 08 09 10` (suite de +1), `06 12 34 56 78` (chiffres
+ * consécutifs), `06 00 00 00 00` (répétition). Ils passent tous les contrôles
+ * de format et d'indicatif, donc seule leur régularité les trahit. Un seul
+ * dans une base coûte un appel dans le vide et fait douter de tout le reste :
+ * `alteraudit.fr` publiait le premier.
+ */
+export function numeroFactice(numero: string): boolean {
+  const n = (numero ?? "").replace(/\D/g, "");
+  if (!/^0\d{9}$/.test(n)) return false;
+  const suite = n.slice(1);
+  if (new Set(suite).size <= 2) return true;
+  const paires = [1, 3, 5, 7].map((i) => Number(suite.slice(i, i + 2)));
+  if (paires.every((v, i) => i === 0 || v - paires[i - 1]! === 1)) return true;
+  if ("01234567890123456789".includes(suite.slice(1))) return true;
+  return false;
+}
+
 export function extraireTelephones(texte: string): { mobiles: string[]; fixes: string[] } {
   const trouves = new Set<string>();
   const re = /(?:(?:\+|00)33\s?|0)\s?[1-9](?:[\s.\-]?\d{2}){4}\b/g;

@@ -6,6 +6,7 @@ import {
   extraireResponsable,
   extraireTelephones,
   formaterTelephone,
+  numeroFactice,
   telephoneFrancaisPlausible,
   texteVisible,
 } from "../src/lib/contacts.js";
@@ -165,5 +166,27 @@ describe("telephoneFrancaisPlausible — les faux numéros de la base", () => {
   it("filtre à la source : un SIRET dans le texte ne devient pas un téléphone", () => {
     const t = extraireTelephones("SIRET 01200486 22 000 15 — tel 04 78 12 34 56");
     expect(t.fixes).toEqual(["0478123456"]);
+  });
+});
+
+describe("numeroFactice — les numéros de gabarit", () => {
+  it("écarte les suites laissées par les modèles de site", () => {
+    // 06 07 08 09 10 était publié sur alteraudit.fr : format valide, indicatif
+    // valide, mais c'est le numéro d'exemple du thème.
+    expect(numeroFactice("0607080910")).toBe(true);
+    expect(numeroFactice("0612345678")).toBe(true);
+    expect(numeroFactice("0600000000")).toBe(true);
+    expect(numeroFactice("0611111111")).toBe(true);
+  });
+
+  it("laisse passer les vrais mobiles récoltés en réel", () => {
+    for (const vrai of ["0605418797", "0624420003", "0652887577", "0682147499", "0633933924"]) {
+      expect(numeroFactice(vrai)).toBe(false);
+    }
+  });
+
+  it("ne se prononce pas sur ce qui n'est pas un numéro à dix chiffres", () => {
+    expect(numeroFactice("")).toBe(false);
+    expect(numeroFactice("12345")).toBe(false);
   });
 });
