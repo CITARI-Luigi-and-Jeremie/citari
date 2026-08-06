@@ -2,6 +2,12 @@
   "version": "0.0.1",
   "configurations": [
     {
+      "name": "citari-site",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["--filter", "tanstack_start_ts", "dev"],
+      "port": 8080
+    },
+    {
       "name": "citari-admin",
       "runtimeExecutable": "pnpm",
       "runtimeArgs": ["--filter", "admin", "dev"],

@@ -452,3 +452,27 @@ gelées permettant d'arbitrer sans litige.
   Perplexity, Grok et Le Chat passent par des appels directs.
 - La table des prix `packages/core/src/cost.ts` est typée `Record<EngineId, …>`
   volontairement : ajouter un moteur sans son tarif ne compile pas.
+- **Deux clients Supabase coexistaient**, et un seul est le bon.
+  `client.server.ts` lit `SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY` depuis
+  `.env.local` : c'est celui du moteur, il pointe sur `ebcuhuhslrrsjouchiga`.
+  L'autre, `client.ts` généré par Lovable, lisait `VITE_SUPABASE_URL` depuis un
+  `apps/citari/.env` versionné qui désignait **une base étrangère**
+  (`absff…`, le projet Supabase de Lovable). Aucun secret n'a fuité, une clé
+  `sb_publishable_` étant publique par construction, mais un lecteur pressé
+  pouvait travailler sur la mauvaise base. Supprimé le 06/08/2026, avec
+  `auth-attacher.ts` et `auth-middleware.ts`.
+- Ne pas se fier à `git grep "integrations/supabase/client"` pour juger ce
+  fichier mort : le motif capture aussi `client.server`, et `auth-attacher.ts`
+  l'importait en relatif (`./client`). Il était bien vivant, branché en
+  `functionMiddleware` global dans `start.ts`. La suppression compile mais
+  casse le build à l'étape de résolution : **toujours lancer
+  `pnpm run build` sur `apps/citari` après avoir retiré un fichier**, le
+  `typecheck` du monorepo ne couvre pas cette application.
+- L'authentification Supabase ne servait à rien : personne ne se connecte à ce
+  projet étranger, donc `getSession()` renvoyait toujours `null` et le
+  middleware ajoutait un en-tête vide à chaque appel serveur. Le vrai contrôle
+  d'accès de l'admin est `ADMIN_PASSWORD` dans `admin.functions.ts`.
+- `ADMIN_PASSWORD` n'est pas renseigné dans `.env.local` : le back-office
+  affiche « ADMIN_PASSWORD n'est pas configuré » et reste inutilisable tant que
+  la variable est absente. C'est pourtant là que se relisent les emails avant
+  envoi.
