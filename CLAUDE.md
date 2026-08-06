@@ -11,14 +11,17 @@ ont tourné contre la vraie base. 90 tests passent.
 
 **Ce qui empêche de vendre n'est pas du code.**
 
-1. **Le crédit Anthropic est épuisé** (vérifié le 06/08). Claude ne répond plus
-   du tout, le diagnostic complet tourne donc à cinq moteurs sur six. Les cinq
-   autres répondent.
-2. `ADMIN_PASSWORD` n'est pas renseigné : le back-office est inutilisable, alors
-   que c'est là qu'on relit les emails avant envoi.
-3. Resend et mise en ligne : voir `SETUP.md` et `docs/DEPLOIEMENT.md`. Le
+1. `ADMIN_PASSWORD` n'est pas renseigné : le back-office est inutilisable, alors
+   que c'est là qu'on relit les emails avant envoi. C'est le seul vrai bloquant
+   qui reste, et il se règle en une ligne (`SETUP.md`).
+2. Resend et mise en ligne : voir `SETUP.md` et `docs/DEPLOIEMENT.md`. Le
    domaine est acheté, chez Hostinger. Le site part sur **Cloudflare Workers**,
    puis basculera sur le **VPS Hostinger** quand tout le reste sera fini.
+
+**Le crédit Anthropic est rechargé** (vérifié le 06/08/2026 par un appel réel :
+`claude-sonnet-5` répond). Le diagnostic complet retrouve ses six moteurs. Il
+avait été à court, et la panne avait appris une règle qui, elle, reste : une
+réponse en erreur ne compte pas au dénominateur du score.
 
 **Deux dettes ouvertes, assumées.** Aucune commande n'efface les données d'une
 personne qui invoque son droit RGPD, alors qu'on collecte des emails avec

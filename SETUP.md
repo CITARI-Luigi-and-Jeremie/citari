@@ -8,16 +8,15 @@ Le déploiement lui-même est décrit ailleurs, avec les commandes exactes :
 
 ## 1. Bloquant tout de suite
 
-### Recharger la clé Anthropic
+### ~~Recharger la clé Anthropic~~ — fait le 06/08/2026
 
-Vérifié le 06/08/2026 : l'API répond `credit balance is too low`. **Claude ne
-répond plus du tout**, donc le diagnostic complet tourne à cinq moteurs sur six.
+Le crédit est rechargé, vérifié par un appel réel : `claude-sonnet-5` répond. Le
+diagnostic complet retrouve ses six moteurs.
 
-Un moteur muet ne fausse plus le score, ses réponses manquantes sont exclues du
-calcul depuis le 06/08/2026, mais la mesure est amputée d'un sixième et le
-client paye pour six moteurs.
-
-→ https://console.anthropic.com, Plans & Billing.
+Ce que l'épisode a laissé, et qu'il faut garder : une réponse en erreur ne
+compte plus au dénominateur du score. Un moteur muet n'abaisse donc plus la note
+du client. Si un jour un moteur retombe, la mesure sera amputée mais juste, et
+c'est ce qui compte pour la comparaison J+90.
 
 ### Renseigner le mot de passe de l'admin
 

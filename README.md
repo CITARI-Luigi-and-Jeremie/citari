@@ -102,7 +102,11 @@ npm --prefix apps/citari run build
 Le code est prêt et éprouvé sur des scans réels. Ce qui manque n'est pas du
 code, ce sont des comptes :
 
-1. **Crédit Anthropic épuisé.** Claude ne répond plus, le diagnostic complet
-   tourne donc à cinq moteurs sur six. Les cinq autres répondent.
-2. `ADMIN_PASSWORD` absent de `.env.local` : le back-office est inutilisable.
-3. Resend, hébergement, nom de domaine : voir [SETUP.md](SETUP.md).
+1. `ADMIN_PASSWORD` absent de `.env.local` : le back-office est inutilisable.
+   C'est le seul vrai bloquant qui reste.
+2. Resend et mise en ligne : voir [SETUP.md](SETUP.md). Le domaine `citari.fr`
+   est acheté chez Hostinger ; le site part sur Cloudflare Workers, puis
+   basculera sur le VPS Hostinger.
+
+Le crédit Anthropic, longtemps le bloquant n° 1, est rechargé depuis le
+06/08/2026 : les six moteurs répondent de nouveau.
