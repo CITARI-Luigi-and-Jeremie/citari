@@ -80,3 +80,90 @@ describe("regrouperMarques", () => {
     expect(regrouperMarques([{ brand: "  " }, { brand: "-" }, ...fois("Exco", 3)])).toEqual({});
   });
 });
+
+/**
+ * Copie de `partDeVoix` (apps/citari/src/lib/score.ts), même convention que
+ * `regrouperMarques` ci-dessus : le site n'est pas importable d'ici, mais la
+ * règle décide de ce qu'on affirme à un prospect. Toute modification là-bas
+ * doit être reportée ici.
+ */
+function partDeVoix(
+  mentions: { brand: string; is_target: boolean }[],
+  alias: Record<string, string> = {},
+) {
+  const compte = new Map<string, { count: number; target: boolean }>();
+  for (const m of mentions) {
+    const brut = m.brand.trim();
+    if (!brut) continue;
+    const clef = alias[brut] ?? brut;
+    const prev = compte.get(clef) ?? { count: 0, target: m.is_target };
+    compte.set(clef, { count: prev.count + 1, target: prev.target || m.is_target });
+  }
+  const total = [...compte.values()].reduce((a, b) => a + b.count, 0) || 1;
+  const toutes = [...compte.entries()]
+    .map(([name, v]) => ({ name, count: v.count, share: v.count / total, target: v.target }))
+    .sort((a, b) => b.count - a.count);
+  const dix = toutes.slice(0, 10);
+  if (!dix.some((p) => p.target)) {
+    const cible = toutes.find((p) => p.target);
+    if (cible) dix.push(cible);
+  }
+  return dix;
+}
+
+describe("partDeVoix", () => {
+  /** Un secteur encombré : douze concurrents devant le client. */
+  const secteurEncombre = [
+    ...Array.from({ length: 12 }, (_, i) => ({ brand: `Concurrent ${i}`, is_target: false }))
+      .flatMap((c, i) => Array.from({ length: 20 - i }, () => c)),
+    ...Array.from({ length: 4 }, () => ({ brand: "Petit Cabinet", is_target: true })),
+  ];
+
+  it("garde le client même quand douze concurrents le devancent", () => {
+    // LE bug : le client tombait hors du top 10, `insights.ts` lisait ses
+    // citations dans ce tableau et trouvait zéro. L'email annonçait alors
+    // « absent sur les 20 questions » à une entreprise citée 4 fois.
+    const pdv = partDeVoix(secteurEncombre);
+    const cible = pdv.find((p) => p.target);
+    expect(cible).toBeDefined();
+    expect(cible!.count).toBe(4);
+  });
+
+  it("compte la part du client sur le total réel, pas sur les lignes affichées", () => {
+    const pdv = partDeVoix(secteurEncombre);
+    const cible = pdv.find((p) => p.target)!;
+    const totalReel = secteurEncombre.length;
+    expect(cible.share).toBeCloseTo(4 / totalReel, 10);
+    expect(cible.share).toBeLessThan(0.05);
+  });
+
+  it("n'ajoute pas de onzième ligne quand le client est déjà dans le top 10", () => {
+    const pdv = partDeVoix([
+      ...Array.from({ length: 30 }, () => ({ brand: "Nous", is_target: true })),
+      ...Array.from({ length: 5 }, () => ({ brand: "Rival", is_target: false })),
+    ]);
+    expect(pdv).toHaveLength(2);
+    expect(pdv[0]!.target).toBe(true);
+  });
+
+  it("ne fabrique pas de ligne client quand la marque n'est jamais citée", () => {
+    // Absence réelle : il ne doit y avoir aucune ligne cible, sans quoi on
+    // afficherait un zéro là où le rapport doit dire « jamais mentionné ».
+    const pdv = partDeVoix(Array.from({ length: 15 }, (_, i) => ({ brand: `Rival ${i}`, is_target: false })));
+    expect(pdv.some((p) => p.target)).toBe(false);
+    expect(pdv).toHaveLength(10);
+  });
+
+  it("regroupe les variantes avant de trancher le top 10", () => {
+    const pdv = partDeVoix(
+      [
+        ...Array.from({ length: 6 }, () => ({ brand: "Amarris", is_target: false })),
+        ...Array.from({ length: 5 }, () => ({ brand: "Amarris Direct", is_target: false })),
+        ...Array.from({ length: 8 }, () => ({ brand: "Nous", is_target: true })),
+      ],
+      { "Amarris Direct": "Amarris" },
+    );
+    expect(pdv[0]!.name).toBe("Amarris");
+    expect(pdv[0]!.count).toBe(11);
+  });
+});

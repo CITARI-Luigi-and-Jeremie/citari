@@ -452,6 +452,40 @@ gelées permettant d'arbitrer sans litige.
   Perplexity, Grok et Le Chat passent par des appels directs.
 - La table des prix `packages/core/src/cost.ts` est typée `Record<EngineId, …>`
   volontairement : ajouter un moteur sans son tarif ne compile pas.
+- **Chaque scan coûtait le double, et personne ne pouvait le voir.**
+  Mesuré : 80 appels de moteur facturés pour 40 réponses conservées. Deux
+  causes empilées. D'abord `scan.$id.tsx` gardait le drapeau « boucle active »
+  dans un `useRef` PARTAGÉ entre les exécutions de l'effet : le nettoyage le
+  passait à false, l'exécution suivante le remettait à true, et la requête
+  encore en vol de l'ancienne boucle se croyait vivante et replanifiait un
+  minuteur que plus rien ne pouvait annuler. Ensuite `avancerScan` générait
+  l'échantillon ET interrogeait les moteurs dans le même appel, soit plus de
+  vingt secondes : le navigateur coupait et relançait pendant que le serveur
+  continuait. La dépense réelle n'apparaissait nulle part parce que
+  `cost_log` n'était écrit que pour les réponses conservées, jamais pour les
+  doublons — alors que l'éditeur, lui, facture l'appel. Corrigé aux trois
+  endroits ; vérifié de bout en bout : 80 → 60 → 40 appels pour 40 réponses,
+  0,14 € pour un aperçu.
+- **La part de voix était tronquée aux 10 premières marques, et `insights.ts`
+  y lisait les citations du client.** Un client classé onzième était donc
+  compté à zéro, et l'email le déclarait « invisible » avec un objet du type
+  « absent sur les 20 questions testées ». Faux, et vérifiable en trente
+  secondes par le prospect. Ce n'était pas théorique : sur les données
+  réelles, Compta Clementine (1 citation) et Cerfrance (3) étaient dans ce
+  cas. `partDeVoix` garde désormais toujours la ligne du client, et
+  `insights.ts` compte sur les mentions comme il le faisait déjà pour les
+  concurrents.
+- **`packages/core/src/scan/runScan.ts` était un SECOND moteur de scan**, resté
+  sur le schéma d'avant Lovable (`brand`, `url`, `lang`, `queries.position`,
+  `cost_log.cost_cents`). Il n'aurait jamais tourné contre la vraie base, mais
+  il était exporté et lançable par `pnpm --filter @geo/core scan:cli`. Ses
+  tests passaient parce qu'ils tournaient sur une base simulée : 2 tests verts
+  qui ne prouvaient rien. Supprimé avec son CLI et ses tests.
+- **`supabase/schema.sql` omettait les triggers.** Trois `touch_updated_at`
+  (scans, leads, clients) entretiennent `updated_at` à chaque UPDATE. Le
+  verrou de génération des questions s'en sert comme battement de cœur : sans
+  eux dans l'instantané, une base reconstruite depuis le fichier aurait un
+  verrou qui ne se libère jamais. Ajoutés.
 - **Deux clients Supabase coexistaient**, et un seul est le bon.
   `client.server.ts` lit `SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY` depuis
   `.env.local` : c'est celui du moteur, il pointe sur `ebcuhuhslrrsjouchiga`.

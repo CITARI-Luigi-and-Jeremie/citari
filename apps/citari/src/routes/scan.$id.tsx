@@ -51,33 +51,48 @@ function Attente() {
   const [etat, setEtat] = useState<Etat>(null);
   const [abandon, setAbandon] = useState(false);
   const echecs = useRef(0);
-  const actif = useRef(true);
 
   useEffect(() => {
-    actif.current = true;
+    // `actif` est une variable LOCALE à cette exécution de l'effet, et surtout
+    // pas un `useRef` partagé. C'est ce partage qui doublait la facture.
+    //
+    // Le scénario : l'effet se relance (identité de `avancer` changée), son
+    // nettoyage passe le drapeau partagé à false, puis la nouvelle exécution le
+    // remet aussitôt à true. La requête encore en vol de l'ANCIENNE boucle
+    // reprend alors la main, lit un drapeau redevenu true, se croit vivante et
+    // replanifie son propre minuteur — inscrit dans une fermeture dont le
+    // nettoyage est déjà passé, donc plus annulable par personne. Deux boucles
+    // sondaient dès lors le même scan en parallèle.
+    //
+    // Mesuré, pas supposé : 80 appels de moteur facturés pour 40 réponses
+    // conservées, exactement le double, sur un scan aperçu ordinaire.
+    // Avec une variable locale, chaque boucle possède son propre drapeau et
+    // meurt pour de bon quand son nettoyage passe.
+    let actif = true;
     let timer: ReturnType<typeof setTimeout>;
 
     const boucle = async () => {
       try {
         const res = (await avancer({ data: { id } })) as Etat;
         echecs.current = 0;
-        if (!actif.current) return;
+        if (!actif) return;
         setEtat(res);
         if (res && (res.status === "done" || res.status === "error")) return;
       } catch {
         echecs.current += 1;
         // On tolère plusieurs erreurs réseau consécutives avant d'abandonner.
         if (echecs.current >= 8) {
-          if (actif.current) setAbandon(true);
+          if (actif) setAbandon(true);
           return;
         }
       }
+      if (!actif) return;
       timer = setTimeout(boucle, 1500);
     };
 
     void boucle();
     return () => {
-      actif.current = false;
+      actif = false;
       clearTimeout(timer);
     };
   }, [avancer, id]);

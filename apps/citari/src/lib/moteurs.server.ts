@@ -36,10 +36,13 @@ async function gemini_(model: string, systeme: string, user: string, opts: { rec
   const key = process.env.GOOGLE_AI_API_KEY;
   if (!key) throw new Error("GOOGLE_AI_API_KEY absente");
   const res = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`,
+    `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
     {
       method: "POST",
-      headers: { "content-type": "application/json" },
+      // La clé passe par un en-tête, jamais par la chaîne de requête : une URL
+      // se retrouve dans les journaux du serveur, ceux des intermédiaires et
+      // les traces d'erreur, et y laisser une clé revient à la publier.
+      headers: { "content-type": "application/json", "x-goog-api-key": key },
       body: JSON.stringify({
         systemInstruction: { parts: [{ text: systeme }] },
         contents: [{ role: "user", parts: [{ text: user }] }],
@@ -142,7 +145,10 @@ async function claude(q: string, langue: string, recherche: boolean): Promise<Re
       "anthropic-version": "2023-06-01",
     },
     body: JSON.stringify({
-      model: "claude-sonnet-4-5",
+      // Surchargeable, comme les autres moteurs. Le défaut ne change PAS sans
+      // décision explicite : le modèle interrogé fait partie de la mesure, et
+      // en changer casse la comparaison J+90 qu'on vend au client.
+      model: process.env.ANTHROPIC_MODEL || "claude-sonnet-4-5",
       max_tokens: 1024,
       system: prompt(q, langue)[0]!.content,
       messages: [{ role: "user", content: q }],
@@ -177,7 +183,10 @@ async function perplexity(q: string, langue: string): Promise<ReponseMoteur> {
   const res = await fetch("https://api.perplexity.ai/chat/completions", {
     method: "POST",
     headers: { "content-type": "application/json", authorization: `Bearer ${key}` },
-    body: JSON.stringify({ model: "sonar", messages: prompt(q, langue) }),
+    body: JSON.stringify({
+      model: process.env.PERPLEXITY_MODEL || "sonar",
+      messages: prompt(q, langue),
+    }),
   });
   if (!res.ok) return manquant(`Perplexity [${res.status}]`);
   const json = (await res.json()) as {
@@ -229,7 +238,10 @@ async function lechat(q: string, langue: string): Promise<ReponseMoteur> {
   const res = await fetch("https://api.mistral.ai/v1/chat/completions", {
     method: "POST",
     headers: { "content-type": "application/json", authorization: `Bearer ${key}` },
-    body: JSON.stringify({ model: "mistral-large-latest", messages: prompt(q, langue) }),
+    body: JSON.stringify({
+      model: process.env.MISTRAL_MODEL || "mistral-large-latest",
+      messages: prompt(q, langue),
+    }),
   });
   if (!res.ok) return manquant(`Mistral [${res.status}]`);
   const json = (await res.json()) as { choices: { message: { content: string } }[] };

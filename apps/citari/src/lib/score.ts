@@ -188,7 +188,7 @@ export function partDeVoix(
     compte.set(clef, { count: prev.count + 1, target: prev.target || m.is_target, variantes: prev.variantes });
   }
   const total = [...compte.values()].reduce((a, b) => a + b.count, 0) || 1;
-  return [...compte.entries()]
+  const toutes = [...compte.entries()]
     .map(([name, v]) => ({
       name,
       count: v.count,
@@ -196,6 +196,22 @@ export function partDeVoix(
       target: v.target,
       ...(v.variantes.size ? { variantes: [...v.variantes].sort() } : {}),
     }))
-    .sort((a, b) => b.count - a.count)
-    .slice(0, 10);
+    .sort((a, b) => b.count - a.count);
+
+  // Les dix premiers, PLUS le client s'il n'y figure pas.
+  //
+  // La troncature sert l'affichage : dix lignes se lisent, quarante non. Mais
+  // le client doit toujours être présent, et pas seulement par courtoisie :
+  // `insights.ts` lisait ses citations dans ce tableau, si bien qu'une marque
+  // classée onzième était comptée à zéro. Les emails la déclaraient alors
+  // « invisible » et annonçaient « absent sur les 20 questions » à une
+  // entreprise réellement citée. Une affirmation fausse envoyée à un prospect
+  // est la pire erreur que ce produit puisse commettre : elle se vérifie en
+  // trente secondes et détruit la crédibilité de toute la mesure.
+  const dix = toutes.slice(0, 10);
+  if (!dix.some((p) => p.target)) {
+    const cible = toutes.find((p) => p.target);
+    if (cible) dix.push(cible);
+  }
+  return dix;
 }

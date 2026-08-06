@@ -183,10 +183,18 @@ export async function buildScanInsights(scanId: string): Promise<ScanInsights> {
   const topCompetitor = competitorShares[0]
     ? { name: competitorShares[0].name, share: competitorShares[0].share, count: competitorShares[0].count }
     : null;
-  const brandShare = pdv.find((p) => p.target)?.share ?? 0;
-  const citationsCible = pdv.find((p) => p.target)?.count ?? 0;
+  // Les citations du client se comptent sur les mentions, jamais sur la part de
+  // voix : celle-ci est tronquée pour l'affichage, et un client hors du top 10
+  // y serait introuvable, donc compté à zéro. C'est la source qu'utilisent déjà
+  // les deux lignes suivantes pour les concurrents ; le client la partage
+  // désormais, et les trois chiffres sont enfin comptés de la même façon.
+  const citationsCible = mentions.filter((m) => m.is_target).length;
   const citationsConcurrents = mentions.filter((m) => !m.is_target).length;
   const citationsRivaux = mentions.filter((m) => !m.is_target && estRival(m.brand)).length;
+  const brandShare =
+    citationsCible + citationsConcurrents > 0
+      ? citationsCible / (citationsCible + citationsConcurrents)
+      : 0;
 
   // L'audit flash : robots.txt et llms.txt, tels que le moteur les a lus.
   // `auditFait` distingue « rien de bloqué » de « on n'a pas pu vérifier » :

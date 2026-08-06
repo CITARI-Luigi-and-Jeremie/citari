@@ -283,15 +283,53 @@ export async function auditFlash(siteUrl: string | null): Promise<AuditFlash | n
   return audit;
 }
 
-/** Étape 2 : génération (ou recopie à l'identique pour un re-scan) de l'échantillon. */
-async function preparerQuestions(scan: ScanRow) {
+/**
+ * Étape 2 : génération (ou recopie à l'identique pour un re-scan) de l'échantillon.
+ *
+ * @returns `pretes` si l'échantillon existait déjà et qu'on peut enchaîner,
+ * `generees` si on vient de le produire, `occupe` si un autre sondage s'en
+ * charge. Les deux derniers cas rendent la main.
+ *
+ * Deux navigateurs peuvent entrer ici en même temps, et ce n'est pas un cas
+ * tordu : le cache renvoie volontairement un scan EN COURS à un second
+ * visiteur du même domaine, qui se met alors à sonder le même scan. Sans
+ * verrou, les deux voyaient zéro question, appelaient tous deux le générateur
+ * et inséraient chacun leur échantillon. La table `queries` n'a pas de
+ * contrainte d'unicité sur (scan_id, rank) : rien ne l'aurait empêché. Le scan
+ * se retrouvait avec 40 questions au lieu de 20, donc le double d'appels
+ * facturés, une progression fausse et un rapport qui se répète.
+ *
+ * Le verrou est la transition de phase elle-même : `init` → `questions` en une
+ * seule écriture conditionnelle, que Postgres sérialise. Le perdant repart et
+ * retentera au sondage suivant, 1,5 seconde plus tard.
+ */
+type EtatQuestions = "pretes" | "generees" | "occupe";
+
+async function preparerQuestions(scan: ScanRow): Promise<EtatQuestions> {
   const { count } = await supabaseAdmin
     .from("queries")
     .select("id", { count: "exact", head: true })
     .eq("scan_id", scan.id);
-  if ((count ?? 0) > 0) return;
+  if ((count ?? 0) > 0) return "pretes";
 
-  await supabaseAdmin.from("scans").update({ phase: "questions" }).eq("id", scan.id);
+  // Le verrou se reprend au bout de deux minutes.
+  //
+  // Sans cette échappatoire, un processus tué net entre la prise du verrou et
+  // l'écriture des questions laisserait le scan en phase « questions » pour
+  // toujours : plus personne ne pourrait le réclamer, et comme le cache
+  // resssert les scans « running », tous les visiteurs de ce domaine
+  // hériteraient du scan mort pendant trois jours. La génération dure une
+  // dizaine de secondes, deux minutes ne peuvent donc pas voler le verrou à un
+  // sondage réellement en cours.
+  const perime = new Date(Date.now() - 120_000).toISOString();
+  const { data: obtenu } = await supabaseAdmin
+    .from("scans")
+    .update({ phase: "questions", updated_at: new Date().toISOString() })
+    .eq("id", scan.id)
+    .or(`phase.eq.init,and(phase.eq.questions,updated_at.lt.${perime})`)
+    .select("id")
+    .maybeSingle();
+  if (!obtenu) return "occupe";
 
   let lignes: { text: string; intent: string }[] = [];
   if (scan.previous_scan_id) {
@@ -321,7 +359,7 @@ async function preparerQuestions(scan: ScanRow) {
   // Audit flash + question miroir, une seule fois, en parallèle de la mise en
   // place. Aperçu : miroir sur ChatGPT seul (une accroche). Complet : les six.
   // Contrôle J+45 : ni audit ni miroir, c'est de la télémétrie interne.
-  if (scan.mode === "controle") return;
+  if (scan.mode === "controle") return "generees";
   const moteursMiroir = scan.mode === "apercu" ? (["ChatGPT"] as const) : MOTEURS;
   const [audit, miroirs] = await Promise.all([
     auditFlash(scan.website_url),
@@ -333,6 +371,7 @@ async function preparerQuestions(scan: ScanRow) {
     .from("scans")
     .update({ audit, miroir: miroirs.filter((m) => !m.erreur && m.texte) })
     .eq("id", scan.id);
+  return "generees";
 }
 
 type ScanRow = {
@@ -392,7 +431,22 @@ export async function avancerScan(id: string) {
   if (!scan || scan.status !== "running") return;
 
   try {
-    await preparerQuestions(scan as ScanRow);
+    // On ne génère PAS l'échantillon et n'interroge PAS les moteurs dans le
+    // même appel.
+    //
+    // La génération dure une quinzaine de secondes. Enchaîner l'interrogation
+    // derrière portait la requête à plus de vingt secondes, au-delà de ce que
+    // le navigateur accepte d'attendre : il la coupait et relançait un sondage
+    // pendant que le serveur, lui, continuait tranquillement son lot. Deux
+    // `avancerScan` se retrouvaient en vol, chacun interrogeant les mêmes
+    // paires, puisque ni l'un ni l'autre n'avait encore écrit ses réponses.
+    // Mesuré sur un scan aperçu : 60 appels facturés pour 40 réponses.
+    //
+    // En rendant la main tout de suite après la génération, chaque requête
+    // reste courte et le sondage suivant, 1,5 seconde plus tard, trouve
+    // l'échantillon en place.
+    const questionsPretes = await preparerQuestions(scan as ScanRow);
+    if (questionsPretes !== "pretes") return;
 
     const { data: questions } = await supabaseAdmin
       .from("queries")
@@ -462,12 +516,18 @@ export async function avancerScan(id: string) {
           )
           .select("id")
           .maybeSingle();
-        // Doublon (paire déjà traitée par un sondage concurrent) : ni coût, ni analyse.
-        if (!inserted) return;
 
+        // Le coût se journalise même quand la réponse est un doublon : l'appel
+        // au moteur a eu lieu juste au-dessus, il est facturé par l'éditeur que
+        // la ligne soit conservée ou non. L'omettre revenait à sous-évaluer la
+        // dépense réelle, donc à laisser le plafond raisonner sur un chiffre
+        // faux — le fusible se serait déclenché trop tard.
         await supabaseAdmin
           .from("cost_log")
           .insert({ scan_id: id, engine: item.engine, cost_eur: rep.cost });
+
+        // Doublon : la réponse existe déjà, ne pas la ré-analyser.
+        if (!inserted) return;
         if (rep.error || !rep.text) return;
 
 
@@ -523,7 +583,25 @@ export async function scoreSurMoteurs(scanId: string, moteurs: readonly string[]
 }
 
 async function finaliser(id: string) {
-  await supabaseAdmin.from("scans").update({ phase: "analyse" }).eq("id", id);
+  // Même verrou que pour les questions, et pour la même raison : deux sondages
+  // simultanés voient tous deux la dernière paire traitée et appellent
+  // `finaliser`. L'analyse n'est pas gratuite, elle appelle le modèle deux fois
+  // (classement des concurrents, puis actions) : la faire deux fois, c'est
+  // payer deux fois pour écrire le même résultat.
+  //
+  // `neq("phase", "analyse")` couvre le cas où les deux sondages arrivent
+  // pendant que le premier analyse encore, `eq("status", "running")` celui où
+  // le scan est déjà terminé.
+  const { data: obtenu } = await supabaseAdmin
+    .from("scans")
+    .update({ phase: "analyse" })
+    .eq("id", id)
+    .eq("status", "running")
+    .neq("phase", "analyse")
+    .select("id")
+    .maybeSingle();
+  if (!obtenu) return;
+
   const [{ data: reponses }, { data: mentions }, { data: scan }] = await Promise.all([
     supabaseAdmin.from("responses").select("id, engine").eq("scan_id", id),
     supabaseAdmin.from("mentions").select("*").eq("scan_id", id),

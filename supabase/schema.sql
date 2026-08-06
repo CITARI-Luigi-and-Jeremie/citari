@@ -298,3 +298,24 @@ ALTER TABLE deliverables     ENABLE ROW LEVEL SECURITY;
 ALTER TABLE citation_targets ENABLE ROW LEVEL SECURITY;
 ALTER TABLE crawler_hits     ENABLE ROW LEVEL SECURITY;
 ALTER TABLE brand_overrides  ENABLE ROW LEVEL SECURITY;
+
+-- ─────────────────────────── Triggers ───────────────────────────
+--
+-- `updated_at` est entretenu par la base, pas par le code applicatif.
+--
+-- Ce n'est pas un détail cosmétique : le verrou de génération des questions
+-- (`preparerQuestions`, orchestrateur) reprend un scan resté bloqué depuis plus
+-- de deux minutes, et il lit précisément cette colonne. Le trigger en fait un
+-- battement de cœur fiable : toute écriture sur la ligne la rafraîchit, donc un
+-- scan qui n'avance plus se repère à coup sûr.
+--
+-- Attention : ces triggers ne s'appliquent qu'aux UPDATE. Un INSERT peut poser
+-- un `updated_at` arbitraire, ce dont on se sert pour tester la péremption.
+
+CREATE OR REPLACE FUNCTION public.touch_updated_at()
+RETURNS trigger LANGUAGE plpgsql SET search_path TO '' AS $$
+BEGIN new.updated_at = now(); RETURN new; END $$;
+
+CREATE TRIGGER scans_touch   BEFORE UPDATE ON scans   FOR EACH ROW EXECUTE FUNCTION touch_updated_at();
+CREATE TRIGGER leads_touch   BEFORE UPDATE ON leads   FOR EACH ROW EXECUTE FUNCTION touch_updated_at();
+CREATE TRIGGER clients_touch BEFORE UPDATE ON clients FOR EACH ROW EXECUTE FUNCTION touch_updated_at();
