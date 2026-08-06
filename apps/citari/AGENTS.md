@@ -17,8 +17,8 @@ Ce projet contient **le site ET le moteur de mesure** dans la même application
 ## Où se construit le nouveau front
 
 Jérémie refait l'interface **à partir de zéro dans un projet Lovable séparé**,
-`citari-ai-audit` (b884a38f-24b7-40f9-b447-f184da6cf740), qui tourne sur la
-même pile. Ce projet-là ne contient aucun moteur : il affiche des données de
+`citari-ai-audit`, qui tourne sur la même pile :
+https://lovable.dev/projects/b884a38f-24b7-40f9-b447-f184da6cf740 Ce projet-là ne contient aucun moteur : il affiche des données de
 démonstration aux formes exactes de ce que renvoient les fonctions serveur
 listées plus bas. Ses instructions permanentes portent le même contrat que ce
 fichier.

@@ -45,6 +45,25 @@ Il faut aussi poser `NEXT_PUBLIC_SITE_URL` avec le vrai domaine. Tant qu'il vaut
 `http://localhost:8080`, les liens de rapport envoyés par email seront
 inutilisables.
 
+### Brancher le domaine
+
+Le domaine est chez **Hostinger** (acheté le 06/08/2026), le site tourne chez
+Cloudflare. Rattacher un domaine à un worker **exige que la zone DNS soit gérée
+par Cloudflare** : un simple CNAME depuis Hostinger ne suffit pas.
+
+1. Ajouter le domaine comme site dans Cloudflare, plan gratuit.
+2. Cloudflare donne deux serveurs de noms.
+3. Chez Hostinger, remplacer les serveurs de noms du domaine par ceux-là.
+   C'est le seul geste à faire côté Hostinger.
+4. Attendre la propagation, de quelques minutes à quelques heures.
+5. Attacher le domaine au worker `citari` en « Custom Domain ». Cloudflare pose
+   le certificat TLS tout seul.
+6. Poser `NEXT_PUBLIC_SITE_URL` avec le domaine réel, en `https://`.
+
+L'étape 6 n'est pas cosmétique : tant que la variable vaut
+`http://localhost:8080`, les liens de rapport envoyés par email sont
+inutilisables, et c'est le lien sur lequel le prospect clique.
+
 ### Ensuite, à chaque mise en ligne
 
 ```bash
@@ -62,6 +81,23 @@ Le plan gratuit de Cloudflare limite à **50 sous-requêtes** par requête, le p
 payant à 1000. Un aperçu passe, un diagnostic complet est plus juste. Si des
 scans s'arrêtent en cours de route sans erreur claire, c'est la première piste :
 réduire la taille des lots dans `lotDuMode()`, ou passer au plan payant.
+
+### Après : la bascule vers le VPS Hostinger
+
+Cloudflare est l'étape, pas la destination. Une fois le front de Jérémie intégré
+et le reste terminé, tout passe sur le VPS Hostinger. Ce que ça demande, écrit
+ici pour que ce ne soit pas découvert en cours de route :
+
+- changer le preset nitro, `cloudflare-module` → `node-server` ;
+- un service qui survit au redémarrage, systemd ou PM2 ;
+- un reverse proxy et son certificat, nginx ou Caddy avec Let's Encrypt ;
+- reporter les huit secrets de `wrangler secret` vers le `.env` du serveur ;
+- repointer les serveurs de noms de Cloudflare vers Hostinger ;
+- **relancer un scan réel de bout en bout.** C'est la seule preuve qui vaut, et
+  c'est ainsi que le worker Cloudflare avait été validé.
+
+Ce que la bascule fait gagner : la limite des 50 sous-requêtes disparaît, donc
+le diagnostic complet à six moteurs cesse d'être le cas juste.
 
 ---
 

@@ -46,9 +46,32 @@ Ce lien apparaît dans tous les emails et toutes les réponses aux objections.
 
 ### Nom de domaine et hébergement
 
-Décidé : `citari.fr`. Cloudflare Registrar ne vend pas de `.fr`, il faut passer
-par un bureau d'enregistrement français. Pour l'hébergement, comparaison et
-choix dans [docs/DEPLOIEMENT.md](docs/DEPLOIEMENT.md).
+**Le domaine est acheté, chez Hostinger** (06/08/2026). Cloudflare Registrar ne
+vend pas de `.fr`, il fallait donc un bureau d'enregistrement tiers.
+
+**Décidé le 06/08/2026, et c'est une décision en deux temps.**
+
+**Maintenant, pour mettre en ligne : Cloudflare Workers**, Hostinger ne servant
+que de bureau d'enregistrement. Le code n'a pas à bouger, `vite build` vise déjà
+Cloudflare et un scan réel a tourné de bout en bout sur ce bundle. C'est le
+chemin le plus court vers un site en ligne, et il est déjà éprouvé.
+
+**Plus tard, une fois le front de Jérémie intégré et le reste terminé : tout
+passe sur le VPS Hostinger.** Un seul fournisseur, et surtout la fin de la
+limite des 50 sous-requêtes qui pèse aujourd'hui sur le diagnostic complet.
+
+Ce que coûtera cette bascule, à savoir avant de s'y engager plutôt qu'au milieu :
+changer le preset nitro (`cloudflare-module` → `node-server`), écrire le service
+et le reverse proxy avec son certificat, reporter les huit secrets de
+`wrangler secret` vers le `.env` du serveur, puis **retester un scan réel de bout
+en bout** — c'est la seule preuve qui vaut. Rien d'insurmontable, mais rien de
+gratuit non plus : à faire quand plus rien d'autre ne bouge.
+
+Le branchement du domaine sur le worker est décrit dans
+[docs/DEPLOIEMENT.md](docs/DEPLOIEMENT.md). Point à connaître avant de
+commencer : rattacher un domaine à un worker **exige que la zone DNS soit gérée
+par Cloudflare**, donc les serveurs de noms devront être changés chez Hostinger.
+Au moment de la bascule vers le VPS, ils repointeront vers Hostinger.
 
 ## 3. Obligations légales, bloquant la mise en ligne
 

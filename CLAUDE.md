@@ -16,7 +16,9 @@ ont tourné contre la vraie base. 90 tests passent.
    autres répondent.
 2. `ADMIN_PASSWORD` n'est pas renseigné : le back-office est inutilisable, alors
    que c'est là qu'on relit les emails avant envoi.
-3. Resend, hébergement, `citari.fr` : voir `SETUP.md` et `docs/DEPLOIEMENT.md`.
+3. Resend et mise en ligne : voir `SETUP.md` et `docs/DEPLOIEMENT.md`. Le
+   domaine est acheté, chez Hostinger. Le site part sur **Cloudflare Workers**,
+   puis basculera sur le **VPS Hostinger** quand tout le reste sera fini.
 
 **Deux dettes ouvertes, assumées.** Aucune commande n'efface les données d'une
 personne qui invoque son droit RGPD, alors qu'on collecte des emails avec
@@ -28,6 +30,16 @@ moment de les envoyer, il faut revérifier ce qui a changé depuis, par exemple 
 région Paris) et Notion (espace CITARI, où vit toute la documentation
 commerciale). Les clés des six moteurs sont dans `apps/citari/.env.local`,
 jamais versionnées.
+
+**Un front se construit ailleurs, en parallèle.** Jérémie, l'associé, refait
+l'interface à partir de zéro dans un projet Lovable séparé, `citari-ai-audit`,
+qui n'embarque aucun moteur et travaille sur des données de démonstration aux
+formes exactes des fonctions serveur d'ici. Quand il aura fini, on recopie ses
+`src/routes/*` et `src/components/*` et on remplace ses imports de démonstration
+par les vrais appels : même pile des deux côtés, le portage est mécanique. Le
+contrat détaillé est dans `apps/citari/AGENTS.md`. Conséquence à retenir : ce
+dépôt reste la seule source de vérité de la mesure, et le moteur ne dépend
+jamais de l'avancement du design.
 
 **Citari** est une agence GEO pour PME et ETI francophones : on fait apparaître
 les marques clientes dans les réponses de ChatGPT, Claude, Gemini, Perplexity,
