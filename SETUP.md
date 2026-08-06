@@ -46,7 +46,7 @@ Ce lien apparaît dans tous les emails et toutes les réponses aux objections.
 
 ### Nom de domaine et hébergement
 
-**Le domaine est acheté, chez Hostinger** (06/08/2026). Cloudflare Registrar ne
+**`citari.fr` est acheté, chez Hostinger** (06/08/2026). Cloudflare Registrar ne
 vend pas de `.fr`, il fallait donc un bureau d'enregistrement tiers.
 
 **Décidé le 06/08/2026, et c'est une décision en deux temps.**
