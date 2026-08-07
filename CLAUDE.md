@@ -38,15 +38,19 @@ région Paris) et Notion (espace CITARI, où vit toute la documentation
 commerciale). Les clés des six moteurs sont dans `apps/citari/.env.local`,
 jamais versionnées.
 
-**Un front se construit ailleurs, en parallèle.** Jérémie, l'associé, refait
-l'interface à partir de zéro dans un projet Lovable séparé, `citari-ai-audit`,
-qui n'embarque aucun moteur et travaille sur des données de démonstration aux
-formes exactes des fonctions serveur d'ici. Quand il aura fini, on recopie ses
-`src/routes/*` et `src/components/*` et on remplace ses imports de démonstration
-par les vrais appels : même pile des deux côtés, le portage est mécanique. Le
-contrat détaillé est dans `apps/citari/AGENTS.md`. Conséquence à retenir : ce
-dépôt reste la seule source de vérité de la mesure, et le moteur ne dépend
-jamais de l'avancement du design.
+**Le front de Jérémie est porté** (07/08/2026), mais partiellement. La landing,
+l'en-tête, le pied et les tokens de design viennent de son projet Lovable
+`citari-ai-audit` ; ils vivent dans `src/components/jeremie/`. L'écran de scan
+et le rapport gardent l'ancienne maquette : c'est le prochain chantier.
+
+**Sa couche données a été intégralement jetée, et ne doit jamais revenir.** Son
+projet visait une AUTRE base Supabase (`vbxgwqutyzmnasjyladg`) avec un autre
+schéma : `scans_public`, `brand`, `queries.position`, `responses_meta`,
+`scan_leads`. Recopier ses fonctions serveur ne planterait pas — le site
+afficherait simplement des scans absents de notre base et écrirait des leads
+ailleurs. Tout ce qui vient de lui doit passer par `scan.functions.ts`. Le
+contrat d'origine est dans `apps/citari/AGENTS.md` ; il décrivait un projet sans
+moteur, ce qui s'est révélé faux.
 
 **Citari** est une agence GEO pour PME et ETI francophones : on fait apparaître
 les marques clientes dans les réponses de ChatGPT, Claude, Gemini, Perplexity,

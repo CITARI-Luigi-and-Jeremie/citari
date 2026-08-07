@@ -5,6 +5,61 @@ d'une nouvelle session, après `CLAUDE.md`.
 
 ---
 
+## 2026-08-07 — Le front de Jérémie est porté, sa couche données jetée
+
+La landing dessinée par Jérémie tourne désormais sur ce dépôt, branchée sur
+notre orchestrateur et notre base. **Aucune ligne de sa couche serveur n'a été
+reprise.**
+
+**Le contrat d'`AGENTS.md` ne décrivait pas la réalité.** Il annonçait un
+projet « qui ne contient aucun moteur, affiche des données de démonstration aux
+formes exactes de nos fonctions serveur », donc un portage mécanique. En
+ouvrant le projet, on a trouvé une application complète : ses propres fonctions
+serveur (`scan-live.server.ts`, `rapport.server.ts`), ses propres migrations
+SQL, et surtout **une autre base Supabase** — `vbxgwqutyzmnasjyladg`, quand la
+nôtre est `ebcuhuhslrrsjouchiga`. Son schéma diverge partout : `scans_public`
+contre `scans`, `brand` contre `brand_name`, `queries.position` contre
+`queries.rank`, `responses_meta` contre `responses`, `scan_leads` contre
+`leads`, et des statuts supplémentaires (`generating_queries`, `scoring`).
+
+Le danger n'était pas qu'une recopie plante : c'est qu'elle **ne plante pas**.
+Le site aurait affiché des scans absents de notre base et écrit des leads dans
+une base étrangère, sans erreur visible. C'est le piège nettoyé le 06/08, en
+plus gros.
+
+**Ce qui a été porté** : les tokens de design (palette, Archivo / Newsreader /
+IBM Plex Mono), la landing entière — hero à cartes flottantes, simulateur du
+coût de l'absence avec ses trois sources datées, les trois étapes empilées, la
+FAQ balisée FAQPage, l'appel final et le pied —, l'en-tête, le fond de page, la
+barre de lecture. Les quatorze images ont été **téléchargées dans
+`public/img/`** : un site en production ne doit dépendre d'aucun CDN d'outil de
+conception.
+
+**Ce qui a été jeté** : toute sa couche données, ses migrations, son client
+Supabase, et son fichier de démonstration.
+
+**Trois corrections faites au passage**, chacune sur une règle du dépôt :
+
+- son pied de page annonçait « Nous travaillons avec » sous les logos d'OpenAI
+  et d'Anthropic, ce qui suggère un partenariat inexistant. Remplacé par
+  « Moteurs interrogés » ;
+- un bouton « SKIP → RÉSULTAT (temporaire) » vivait en dur dans sa route de
+  scan. Non porté ;
+- sa liste de moteurs contenait « Copilot », qui n'est pas dans les six figés.
+
+**La fusion des styles est un merge, pas un écrasement.** Ses utilitaires et
+les nôtres cohabitent : aucun nom ne collide, vérification faite avant. Les
+pages non redessinées (guide-geo, geo-vs-seo, alternatives, mentions, rapport,
+admin) continuent donc de s'afficher normalement.
+
+**Ce qui reste à porter** : l'écran de scan `/scan/$id` et le rapport
+`/rapport/$jeton` gardent l'ancienne maquette. Ils fonctionnent, mais le
+contraste avec la nouvelle landing se voit. C'est le prochain chantier, et il
+demandera les mêmes adaptateurs de formes.
+
+`gsap` est entré comme dépendance, pour le seul effet de titre au défilement.
+Il est importé dynamiquement, donc découpé du bundle principal.
+
 ## 2026-08-07 — « A publié puis s'est arrêté » : le meilleur signal d'achat
 
 Nouvelle commande `signaux-geo`, la vingt-quatrième. Elle lit sur le site de

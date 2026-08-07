@@ -2,153 +2,919 @@
 @source "../src";
 
 /*
- * Citari — système « maison ».
- * Porcelaine, graphite, bronze. Beaucoup d'air, très peu de traits,
- * une seule couleur d'accent. Aucune couleur en dur dans les composants.
+ * CITARI — tokens centraux.
+ *
+ * Base : le système de Jérémie, porté depuis le projet Lovable `citari-ai-audit`
+ * le 07/08/2026. Palette exhaustive et trois familles typographiques ; aucune
+ * couleur ni typo ne doit être définie ailleurs.
+ *
+ * S'y ajoutent, en fin de fichier, les utilitaires et variables du site
+ * d'origine, conservés parce que les pages de contenu (guide-geo, geo-vs-seo,
+ * alternatives, mentions légales, rapport, admin) s'en servent encore. Les deux
+ * jeux cohabitent sans collision de noms : la vérification a été faite avant la
+ * fusion. Ils fusionneront le jour où ces pages seront redessinées.
  */
 
 @theme inline {
-  --color-background: var(--paper);
-  --color-foreground: var(--ink);
   --color-paper: var(--paper);
   --color-paper-2: var(--paper-2);
   --color-paper-3: var(--paper-3);
   --color-ink: var(--ink);
   --color-ink-2: var(--ink-2);
   --color-ink-3: var(--ink-3);
+  --color-signal: var(--signal);
+  --color-signal-tint: var(--signal-tint);
+  --color-verdict: var(--verdict);
   --color-rule: var(--rule);
   --color-rule-strong: var(--rule-strong);
-  --color-bordeaux: var(--accent);
-  --color-accent-line: var(--accent);
-  --color-bordeaux-wash: var(--accent-wash);
-  --color-highlight: var(--accent-wash);
-  --color-primary: var(--ink);
-  --color-primary-foreground: var(--paper);
-  --color-muted: var(--paper-2);
-  --color-muted-foreground: var(--ink-3);
-  --color-border: var(--rule);
-  --color-input: var(--rule-strong);
-  --color-ring: var(--accent);
-  --color-card: var(--surface);
-  --color-card-foreground: var(--ink);
-  --color-popover: var(--surface);
-  --color-popover-foreground: var(--ink);
-  --color-accent: var(--paper-2);
-  --color-accent-foreground: var(--ink);
-  --color-secondary: var(--paper-2);
-  --color-secondary-foreground: var(--ink);
-  --color-destructive: var(--danger);
-  --color-destructive-foreground: var(--paper);
+  --color-accent: var(--accent);
+  --color-accent-wash: var(--accent-wash);
+  --color-surface: var(--surface);
+  --color-danger: var(--danger);
 
-  --font-display: "Cormorant Garamond", "Iowan Old Style", Georgia, serif;
-  --font-sans: "Manrope", "Segoe UI", system-ui, sans-serif;
+  --color-background: var(--paper);
+  --color-foreground: var(--ink);
+  --color-border: var(--rule);
+  --color-ring: var(--ink);
+
+  --font-sans: "Archivo", system-ui, sans-serif;
+  --font-quote: "Newsreader", Georgia, serif;
   --font-mono: "IBM Plex Mono", ui-monospace, monospace;
 
   --radius-sm: 2px;
-  --radius-md: 3px;
+  --radius-md: 2px;
   --radius-lg: 4px;
-  --radius-xl: 6px;
-
-  --shadow-soft: var(--elev-1);
-  --shadow-lift: var(--elev-2);
 }
 
 :root {
-  /* Surfaces : blanc cassé légèrement chaud. */
-  --paper: #faf9f6;
-  --paper-2: oklch(0.965 0.005 85);
-  --paper-3: oklch(0.938 0.006 85);
-  --surface: oklch(1 0 0);
+  --paper: #fbfaf7;
+  --paper-2: #f2f0ea;
+  --ink: #17160f;
+  --ink-2: #5c5a52;
+  --signal: #c0371d;
+  --signal-tint: #f6dfd8;
+  --verdict: #1f3a5c;
+  --rule: color-mix(in srgb, var(--ink) 15%, transparent);
+  --rule-strong: color-mix(in srgb, var(--ink) 20%, transparent);
 
-  /* Traitement de fond : réglages. */
+  /* Surfaces : séparation des blocs par dégradés, sans couleur nouvelle. */
+  --surface-hollow: linear-gradient(
+    180deg,
+    var(--paper) 0%,
+    color-mix(in srgb, var(--paper-2) 55%, var(--paper)) 22%,
+    color-mix(in srgb, var(--paper-2) 70%, var(--paper)) 50%,
+    color-mix(in srgb, var(--paper-2) 55%, var(--paper)) 78%,
+    var(--paper) 100%
+  );
+  --surface-edge: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--paper-2) 60%, var(--paper)) 0%,
+    var(--paper) 120px,
+    var(--paper) 100%
+  );
+  --surface-close: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--paper-2) 55%, var(--paper)) 0%,
+    var(--paper) 45%,
+    var(--paper) 100%
+  );
+
+  /* ── Héritage du site d'origine, pour les pages non encore redessinées ── */
+  --paper-3: #eeece5;
+  --surface: #ffffff;
+  --ink-3: #7a756b;
+  --accent: #8b5a2b;
+  --accent-wash: #f5eee4;
+  --danger: #b3261e;
   --grain-opacity: 0.03;
   --champ-opacity: 0.045;
-
-
-  /* Encre : graphite profond, jamais de noir pur. */
-  --ink: oklch(0.215 0.008 250);
-  --ink-2: oklch(0.375 0.008 250);
-  --ink-3: oklch(0.52 0.008 250);
-
-  /* Filets : quasi invisibles. */
-  --rule: oklch(0.912 0.003 250);
-  --rule-strong: oklch(0.845 0.004 250);
-
-  /* Accent unique : bronze patiné. */
-  --accent: oklch(0.545 0.072 68);
-  --accent-wash: oklch(0.955 0.022 78);
-  --danger: oklch(0.5 0.13 25);
-
-  --elev-1: 0 1px 2px oklch(0.215 0.008 250 / 0.04), 0 6px 20px -12px oklch(0.215 0.008 250 / 0.14);
-  --elev-2: 0 1px 2px oklch(0.215 0.008 250 / 0.05), 0 22px 48px -24px oklch(0.215 0.008 250 / 0.22);
-
-  /* ——— Marque Citari : tout le logotype se règle ici. ——— */
+  --elev-1: 0 1px 2px rgb(23 22 15 / 0.04), 0 6px 20px -12px rgb(23 22 15 / 0.14);
+  --elev-2: 0 1px 2px rgb(23 22 15 / 0.05), 0 22px 48px -24px rgb(23 22 15 / 0.22);
+  --radius: 3px;
   --marque-couleur: var(--ink);
   --marque-accent: var(--accent);
-  --marque-h: 20px; /* hauteur du logotype */
-  --marque-ratio: 2.61; /* largeur / hauteur du signe */
+  --marque-h: 20px;
+  --marque-ratio: 2.61;
   --marque-opacite: 0.92;
   --marque-opacite-hover: 1;
-  --marque-ecart: 0.42em; /* signe ↔ point */
-  --marque-point-taille: 0.115em; /* relatif à la hauteur */
+  --marque-ecart: 0.42em;
+  --marque-point-taille: 0.115em;
   --marque-transition: 460ms cubic-bezier(0.2, 0.7, 0.2, 1);
-
-
-  --radius: 3px;
 }
-
 
 @layer base {
   * {
     border-color: var(--rule);
-    min-width: 0;
   }
 
   html {
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
+    -webkit-text-size-adjust: 100%;
   }
 
   body {
     background-color: var(--paper);
     color: var(--ink);
     font-family: var(--font-sans);
-    font-size: 16px;
+    font-size: 17px;
     line-height: 1.6;
     font-weight: 400;
-    letter-spacing: -0.005em;
-    font-feature-settings: "kern" 1;
   }
 
   h1,
   h2,
   h3 {
-    font-family: var(--font-display);
-    font-weight: 300;
-    letter-spacing: -0.018em;
-    line-height: 1.04;
-  }
-
-  ::selection {
-    background: var(--accent-wash);
-    color: var(--ink);
-  }
-
-  input,
-  select,
-  textarea,
-  button {
-    font: inherit;
-    color: inherit;
+    font-family: var(--font-sans);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    line-height: 1.15;
   }
 
   :focus-visible {
-    outline: 1px solid var(--accent);
+    outline: 2px solid var(--ink);
     outline-offset: 2px;
   }
 }
 
-/* Chiffres : toujours tabulaires, jamais brutaux. */
+@utility measure {
+  max-width: 70ch;
+}
+
+@utility surface-hollow {
+  background-image: var(--surface-hollow);
+}
+
+@utility surface-edge {
+  background-image: var(--surface-edge);
+}
+
+@utility surface-close {
+  background-image: var(--surface-close);
+}
+
+@utility mono {
+  font-family: var(--font-mono);
+  font-feature-settings: "tnum";
+}
+
+@utility quote-serif {
+  font-family: var(--font-quote);
+  font-style: italic;
+  font-weight: 400;
+}
+
+@utility cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--ink);
+  color: var(--paper);
+  border-radius: 2px;
+  padding: 0.9rem 1.5rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  border: 1px solid var(--ink);
+}
+
+@utility field {
+  width: 100%;
+  background-color: var(--paper);
+  border: 1px solid var(--rule-strong);
+  border-radius: 2px;
+  padding: 0.85rem 0.9rem;
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: 16px;
+
+  &::placeholder {
+    color: var(--ink-2);
+  }
+}
+
+@utility highlight-signal {
+  background-color: transparent;
+  color: var(--ink);
+  font-style: normal;
+  padding: 0 0.15em;
+  transition: background-color 240ms linear, color 240ms linear;
+}
+
+@utility highlight-signal-on {
+  background-color: var(--signal-tint);
+  color: var(--signal);
+}
+
+/* ---- Animations (sobres, sans rebond) ---- */
+
+@keyframes citari-veil {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes citari-panel {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes citari-step {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@utility anim-veil {
+  animation: citari-veil 180ms ease-out both;
+}
+
+@utility anim-panel {
+  animation: citari-panel 280ms cubic-bezier(0.16, 0.8, 0.3, 1) both;
+}
+
+@utility anim-step {
+  animation: citari-step 240ms cubic-bezier(0.16, 0.8, 0.3, 1) both;
+}
+
+/* Animation d'appel au champ URL : bordure et fond signal pulsés brièvement. */
+@keyframes field-signal-pulse {
+  0%,
+  100% {
+    border-color: var(--rule-strong);
+    background-color: var(--paper);
+  }
+  50% {
+    border-color: var(--signal);
+    background-color: var(--signal-tint);
+  }
+}
+
+@utility field-signal {
+  animation: field-signal-pulse 600ms ease-in-out 2;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .field-signal {
+    animation: none;
+    border-color: var(--signal) !important;
+    background-color: var(--signal-tint) !important;
+  }
+}
+
+@keyframes citari-menu-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes citari-menu-out {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+}
+
+@utility anim-menu-in {
+  animation: citari-menu-in 180ms cubic-bezier(0.16, 0.8, 0.3, 1) both;
+}
+
+@utility anim-menu-out {
+  animation: citari-menu-out 140ms ease-in both;
+}
+
+/* Option de secteur : même grammaire que les filets du site */
+@utility option-row {
+  display: flex;
+  width: 100%;
+  align-items: baseline;
+  gap: 0.75rem;
+  border: 1px solid var(--rule-strong);
+  border-radius: 2px;
+  background-color: var(--paper);
+  padding: 0.7rem 0.85rem;
+  text-align: left;
+  color: var(--ink);
+  transition:
+    background-color 160ms ease-out,
+    border-color 160ms ease-out,
+    color 160ms ease-out;
+
+  &:hover {
+    background-color: var(--paper-2);
+  }
+}
+
+@utility option-row-on {
+  border-color: var(--ink);
+  background-color: var(--paper-2);
+  font-weight: 600;
+}
+
+/* ---- Écran de chargement ---- */
+
+@keyframes citari-blink {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+
+@keyframes citari-cell {
+  from {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes citari-sweep {
+  from { top: 0; opacity: 0.9; }
+  to { top: 100%; opacity: 0; }
+}
+
+@utility anim-blink {
+  animation: citari-blink 1s steps(1, end) infinite;
+}
+
+@utility anim-cell {
+  animation: citari-cell 180ms cubic-bezier(0.16, 0.8, 0.3, 1) both;
+}
+
+@utility anim-sweep {
+  background-color: var(--ink);
+  animation: citari-sweep 1400ms cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+/* Barre de progression : ancrée sur des données réelles, jamais scriptée. */
+@utility progress-rail {
+  position: relative;
+  height: 2px;
+  width: 100%;
+  background-color: var(--rule);
+  overflow: hidden;
+}
+
+@utility progress-fill {
+  display: block;
+  height: 100%;
+  background-color: var(--ink);
+  transition: width 520ms cubic-bezier(0.16, 0.8, 0.3, 1);
+}
+
+/* Colonne de moteur verrouillée (mode aperçu) */
+@utility locked-col {
+  color: var(--ink-2);
+  opacity: 0.45;
+}
+
+/* Cartes d'étapes empilées : superposition progressive au défilement */
+@utility stack-card {
+  position: sticky;
+}
+
+@media (max-width: 639px) {
+  .stack-card {
+    position: static !important;
+    top: auto !important;
+    margin-bottom: 2rem !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stack-card {
+    position: static !important;
+    margin-bottom: 1.5rem !important;
+  }
+}
+
+/* ---- Vitrine du hero : cartes flottantes ---- */
+
+@utility card-glow {
+  position: relative;
+  isolation: isolate;
+}
+
+.card-glow::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1px;
+  background: conic-gradient(
+    from var(--glow-angle, 0deg),
+    transparent 0deg,
+    color-mix(in srgb, var(--ink) 28%, transparent) 60deg,
+    color-mix(in srgb, var(--signal) 55%, transparent) 120deg,
+    color-mix(in srgb, var(--ink) 28%, transparent) 180deg,
+    transparent 240deg,
+    transparent 360deg
+  );
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  opacity: 0.85;
+  animation: citari-glow-rotate 8s linear infinite;
+}
+
+.card-glow::after {
+  content: "";
+  position: absolute;
+  inset: -12px;
+  border-radius: inherit;
+  background: radial-gradient(
+    circle at 50% 50%,
+    color-mix(in srgb, var(--signal) 16%, transparent) 0%,
+    transparent 60%
+  );
+  opacity: 0;
+  filter: blur(14px);
+  pointer-events: none;
+  transition: opacity 700ms ease;
+  z-index: -1;
+}
+
+.card-glow:hover::after {
+  opacity: 1;
+}
+
+@keyframes citari-glow-rotate {
+  from { --glow-angle: 0deg; }
+  to { --glow-angle: 360deg; }
+}
+
+@property --glow-angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+
+@utility float-card {
+  border: 1px solid var(--rule-strong);
+  background-color: var(--paper);
+  border-radius: 4px;
+  padding: 1rem 1.1rem;
+  box-shadow: 0 18px 40px -32px color-mix(in srgb, var(--ink) 45%, transparent);
+}
+
+@utility float-card-main {
+  padding: 1.4rem 1.5rem;
+  background-color: var(--paper);
+  animation: citari-float-in 520ms cubic-bezier(0.16, 0.8, 0.3, 1) both;
+}
+
+@keyframes citari-float-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Cartes satellites : disposées autour du titre du hero. */
+.float-card-tl,
+.float-card-bl,
+.float-card-tr,
+.float-card-br {
+  position: absolute;
+  width: 13rem;
+  animation: citari-float-in 640ms cubic-bezier(0.16, 0.8, 0.3, 1) both;
+}
+
+.float-card-tl {
+  top: 1rem;
+  left: -4rem;
+  rotate: -4deg;
+  animation-delay: 90ms;
+}
+
+.float-card-bl {
+  bottom: -1.5rem;
+  left: -6rem;
+  rotate: 3deg;
+  animation-delay: 180ms;
+}
+
+.float-card-tr {
+  top: 0.5rem;
+  right: -5rem;
+  rotate: 4deg;
+  animation-delay: 140ms;
+}
+
+.float-card-br {
+  bottom: -2rem;
+  right: -3.5rem;
+  rotate: -3deg;
+  animation-delay: 230ms;
+}
+
+/* ---- Apparition au défilement ---- */
+
+.reveal {
+  opacity: 0;
+  transform: translateY(18px);
+  transition:
+    opacity 700ms cubic-bezier(0.16, 0.8, 0.3, 1),
+    transform 700ms cubic-bezier(0.16, 0.8, 0.3, 1);
+  transition-delay: var(--reveal-delay, 0ms);
+  will-change: opacity, transform;
+}
+
+.reveal-on {
+  opacity: 1;
+  transform: none;
+}
+
+/* ---- Micro-interactions ---- */
+
+@utility link-rule {
+  position: relative;
+  display: inline-block;
+}
+
+.link-rule::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -2px;
+  height: 1px;
+  width: 100%;
+  background-color: var(--ink);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 380ms cubic-bezier(0.16, 0.8, 0.3, 1);
+}
+
+.link-rule:hover::after {
+  transform: scaleX(1);
+}
+
+@utility row-hover {
+  position: relative;
+  transition:
+    background-color 260ms ease,
+    padding-left 320ms cubic-bezier(0.16, 0.8, 0.3, 1);
+}
+
+.row-hover::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background-color: var(--signal);
+  transform: scaleY(0);
+  transform-origin: top;
+  transition: transform 300ms cubic-bezier(0.16, 0.8, 0.3, 1);
+}
+
+.row-hover:hover {
+  background-color: var(--paper-2);
+  padding-left: 0.9rem;
+}
+
+.row-hover:hover::before {
+  transform: scaleY(1);
+}
+
+@utility step-row {
+  transition: transform 320ms cubic-bezier(0.16, 0.8, 0.3, 1);
+}
+
+.step-row:hover {
+  transform: translateX(4px);
+}
+
+.step-row .step-num {
+  transition:
+    color 260ms ease,
+    letter-spacing 320ms ease;
+}
+
+.step-row:hover .step-num {
+  color: var(--signal);
+  letter-spacing: 0.12em;
+}
+
+.float-card {
+  transition:
+    transform 420ms cubic-bezier(0.16, 0.8, 0.3, 1),
+    rotate 520ms cubic-bezier(0.16, 0.8, 0.3, 1),
+    border-color 300ms ease,
+    box-shadow 420ms ease;
+  will-change: transform;
+}
+
+.float-card:hover {
+  transform: translateY(-6px) scale(1.02);
+  rotate: 0deg;
+  border-color: var(--ink);
+  box-shadow: 0 26px 50px -28px color-mix(in srgb, var(--ink) 60%, transparent);
+  z-index: 2;
+}
+
+.float-card .float-bar {
+  transition: width 620ms cubic-bezier(0.16, 0.8, 0.3, 1);
+}
+
+.float-card:hover .float-bar {
+  width: var(--bar-hover, var(--bar-w)) !important;
+}
+
+.float-card .float-accent {
+  transition: color 300ms ease;
+}
+
+.float-card:hover .float-accent {
+  color: var(--signal);
+}
+
+.stat-card {
+  transition:
+    transform 420ms cubic-bezier(0.16, 0.8, 0.3, 1),
+    border-color 300ms ease,
+    box-shadow 420ms ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--ink);
+  box-shadow: 0 22px 44px -30px color-mix(in srgb, var(--ink) 55%, transparent);
+}
+
+.stat-card .stat-num {
+  transition:
+    letter-spacing 380ms ease,
+    color 300ms ease;
+}
+
+.stat-card:hover .stat-num {
+  letter-spacing: -0.03em;
+  color: var(--signal);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition: none !important;
+    animation: none !important;
+  }
+  .reveal {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (min-width: 1280px) {
+  .float-card-tl,
+  .float-card-bl,
+  .float-card-tr,
+  .float-card-br {
+    width: 15rem;
+  }
+  .float-card-tl { left: -8rem; }
+  .float-card-bl { left: -9.5rem; }
+  .float-card-tr { right: -9rem; }
+  .float-card-br { right: -7rem; }
+}
+
+/* ============================================================
+   PROFONDEUR GLOBALE — fonds, dégradés, interactions
+   Aucune couleur hors palette : tout dérive de paper / ink / signal.
+   ============================================================ */
+
+:root {
+  --canvas-halo: radial-gradient(
+      120% 70% at 50% -10%,
+      color-mix(in srgb, var(--paper-2) 92%, var(--paper)) 0%,
+      color-mix(in srgb, var(--paper-2) 40%, var(--paper)) 45%,
+      transparent 78%
+    ),
+    radial-gradient(
+      60% 40% at 82% 6%,
+      color-mix(in srgb, var(--signal) 5%, transparent) 0%,
+      transparent 70%
+    );
+  --canvas-grid-line: color-mix(in srgb, var(--ink) 6%, transparent);
+  --rule-fade: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--rule-strong) 18%,
+    var(--rule-strong) 82%,
+    transparent 100%
+  );
+  --surface-lift: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--paper-2) 30%, var(--paper)) 0%,
+    var(--paper) 55%,
+    color-mix(in srgb, var(--paper-2) 45%, var(--paper)) 100%
+  );
+}
+
+@utility canvas-halo {
+  background-image: var(--canvas-halo);
+}
+
+@utility canvas-grid {
+  background-image:
+    linear-gradient(to right, var(--canvas-grid-line) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--canvas-grid-line) 1px, transparent 1px);
+  background-size: 88px 88px;
+  mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.55) 0%, transparent 62%);
+}
+
+@utility canvas-grain {
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/></filter><rect width='120' height='120' filter='url(%23n)'/></svg>");
+  background-size: 120px 120px;
+}
+
+@utility surface-lift {
+  background-image: var(--surface-lift);
+}
+
+@utility rule-fade {
+  height: 1px;
+  width: 100%;
+  border: 0;
+  background-image: var(--rule-fade);
+}
+
+@utility section-fade-top {
+  &::before {
+    content: "";
+    position: absolute;
+    inset-inline: 0;
+    top: 0;
+    height: 1px;
+    background-image: var(--rule-fade);
+  }
+}
+
+@utility link-underline {
+  position: relative;
+  text-decoration: none;
+
+  &::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -3px;
+    height: 1px;
+    background-color: currentColor;
+    transform: scaleX(0);
+    transform-origin: left center;
+    transition: transform 260ms cubic-bezier(0.16, 0.8, 0.3, 1);
+  }
+
+  &:hover::after,
+  &:focus-visible::after {
+    transform: scaleX(1);
+  }
+}
+
+@utility cta-sweep {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background-color: var(--signal);
+    transform: translateX(-101%);
+    transition: transform 380ms cubic-bezier(0.16, 0.8, 0.3, 1);
+  }
+
+  &:hover::before,
+  &:focus-visible::before {
+    transform: translateX(0);
+  }
+}
+
+@utility card-lift {
+  transition:
+    transform 300ms cubic-bezier(0.16, 0.8, 0.3, 1),
+    border-color 300ms ease-out,
+    background-color 300ms ease-out;
+
+  &:hover {
+    transform: translateY(-4px);
+    border-color: var(--signal);
+  }
+}
+
+@utility read-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 2px;
+  z-index: 60;
+  background-color: var(--signal);
+  transform-origin: left center;
+  pointer-events: none;
+}
+
+@utility cursor-halo {
+  position: absolute;
+  height: 460px;
+  width: 460px;
+  border-radius: 9999px;
+  pointer-events: none;
+  background: radial-gradient(
+    closest-side,
+    color-mix(in srgb, var(--signal) 9%, transparent),
+    transparent 72%
+  );
+  transition: opacity 320ms ease-out;
+}
+
+@keyframes citari-word-rise {
+  from {
+    opacity: 0;
+    transform: translateY(0.5em);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@utility word-rise {
+  display: inline-block;
+  animation: citari-word-rise 620ms cubic-bezier(0.16, 0.8, 0.3, 1) both;
+}
+
+@utility logo-mute {
+  filter: grayscale(1);
+  opacity: 0.55;
+  transition:
+    filter 260ms ease-out,
+    opacity 260ms ease-out;
+
+  &:hover {
+    filter: grayscale(0);
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .word-rise {
+    animation: none;
+  }
+  .cursor-halo {
+    display: none;
+  }
+}
+
+/* ============================================================
+   HÉRITAGE — utilitaires du site d'origine.
+   Conservés tant que guide-geo, geo-vs-seo, alternatives-agence-seo,
+   mentions-legales, confidentialite, rapport et admin ne sont pas
+   redessinés. Aucun nom ne collide avec le jeu ci-dessus : vérifié
+   à la fusion du 07/08/2026.
+   ============================================================ */
+
+@keyframes geo-rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
 @utility num {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
@@ -156,7 +922,6 @@
   letter-spacing: -0.03em;
 }
 
-/* Micro-titre : sans-serif, capitales fines, très espacées. */
 @utility label-xs {
   font-family: var(--font-sans);
   font-size: 12px;
@@ -174,7 +939,6 @@
   border-bottom: 1px solid var(--rule);
 }
 
-/* Surface élevée : la carte remplace le cadre. */
 @utility carte {
   background: var(--surface);
   border: 1px solid var(--rule);
@@ -204,7 +968,6 @@
   }
 }
 
-/* ——— Logotype Citari : entièrement piloté par les variables --marque-*. ——— */
 @utility marque {
   display: inline-flex;
   align-items: center;
@@ -213,234 +976,93 @@
   line-height: 1;
   user-select: none;
   transition: opacity var(--marque-transition);
-}
 
-/* Le signe est peint par masque alpha : sa couleur suit --marque-couleur. */
-@utility marque-signe {
-  display: block;
-  height: var(--marque-h);
-  width: calc(var(--marque-h) * var(--marque-ratio));
-  background-color: var(--marque-couleur);
-  mask-image: var(--marque-src);
-  mask-repeat: no-repeat;
-  mask-position: left center;
-  mask-size: contain;
-  -webkit-mask-image: var(--marque-src);
-  -webkit-mask-repeat: no-repeat;
-  -webkit-mask-position: left center;
-  -webkit-mask-size: contain;
-  transition: background-color var(--marque-transition);
-}
-
-/* Point bronze final : le seul écart de couleur autorisé dans la marque. */
-@utility marque-point {
-  display: block;
-  width: calc(var(--marque-h) * var(--marque-point-taille));
-  height: calc(var(--marque-h) * var(--marque-point-taille));
-  border-radius: 999px;
-  background: var(--marque-accent);
-  transform: translateY(calc(var(--marque-h) * 0.26));
-  transition:
-    background-color var(--marque-transition),
-    transform var(--marque-transition);
-}
-
-
-@utility marque-i {
   &:hover {
     opacity: var(--marque-opacite-hover);
   }
-
-  &:hover .marque-point {
-    background: var(--marque-accent);
-    transform: translateY(calc(var(--marque-h) * 0.26)) scale(1.35);
-  }
 }
 
+@utility marque-signe {
+  height: var(--marque-h);
+  width: calc(var(--marque-h) * var(--marque-ratio));
+  color: var(--marque-couleur);
+}
 
-@keyframes geo-rise {
+@utility marque-point {
+  height: calc(var(--marque-h) * var(--marque-point-taille));
+  width: calc(var(--marque-h) * var(--marque-point-taille));
+  border-radius: 9999px;
+  background: var(--marque-accent);
+}
 
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
+@utility marque-i {
+  font-family: var(--font-mono);
+  font-size: calc(var(--marque-h) * 0.62);
+  letter-spacing: 0.02em;
+  color: var(--ink-2);
 }
 
 @utility rise {
-  animation: geo-rise 520ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: geo-rise 520ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
 }
 
-/* Apparition au défilement : discrète, une seule fois. */
 @utility apparait {
-  opacity: 0;
-  transform: translateY(16px);
-  transition:
-    opacity 760ms cubic-bezier(0.16, 1, 0.3, 1),
-    transform 760ms cubic-bezier(0.16, 1, 0.3, 1);
-  transition-delay: var(--delai, 0ms);
-  will-change: opacity, transform;
-
-  &[data-vu="1"] {
-    opacity: 1;
-    transform: none;
-  }
+  animation: geo-rise 620ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
 }
 
-/* Lien de navigation : filet bronze qui se déploie. */
 @utility lien-nav {
-  position: relative;
-  transition: color 240ms cubic-bezier(0.2, 0.7, 0.2, 1);
-
-  &::after {
-    content: "";
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: -5px;
-    height: 1px;
-    background: var(--accent);
-    transform: scaleX(0);
-    transform-origin: right center;
-    transition: transform 380ms cubic-bezier(0.2, 0.7, 0.2, 1);
-  }
+  color: var(--ink-2);
+  transition: color 200ms cubic-bezier(0.2, 0.7, 0.2, 1);
 
   &:hover {
     color: var(--ink);
   }
-
-  &:hover::after {
-    transform: scaleX(1);
-    transform-origin: left center;
-  }
 }
 
-/* Surface interactive : élévation à peine perceptible. */
 @utility carte-i {
-  transition:
-    box-shadow 460ms cubic-bezier(0.2, 0.7, 0.2, 1),
-    transform 460ms cubic-bezier(0.2, 0.7, 0.2, 1),
-    border-color 460ms cubic-bezier(0.2, 0.7, 0.2, 1);
-
-  &:hover {
-    box-shadow: var(--elev-2);
-    border-color: var(--rule-strong);
-    transform: translateY(-2px);
-  }
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-lg);
+  padding: 1.25rem;
 }
 
-/* Ligne de liste : la marge gauche respire au survol. */
 @utility ligne-i {
-  transition:
-    background-color 380ms cubic-bezier(0.2, 0.7, 0.2, 1),
-    padding-left 380ms cubic-bezier(0.2, 0.7, 0.2, 1);
-
-  &:hover {
-    background-color: var(--paper-2);
-    padding-left: 0.75rem;
-  }
+  border-bottom: 1px solid var(--rule);
+  padding-block: 0.75rem;
 }
 
-/* Sélecteur éditorial dans le bloc de preuve. */
 @utility select-edito {
   appearance: none;
   background: transparent;
   border: 0;
-  border-bottom: 1px solid color-mix(in oklab, var(--accent) 45%, transparent);
-  color: var(--accent);
-  display: inline-block;
-  width: auto;
-  max-width: 100%;
-  field-sizing: content;
-  padding-bottom: 2px;
-  cursor: pointer;
-  outline: none;
-  transition:
-    border-color 300ms cubic-bezier(0.2, 0.7, 0.2, 1),
-    background-color 300ms cubic-bezier(0.2, 0.7, 0.2, 1);
-
-  &:hover {
-    border-bottom-color: var(--accent);
-    background-color: var(--accent-wash);
-  }
-}
-
-/* COUCHE 2 — grain de papier : bruit SVG inline, fixe, imperceptible. */
-@utility grain {
-  position: fixed;
-  inset: 0;
-  z-index: 1;
-  pointer-events: none;
-  opacity: var(--grain-opacity);
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23n)'/%3E%3C/svg%3E");
-  background-repeat: repeat;
-  background-size: 240px 240px;
-}
-
-/* COUCHE 3 — champ de texte derrière le hero. */
-@utility champ-texte {
-  position: absolute;
-  inset: -2rem -1rem auto -1rem;
-  height: calc(100% + 4rem);
-  overflow: hidden;
-  z-index: 0;
-  pointer-events: none;
-  user-select: none;
+  border-bottom: 1px solid var(--rule-strong);
+  border-radius: 0;
   color: var(--ink);
-  opacity: var(--champ-opacity);
-  font-family: var(--font-mono);
-  font-size: 11px;
-  line-height: 1.32;
-  text-align: justify;
-  hyphens: auto;
-  columns: 2;
-  column-gap: 2.5rem;
-  mask-image:
-    radial-gradient(120% 90% at 50% 45%, transparent 0%, transparent 34%, black 78%),
-    linear-gradient(to right, transparent, black 12%, black 88%, transparent),
-    linear-gradient(to bottom, transparent, black 14%, black 82%, transparent);
-  mask-composite: intersect;
-  -webkit-mask-image:
-    radial-gradient(120% 90% at 50% 45%, transparent 0%, transparent 34%, black 78%),
-    linear-gradient(to right, transparent, black 12%, black 88%, transparent),
-    linear-gradient(to bottom, transparent, black 14%, black 82%, transparent);
-  -webkit-mask-composite: source-in;
+  font-family: var(--font-sans);
+  font-size: inherit;
+  padding: 0.35rem 1.5rem 0.35rem 0;
 }
 
-@media (max-width: 640px) {
-  .champ-texte {
-    columns: 1;
+@utility grain {
+  position: relative;
+
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: var(--grain-opacity);
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><filter id='g'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/></filter><rect width='120' height='120' filter='url(%23g)'/></svg>");
+    background-size: 120px 120px;
   }
 }
 
-
-@media print {
-  body {
-    background: #fff;
-  }
-  .no-print {
-    display: none !important;
-  }
-  a[href^="http"]::after {
-    content: " (" attr(href) ")";
-    font-size: 10px;
-    font-family: var(--font-mono);
-  }
-  section,
-  .avoid-break {
-    break-inside: avoid;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.001ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.001ms !important;
-  }
+@utility champ-texte {
+  width: 100%;
+  background: color-mix(in srgb, var(--ink) calc(var(--champ-opacity) * 100%), transparent);
+  border: 1px solid var(--rule-strong);
+  border-radius: var(--radius);
+  padding: 0.75rem 0.9rem;
+  color: var(--ink);
+  font-family: var(--font-sans);
 }

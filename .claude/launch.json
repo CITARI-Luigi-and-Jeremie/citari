@@ -2,25 +2,10 @@
   "version": "0.0.1",
   "configurations": [
     {
-      "name": "citari-site",
+      "name": "citari",
       "runtimeExecutable": "npm",
-      "runtimeArgs": [
-        "--prefix",
-        "apps/citari",
-        "run",
-        "dev"
-      ],
+      "runtimeArgs": ["--prefix", "apps/citari", "run", "dev"],
       "port": 8080
-    },
-    {
-      "name": "citari-admin",
-      "runtimeExecutable": "pnpm",
-      "runtimeArgs": [
-        "--filter",
-        "admin",
-        "dev"
-      ],
-      "port": 3001
     }
   ]
 }
