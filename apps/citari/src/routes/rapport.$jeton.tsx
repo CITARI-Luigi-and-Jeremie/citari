@@ -18,6 +18,17 @@ import {
 } from "@/components/rapport";
 import { dateFr, fr, frTitre, verdict, MOTEURS, NBSP } from "@/lib/typo";
 import { bookingUrl } from "@/lib/site";
+import { RapportApercu } from "@/components/jeremie/RapportApercu";
+import {
+  adversairePrincipal,
+  citationsCible,
+  moteursDesReponses,
+  preparerQuestions,
+  reponseLaPlusDure,
+  type LigneMention,
+  type LigneQuestion,
+  type LigneReponse,
+} from "@/lib/rapport-apercu";
 
 export const Route = createFileRoute("/rapport/$jeton")({
   loader: async ({ params }) => {
@@ -62,7 +73,62 @@ const SECTIONS = [
   ["actions", "Actions prioritaires"],
 ] as const;
 
+/**
+ * Le rapport, deux artefacts sous une seule adresse.
+ *
+ * En mode `apercu` (20 questions × 2 moteurs), c'est une page de conversion :
+ * la maquette de Jérémie, où les quatre moteurs non interrogés sont montrés
+ * verrouillés. En mode `complet` ou `controle`, c'est le document de mesure :
+ * les six moteurs ont réellement répondu, et en verrouiller un serait mentir
+ * au client qui vient de payer pour l'avoir.
+ *
+ * C'est le mode du scan qui décide, jamais une préférence d'affichage.
+ */
 function Rapport() {
+  const data = Route.useLoaderData();
+  return data.scan.mode === "apercu" ? <RapportDApercu /> : <RapportComplet />;
+}
+
+function RapportDApercu() {
+  const { scan, questions, reponses, mentions } = Route.useLoaderData();
+
+  const moteurs = moteursDesReponses(reponses as unknown as LigneReponse[]);
+  const lignes = mentions as unknown as LigneMention[];
+  const prepared = preparerQuestions(
+    questions as LigneQuestion[],
+    reponses as unknown as LigneReponse[],
+    lignes,
+    moteurs,
+  );
+
+  return (
+    <RapportApercu
+      marque={scan.brand_name}
+      domaine={scan.website_url}
+      date={scan.completed_at ?? scan.created_at}
+      score={Math.round(Number(scan.score_global ?? 0))}
+      questions={prepared}
+      adversaire={adversairePrincipal(lignes)}
+      vosCitations={citationsCible(lignes)}
+      laPlusDure={reponseLaPlusDure(lignes)}
+      pdv={
+        (Array.isArray(scan.share_of_voice) ? scan.share_of_voice : []) as {
+          name: string;
+          count: number;
+          share: number;
+          target: boolean;
+        }[]
+      }
+      moteursVerrouilles={MOTEURS.filter((m) => !moteurs.includes(m))}
+      questionsDuComplet={QUESTIONS_COMPLET}
+    />
+  );
+}
+
+/** Le mix figé du diagnostic complet : 10 comparatives, 6 problème, 5 locales, 3 confiance. */
+const QUESTIONS_COMPLET = 24;
+
+function RapportComplet() {
   const { scan, questions, reponses, mentions, precedent } = Route.useLoaderData();
   const marque = scan.brand_name;
   const score = Math.round(Number(scan.score_global ?? 0));

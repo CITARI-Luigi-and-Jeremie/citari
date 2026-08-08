@@ -5,6 +5,49 @@ d'une nouvelle session, après `CLAUDE.md`.
 
 ---
 
+## 2026-08-08 (suite) — Le rapport d'aperçu devient une page de vente
+
+Son projet contenait DEUX branches de scan, et je n'avais vu que la seconde.
+
+Celle qui est réellement branchée à son formulaire — `/scan?domaine=` puis
+`/rapport/$scanId` — tourne sur des données inventées : une horloge simulée
+(`useSimulatedProgress`), des verdicts tirés d'un modulo, « Ledgio, 9 fois sur
+36 », et un bouton « SKIP → RÉSULTAT (temporaire) ». Elle ne sera jamais
+portée : c'est exactement ce que la doctrine interdit.
+
+Mais son `CitariReportScreen` contenait du vrai travail de conversion, indépendant
+de ces fausses données : le bloc « qui prend votre place », la bande de questions
+cliquables, et surtout **les cartes de moteur verrouillées**. Cette maquette-là
+est portée, alimentée par `rapportParJeton`.
+
+**Une adresse, deux artefacts.** `/rapport/$jeton` sert aussi bien l'aperçu
+(20 × 2) que le diagnostic complet (24 × 6). C'est le **mode du scan** qui
+choisit l'affichage : maquette de conversion en aperçu, document de mesure
+ensuite. Verrouiller un moteur qu'on vient d'interroger et de facturer serait
+un mensonge ; l'aiguillage n'est donc pas une préférence d'affichage, c'est une
+règle.
+
+**Une carte verrouillée ne contient aucun texte.** La sienne floutait la vraie
+réponse du moteur — un floutage CSS, que n'importe qui lève en deux clics. Chez
+nous il n'y a rien à flouter : le moteur n'a pas été interrogé. La carte le dit
+(« non interrogé dans l'aperçu ») et rien n'est fabriqué pour la remplir. C'est
+plus honnête ET plus vendeur : l'absence est le produit.
+
+**Les extraits viennent de `mentions.verbatim`, pas de `responses.raw_text`.**
+Une réponse réelle fait 1 200 à 1 350 caractères, illisible dans une carte ; le
+verbatim fait 74 à 213 caractères et contient exactement la phrase où la marque
+se joue. Le `raw_text` ne sert que de repli quand aucune marque n'est relevée.
+
+**Les comptages se font sur `mentions`, jamais sur `share_of_voice`,** qui est
+tronqué aux dix premiers plus la ligne du client. C'est le piège déjà écrit dans
+CLAUDE.md ; « In Extenso, 33 fois sur 280 » vient bien du comptage complet.
+
+Enfin, la maquette est repeinte avec nos jetons. La sienne codait sa palette en
+dur, dont un orange `#E8601F` absent de la charte : garder deux palettes était
+précisément le défaut corrigé le matin même.
+
+---
+
 ## 2026-08-08 — Le portage du front était à moitié fait, et ça se voyait
 
 Le portage de la veille avait pris la landing et s'était arrêté là. Trois

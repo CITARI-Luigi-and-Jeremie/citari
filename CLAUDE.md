@@ -57,6 +57,22 @@ Ce que le premier passage avait manqué, et qui a été rattrapé :
   CDN Lovable : deux fois mort, il ne s'affichait plus nulle part ;
 - les pages de contenu avaient **deux** en-têtes, le leur et celui de la racine.
 
+**`/rapport/$jeton` sert deux artefacts, et c'est le mode du scan qui tranche.**
+En `apercu`, c'est la maquette de conversion de Jérémie
+(`components/jeremie/RapportApercu.tsx`) : verdict, « qui prend votre place »,
+bande de questions, réponses moteur par moteur, et les quatre moteurs non
+interrogés montrés verrouillés. En `complet` ou `controle`, c'est le document de
+mesure. Verrouiller un moteur qu'on vient d'interroger et de facturer serait un
+mensonge : ne jamais rendre cet aiguillage configurable.
+
+Une carte verrouillée ne contient **aucun texte**. Sa maquette floutait la vraie
+réponse en CSS ; chez nous le moteur n'a pas été interrogé, il n'y a rien à
+cacher et rien à inventer pour remplir la carte.
+
+**Sa branche de scan démo ne doit jamais être portée** : `CitariScanScreen` et
+la route `/scan?domaine=` de son projet tournent sur une horloge simulée, des
+verdicts tirés d'un modulo et un bouton « SKIP → RÉSULTAT (temporaire) ».
+
 **Sa couche données a été intégralement jetée, et ne doit jamais revenir.** Son
 projet visait une AUTRE base Supabase (`vbxgwqutyzmnasjyladg`) avec un autre
 schéma : `scans_public`, `brand`, `queries.position`, `responses_meta`,
