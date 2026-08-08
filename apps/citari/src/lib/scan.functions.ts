@@ -107,30 +107,12 @@ export const chargerRapport = createServerFn({ method: "POST" })
     return await rapportParJeton(data.jeton);
   });
 
-export const debloquerRapport = createServerFn({ method: "POST" })
-  .inputValidator((d: unknown) =>
-    z
-      .object({
-        scanId: z.string().uuid(),
-        email: z.string().trim().email().max(200),
-        prenom: z.string().trim().max(80).optional(),
-        telephone: z.string().trim().max(40).optional(),
-      })
-      .parse(d),
-  )
-  .handler(async ({ data }) => {
-    const { enregistrerLead } = await import("@/lib/orchestrateur.server");
-    return await enregistrerLead({
-      scanId: data.scanId,
-      email: data.email,
-      prenom: data.prenom ?? null,
-      telephone: data.telephone ?? null,
-    });
-  });
-
-export const chargerTeaser = createServerFn({ method: "POST" })
-  .inputValidator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
-  .handler(async ({ data }) => {
-    const { teaserScan } = await import("@/lib/orchestrateur.server");
-    return await teaserScan(data.id);
-  });
+/*
+ * `debloquerRapport` et `chargerTeaser` ont été retirés le 09/08/2026 avec
+ * l'aguiche qu'ils servaient. Ne pas les réintroduire par réflexe : une
+ * fonction serveur exportée reste appelable depuis n'importe quel navigateur,
+ * et `debloquerRapport` écrivait dans `leads`. Une porte ouverte que plus
+ * personne ne regarde est une porte ouverte.
+ *
+ * L'email est capturé par `lancerScan`, à la quatrième étape du formulaire.
+ */

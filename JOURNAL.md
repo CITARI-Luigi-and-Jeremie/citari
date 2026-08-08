@@ -5,6 +5,59 @@ d'une nouvelle session, après `CLAUDE.md`.
 
 ---
 
+## 2026-08-09 — L'aguiche n'avait plus de raison d'être, on l'a supprimée
+
+Le parcours comptait quatre écrans : landing, attente, aguiche, rapport.
+L'aguiche montrait le score, les moteurs, la part de voix et le verbatim, puis
+un bouton ouvrait un rapport qui rouvrait sur… le score, la part de voix et le
+verbatim. Le prospect payait un clic pour relire ce qu'il venait de lire.
+
+**Le vrai défaut n'était pas la répétition, c'était l'obsolescence.** Cet écran
+avait été construit comme péage à l'email. Depuis que l'adresse est demandée à
+la quatrième étape du formulaire, avant le lancement, le péage ne perçoit plus
+rien : il ne restait qu'une page qui dépense deux fois le choc du chiffre.
+Leçon générale : quand on déplace une capture en amont, il faut aller voir ce
+qui la réclamait en aval, sinon la coquille survit et coûte un clic.
+
+**Pire que redondant, contradictoire.** L'aguiche annonçait « 13 citations sur
+40 réponses », le rapport « In Extenso, 33 fois sur 280 ». Les deux nombres
+étaient justes — 280 est le total des citations, 40 celui des réponses — mais
+juxtaposés à trente secondes d'intervalle, ils donnaient l'impression que la
+page se contredit. La page de rapport ne compte plus qu'en RÉPONSES, du grand
+titre aux barres de part de voix : « In Extenso, cité dans 30 réponses sur 40 »
+contre « votre marque apparaît dans 13 ».
+
+Conséquence : la part de voix est recalculée depuis `mentions` plutôt que lue
+dans `share_of_voice`, qui compte en citations et tronque aux dix premiers. Les
+variantes d'écriture sont regroupées avec `brand_aliases`, faute de quoi
+« Exco » et « Exco Lyon » feraient deux barres.
+
+**« Qui prend votre place » choisit maintenant un rival.** Prendre le plus cité
+dans l'absolu revient souvent à désigner un géant : c'est exact, et c'est
+décourageant. La règle des `concurrent_classes` existait déjà dans le toolkit,
+elle s'applique désormais aussi à l'écran. Vide = tout est rival, le parti pris
+prudent ; les institutions sont exclues, elles ne prennent la place de personne.
+
+**Ce qui a été supprimé avec l'aguiche** : `teaserScan` (146 lignes),
+`chargerTeaser` et `debloquerRapport`. Ce dernier écrivait dans `leads` et
+restait une fonction serveur exportée, donc appelable depuis n'importe quel
+navigateur, pour un écran que plus personne n'affichait.
+
+**Détail qui compte** : la redirection utilise `replace`. Sans cela, le bouton
+« retour » ramène sur un scan terminé, qui redirige aussitôt : le prospect est
+prisonnier de sa propre page de résultat.
+
+**Et une erreur de notre propre documentation, corrigée.** `CLAUDE.md`
+affirmait depuis des jours que la route `/admin` du site était protégée par un
+« mot de passe bidon publié en clair dans ce dépôt ». Vérification faite :
+aucun `ADMIN_PASSWORD` dans l'historique git, le seul `.env` jamais versionné ne
+contenait qu'une clé Supabase publiable d'un projet Lovable étranger, et les
+deux mots de passe actuels diffèrent et ne sont pas des placeholders. Le
+problème des deux back-offices reste entier ; le qualifier de fuite envoyait au
+mauvais endroit.
+
+---
+
 ## 2026-08-08 (suite) — Le rapport d'aperçu devient une page de vente
 
 Son projet contenait DEUX branches de scan, et je n'avais vu que la seconde.

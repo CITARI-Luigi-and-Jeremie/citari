@@ -21,10 +21,14 @@ import { bookingUrl } from "@/lib/site";
 import { RapportApercu } from "@/components/jeremie/RapportApercu";
 import {
   adversairePrincipal,
-  citationsCible,
+  constatsDuSite,
   moteursDesReponses,
+  partDeVoix,
   preparerQuestions,
+  questionsPerdues,
   reponseLaPlusDure,
+  reponsesAvecLaMarque,
+  reponsesRetenues,
   type LigneMention,
   type LigneQuestion,
   type LigneReponse,
@@ -92,14 +96,20 @@ function Rapport() {
 function RapportDApercu() {
   const { scan, questions, reponses, mentions } = Route.useLoaderData();
 
-  const moteurs = moteursDesReponses(reponses as unknown as LigneReponse[]);
+  const lignesReponses = reponses as unknown as LigneReponse[];
   const lignes = mentions as unknown as LigneMention[];
-  const prepared = preparerQuestions(
-    questions as LigneQuestion[],
-    reponses as unknown as LigneReponse[],
-    lignes,
-    moteurs,
-  );
+  const listeQuestions = questions as LigneQuestion[];
+  const moteurs = moteursDesReponses(lignesReponses);
+  const retenues = reponsesRetenues(lignesReponses);
+
+  const notes: Record<string, unknown> = {
+    ChatGPT: scan.score_chatgpt,
+    Claude: scan.score_claude,
+    Gemini: scan.score_gemini,
+    Perplexity: scan.score_perplexity,
+    Grok: scan.score_grok,
+    "Le Chat": scan.score_mistral,
+  };
 
   return (
     <RapportApercu
@@ -107,20 +117,26 @@ function RapportDApercu() {
       domaine={scan.website_url}
       date={scan.completed_at ?? scan.created_at}
       score={Math.round(Number(scan.score_global ?? 0))}
-      questions={prepared}
-      adversaire={adversairePrincipal(lignes)}
-      vosCitations={citationsCible(lignes)}
+      questions={preparerQuestions(listeQuestions, lignesReponses, lignes, moteurs)}
+      adversaire={adversairePrincipal(
+        lignes,
+        retenues,
+        (scan.concurrent_classes ?? {}) as Record<string, string>,
+        (scan.brand_aliases ?? {}) as Record<string, string>,
+      )}
+      vosReponses={reponsesAvecLaMarque(lignes)}
+      reponsesRetenues={retenues}
+      questionsPerdues={questionsPerdues(listeQuestions, lignes)}
+      parMoteur={moteurs
+        .filter((m) => notes[m] !== null && notes[m] !== undefined)
+        .map((m) => ({ moteur: m, score: Math.round(Number(notes[m])) }))}
       laPlusDure={reponseLaPlusDure(lignes)}
-      pdv={
-        (Array.isArray(scan.share_of_voice) ? scan.share_of_voice : []) as {
-          name: string;
-          count: number;
-          share: number;
-          target: boolean;
-        }[]
-      }
+      pdv={partDeVoix(lignes, (scan.brand_aliases ?? {}) as Record<string, string>)}
       moteursVerrouilles={MOTEURS.filter((m) => !moteurs.includes(m))}
       questionsDuComplet={QUESTIONS_COMPLET}
+      constats={constatsDuSite(
+        scan.audit as { ok?: boolean; bots?: Record<string, string>; llmstxt?: boolean } | null,
+      )}
     />
   );
 }

@@ -15,9 +15,18 @@ ont tourné contre la vraie base. 180 tests passent.
    ligne. `apps/admin` (Next, port 3001) est celui qu'on utilise, et il
    fonctionne : `ADMIN_PASSWORD` est renseigné dans le `.env` de la racine, le
    fichier que son `next.config.ts` charge. La route `/admin` du site en est un
-   second, qui lit `apps/citari/.env.local` où traîne un mot de passe bidon
-   publié en clair dans ce dépôt. Leurs listes de statuts divergent et
+   second, qui lit son propre `ADMIN_PASSWORD` dans `apps/citari/.env.local`, et
+   qui sert les emails de `leads`. Leurs listes de statuts divergent et
    `leads.status` n'a aucune contrainte. Détail dans `SETUP.md`.
+
+   Correction du 09/08/2026 : ce fichier a longtemps affirmé que ce second mot
+   de passe était « bidon, publié en clair dans ce dépôt ». C'est faux, vérifié.
+   Aucun `ADMIN_PASSWORD` n'est passé dans l'historique git ; le seul `.env`
+   jamais versionné (commit `e05c946`, depuis retiré du suivi) ne contenait
+   qu'une clé Supabase **publiable** d'un projet Lovable étranger ; et les deux
+   mots de passe actuels diffèrent et n'ont rien de factices. Le problème reste
+   entier — deux back-offices pour une seule base — mais ce n'est pas une fuite,
+   et le traiter comme telle ferait perdre du temps au mauvais endroit.
 2. Resend et mise en ligne : voir `SETUP.md` et `docs/DEPLOIEMENT.md`. Le
    domaine est acheté, chez Hostinger. Le site part sur **Cloudflare Workers**,
    puis basculera sur le **VPS Hostinger** quand tout le reste sera fini.
@@ -69,6 +78,29 @@ Une carte verrouillée ne contient **aucun texte**. Sa maquette floutait la vrai
 réponse en CSS ; chez nous le moteur n'a pas été interrogé, il n'y a rien à
 cacher et rien à inventer pour remplir la carte.
 
+**Le parcours a trois écrans, pas quatre.** Landing → `/scan/$id` (l'attente,
+carte perforée) → `/rapport/$jeton`. L'aguiche qui vivait sur l'écran de scan a
+été retirée le 09/08/2026 : elle servait de péage à l'email, or l'adresse est
+demandée à la quatrième étape du formulaire, AVANT le lancement. Elle rejouait
+donc le score, la part de voix et le verbatim que le rapport rouvrait aussitôt,
+avec des dénominateurs différents. La mesure finie, on redirige (en `replace`,
+sinon le bouton « retour » enferme le prospect) vers le rapport, seule adresse
+partageable. `teaserScan`, `chargerTeaser` et `debloquerRapport` ont été
+supprimés avec elle : une fonction serveur exportée que plus personne
+n'appelle reste appelable depuis n'importe quel navigateur.
+
+**Une seule unité sur la page de rapport : la réponse.** « In Extenso, cité dans
+30 réponses sur 40 » et « votre marque apparaît dans 13 » se comparent d'un coup
+d'œil. Compter en citations à côté de comptages en réponses donnait deux
+nombres justes qui se contredisaient à l'écran. La part de voix est donc
+recalculée depuis `mentions` (avec `brand_aliases` pour regrouper les
+variantes), pas lue dans `share_of_voice` qui compte en citations et tronque.
+
+**« Qui prend votre place » privilégie un rival, pas le plus cité.** Un géant en
+tête de comptage est exact et décourageant : annoncer KPMG à un cabinet de
+quinze personnes écrase au lieu d'indiquer une action. `concurrent_classes` vide
+signifie « tout est rival », et les institutions sont exclues du classement.
+
 **Sa branche de scan démo ne doit jamais être portée** : `CitariScanScreen` et
 la route `/scan?domaine=` de son projet tournent sur une horloge simulée, des
 verdicts tirés d'un modulo et un bouton « SKIP → RÉSULTAT (temporaire) ».
@@ -97,7 +129,7 @@ Grok et Le Chat.
 
 | Dossier | Quoi | Outillage |
 |---|---|---|
-| `apps/citari` | Le site **et son moteur de scan** : landing, scan, teaser, rapport, lead | **npm**, TanStack Start, port 8080 |
+| `apps/citari` | Le site **et son moteur de scan** : landing, méthode, attente, rapport, lead | **npm**, TanStack Start, port 8080 |
 | `apps/admin` | Back-office : leads, clients, sprints, relances, citations | pnpm, Next.js, port 3001 |
 | `packages/toolkit` | L'usine : 24 commandes de livraison et d'acquisition | pnpm |
 | `packages/core` | Socle partagé : accès Supabase, appel JSON au modèle, crawl | pnpm |

@@ -140,26 +140,135 @@ export function moteursDesReponses(reponses: LigneReponse[]): string[] {
   return MOTEURS.filter((m: Moteur) => vus.has(m));
 }
 
-export type Adversaire = { nom: string; citations: number; total: number };
+export type Adversaire = { nom: string; reponses: number; total: number; geant: boolean };
 
 /**
- * Le concurrent qui prend la place, compté sur `mentions` et non sur la part
- * de voix : celle-ci est tronquée et ne permet aucun comptage.
+ * Le concurrent qui prend la place.
+ *
+ * Deux précautions, toutes deux payées d'avance ailleurs dans le projet :
+ *
+ * - On compte en RÉPONSES, pas en citations. « 33 fois sur 280 » oblige le
+ *   lecteur à deviner ce qu'est 280 ; « cité dans 33 réponses sur 40 » se lit
+ *   sans effort, et c'est le même dénominateur que le reste de la page.
+ * - On privilégie un RIVAL. Le plus cité dans l'absolu est souvent un géant
+ *   (Deloitte, KPMG) : l'annoncer à un cabinet de quinze personnes est exact et
+ *   décourageant, ça écrase au lieu d'indiquer une action. `concurrent_classes`
+ *   vide signifie « tout est rival », le parti pris prudent.
  */
-export function adversairePrincipal(mentions: LigneMention[]): Adversaire | null {
-  const compte = new Map<string, number>();
+export function adversairePrincipal(
+  mentions: LigneMention[],
+  reponsesRetenues: number,
+  classes: Record<string, string> = {},
+  alias: Record<string, string> = {},
+): Adversaire | null {
+  const classeDe = (marque: string) => classes[alias[marque] ?? marque] ?? "rival";
+
+  const parMarque = new Map<string, Set<string>>();
   for (const m of mentions) {
     if (m.is_target) continue;
-    compte.set(m.brand, (compte.get(m.brand) ?? 0) + 1);
+    // Les institutions (ordres, chambres) sont citées comme références, jamais
+    // comme prestataires à choisir : elles ne prennent la place de personne.
+    if (classeDe(m.brand) === "institution") continue;
+    const vu = parMarque.get(m.brand) ?? new Set<string>();
+    vu.add(m.response_id);
+    parMarque.set(m.brand, vu);
   }
-  const tri = [...compte.entries()].sort((a, b) => b[1] - a[1]);
-  const premier = tri[0];
-  if (!premier) return null;
-  return { nom: premier[0], citations: premier[1], total: mentions.length };
+
+  const tri = [...parMarque.entries()]
+    .map(([nom, reponses]) => ({ nom, reponses: reponses.size, classe: classeDe(nom) }))
+    .sort((a, b) => b.reponses - a.reponses);
+
+  const rival = tri.find((c) => c.classe === "rival") ?? tri[0];
+  if (!rival) return null;
+
+  return {
+    nom: rival.nom,
+    reponses: rival.reponses,
+    total: reponsesRetenues,
+    geant: rival.classe === "geant",
+  };
 }
 
-export function citationsCible(mentions: LigneMention[]): number {
-  return mentions.filter((m) => m.is_target).length;
+/** Réponses dans lesquelles la marque suivie apparaît, et non nombre de citations. */
+export function reponsesAvecLaMarque(mentions: LigneMention[]): number {
+  return new Set(mentions.filter((m) => m.is_target).map((m) => m.response_id)).size;
+}
+
+export type LignePdv = { nom: string; reponses: number; cible: boolean };
+
+/**
+ * La part de voix, comptée en RÉPONSES comme le reste de la page.
+ *
+ * On ne réutilise pas `share_of_voice` ici, pour deux raisons : il compte en
+ * citations (un moteur qui nomme deux fois la même marque dans une réponse en
+ * vaut deux), et il est tronqué aux dix premiers. Juxtaposer « cité dans 30
+ * réponses sur 40 » et « 33 mentions » sur le même écran donne l'impression que
+ * la page se contredit, alors que les deux nombres sont justes.
+ *
+ * Les variantes d'écriture sont regroupées avec `brand_aliases`, sans quoi
+ * « Exco » et « Exco Lyon » feraient deux barres.
+ */
+export function partDeVoix(
+  mentions: LigneMention[],
+  alias: Record<string, string> = {},
+  max = 5,
+): LignePdv[] {
+  const parNom = new Map<string, { reponses: Set<string>; cible: boolean }>();
+  for (const m of mentions) {
+    const nom = m.is_target ? m.brand : (alias[m.brand] ?? m.brand);
+    const entree = parNom.get(nom) ?? { reponses: new Set<string>(), cible: m.is_target };
+    entree.reponses.add(m.response_id);
+    entree.cible = entree.cible || m.is_target;
+    parNom.set(nom, entree);
+  }
+
+  const toutes = [...parNom.entries()]
+    .map(([nom, v]) => ({ nom, reponses: v.reponses.size, cible: v.cible }))
+    .sort((a, b) => b.reponses - a.reponses);
+
+  // La ligne du client est garantie présente, même hors du haut de tableau :
+  // sans elle, un client classé onzième apparaissait à zéro.
+  const tete = toutes.slice(0, max);
+  const cible = toutes.find((l) => l.cible);
+  if (cible && !tete.some((l) => l.cible)) tete.push(cible);
+  return tete;
+}
+
+/** Questions où la marque n'apparaît sur AUCUN moteur : l'argument du manque. */
+export function questionsPerdues(questions: LigneQuestion[], mentions: LigneMention[]): number {
+  const citee = new Set(mentions.filter((m) => m.is_target).map((m) => m.query_id));
+  return questions.filter((q) => !citee.has(q.id)).length;
+}
+
+/** Réponses réellement obtenues : une panne ne compte pas au dénominateur. */
+export function reponsesRetenues(reponses: LigneReponse[]): number {
+  return reponses.filter((r) => !r.error && r.raw_text).length;
+}
+
+/**
+ * Ce que l'audit a déjà relevé sur le site, et rien d'autre.
+ *
+ * Si tout est en ordre, on ne dit rien : inventer un problème pour donner du
+ * grain à l'appel final serait exactement ce que la méthode reproche aux
+ * autres.
+ */
+export function constatsDuSite(
+  audit: { ok?: boolean; bots?: Record<string, string>; llmstxt?: boolean } | null,
+): string[] {
+  if (!audit?.ok) return [];
+  const constats: string[] = [];
+  const bloques = Object.entries(audit.bots ?? {})
+    .filter(([, etat]) => etat === "bloque")
+    .map(([nom]) => nom);
+  if (bloques.length > 0) {
+    constats.push(
+      `Votre site bloque ${bloques.join(", ")} : ${bloques.length > 1 ? "ces robots" : "ce robot"} ne peuvent pas vous lire.`,
+    );
+  }
+  if (audit.llmstxt === false) {
+    constats.push("Votre site n’a pas de fichier llms.txt, qui indique aux moteurs quoi lire.");
+  }
+  return constats;
 }
 
 /**

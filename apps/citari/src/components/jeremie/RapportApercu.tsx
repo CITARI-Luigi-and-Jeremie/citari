@@ -4,7 +4,7 @@ import { Link } from "@tanstack/react-router";
 import { LogoMoteur } from "@/components/jeremie/LogosMoteurs";
 import { bookingUrl } from "@/lib/site";
 import { dateFr, fr, verdict } from "@/lib/typo";
-import type { Adversaire, Case, QuestionPreparee } from "@/lib/rapport-apercu";
+import type { Adversaire, Case, LignePdv, QuestionPreparee } from "@/lib/rapport-apercu";
 
 /**
  * Le rapport d'aperçu, maquette de conversion.
@@ -34,11 +34,16 @@ type Props = {
   score: number;
   questions: QuestionPreparee[];
   adversaire: Adversaire | null;
-  vosCitations: number;
+  /** Réponses où la marque apparaît, sur le total réellement obtenu. */
+  vosReponses: number;
+  reponsesRetenues: number;
+  questionsPerdues: number;
+  parMoteur: { moteur: string; score: number }[];
   laPlusDure: { moteur: string; texte: string; marque: string } | null;
-  pdv: { name: string; count: number; share: number; target: boolean }[];
+  pdv: LignePdv[];
   moteursVerrouilles: string[];
   questionsDuComplet: number;
+  constats: string[];
 };
 
 export function RapportApercu({
@@ -48,11 +53,15 @@ export function RapportApercu({
   score,
   questions,
   adversaire,
-  vosCitations,
+  vosReponses,
+  reponsesRetenues,
+  questionsPerdues,
+  parMoteur,
   laPlusDure,
   pdv,
   moteursVerrouilles,
   questionsDuComplet,
+  constats,
 }: Props) {
   const [choisie, setChoisie] = useState(0);
   const [reservation, setReservation] = useState(false);
@@ -66,7 +75,11 @@ export function RapportApercu({
         score={score}
         date={date}
         adversaire={adversaire}
-        vosCitations={vosCitations}
+        vosReponses={vosReponses}
+        reponsesRetenues={reponsesRetenues}
+        questionsPerdues={questionsPerdues}
+        questionsPosees={questions.length}
+        parMoteur={parMoteur}
         laPlusDure={laPlusDure}
         pdv={pdv}
       />
@@ -89,6 +102,7 @@ export function RapportApercu({
       <AppelFinal
         moteursVerrouilles={moteursVerrouilles}
         questionsDuComplet={questionsDuComplet}
+        constats={constats}
         onReserver={() => setReservation(true)}
       />
 
@@ -143,23 +157,55 @@ function BarreHaute({
 
 /* ──────────────────────── verdict et adversaire ──────────────────────── */
 
+/** La révélation du chiffre : le seul moment chorégraphié du parcours. */
+function useCompteur(cible: number) {
+  const [v, setV] = useState(0);
+  useEffect(() => {
+    if (
+      typeof window !== "undefined" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    ) {
+      setV(cible);
+      return;
+    }
+    let frame = 0;
+    const debut = performance.now();
+    const tick = (now: number) => {
+      const t = Math.min(1, (now - debut) / 900);
+      setV(Math.round(cible * (1 - Math.pow(1 - t, 3))));
+      if (t < 1) frame = requestAnimationFrame(tick);
+    };
+    frame = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(frame);
+  }, [cible]);
+  return v;
+}
+
 function Verdict({
   score,
   date,
   adversaire,
-  vosCitations,
+  vosReponses,
+  reponsesRetenues,
+  questionsPerdues,
+  questionsPosees,
+  parMoteur,
   laPlusDure,
   pdv,
 }: {
   score: number;
   date: string | null;
   adversaire: Adversaire | null;
-  vosCitations: number;
+  vosReponses: number;
+  reponsesRetenues: number;
+  questionsPerdues: number;
+  questionsPosees: number;
+  parMoteur: { moteur: string; score: number }[];
   laPlusDure: { moteur: string; texte: string; marque: string } | null;
   pdv: Props["pdv"];
 }) {
-  const max = pdv.length ? Math.max(...pdv.map((p) => p.count)) : 1;
-  const visibles = pdv.slice(0, 5);
+  const affiche = useCompteur(score);
+  const max = pdv.length ? Math.max(...pdv.map((p) => p.reponses)) : 1;
 
   return (
     <div className="border-b border-ink lg:flex">
@@ -167,15 +213,38 @@ function Verdict({
         <span className="mono text-[12px] uppercase tracking-[0.13em] text-ink-2">
           votre score{date ? ` · ${dateFr(date)}` : ""}
         </span>
-        <p className="flex items-baseline gap-2">
+        <p className="flex items-baseline gap-2" aria-label={`Score ${score} sur 100`}>
           <span className="text-[104px] font-extrabold leading-[0.78] tracking-[-0.06em] lg:text-[120px]">
-            {score}
+            {affiche}
           </span>
           <span className="text-[30px] font-extrabold tracking-[-0.04em] text-ink-2 lg:text-[34px]">
             /100
           </span>
         </p>
         <p className="text-[19px] font-semibold tracking-[-0.02em]">{verdict(score)}</p>
+
+        <p className="mt-1 text-[15.5px] leading-[1.5] text-ink-2">
+          {fr(
+            `Sur les ${reponsesRetenues} réponses obtenues, votre marque apparaît dans ${vosReponses}.`,
+          )}
+          {questionsPerdues > 0
+            ? ` ${questionsPerdues} question${questionsPerdues > 1 ? "s" : ""} sur ${questionsPosees} ne vous ${questionsPerdues > 1 ? "font" : "fait"} apparaître sur aucun moteur.`
+            : ""}
+        </p>
+
+        {parMoteur.length ? (
+          <ul className="mt-3 flex flex-col gap-1.5 border-t border-rule pt-3">
+            {parMoteur.map((m) => (
+              <li key={m.moteur} className="flex items-baseline justify-between gap-3">
+                <span className="flex items-center gap-2 text-[15px]">
+                  <LogoMoteur nom={m.moteur} size={16} />
+                  {m.moteur}
+                </span>
+                <span className="mono text-[13px] text-ink-2">{m.score} / 100</span>
+              </li>
+            ))}
+          </ul>
+        ) : null}
       </div>
 
       <div className="flex flex-1 flex-col gap-5 px-5 py-8 sm:px-8 lg:py-14 lg:pr-12">
@@ -186,11 +255,13 @@ function Verdict({
           {adversaire ? (
             <>
               <p className="text-[30px] font-extrabold leading-[1.05] tracking-[-0.04em] lg:text-[44px]">
-                {adversaire.nom}, {adversaire.citations} fois sur {adversaire.total}.
+                {adversaire.nom}, cité dans {adversaire.reponses} réponses sur {adversaire.total}.
               </p>
               <p className="max-w-[62ch] text-[15.5px] leading-[1.5] text-ink-2 lg:text-[17px]">
                 {fr(
-                  `C'est le nom qui revient le plus souvent quand les moteurs répondent aux questions de votre marché. Vous êtes nommé ${vosCitations} fois.`,
+                  adversaire.geant
+                    ? "C'est le nom qui revient le plus souvent sur les questions de votre marché. C'est un acteur d'une autre taille que la vôtre : il donne la mesure du terrain, pas un objectif à rattraper."
+                    : "C'est le nom qui revient le plus souvent quand les moteurs répondent aux questions de votre marché. À votre place.",
                 )}
               </p>
             </>
@@ -218,25 +289,28 @@ function Verdict({
             </figure>
           ) : null}
 
-          {visibles.length ? (
+          {pdv.length ? (
             <div className="flex w-full flex-none flex-col gap-3 lg:w-[300px]">
-              {visibles.map((p) => (
-                <div key={p.name} className="flex flex-col gap-1.5">
+              <span className="mono text-[11px] uppercase tracking-[0.12em] text-ink-2">
+                réponses où chacun est nommé
+              </span>
+              {pdv.map((p) => (
+                <div key={p.nom} className="flex flex-col gap-1.5">
                   <div className="flex items-baseline justify-between gap-3">
                     <span
                       className="text-[15.5px] font-semibold"
-                      style={p.target ? { color: "var(--signal)" } : undefined}
+                      style={p.cible ? { color: "var(--signal)" } : undefined}
                     >
-                      {p.target ? "Vous" : p.name}
+                      {p.cible ? "Vous" : p.nom}
                     </span>
-                    <span className="mono text-[13px] text-ink-2">{p.count} mentions</span>
+                    <span className="mono text-[13px] text-ink-2">{p.reponses}</span>
                   </div>
                   <span className="block h-[9px] w-full bg-paper-2">
                     <span
                       className="block h-full"
                       style={{
-                        width: `${Math.max(2, (p.count / max) * 100)}%`,
-                        backgroundColor: p.target ? "var(--signal)" : "var(--ink)",
+                        width: `${Math.max(2, (p.reponses / max) * 100)}%`,
+                        backgroundColor: p.cible ? "var(--signal)" : "var(--ink)",
                       }}
                     />
                   </span>
@@ -543,10 +617,12 @@ const CE_QUE_LAPERCU_NE_MONTRE_PAS = [
 function AppelFinal({
   moteursVerrouilles,
   questionsDuComplet,
+  constats,
   onReserver,
 }: {
   moteursVerrouilles: string[];
   questionsDuComplet: number;
+  constats: string[];
   onReserver: () => void;
 }) {
   const ouverts = 6 - moteursVerrouilles.length;
@@ -554,6 +630,25 @@ function AppelFinal({
   return (
     <div className="bg-ink text-paper">
       <div className="mx-auto flex max-w-[920px] flex-col items-start gap-6 px-5 py-12 sm:px-8 lg:gap-9 lg:py-14">
+        {/* Ce que l'audit a DÉJÀ relevé. Rien n'est affiché si le site est en
+            ordre : fabriquer un problème pour nourrir l'appel serait exactement
+            ce que notre méthode reproche aux autres. */}
+        {constats.length > 0 ? (
+          <div
+            className="flex w-full flex-col gap-2 border-l-2 pl-4"
+            style={{ borderColor: "var(--signal)" }}
+          >
+            <span className="mono text-[12px] uppercase tracking-[0.13em] opacity-60">
+              déjà relevé sur votre site
+            </span>
+            {constats.map((c) => (
+              <p key={c} className="text-[16px] leading-[1.5]">
+                {c}
+              </p>
+            ))}
+          </div>
+        ) : null}
+
         <div className="flex flex-col gap-1.5">
           <span className="mono text-[12px] uppercase tracking-[0.13em] opacity-60">
             votre aperçu a interrogé {ouverts} moteur{ouverts > 1 ? "s" : ""}. vos clients en
