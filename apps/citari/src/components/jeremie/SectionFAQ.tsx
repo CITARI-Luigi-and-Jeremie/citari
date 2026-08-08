@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { ChevronDown } from "lucide-react";
 
 import { CONTACT_EMAIL } from "@/lib/site";
 
@@ -229,12 +230,12 @@ function Entree({ entree, index }: { entree: Entree; index: number }) {
           <span className="flex-1 font-sans text-[18px] font-semibold leading-[1.3] tracking-[-0.01em] text-ink sm:text-[21px]">
             {entree.q}
           </span>
-          <span
-            aria-hidden
-            className="mono shrink-0 px-1 text-[14px] text-ink-2 transition-transform duration-300 ease-out group-hover:text-ink"
-            style={{ transform: ouvert ? "rotate(180deg)" : "rotate(0deg)" }}
-          >
-            ↓
+          <span className="shrink-0 px-1">
+            <ChevronDown
+              aria-hidden="true"
+              className="h-5 w-5 text-ink-2 transition-transform duration-300 ease-out group-hover:text-ink"
+              style={{ transform: ouvert ? "rotate(180deg)" : "rotate(0deg)" }}
+            />
           </span>
         </button>
       </h3>

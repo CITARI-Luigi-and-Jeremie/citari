@@ -420,6 +420,18 @@ export function CostCalculator({
               margin: wide ? undefined : "0 auto",
             }}
           >
+            <span
+              style={{
+                fontFamily: MONO,
+                fontSize: 10.5,
+                letterSpacing: "0.16em",
+                textTransform: "uppercase",
+                color: ON_INK_MUTED,
+              }}
+            >
+              Ce qui a changé
+            </span>
+
             <ScrollFloat
               style={{
                 margin: 0,
@@ -427,10 +439,54 @@ export function CostCalculator({
                 fontWeight: 800,
                 letterSpacing: "-0.04em",
                 lineHeight: 1.05,
+                textWrap: "pretty" as never,
               }}
             >
-              Vos prospects n'ont pas arrêté de chercher. Ils ont arrêté de cliquer.
+              Le trafic baisse. La demande, non.
             </ScrollFloat>
+
+            <p
+              style={{
+                margin: 0,
+                fontSize: wide ? 17 : 15.5,
+                lineHeight: 1.55,
+                color: BODY,
+                textWrap: "pretty" as never,
+              }}
+            >
+              Votre marché n'a pas disparu. C'est{" "}
+              <strong style={{ color: BODY_STRONG }}>l'endroit où il se décide</strong> qui a
+              changé de place, et personne ne vous a prévenu.
+            </p>
+
+            <div
+              style={{
+                height: 1,
+                width: "100%",
+                maxWidth: 420,
+                background: LINE_INK,
+                margin: wide ? "14px 0 4px" : "10px 0 2px",
+              }}
+            />
+
+            <p
+              style={{
+                margin: 0,
+                fontSize: wide ? 26 : 21,
+                fontWeight: 600,
+                letterSpacing: "-0.02em",
+                lineHeight: 1.2,
+                color: INK,
+                textWrap: "pretty" as never,
+              }}
+            >
+              La décision se prend désormais dans la réponse, pas sur votre site.
+            </p>
+
+            <p style={{ margin: 0, fontSize: 15.5, lineHeight: 1.5, color: BODY }}>
+              Et dans cette réponse, il n'y a que{" "}
+              <span style={{ color: RED_DARK }}>trois noms</span>.
+            </p>
           </div>
 
           <div
@@ -457,7 +513,7 @@ export function CostCalculator({
                 logoAlt="McKinsey"
                 value="38"
                 unit="%"
-                line="de vos prospects se renseignent via une IA avant d'acheter"
+                line="de vos acheteurs interrogent une IA avant de décider. Trois noms sortent. Le vôtre, ou trois concurrents."
                 chart={<DotScale />}
                 source="McKinsey · mars 2026"
               />,
@@ -466,13 +522,16 @@ export function CostCalculator({
                 wide={wide}
                 logo="/img/pew.jpg"
                 logoAlt="Pew Research Center"
-                value="−7"
-                unit="%"
-                line="de clics vers les sites, à cause des résumés d'IA en haut de Google"
+                value="1"
+                unit="sur 2"
+                line="C'est la part des clics qui disparaît dès qu'une réponse d'IA s'affiche."
                 chart={
+                  // Les deux valeurs brutes de l'étude sont sous le titre : 15 % de
+                  // clics sans réponse d'IA, 8 % avec. Le « 1 sur 2 » les résume,
+                  // il ne les remplace pas.
                   <div style={{ display: "flex", flexDirection: "column", gap: 7 }}>
-                    <CompareBar label="sans résumé" pct={100} value="15 %" color={ON_INK_BODY} dim />
-                    <CompareBar label="avec résumé" pct={53} value="8 %" color={RED} />
+                    <CompareBar label="sans rép. d'IA" pct={100} value="15 %" color={ON_INK_BODY} dim />
+                    <CompareBar label="avec rép. d'IA" pct={53} value="8 %" color={RED} />
                   </div>
                 }
                 source="Pew Research Center · juill. 2025 · n = 900"
@@ -484,7 +543,7 @@ export function CostCalculator({
                 logoAlt="Arcom / Médiamétrie"
                 value="56,6"
                 unit="%"
-                line="des Français ont utilisé un service d'IA"
+                line="des Français utilisent déjà l'IA. Vous n'êtes pas devenu invisible, le marché a changé de fenêtre."
                 chart={<Bar pct={56.6} />}
                 source="Arcom / Médiamétrie · avr. 2026"
               />,

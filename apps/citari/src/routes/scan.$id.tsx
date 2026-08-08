@@ -3,6 +3,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useRef, useState } from "react";
 
 import { EcranAttente } from "@/components/jeremie/EcranAttente";
+import { LogoMoteur } from "@/components/jeremie/LogosMoteurs";
 import { chargerTeaser, debloquerRapport, suivreScan } from "@/lib/scan.functions";
 import type { EtatScan } from "@/lib/orchestrateur.server";
 import { MOTEURS, fr, verdict } from "@/lib/typo";
@@ -235,7 +236,13 @@ function ParMoteur({ data }: { data: Teaser }) {
             const zero = note === 0;
             return (
               <li key={moteur} className="flex items-baseline justify-between gap-4 py-4">
-                <span style={zero ? { color: "var(--signal)" } : undefined}>{moteur}</span>
+                <span
+                  className="flex items-center gap-2.5"
+                  style={zero ? { color: "var(--signal)" } : undefined}
+                >
+                  <LogoMoteur nom={moteur} size={17} />
+                  {moteur}
+                </span>
                 <span className="mono" style={zero ? { color: "var(--signal)" } : undefined}>
                   {note} / 100
                 </span>
