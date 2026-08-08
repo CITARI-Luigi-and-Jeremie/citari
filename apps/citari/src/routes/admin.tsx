@@ -70,7 +70,7 @@ function Page() {
             onChange={(e) => setMotDePasse(e.target.value)}
             autoComplete="current-password"
           />
-          {erreur && <p className="mt-3 text-[13px] text-bordeaux">{erreur}</p>}
+          {erreur && <p className="mt-3 text-[13px] text-signal">{erreur}</p>}
           <Btn className="mt-5 w-full" type="submit">
             Entrer
           </Btn>
@@ -82,9 +82,9 @@ function Page() {
   return (
     <div className="mx-auto max-w-[1240px] px-6 py-10 lg:px-10">
       <header className="flex items-baseline justify-between border-b border-rule-strong pb-3">
-        <h1 className="font-display text-[26px] leading-none">Back-office</h1>
+        <h1 className="font-sans font-semibold text-[26px] leading-none">Back-office</h1>
         <button
-          className="label-xs hover:text-bordeaux"
+          className="label-xs hover:text-signal"
           onClick={() => {
             sessionStorage.removeItem("geo-admin");
             setSession(null);
@@ -96,7 +96,7 @@ function Page() {
       </header>
 
       {chargement && !donnees && <p className="mt-8 text-[14px] text-ink-3">Chargement…</p>}
-      {erreur && <p className="mt-8 text-[14px] text-bordeaux">{erreur}</p>}
+      {erreur && <p className="mt-8 text-[14px] text-signal">{erreur}</p>}
 
       {donnees && (
         <>
@@ -138,12 +138,12 @@ function Page() {
                       {[s.sector, s.city].filter(Boolean).join(" · ") || "—"}
                     </td>
                     <td className="py-2 pr-4">
-                      <Etiquette ton={s.status === "termine" ? "neutre" : "bordeaux"}>{s.status}</Etiquette>
+                      <Etiquette ton={s.status === "termine" ? "neutre" : "signal"}>{s.status}</Etiquette>
                     </td>
                     <td className="num py-2 pr-4">{s.score_global ?? "—"}</td>
                     <td className="py-2">
                       {s.report_token ? (
-                        <a className="underline hover:text-bordeaux" href={`/rapport/${s.report_token}`}>
+                        <a className="underline hover:text-signal" href={`/rapport/${s.report_token}`}>
                           ouvrir
                         </a>
                       ) : (
@@ -194,7 +194,7 @@ function Page() {
 function Section({ titre, children }: { titre: string; children: React.ReactNode }) {
   return (
     <section className="mt-14">
-      <h2 className="font-display text-[24px] leading-none">{titre}</h2>
+      <h2 className="font-sans font-semibold text-[24px] leading-none">{titre}</h2>
       <div className="mt-4 overflow-x-auto">{children}</div>
     </section>
   );
@@ -237,7 +237,7 @@ function TableLeads({
             </td>
             <td className="py-2 pr-4">
               {l.scan?.report_token ? (
-                <a className="underline hover:text-bordeaux" href={`/rapport/${l.scan.report_token}`}>
+                <a className="underline hover:text-signal" href={`/rapport/${l.scan.report_token}`}>
                   {l.scan.brand_name}
                 </a>
               ) : (
@@ -275,7 +275,7 @@ function TableLeads({
                   }}
                 />
               ) : (
-                <button className="text-left text-ink-2 hover:text-bordeaux" onClick={() => setOuvert(l.id)}>
+                <button className="text-left text-ink-2 hover:text-signal" onClick={() => setOuvert(l.id)}>
                   {l.notes || "ajouter une note"}
                 </button>
               )}

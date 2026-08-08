@@ -1,43 +1,23 @@
-import { Link } from "@tanstack/react-router";
 import type { ReactNode } from "react";
-import { Logo, LogoLien } from "@/components/logo";
 import { Label } from "@/components/kit";
+import { SiteFooter } from "@/components/jeremie/SectionFinalCTA";
 
-const LIENS = [
-  ["/guide-geo", "Guide du GEO"],
-  ["/geo-vs-seo", "GEO vs SEO"],
-  ["/alternatives-agence-seo", "Alternatives"],
-] as const;
-
+/**
+ * Habillage des pages de contenu (guide, comparaisons, mentions, confidentialité).
+ *
+ * Elle portait son propre en-tête avec logo et navigation. Depuis le portage du
+ * front de Jérémie, la racine en affiche déjà un : ces pages en avaient donc
+ * DEUX, l'un sous l'autre. L'en-tête a été retiré, et le pied minimal remplacé
+ * par le pied du site, pour que la navigation soit la même partout.
+ */
 export function Chrome({ children }: { children: ReactNode }) {
   return (
-    <div className="mx-auto max-w-[1240px] px-6 lg:px-10">
-      <header className="flex flex-wrap items-center justify-between gap-4 border-b border-rule-strong py-5">
-        <LogoLien hauteur={36} className="justify-start" />
-        <nav className="flex flex-wrap gap-6">
-          {LIENS.map(([to, label]) => (
-            <Link key={to} to={to} className="label-xs hover:text-ink">
-              {label}
-            </Link>
-          ))}
-        </nav>
-      </header>
-      {children}
-      <footer className="mt-28 border-t border-rule-strong py-8">
-        <div className="flex flex-wrap items-baseline justify-between gap-6">
-          <Logo hauteur={24} />
-          <nav className="flex flex-wrap gap-6">
-            {[...LIENS, ["/mentions-legales", "Mentions légales"], ["/confidentialite", "Confidentialité"]].map(
-              ([to, label]) => (
-                <Link key={to} to={to} className="label-xs hover:text-ink">
-                  {label}
-                </Link>
-              ),
-            )}
-          </nav>
-        </div>
-      </footer>
-    </div>
+    <>
+      <div className="mx-auto max-w-[1240px] px-6 lg:px-10">{children}</div>
+      <div className="mt-28">
+        <SiteFooter />
+      </div>
+    </>
   );
 }
 
@@ -65,7 +45,7 @@ export function Article({
           <ol className="border-t border-rule-strong">
             {sommaire.map(([id, label], i) => (
               <li key={id} className="border-b border-rule">
-                <a href={`#${id}`} className="flex gap-2 py-2 text-[13px] leading-snug hover:text-bordeaux">
+                <a href={`#${id}`} className="flex gap-2 py-2 text-[13px] leading-snug hover:text-signal">
                   <span className="num text-[10px] text-ink-3">{String(i + 1).padStart(2, "0")}</span>
                   {label}
                 </a>

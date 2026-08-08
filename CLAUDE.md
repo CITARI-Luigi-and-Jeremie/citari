@@ -38,10 +38,24 @@ région Paris) et Notion (espace CITARI, où vit toute la documentation
 commerciale). Les clés des six moteurs sont dans `apps/citari/.env.local`,
 jamais versionnées.
 
-**Le front de Jérémie est porté** (07/08/2026), mais partiellement. La landing,
-l'en-tête, le pied et les tokens de design viennent de son projet Lovable
-`citari-ai-audit` ; ils vivent dans `src/components/jeremie/`. L'écran de scan
-et le rapport gardent l'ancienne maquette : c'est le prochain chantier.
+**Le front de Jérémie est porté en entier** (08/08/2026). Landing, en-tête,
+pied, page `/methode`, écran de scan et rapport viennent de son projet Lovable
+`citari-ai-audit` ; ses composants vivent dans `src/components/jeremie/`. Il
+n'y a plus qu'une seule charte sur le site.
+
+Ce que le premier passage avait manqué, et qui a été rattrapé :
+
+- la page `/methode` n'existait pas du tout ;
+- le héros montrait ses vieilles cartes flottantes, plus le spécimen de rapport
+  à deux colonnes qu'il utilise réellement (`HeroSpecimen`) ;
+- l'écran d'attente gardait l'ancienne maquette, au lieu de sa carte perforée ;
+- `bordeaux` et `font-display` avaient disparu de la feuille de style sans que
+  les pages qui s'en servaient soient reprises : le rapport, l'admin et les
+  pages de contenu s'affichaient sans accent et sans police de titrage. Les
+  jetons pointent désormais sur `signal` et sur Archivo / Newsreader ;
+- `components/logo.tsx` peignait le signe par masque alpha depuis une URL de
+  CDN Lovable : deux fois mort, il ne s'affichait plus nulle part ;
+- les pages de contenu avaient **deux** en-têtes, le leur et celui de la racine.
 
 **Sa couche données a été intégralement jetée, et ne doit jamais revenir.** Son
 projet visait une AUTRE base Supabase (`vbxgwqutyzmnasjyladg`) avec un autre

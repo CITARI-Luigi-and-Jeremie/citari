@@ -17,6 +17,7 @@ import {
   type Reponse,
 } from "@/components/rapport";
 import { dateFr, fr, frTitre, verdict, MOTEURS, NBSP } from "@/lib/typo";
+import { bookingUrl } from "@/lib/site";
 
 export const Route = createFileRoute("/rapport/$jeton")({
   loader: async ({ params }) => {
@@ -29,7 +30,7 @@ export const Route = createFileRoute("/rapport/$jeton")({
       ? `Rapport de visibilité IA — ${loaderData.scan.brand_name}`
       : "Rapport indisponible";
     const desc =
-      "Score de visibilité IA, part de voix et sources citées par ChatGPT, Claude, Gemini et Perplexity.";
+      "Score de visibilité IA, part de voix et sources citées par ChatGPT, Claude, Gemini, Perplexity, Grok et Le Chat.";
     return {
       meta: [
         { title: titre },
@@ -77,12 +78,19 @@ function Rapport() {
     pourquoi: string;
     effort: string;
   }[];
+  // Les six, toujours. Il en manquait deux — Grok et Le Chat — et le rapport
+  // les affichait donc « — » alors qu'ils avaient bien été interrogés et notés.
   const parMoteur: Record<string, number | null> = {
     ChatGPT: scan.score_chatgpt as number | null,
     Claude: scan.score_claude as number | null,
     Gemini: scan.score_gemini as number | null,
     Perplexity: scan.score_perplexity as number | null,
+    Grok: scan.score_grok as number | null,
+    "Le Chat": scan.score_mistral as number | null,
   };
+  // Le nombre de moteurs dépend du mode : annoncer « × 6 moteurs » sur un
+  // aperçu qui en interroge deux gonfle l'ampleur de la mesure vendue.
+  const moteursInterroges = MOTEURS.filter((m) => parMoteur[m] !== null).length || MOTEURS.length;
 
   return (
     <div className="mx-auto max-w-[1180px] px-6 pb-32 lg:px-10">
@@ -104,7 +112,7 @@ function Rapport() {
             ["secteur", scan.sector],
             ["site", scan.website_url ?? "—"],
             ["date", scan.completed_at ? dateFr(scan.completed_at) : dateFr(scan.created_at)],
-            ["échantillon", `${questions.length} questions × ${MOTEURS.length} moteurs`],
+            ["échantillon", `${questions.length} questions × ${moteursInterroges} moteurs`],
             ["réponses", `${reponses.length}`],
           ].map(([k, v]) => (
             <div key={k}>
@@ -115,7 +123,7 @@ function Rapport() {
         </dl>
         {precedent ? (
           <div className="mt-4">
-            <Etiquette ton="bordeaux">
+            <Etiquette ton="signal">
               mode comparaison — scan initial du {precedent.date ? dateFr(precedent.date) : "—"}
             </Etiquette>
           </div>
@@ -130,7 +138,7 @@ function Rapport() {
           <ol>
             {SECTIONS.map(([id, titre], i) => (
               <li key={id} className="border-b border-rule">
-                <a href={`#${id}`} className="flex items-baseline gap-2 py-2 text-[13px] hover:text-bordeaux">
+                <a href={`#${id}`} className="flex items-baseline gap-2 py-2 text-[13px] hover:text-signal">
                   <span className="num text-[10px] text-ink-3">{String(i + 1).padStart(2, "0")}</span>
                   {titre}
                 </a>
@@ -172,7 +180,7 @@ function Rapport() {
           <Section id="voix" titre="Part de voix">
             <p className="mb-6 max-w-[58ch] text-[15px] text-ink-2">
               {fr(
-                "Mentions de la marque rapportées au total des mentions relevées, concurrents compris. La marque suivie est en bordeaux ; le contexte reste neutre.",
+                "Mentions de la marque rapportées au total des mentions relevées, concurrents compris. La marque suivie est en rouge signal ; le contexte reste neutre.",
               )}
             </p>
             <PartDeVoix items={pdv} />
@@ -228,6 +236,8 @@ function Rapport() {
           </div>
 
           {!reponses.length ? <Vide>Aucune réponse collectée pour ce scan.</Vide> : null}
+
+          <Restitution marque={marque} />
         </main>
       </div>
 
@@ -238,6 +248,48 @@ function Rapport() {
         </p>
       </footer>
     </div>
+  );
+}
+
+/**
+ * Le mur de restitution.
+ *
+ * Porté du projet Lovable de Jérémie (`BookingWall`) le 08/08/2026 : le rapport
+ * s'arrêtait jusqu'ici sur une note méthodologique, sans jamais proposer la
+ * suite. C'est pourtant la page où le prospect est le plus convaincu.
+ *
+ * Ne rien promettre sur le résultat : on vend trente minutes de lecture du
+ * rapport, et on dit à voix haute qu'un bon score ne débouche sur aucune vente.
+ */
+function Restitution({ marque }: { marque: string }) {
+  const lien = bookingUrl({ name: marque });
+  return (
+    <section className="no-print mt-24 border border-ink p-6 sm:p-12">
+      <h2 className="measure text-[26px] sm:text-[34px]">Le rapport se lit mieux à deux.</h2>
+      <p className="measure mt-6 text-ink-2">
+        {fr(
+          "Trente minutes en visio : les questions une par une, les sources sur lesquelles les moteurs s’appuient pour recommander vos concurrents, et vos trois corrections prioritaires. Vous repartez avec le diagnostic, qu’on travaille ensemble ou non.",
+        )}
+      </p>
+      <div className="mt-8">
+        <iframe
+          src={lien}
+          title="Réserver trente minutes avec Citari"
+          loading="lazy"
+          className="h-[620px] w-full border border-rule-strong bg-paper"
+        />
+      </div>
+      <p className="mt-6">
+        <a href={lien} className="cta">
+          Réserver mes 30 minutes
+        </a>
+      </p>
+      <p className="mono mt-4 text-[13px] text-ink-2">
+        {fr(
+          "Appel gratuit. Si votre score est bon, nous vous le disons et nous ne vous vendons rien. Le Sprint GEO, si vous le faites : 2 900 € HT une fois, sans abonnement.",
+        )}
+      </p>
+    </section>
   );
 }
 

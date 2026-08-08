@@ -385,6 +385,27 @@
   opacity: 0.45;
 }
 
+/**
+ * En-tête de colonne de la carte perforée.
+ *
+ * Sur petit écran les colonnes font une vingtaine de pixels : le nom du moteur
+ * se lit à la verticale. Sans la rotation, `vertical-rl` colle la ligne au bord
+ * DROIT de sa colonne, et chaque nom se retrouve visuellement au-dessus de la
+ * colonne suivante — on lisait « ChatGPT » à l'aplomb de Gemini. La rotation
+ * ramène la ligne à gauche, dans l'axe de ses propres cases.
+ */
+@utility col-moteur {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  transform: rotate(180deg);
+  transform-origin: center;
+
+  @media (width >= 40rem) {
+    writing-mode: horizontal-tb;
+    transform: none;
+  }
+}
+
 /* Cartes d'étapes empilées : superposition progressive au défilement */
 @utility stack-card {
   position: sticky;

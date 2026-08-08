@@ -33,9 +33,9 @@ export function Btn({ variant = "encre", size = "md", className, ...props }: Btn
         "disabled:cursor-not-allowed disabled:opacity-40",
         size === "lg" ? "px-7 py-3.5" : "px-5 py-2.5",
         variant === "encre" &&
-          "border-ink bg-ink text-paper shadow-soft hover:-translate-y-px hover:bg-bordeaux hover:border-bordeaux hover:shadow-lift",
+          "border-ink bg-ink text-paper shadow-soft hover:-translate-y-px hover:bg-signal hover:border-signal hover:shadow-lift",
         variant === "ligne" && "border-rule-strong bg-transparent text-ink hover:border-ink hover:bg-paper-2",
-        variant === "nu" && "border-transparent px-0 text-ink-3 hover:text-bordeaux",
+        variant === "nu" && "border-transparent px-0 text-ink-3 hover:text-signal",
         className,
       )}
     />
@@ -63,7 +63,7 @@ export function Field({
 }
 
 const champBase =
-  "w-full rounded-sm border border-rule bg-card px-3.5 py-2.5 text-[15px] outline-none transition-[border-color,box-shadow] duration-300 ease-[cubic-bezier(0.2,0.7,0.2,1)] placeholder:text-ink-3/70 hover:border-rule-strong focus:border-bordeaux focus:shadow-[0_0_0_3px_var(--accent-wash)]";
+  "w-full rounded-sm border border-rule bg-card px-3.5 py-2.5 text-[15px] outline-none transition-[border-color,box-shadow] duration-300 ease-[cubic-bezier(0.2,0.7,0.2,1)] placeholder:text-ink-3/70 hover:border-rule-strong focus:border-signal focus:shadow-[0_0_0_3px_var(--accent-wash)]";
 
 export function Champ({ className, ...props }: InputHTMLAttributes<HTMLInputElement>) {
   return <input {...props} className={cn(champBase, className)} />;
@@ -85,17 +85,17 @@ export function LigneVide({ legende, className }: { legende?: string; className?
         {legende ? <span className="label-xs block pb-2.5">{legende}</span> : null}
         <div className="h-px w-full bg-rule-strong" />
       </div>
-      <span className="shrink-0 font-display text-[17px] italic leading-none text-bordeaux">rien</span>
+      <span className="shrink-0 quote-serif text-[17px] leading-none text-signal">rien</span>
     </div>
   );
 }
 
-export function Etiquette({ children, ton = "neutre" }: { children: ReactNode; ton?: "neutre" | "bordeaux" }) {
+export function Etiquette({ children, ton = "neutre" }: { children: ReactNode; ton?: "neutre" | "signal" }) {
   return (
     <span
       className={cn(
         "inline-flex items-center rounded-full border px-2.5 py-0.5 text-[11px] font-medium tracking-[0.04em]",
-        ton === "bordeaux" ? "border-bordeaux/40 bg-bordeaux-wash text-bordeaux" : "border-rule bg-paper-2 text-ink-3",
+        ton === "signal" ? "border-signal/40 bg-signal-tint text-signal" : "border-rule bg-paper-2 text-ink-3",
       )}
     >
       {children}

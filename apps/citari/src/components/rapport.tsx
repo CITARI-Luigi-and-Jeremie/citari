@@ -51,9 +51,9 @@ export function ScoreGeant({
       <div className="num leading-[0.8] text-[112px] md:text-[152px]">{score}</div>
       <div className="pb-3">
         <Label>sur 100</Label>
-        <div className="font-display text-[34px] leading-none">{verdict}</div>
+        <div className="font-sans font-semibold text-[34px] leading-none">{verdict}</div>
         {typeof ecart === "number" ? (
-          <div className="num mt-2 text-[13px] text-bordeaux">
+          <div className="num mt-2 text-[13px] text-signal">
             {ecart >= 0 ? "+" : "−"}
             {Math.abs(ecart)} pt depuis le scan initial
           </div>
@@ -125,7 +125,7 @@ export function PartDeVoix({
             <span
               className={cn(
                 "w-[150px] shrink-0 truncate text-[14px] md:w-[210px]",
-                it.target ? "font-semibold text-bordeaux" : "text-ink-2",
+                it.target ? "font-semibold text-signal" : "text-ink-2",
               )}
             >
               {it.name}
@@ -133,7 +133,7 @@ export function PartDeVoix({
             </span>
             <span className="h-3 flex-1 bg-paper-2">
               <span
-                className={cn("block h-3", it.target ? "bg-bordeaux" : "bg-rule-strong")}
+                className={cn("block h-3", it.target ? "bg-signal" : "bg-rule-strong")}
                 style={{ width: `${Math.max(1.5, it.share * 100)}%` }}
               />
             </span>
@@ -203,10 +203,10 @@ export function TableauRequetes({
                     {cible ? (
                       <span className="num text-[12px]">
                         {marque} <span className="text-ink-3">#{cible.position ?? "?"}</span>
-                        {cible.recommended ? <span className="text-bordeaux"> ✓reco</span> : null}
+                        {cible.recommended ? <span className="text-signal"> ✓reco</span> : null}
                       </span>
                     ) : (
-                      <span className="num text-[12px] text-bordeaux">absent</span>
+                      <span className="num text-[12px] text-signal">absent</span>
                     )}
                     <div className="mt-0.5 text-[11px] leading-tight text-ink-3">
                       {cell
@@ -235,7 +235,7 @@ export function Verbatims({ mentions, marque }: { mentions: Mention[]; marque: s
     <div className="grid gap-6 md:grid-cols-2">
       {items.map((m) => (
         <figure key={m.id} className="avoid-break border-t border-rule-strong pt-3">
-          <blockquote className="font-display text-[21px] leading-[1.3]">
+          <blockquote className="quote-serif text-[21px] leading-[1.3]">
             <Surligne texte={m.verbatim ?? ""} marque={m.brand} cible={marque} />
           </blockquote>
           <figcaption className="num mt-3 text-[11px] text-ink-3">
@@ -258,8 +258,8 @@ function Surligne({ texte, marque, cible }: { texte: string; marque: string; cib
           <mark
             key={i}
             className={cn(
-              "bg-highlight px-0.5",
-              part.toLowerCase() === cible.toLowerCase() && "bg-bordeaux-wash text-bordeaux",
+              "bg-paper-3 px-0.5",
+              part.toLowerCase() === cible.toLowerCase() && "bg-signal-tint text-signal",
             )}
           >
             {part}

@@ -5,6 +5,72 @@ d'une nouvelle session, après `CLAUDE.md`.
 
 ---
 
+## 2026-08-08 — Le portage du front était à moitié fait, et ça se voyait
+
+Le portage de la veille avait pris la landing et s'était arrêté là. Trois
+écrans manquaient, et surtout le site s'était mis à **mélanger deux chartes**
+sans que rien ne signale l'erreur : ni le build, ni `tsc`, ni les tests.
+
+**Une classe Tailwind morte ne casse rien, elle éteint.** En fusionnant les
+feuilles de style, `bordeaux` et `font-display` ne sont pas passés dans
+`@theme`. Tailwind ne génère alors aucune règle pour `text-bordeaux` ou
+`font-display` — pas d'avertissement, pas d'erreur : les 63 usages répartis sur
+dix fichiers ont simplement perdu leur accent et leur police de titrage. Le
+rapport, le back-office et les pages de contenu s'affichaient en noir sur
+blanc, en police par défaut. C'est le genre de régression qu'aucun contrôle
+automatique n'attrape : il faut ouvrir la page.
+
+Les jetons ont été traduits plutôt que rétablis — `bordeaux` → `signal`,
+`font-display` → Archivo pour les titres et Newsreader pour les citations —
+parce que rétablir l'ancienne palette aurait figé deux chartes côte à côte.
+
+**Le logo était mort deux fois.** `components/logo.tsx` peignait le signe par
+masque alpha depuis `--marque-src`, mais la règle CSS du masque n'avait pas
+survécu à la fusion ; et l'image venait de `src/assets/*.asset.json`, une URL de
+CDN Lovable (`/__l5e/assets-v1/…`) qui n'existe pas sur notre serveur. Il ne
+restait qu'un bloc vide sur le rapport et les pages de contenu. Réécrit en
+`<img>` sur `/img/citari-logo.png`, la même image que l'en-tête.
+
+**Deux en-têtes l'un sous l'autre.** `Chrome` portait son propre logo et sa
+propre navigation ; depuis que la racine en affiche un, les pages de contenu en
+avaient deux. `Chrome` n'habille plus que le contenu, et sert le pied du site.
+
+**Le héros ne montrait pas la bonne maquette.** On avait porté
+`HeroFloatingCards`, un composant que son projet garde mais n'utilise plus. Sa
+page d'accueil est en deux colonnes, avec `HeroSpecimen` — un spécimen de
+rapport étiqueté, chiffres et concurrents fictifs — à droite. Leçon : dans un
+projet Lovable, la présence d'un composant ne prouve pas qu'il soit branché ;
+c'est la route qui fait foi.
+
+**L'écran d'attente est devenu une carte perforée.** Une ligne par question,
+une colonne par moteur, une case noircie par réponse réellement écrite en base.
+`etatScan` renvoie désormais les paires (question, moteur) et leur latence, pas
+seulement un compteur : la grille est une lecture directe de `responses`, pas
+une animation. Les moteurs non couverts par l'aperçu s'affichent verrouillés —
+c'est le mécanisme de conversion, et c'est honnête puisqu'ils sont réellement
+absents. Une réponse en erreur est marquée d'une croix plutôt que noircie :
+elle ne compte pas au dénominateur du score, l'écran ne doit pas la faire
+passer pour une réponse obtenue.
+
+**Le péage à l'email de sa maquette a été retiré.** Son écran de résultat
+floute le verbatim et demande l'adresse. Chez nous elle est déjà demandée à la
+quatrième étape du formulaire, avant le lancement : garder son verrou aurait
+fait payer deux fois le même prix. La phrase s'affiche donc en clair, et le
+verrou ne subsiste qu'en repli pour un scan créé sans lead.
+
+**Deux bugs de données trouvés en regardant l'écran.** Le rapport ne
+construisait `parMoteur` que sur quatre moteurs : Grok et Le Chat affichaient
+« — » alors qu'ils étaient interrogés et notés. Et l'en-tête annonçait
+« × 6 moteurs » quel que soit le mode, donc aussi sur un aperçu qui en
+interroge deux.
+
+**L'en-tête vertical de la grille mentait d'une colonne.** En `writing-mode:
+vertical-rl`, une ligne unique se colle au bord droit de sa case : sur mobile,
+« CHATGPT » se lisait à l'aplomb de Gemini. Une rotation de 180° ramène la
+ligne à gauche, dans l'axe de ses propres cases.
+
+---
+
 ## 2026-08-07 — Le front de Jérémie est porté, sa couche données jetée
 
 La landing dessinée par Jérémie tourne désormais sur ce dépôt, branchée sur

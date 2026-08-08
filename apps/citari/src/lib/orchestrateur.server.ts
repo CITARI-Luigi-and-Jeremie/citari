@@ -433,13 +433,18 @@ export async function etatScan(id: string) {
     .eq("id", id)
     .maybeSingle();
   if (!scan) return null;
-  const [{ data: questions }, { count: nbReponses }, { data: cout }] = await Promise.all([
-    supabaseAdmin.from("queries").select("rank, text, intent").eq("scan_id", id).order("rank"),
-    supabaseAdmin.from("responses").select("id", { count: "exact", head: true }).eq("scan_id", id),
+  const [{ data: questions }, { data: cellules }, { data: cout }] = await Promise.all([
+    supabaseAdmin.from("queries").select("id, rank, text, intent").eq("scan_id", id).order("rank"),
+    // L'écran d'attente dessine une grille question × moteur : il lui faut la
+    // paire de chaque réponse écrite, pas seulement leur nombre. Ces lignes
+    // sont minuscules (deux identifiants et une latence) et plafonnent à 144.
+    // Le texte des réponses, lui, ne quitte pas le serveur avant le rapport.
+    supabaseAdmin.from("responses").select("query_id, engine, latency_ms, error").eq("scan_id", id),
     supabaseAdmin.from("cost_log").select("cost_eur").eq("scan_id", id),
   ]);
-  const total = (questions?.length ?? 0) * moteursDuMode((scan.mode as ModeScan) ?? "complet").length;
-  const collectees = nbReponses ?? 0;
+  const moteurs = moteursDuMode((scan.mode as ModeScan) ?? "complet");
+  const total = (questions?.length ?? 0) * moteurs.length;
+  const collectees = cellules?.length ?? 0;
   return {
     id: scan.id,
     status: scan.status,
@@ -450,14 +455,31 @@ export async function etatScan(id: string) {
     // est simplement de réessayer.
     error: scan.error_message ? MESSAGE_ECHEC_PUBLIC : null,
     brand: scan.brand_name,
+    domaine: scan.website_url as string | null,
+    demarreA: (scan.started_at ?? scan.created_at) as string | null,
     reportToken: scan.report_token,
     questions: questions ?? [],
+    // Les moteurs réellement interrogés, et ceux que l'aperçu laisse de côté.
+    // Les montrer verrouillés est le mécanisme de conversion vers le
+    // diagnostic complet, pas un défaut d'affichage. Uniquement en aperçu : le
+    // mode contrôle est interne, personne n'a rien à y débloquer.
+    moteurs: [...moteurs] as string[],
+    verrouilles:
+      scan.mode === "apercu" ? (MOTEURS.filter((m) => !moteurs.includes(m)) as string[]) : [],
+    cellules: (cellules ?? []).map((c) => ({
+      queryId: c.query_id as string,
+      moteur: c.engine as string,
+      latence: (c.latency_ms ?? null) as number | null,
+      erreur: Boolean(c.error),
+    })),
     collectees,
     total,
     progression: total ? Math.min(99, Math.round((collectees / total) * 96) + 2) : 2,
     cout: (cout ?? []).reduce((a, c) => a + Number(c.cost_eur ?? 0), 0),
   };
 }
+
+export type EtatScan = NonNullable<Awaited<ReturnType<typeof etatScan>>>;
 
 /** Traite un lot de paires (question × moteur). Appelé à chaque interrogation du client. */
 export async function avancerScan(id: string) {

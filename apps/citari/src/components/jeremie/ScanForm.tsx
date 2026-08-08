@@ -82,7 +82,7 @@ export function ScanForm({ centered = false }: { centered?: boolean }) {
 
       // Le quota d'IP est rendu comme un message, pas comme une exception :
       // c'est une limite normale, pas une panne, et le visiteur doit le lire.
-      if ("erreur" in reponse) {
+      if ("erreur" in reponse && reponse.erreur) {
         setEtat("erreur");
         setMessageErreur(reponse.erreur);
         return;

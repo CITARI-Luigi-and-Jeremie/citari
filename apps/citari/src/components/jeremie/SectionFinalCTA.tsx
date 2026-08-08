@@ -50,12 +50,13 @@ const LIENS = [
     label: "Mesurer",
     items: [
       { label: "Lancer le scan", to: "/", focus: true },
-      { label: "Guide du GEO", to: "/guide-geo" },
+      { label: "La méthode, en entier", to: "/methode" },
     ],
   },
   {
     label: "Comprendre",
     items: [
+      { label: "Guide du GEO", to: "/guide-geo" },
       { label: "GEO ou SEO", to: "/geo-vs-seo" },
       { label: "Les alternatives à une agence", to: "/alternatives-agence-seo" },
     ],

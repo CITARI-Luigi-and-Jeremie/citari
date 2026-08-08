@@ -112,7 +112,7 @@ function Page() {
           <section key={o.titre} className="mt-10 border-t border-ink pt-4">
             <div className="flex items-baseline gap-3">
               <span className="num text-[11px] text-ink-3">{String(i + 1).padStart(2, "0")}</span>
-              <h3 className="font-display text-[28px] leading-none">{o.titre}</h3>
+              <h3 className="font-sans font-semibold text-[28px] leading-none">{o.titre}</h3>
             </div>
             <dl className="mt-4 grid gap-x-10 gap-y-3 sm:grid-cols-2">
               {[
