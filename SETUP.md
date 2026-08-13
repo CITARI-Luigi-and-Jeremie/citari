@@ -70,18 +70,27 @@ davantage.
 
 ### Emails, Resend
 
-Le circuit est entièrement câblé depuis le 10/08/2026 : `pnpm toolkit envoyer`
-prépare les brouillons manquants, revérifie, et expédie par Resend. Il ne
-manque que trois gestes, qui demandent le compte Resend et l'accès Hostinger :
+Le circuit est entièrement câblé depuis le 10/08/2026, et presque tout est
+fait depuis le 13/08 : la clé est dans le `.env` racine et un email de test
+est réellement parti par le code de production (id Resend à l'appui). La boîte
+`contact@citari.fr` existe (Google Workspace) : c'est elle qui reçoit les
+réponses (`Reply-To`) et les demandes STOP.
 
-1. Coller la clé (créée sur https://resend.com/api-keys) dans le `.env` de la
-   racine, ligne `RESEND_API_KEY=`. L'emplacement est déjà préparé.
-2. Sur Resend, ajouter le domaine `citari.fr`, puis recopier les
-   enregistrements DNS qu'il affiche (SPF et DKIM, 3 lignes environ) dans la
-   zone DNS de Hostinger. Attendre que Resend affiche « Verified » : sans ça,
-   tout part en indésirables.
-3. Créer la boîte `luigi@citari.fr` chez Hostinger (incluse dans le pack) :
-   c'est elle qui reçoit les réponses (`Reply-To`) et les demandes STOP.
+**Il reste UNE chose : poser 3 enregistrements DNS chez Hostinger**, puis
+attendre que Resend affiche « Verified ». Sans ça, impossible d'envoyer depuis
+`contact@citari.fr` (seul le mode test fonctionne). Les valeurs exactes sont
+sur https://resend.com/domains (domaine citari.fr, région eu-west-1) :
+
+| Type | Nom (hôte) | Valeur | Priorité |
+|---|---|---|---|
+| TXT | `resend._domainkey` | `p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCq/ZJkva+kOJLcjfMZ2XKIC1G6wqhEA9CorIeQ7RdnbhUouTC8QX4Z/t6qKRXDXpROJgMlG5/yCI9jTQ8XVDvK1c6fmfLSJsah/Fxgmlqou/r4GIv43mcHVtVDo8WKgPI5XuxETmlr3iMhpn10I51bzoIyFQMQ6SYUfWDPG0lQRQIDAQAB` | — |
+| MX | `send` | `feedback-smtp.eu-west-1.amazonses.com` | 10 |
+| TXT | `send` | `v=spf1 include:amazonses.com ~all` | — |
+
+Aucun conflit avec Google Workspace : le MX de la messagerie vit sur
+`citari.fr` (racine), ceux de Resend vivent sur le sous-domaine `send`. Les
+deux cohabitent sans se toucher. Si les serveurs de noms passent un jour chez
+Cloudflare (pour le Worker), ces trois lignes devront être recréées là-bas.
 
 Ensuite, le rituel d'envoi, chaque matin (un cron toutes les 10 minutes le
 remplacera sur le VPS) :

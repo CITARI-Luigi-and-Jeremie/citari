@@ -45,13 +45,15 @@ réécrit, jamais expédié. La désinscription existe aussi (`desinscrire`,
 colonne `leads.unsubscribed_at`) : la ligne du lead reste, elle est la preuve
 du consentement ET de la désinscription.
 
-**L'envoi est câblé, pas encore armé.** `envoyer` est une simulation par
-défaut ; `--vraiment` expédie par l'API Resend en texte brut. Il refuse seul
-les désinscrits, convertis, mails 0 périmés (> 3 j), relances trop tardives
-(> 10 j), gabarits troués et liens localhost. Restent trois gestes manuels,
-listés dans `SETUP.md` : coller `RESEND_API_KEY` dans le `.env` racine,
-vérifier `citari.fr` chez Resend (SPF + DKIM dans la zone Hostinger), créer
-la boîte `luigi@citari.fr` qui reçoit réponses et STOP.
+**L'envoi est câblé et la clé est en place** (13/08/2026, testée par un envoi
+réel via le code de production). `envoyer` est une simulation par défaut ;
+`--vraiment` expédie par l'API Resend en texte brut. Il refuse seul les
+désinscrits, convertis, mails 0 périmés (> 3 j), relances trop tardives
+(> 10 j), gabarits troués et liens localhost. La boîte `contact@citari.fr`
+(Google Workspace) reçoit réponses et STOP. Reste UN geste manuel : poser les
+3 enregistrements DNS de Resend chez Hostinger (valeurs dans `SETUP.md`) et
+attendre « Verified » — sans quoi seul le mode test fonctionne, et rien ne
+peut partir depuis `contact@citari.fr`.
 
 **Connexions attendues.** Deux MCP : Supabase (projet `ebcuhuhslrrsjouchiga`,
 région Paris) et Notion (espace CITARI, où vit toute la documentation
