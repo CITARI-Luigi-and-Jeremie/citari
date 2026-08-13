@@ -128,6 +128,9 @@ CREATE TABLE leads (
   notes text,
   -- Horodatage du consentement RGPD, posé à la saisie de l'email.
   consent_at timestamptz NOT NULL DEFAULT now(),
+  -- Désinscription (STOP), horodatée. Non nul = plus aucun envoi, jamais.
+  -- La ligne reste : elle est la preuve du consentement ET de la désinscription.
+  unsubscribed_at timestamptz,
   CONSTRAINT leads_pkey PRIMARY KEY (id),
   CONSTRAINT leads_scan_id_fkey FOREIGN KEY (scan_id) REFERENCES scans(id) ON DELETE SET NULL);
 

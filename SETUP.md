@@ -70,12 +70,46 @@ davantage.
 
 ### Emails, Resend
 
-- Créer le compte sur https://resend.com, récupérer `RESEND_API_KEY`
-- Vérifier le domaine d'envoi et poser les enregistrements SPF et DKIM
-- Renseigner `RESEND_FROM`, `FOUNDER_EMAIL`, `FOUNDER_SIGNATURE`
+Le circuit est entièrement câblé depuis le 10/08/2026 : `pnpm toolkit envoyer`
+prépare les brouillons manquants, revérifie, et expédie par Resend. Il ne
+manque que trois gestes, qui demandent le compte Resend et l'accès Hostinger :
 
-Sans domaine vérifié, les emails partent en indésirables. C'est la seule étape
-qui demande d'attendre une propagation DNS, donc à lancer en premier.
+1. Coller la clé (créée sur https://resend.com/api-keys) dans le `.env` de la
+   racine, ligne `RESEND_API_KEY=`. L'emplacement est déjà préparé.
+2. Sur Resend, ajouter le domaine `citari.fr`, puis recopier les
+   enregistrements DNS qu'il affiche (SPF et DKIM, 3 lignes environ) dans la
+   zone DNS de Hostinger. Attendre que Resend affiche « Verified » : sans ça,
+   tout part en indésirables.
+3. Créer la boîte `luigi@citari.fr` chez Hostinger (incluse dans le pack) :
+   c'est elle qui reçoit les réponses (`Reply-To`) et les demandes STOP.
+
+Ensuite, le rituel d'envoi, chaque matin (un cron toutes les 10 minutes le
+remplacera sur le VPS) :
+
+```bash
+pnpm toolkit envoyer              # simulation : montre ce qui partirait, et pourquoi le reste non
+pnpm toolkit envoyer --vraiment   # envoie pour de vrai
+```
+
+La commande refuse d'elle-même : les désinscrits, les convertis, les mails 0
+périmés (plus de 3 jours), les relances trop en retard (plus de 10 jours), les
+gabarits troués (`BOOKING_URL` absente) et les liens localhost
+(`NEXT_PUBLIC_SITE_URL` non passée en production). Avant une relance
+« bloqué », elle relit le robots.txt du prospect EN DIRECT : s'il a corrigé
+entre-temps, le brouillon est réécrit au lieu d'envoyer un fait périmé.
+
+Quand une réponse « STOP » (ou équivalent) arrive dans la boîte :
+
+```bash
+pnpm toolkit desinscrire son@email.fr   # plus jamais d'envoi, relances annulées
+```
+
+Quand quelqu'un invoque son droit à l'effacement (RGPD) :
+
+```bash
+pnpm toolkit effacer son@email.fr             # montre ce qui serait supprimé
+pnpm toolkit effacer son@email.fr --vraiment  # supprime, et donne la date à citer en réponse
+```
 
 ### Réservation
 

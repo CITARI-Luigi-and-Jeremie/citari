@@ -25,6 +25,8 @@ import { crawlerLog } from "./commands/crawler-log.js";
 import { sprintReport } from "./commands/sprint-report.js";
 import { relance } from "./commands/relance.js";
 import { reponses } from "./commands/reponses.js";
+import { envoyer } from "./commands/envoyer.js";
+import { desinscrire, effacer } from "./commands/desinscrire.js";
 import { proposition } from "./commands/proposition.js";
 import { rescan } from "./commands/rescan.js";
 import { prioriser } from "./commands/prioriser.js";
@@ -230,6 +232,26 @@ program
   .argument("<lead>", "id, email ou marque du prospect")
   .description("Commercial — réponses aux objections, remplies avec ses vrais chiffres")
   .action((lead: string) => run(reponses(lead)));
+
+program
+  .command("envoyer")
+  .option("--vraiment", "envoyer réellement (sans ce drapeau : simulation)")
+  .option("-l, --limite <n>", "nombre maximal d'envois par passage", "50")
+  .description("Commercial — envoie par Resend les relances dues, après revérification (simulation par défaut)")
+  .action((opts: { vraiment?: boolean; limite?: string }) => run(envoyer(opts)));
+
+program
+  .command("desinscrire")
+  .argument("<email>", "adresse du prospect qui a répondu STOP")
+  .description("Commercial — plus aucun email vers cette adresse, définitivement ; relances en attente annulées")
+  .action((email: string) => run(desinscrire(email)));
+
+program
+  .command("effacer")
+  .argument("<email>", "adresse de la personne qui invoque son droit à l'effacement")
+  .option("--vraiment", "exécuter la suppression (sans ce drapeau : simulation)")
+  .description("RGPD — droit à l'effacement : supprime le lead et ses relances, vide les coordonnées client")
+  .action((email: string, opts: { vraiment?: boolean }) => run(effacer(email, opts)));
 
 program
   .command("proposition")

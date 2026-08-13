@@ -5,6 +5,70 @@ d'une nouvelle session, après `CLAUDE.md`.
 
 ---
 
+## 2026-08-10 — L'emailing envoie enfin, et il sait surtout refuser
+
+Les 13 gabarits existaient, testés, remplis avec les vrais chiffres ; rien ne
+partait, faute de tuyau. Le tuyau existe : `pnpm toolkit envoyer`, appel HTTP
+direct à Resend, sans SDK, texte brut uniquement (décision documentée dans
+Notion : un domaine neuf qui envoie du HTML part en indésirables, et en B2B de
+dirigeant à dirigeant le texte convertit mieux).
+
+**Le module est écrit à l'envers : d'abord les refus.** Un email raté ne se
+rattrape pas, il n'y a pas de bouton « dépublier » dans la boîte d'un prospect.
+`decisionEnvoi` est une fonction pure, testée, qui refuse : désinscrit,
+converti, statut inconnu (dans le doute on s'abstient), mail 0 périmé au-delà
+de 3 jours (« votre scan est terminé » dix jours après est absurde), relance en
+retard de plus de 10 jours (J+7 envoyé à J+40 ressemble à un système cassé),
+corps contenant un lien localhost (configuration incomplète) ou le gabarit
+`[LIEN DE RÉSERVATION]` non rempli. La simulation est le mode PAR DÉFAUT :
+`envoyer` montre ce qui partirait et pourquoi le reste non ; seul `--vraiment`
+expédie. Vérifié sur la vraie base : le mail 0 de Nutri Smart, scan vieux de
+six jours, a été refusé « périmé » exactement comme prévu.
+
+**La dette « revérifier avant d'envoyer » est soldée.** Avant toute relance
+dont le corps parle de robots.txt, la commande RELIT le fichier du prospect en
+direct. S'il a corrigé entre-temps, le brouillon est régénéré depuis la
+situation actuelle ; si la situation est devenue « solide », la relance est
+annulée : on ne relance pas quelqu'un à qui on a promis de ne rien vendre.
+
+**Ce test a trouvé un bug en production.** Le parseur de robots.txt de
+`auditFlash` inversait son drapeau de regroupement : sur « User-agent: GPTBot /
+User-agent: ClaudeBot / Disallow: / » — la forme la plus courante du blocage —
+seul le dernier agent recevait les règles, et GPTBot ressortait « autorisé »
+sur un site qui le bloque. L'audit passait donc à côté de l'argument le plus
+vérifiable du diagnostic. Corrigé aux deux endroits (site et toolkit), avec la
+règle habituelle : les deux lectures doivent rester identiques, et ce sont les
+tests du toolkit qui les couvrent. Les audits déjà en base ont pu sous-compter
+des blocages ; ceux à venir sont justes.
+
+**La dette RGPD est soldée, en deux gestes distincts parce que deux demandes
+distinctes.** `desinscrire` répond à « ne me contactez plus » : la ligne du
+lead RESTE, `unsubscribed_at` posé (migration du jour), car elle est la preuve
+du consentement ET de la désinscription — la supprimer rendrait l'adresse
+réinscriptible par un nouveau scan. `effacer` répond à « supprimez mes
+données » : lead supprimé, relances en cascade, coordonnées vidées sur une
+éventuelle fiche client (la fiche reste, obligations comptables), et la
+commande donne la date à citer dans la réponse au demandeur. Les scans ne
+contiennent aucune donnée personnelle et sont conservés. Cycle complet vérifié
+sur une ligne jetable.
+
+**Deux détails d'expéditeur qui comptent.** `RESEND_FROM` disait encore
+« GEO Sprint », l'ancien nom : corrigé en « Luigi de Citari » — un prénom en
+expéditeur est ouvert, une marque seule est filtrée. Et chaque envoi porte
+`Reply-To: luigi@citari.fr` plus l'en-tête `List-Unsubscribe` : le bouton
+« se désabonner » de la boîte vaut toujours mieux qu'un signalement spam.
+
+**Ce qui reste manuel, et pourquoi.** Coller la clé Resend dans le `.env`,
+poser SPF et DKIM chez Hostinger, créer la boîte : trois gestes qui demandent
+les comptes du fondateur. Et le mail 0 part au prochain passage d'`envoyer`,
+pas à la seconde où le scan finit : les gabarits vivent dans le toolkit, le
+site ne peut pas les importer (hors du workspace pnpm), et dupliquer la
+rédaction ferait diverger les deux copies. Un cron toutes les 10 minutes sur
+le VPS ramènera ce délai à presque rien ; la fenêtre de 3 jours du mail 0
+protège en attendant.
+
+---
+
 ## 2026-08-09 — L'aguiche n'avait plus de raison d'être, on l'a supprimée
 
 Le parcours comptait quatre écrans : landing, attente, aguiche, rapport.

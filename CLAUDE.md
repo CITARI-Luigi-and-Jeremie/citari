@@ -6,7 +6,7 @@ Lisez ce fichier, puis `JOURNAL.md` qui garde les décisions ET leurs raisons,
 y compris les pièges déjà payés. Rien d'autre n'est nécessaire pour commencer.
 
 **Où en est le projet, au 06/08/2026.** Le back est terminé et éprouvé en
-conditions réelles : les trois modes de scan et les 24 commandes du toolkit
+conditions réelles : les trois modes de scan et les 27 commandes du toolkit
 ont tourné contre la vraie base. 180 tests passent.
 
 **Ce qui empêche de vendre n'est pas du code.**
@@ -36,11 +36,22 @@ ont tourné contre la vraie base. 180 tests passent.
 avait été à court, et la panne avait appris une règle qui, elle, reste : une
 réponse en erreur ne compte pas au dénominateur du score.
 
-**Deux dettes ouvertes, assumées.** Aucune commande n'efface les données d'une
-personne qui invoque son droit RGPD, alors qu'on collecte des emails avec
-consentement horodaté. Et les relances J+2 à J+21 sont rédigées à l'avance : au
-moment de les envoyer, il faut revérifier ce qui a changé depuis, par exemple un
-`robots.txt` corrigé entre-temps.
+**Les deux dettes historiques sont soldées** (10/08/2026). `pnpm toolkit
+effacer` répond au droit à l'effacement (simulation par défaut, `--vraiment`
+pour exécuter, les scans ne portent aucune donnée personnelle et restent). Et
+`pnpm toolkit envoyer` revérifie AVANT chaque relance « bloqué » : le
+robots.txt du prospect est relu en direct, un brouillon devenu faux est
+réécrit, jamais expédié. La désinscription existe aussi (`desinscrire`,
+colonne `leads.unsubscribed_at`) : la ligne du lead reste, elle est la preuve
+du consentement ET de la désinscription.
+
+**L'envoi est câblé, pas encore armé.** `envoyer` est une simulation par
+défaut ; `--vraiment` expédie par l'API Resend en texte brut. Il refuse seul
+les désinscrits, convertis, mails 0 périmés (> 3 j), relances trop tardives
+(> 10 j), gabarits troués et liens localhost. Restent trois gestes manuels,
+listés dans `SETUP.md` : coller `RESEND_API_KEY` dans le `.env` racine,
+vérifier `citari.fr` chez Resend (SPF + DKIM dans la zone Hostinger), créer
+la boîte `luigi@citari.fr` qui reçoit réponses et STOP.
 
 **Connexions attendues.** Deux MCP : Supabase (projet `ebcuhuhslrrsjouchiga`,
 région Paris) et Notion (espace CITARI, où vit toute la documentation
@@ -131,7 +142,7 @@ Grok et Le Chat.
 |---|---|---|
 | `apps/citari` | Le site **et son moteur de scan** : landing, méthode, attente, rapport, lead | **npm**, TanStack Start, port 8080 |
 | `apps/admin` | Back-office : leads, clients, sprints, relances, citations | pnpm, Next.js, port 3001 |
-| `packages/toolkit` | L'usine : 24 commandes de livraison et d'acquisition | pnpm |
+| `packages/toolkit` | L'usine : 27 commandes de livraison et d'acquisition | pnpm |
 | `packages/core` | Socle partagé : accès Supabase, appel JSON au modèle, crawl | pnpm |
 
 Tout vit dans `LuigiRevelli/citari`. `apps/citari` a été absorbé par
@@ -267,7 +278,7 @@ vitest, et par les `paths` de son `tsconfig.json` pour `tsc`. Effet de bord
 heureux : `orchestrateur.server.ts` et `score.ts` sont désormais typés, ce qui
 n'était jamais arrivé, le site n'ayant pas de script de typecheck à lui.
 
-Les 24 commandes s'appellent par `pnpm toolkit <commande>`.
+Les 27 commandes s'appellent par `pnpm toolkit <commande>`.
 
 **Chantier 1, la lisibilité du site**
 `audit-technique` crawle le site comme un robot d'IA · `generate-fixes` écrit
@@ -287,8 +298,15 @@ marque y figure vraiment.
 `controle-45` prend la température à mi-parcours, en interne · `rescan` rejoue
 les mêmes questions à J+90 · `sprint-report` assemble les preuves.
 
+**Emailing**
+`relance` prépare les 4 emails d'un prospect (13 gabarits, la situation décide :
+bloqué, invisible, marginal, ou solide qui n'en reçoit qu'un) · `envoyer`
+expédie par Resend ce qui est dû, simulation par défaut, revérification du
+robots.txt avant toute relance « bloqué » · `desinscrire` honore un STOP,
+définitivement · `effacer` exécute le droit à l'effacement RGPD.
+
 **Commercial**
-`relance` prépare les 4 emails d'un prospect · `reponses` prépare les 8 réponses
+`reponses` prépare les 8 réponses
 aux objections · `proposition` génère la proposition · `concurrents` relit et
 corrige le classement des concurrents · `sourcer` construit la liste
 d'entreprises depuis l'annuaire officiel (API gouv, gratuite : NAF, zone,

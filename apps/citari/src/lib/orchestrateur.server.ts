@@ -268,10 +268,22 @@ export async function auditFlash(siteUrl: string | null): Promise<AuditFlash | n
     if (r.ok) {
       audit.ok = true;
       const lignes = (await r.text()).split(/\r?\n/);
-      // Blocs robots.txt : la section d'un agent nommé prime sur la section « * ».
+      // Blocs robots.txt : la section d'un agent nommé prime sur la section
+      // « * », et des lignes User-agent CONSÉCUTIVES forment un seul bloc qui
+      // partage les directives suivantes.
+      //
+      // Ce second point a été lu de travers jusqu'au 10/08/2026 : le drapeau
+      // de regroupement était inversé, seul le dernier agent du bloc recevait
+      // les règles. Sur « User-agent: GPTBot / User-agent: ClaudeBot /
+      // Disallow: / » — la forme la plus courante du blocage — GPTBot
+      // ressortait « autorisé » alors qu'il est bloqué : l'audit passait à
+      // côté de l'argument le plus vérifiable du diagnostic. Le bug a été
+      // trouvé par les tests du parseur jumeau de `packages/toolkit`
+      // (lib/envoi.ts) ; les deux lectures doivent rester identiques.
       const regles: Record<string, string[]> = {};
       let agents: string[] = [];
-      let enTete = true;
+      // Vrai quand la dernière ligne lue n'était PAS un User-agent.
+      let apresDirectives = true;
       for (const brute of lignes) {
         const ligne = brute.replace(/#.*$/, "").trim();
         if (!ligne) continue;
@@ -283,12 +295,12 @@ export async function auditFlash(siteUrl: string | null): Promise<AuditFlash | n
         const [clef = "", ...reste] = ligne.split(":");
         const valeur = reste.join(":").trim();
         if (clef.trim().toLowerCase() === "user-agent") {
-          if (!enTete) agents = [];
-          enTete = false;
+          if (apresDirectives) agents = [];
+          apresDirectives = false;
           agents.push(valeur.toLowerCase());
           for (const a of agents) regles[a] ??= [];
         } else {
-          enTete = true;
+          apresDirectives = true;
           if (clef.trim().toLowerCase() === "disallow") {
             for (const a of agents) (regles[a] ??= []).push(valeur);
           }
