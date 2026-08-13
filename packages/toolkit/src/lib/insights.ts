@@ -43,8 +43,11 @@ export interface ScanInsights {
   scoreLabel: string;
   reportUrl: string | null;
   competitors: string[];
-  /** Concurrent le plus cité, et sa part de voix. */
-  topCompetitor: { name: string; share: number; count: number } | null;
+  /** Concurrent le plus cité, sa part de voix, et les réponses où il apparaît. */
+  topCompetitor: { name: string; share: number; count: number; reponses: number } | null;
+  /** Réponses valides obtenues, et celles où la marque apparaît : l'unité du rapport. */
+  reponsesTotal: number;
+  reponsesAvecMarque: number;
   brandShare: number;
   /**
    * Nombre brut de citations, marque contre concurrents.
@@ -95,6 +98,27 @@ export interface ScanInsights {
   concurrentsSuivis: { saisi: string; releve: string | null; citations: number }[];
   /** Verbatim où un concurrent est cité et pas la marque. */
   killerQuote: { query: string; engine: string; excerpt: string; competitor: string } | null;
+  /**
+   * La question miroir : ce que ChatGPT répond quand on lui demande de
+   * présenter l'entreprise elle-même. Hors méthodologie de mesure, mais c'est
+   * la pièce la plus personnelle du scan : sa fiche d'identité dans les IA,
+   * avec ses informations datées ou inventées. Null si non posée ou en échec.
+   */
+  miroir: { moteur: string; extrait: string } | null;
+  /**
+   * Ventilation par intention, comptée en RÉPONSES et non en questions.
+   *
+   * C'est l'unité du rapport : « vous apparaissez dans 13 réponses sur 40 ».
+   * Un email qui compterait en questions à côté d'un rapport qui compte en
+   * réponses donnerait deux nombres justes qui se contredisent à l'écran,
+   * exactement le défaut corrigé sur la page de rapport le 09/08/2026.
+   * Ne compte que les réponses réellement obtenues, comme le score.
+   */
+  intentions: { intent: string; total: number; presentes: number }[];
+  /** Position moyenne quand la marque est citée (1 = citée en premier). */
+  rangMoyen: number | null;
+  /** Nombre de marques distinctes citées sur ses questions, et son rang. */
+  classement: { rang: number; nbMarques: number } | null;
 }
 
 type ScanDb = {
@@ -140,6 +164,7 @@ export async function buildScanInsights(scanId: string): Promise<ScanInsights> {
   const mentions = unwrap(
     await db.from("mentions").select("response_id,brand,is_target,position").eq("scan_id", scanId)
   ) as { response_id: string; brand: string; is_target: boolean; position: number | null }[];
+  const miroirBrut = (scan as { miroir?: unknown }).miroir;
 
   const brand = scan.brand_name;
 
@@ -188,9 +213,26 @@ export async function buildScanInsights(scanId: string): Promise<ScanInsights> {
   const competitorShares = pdv
     .filter((p) => !p.target && estRival(p.name))
     .sort((a, b) => b.share - a.share);
+  // Les réponses où une marque apparaît : l'unité du rapport, celle que le
+  // prospect relit en cliquant le lien. « In Extenso cité dans 30 réponses »
+  // dans l'email et « 33 citations » dans le rapport seraient deux nombres
+  // justes qui se contredisent : on compte des réponses distinctes.
+  const reponsesDe = (nom: string) =>
+    new Set(
+      mentions.filter((m) => !m.is_target && nomRetenu(m.brand) === nom).map((m) => m.response_id),
+    ).size;
   const topCompetitor = competitorShares[0]
-    ? { name: competitorShares[0].name, share: competitorShares[0].share, count: competitorShares[0].count }
+    ? {
+        name: competitorShares[0].name,
+        share: competitorShares[0].share,
+        count: competitorShares[0].count,
+        reponses: reponsesDe(competitorShares[0].name),
+      }
     : null;
+  const reponsesTotal = responses.filter((r) => (r.raw_text ?? "").trim().length > 0).length;
+  const reponsesAvecMarque = new Set(
+    mentions.filter((m) => m.is_target).map((m) => m.response_id),
+  ).size;
   // Les citations du client se comptent sur les mentions, jamais sur la part de
   // voix : celle-ci est tronquée pour l'affichage, et un client hors du top 10
   // y serait introuvable, donc compté à zéro. C'est la source qu'utilisent déjà
@@ -261,6 +303,51 @@ export async function buildScanInsights(scanId: string): Promise<ScanInsights> {
     break;
   }
 
+  // La question miroir : première entrée exploitable du tableau `scans.miroir`.
+  const miroirs = Array.isArray(miroirBrut)
+    ? (miroirBrut as { moteur?: string; texte?: string }[])
+    : [];
+  const premierMiroir = miroirs.find((m) => (m?.texte ?? "").trim().length > 40);
+  const miroir = premierMiroir
+    ? { moteur: premierMiroir.moteur ?? "ChatGPT", extrait: coupePhrase(premierMiroir.texte as string, 300) }
+    : null;
+
+  // Ventilation par intention, comptée en RÉPONSES réellement obtenues : une
+  // réponse en panne ne compte pas, même règle que le dénominateur du score.
+  const intentDe = new Map(queries.map((q) => [q.id, q.intent ?? "autre"]));
+  const reponsesValides = responses.filter((r) => (r.raw_text ?? "").trim().length > 0);
+  const intentions = [...new Set(queries.map((q) => q.intent ?? "autre"))]
+    .map((intent) => {
+      const duGroupe = reponsesValides.filter((r) => intentDe.get(r.query_id) === intent);
+      return {
+        intent,
+        total: duGroupe.length,
+        presentes: duGroupe.filter((r) => targetCited(r.id)).length,
+      };
+    })
+    .filter((g) => g.total > 0);
+
+  // Position moyenne quand cité : « les IA ne donnent que deux ou trois noms
+  // utiles » n'a de poids que si on peut dire où le prospect tombe.
+  const rangs = mentions
+    .filter((m) => m.is_target && typeof m.position === "number")
+    .map((m) => m.position as number);
+  const rangMoyen = rangs.length
+    ? Math.round((rangs.reduce((a, b) => a + b, 0) / rangs.length) * 10) / 10
+    : null;
+
+  // Classement parmi toutes les marques citées, compté sur `mentions` et
+  // jamais sur `share_of_voice`, qui est tronqué aux dix premières lignes.
+  const parMarque = new Map<string, number>();
+  for (const m of mentions) {
+    const nom = m.is_target ? brand : nomRetenu(m.brand);
+    parMarque.set(nom, (parMarque.get(nom) ?? 0) + 1);
+  }
+  const tri = [...parMarque.entries()].sort((a, b) => b[1] - a[1]);
+  const rangCible = tri.findIndex(([nom]) => nom === brand);
+  const classement =
+    rangCible >= 0 && tri.length > 1 ? { rang: rangCible + 1, nbMarques: tri.length } : null;
+
   const base = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
   const score = Math.round(Number(scan.score_global ?? 0));
   return {
@@ -290,7 +377,41 @@ export async function buildScanInsights(scanId: string): Promise<ScanInsights> {
     competitorSources: [...sources],
     sourcesUnavailable: !anySources,
     killerQuote,
+    miroir,
+    intentions,
+    rangMoyen,
+    classement,
+    reponsesTotal,
+    reponsesAvecMarque,
   };
 }
 
 export const pct = (v: number) => `${Math.round(v * 100)} %`;
+
+/**
+ * Coupe un texte à une longueur maximale, en finissant sur une PHRASE.
+ *
+ * L'ancienne coupe tombait au dernier espace : un email de prospection partait
+ * avec « et accompagnemen... » en plein milieu d'un mot cité entre guillemets,
+ * ce qui ruine l'effet « mot pour mot » qu'on est justement en train de
+ * revendiquer. On cherche la dernière fin de phrase avant la limite ; à
+ * défaut, le dernier espace, mais jamais l'intérieur d'un mot.
+ */
+export function coupePhrase(texte: string, max: number): string {
+  const propre = texte
+    .replace(/\*\*(.+?)\*\*/g, "$1")
+    .replace(/[*_`#]/g, "")
+    .replace(/\s*\n+\s*/g, " ")
+    .replace(/\s{2,}/g, " ")
+    .trim();
+  if (propre.length <= max) return propre;
+  const fenetre = propre.slice(0, max);
+  const finPhrase = Math.max(
+    fenetre.lastIndexOf(". "),
+    fenetre.lastIndexOf("! "),
+    fenetre.lastIndexOf("? "),
+  );
+  if (finPhrase > max * 0.4) return fenetre.slice(0, finPhrase + 1);
+  const dernierEspace = fenetre.lastIndexOf(" ");
+  return (dernierEspace > max * 0.6 ? fenetre.slice(0, dernierEspace) : fenetre).replace(/[,;:]$/, "") + "…";
+}

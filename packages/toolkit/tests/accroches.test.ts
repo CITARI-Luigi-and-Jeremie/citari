@@ -6,12 +6,14 @@ const scan = (patch: Partial<ScanInsights> = {}): ScanInsights =>
   ({
     brand: "Cabinet Vaurel", url: "https://cabinet-vaurel.fr", sector: "Expertise comptable",
     score: 20, scoreLabel: "", reportUrl: "https://citari.fr/rapport/tok", competitors: [],
-    topCompetitor: { name: "Archipel", share: 0.2, count: 31 }, brandShare: 0.03,
+    topCompetitor: { name: "Archipel", share: 0.2, count: 31, reponses: 28 }, brandShare: 0.03,
     citationsCible: 5, citationsConcurrents: 300, citationsRivaux: 90,
     botsBloques: [], auditFait: true, llmstxtAbsent: false,
     weakestEngine: null, bestEngine: null,
     missedQueries: ["Quel cabinet comptable a Lyon ?"], missedCount: 9, totalQueries: 20,
     competitorSources: [], sourcesUnavailable: false, concurrentsSuivis: [], killerQuote: null,
+    miroir: null, intentions: [], rangMoyen: null, classement: null,
+    reponsesTotal: 40, reponsesAvecMarque: 4,
     ...patch,
   }) as ScanInsights;
 
@@ -39,7 +41,7 @@ describe("classement des accroches", () => {
       })
     );
     expect(a!.type).toBe("concurrent-nomme");
-    expect(a!.sujet).toContain("Fiducial est cité 42 fois");
+    expect(a!.sujet).toBe("Vous nous avez cité Fiducial. Les IA aussi.");
   });
 
   it("ignore un concurrent nommé qui n'est pas cité", () => {

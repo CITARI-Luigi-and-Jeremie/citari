@@ -12,7 +12,7 @@ const scan = (patch: Partial<ScanInsights> = {}): ScanInsights =>
     scoreLabel: "",
     reportUrl: "https://citari.fr/rapport/tok",
     competitors: [],
-    topCompetitor: { name: "In Extenso", share: 0.2, count: 30 },
+    topCompetitor: { name: "In Extenso", share: 0.2, count: 30, reponses: 27 },
     brandShare: 0.1,
     citationsCible: 12,
     citationsConcurrents: 108,
@@ -29,6 +29,12 @@ const scan = (patch: Partial<ScanInsights> = {}): ScanInsights =>
     competitorSources: [],
     sourcesUnavailable: false,
     killerQuote: null,
+    miroir: null,
+    intentions: [],
+    rangMoyen: null,
+    classement: null,
+    reponsesTotal: 40,
+    reponsesAvecMarque: 11,
     ...patch,
   }) as ScanInsights;
 
@@ -196,5 +202,75 @@ describe("emailImmediat", () => {
     const e = emailImmediat(scan({ citationsCible: 0, brandShare: 0, missedCount: 20, totalQueries: 20 }));
     expect(e.body).toContain("sans exception");
     expect(e.body).not.toContain("Sur 20 de ces 20");
+  });
+});
+
+describe("les blocs de personnalisation du 14/08", () => {
+  it("le miroir n'apparaît que s'il existe, et cite le bon moteur", () => {
+    const sans = emailImmediat(scan({ miroir: null }));
+    expect(sans.body).not.toContain("fiche d'identité");
+
+    const avec = emailImmediat(
+      scan({ miroir: { moteur: "Gemini", extrait: "Cabinet Vaurel est un cabinet lyonnais." } }),
+    );
+    expect(avec.body).toContain("qui est Cabinet Vaurel, selon Gemini");
+    expect(avec.body).toContain("votre fiche d'identité dans Gemini");
+    // Jamais « ChatGPT » en dur : l'aperçu peut tirer son miroir de Gemini.
+    expect(avec.body).not.toContain("fiche d'identité dans ChatGPT");
+  });
+
+  it("le miroir annonce qu'il est la seule question qui prononce le nom", () => {
+    // Sans cette phrase, le bloc contredirait le protocole deux paragraphes
+    // plus loin, et un dirigeant qui repère l'incohérence doute de tout.
+    const e = emailImmediat(scan({ miroir: { moteur: "ChatGPT", extrait: "Un cabinet." } }));
+    expect(e.body).toContain("la seule qui prononce votre nom");
+    expect(e.body).toContain("ne prononcent jamais le nom");
+  });
+
+  it("l'analyste compte en réponses et ne montre que ce qui existe", () => {
+    const e = emailImmediat(
+      scan({
+        intentions: [
+          { intent: "comparative", total: 16, presentes: 5 },
+          { intent: "locale", total: 8, presentes: 0 },
+        ],
+        rangMoyen: 5.1,
+        classement: { rang: 5, nbMarques: 80 },
+      }),
+    );
+    expect(e.body).toContain("Sur les 16 réponses aux questions où un acheteur compare avant de choisir, vous apparaissez dans 5");
+    expect(e.body).toContain("80 marques se partagent vos questions ; vous y êtes au rang 5");
+    expect(e.body).toContain("position moyenne est 5,1");
+  });
+
+  it("l'analyste se tait plutôt que d'écrire un trou", () => {
+    const e = emailImmediat(scan({ intentions: [], rangMoyen: null, classement: null }));
+    expect(e.body).not.toContain("ce que votre score ne montre pas");
+  });
+
+  it("pas de position moyenne pour une marque jamais citée", () => {
+    const e = emailImmediat(scan({ citationsCible: 0, rangMoyen: 3, classement: null }));
+    expect(e.body).not.toContain("position moyenne");
+  });
+
+  it("le protocole vend la mesure sur chaque mail 0 non solide", () => {
+    const e = emailImmediat(scan());
+    expect(e.body).toContain("le moteur l'a choisie seul");
+    expect(e.body).toContain("un incident chez eux ne fait pas une mauvaise note chez vous");
+  });
+
+  it("le mail solide invite au transfert, sans rien vendre", () => {
+    const e = emailImmediat(scan({ score: 68 }));
+    expect(e.body).toContain("cet email vaut d'être transféré");
+    expect(e.body).toContain("rien à vous vendre");
+  });
+
+  it("l'objet de l'écart et le rapport comptent dans la même unité", async () => {
+    const { accrochesClassees } = await import("../src/lib/accroches.js");
+    const a = accrochesClassees(scan({ citationsCible: 4, citationsRivaux: 90 })).find(
+      (x) => x.type === "ecart",
+    )!;
+    expect(a.sujet).toBe("In Extenso cité dans 27 réponses. Vous, 11.");
+    expect(a.ouverture).toContain("Sur les 40 réponses obtenues, Cabinet Vaurel apparaît dans 11. In Extenso, dans 27.");
   });
 });

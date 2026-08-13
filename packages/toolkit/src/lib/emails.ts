@@ -1,4 +1,4 @@
-import { pct, type ScanInsights } from "./insights.js";
+import { coupePhrase, pct, type ScanInsights } from "./insights.js";
 import { meilleureAccroche, type TypeAccroche } from "./accroches.js";
 
 /**
@@ -90,16 +90,9 @@ const rival = (i: ScanInsights) => i.topCompetitor?.name ?? "vos concurrents";
  * aussi sur une frontière de mot, jamais au milieu d'un mot.
  */
 function citation(texte: string, max = 320): string {
-  const propre = texte
-    .replace(/\*\*(.+?)\*\*/g, "$1")
-    .replace(/[*_`#]/g, "")
-    .replace(/\s*\n+\s*/g, " ")
-    .replace(/\s{2,}/g, " ")
-    .trim();
-  if (propre.length <= max) return propre;
-  const coupe = propre.slice(0, max);
-  const dernierEspace = coupe.lastIndexOf(" ");
-  return (dernierEspace > max * 0.6 ? coupe.slice(0, dernierEspace) : coupe).replace(/[,;:]$/, "") + "...";
+  // La coupe finit sur une phrase : un « mot pour mot » tronqué en plein mot
+  // (« et accompagnemen... ») ruine exactement ce qu'il prétend prouver.
+  return coupePhrase(texte, max);
 }
 
 function verbatim(i: ScanInsights): string {
@@ -149,6 +142,84 @@ function defiVerifiable(i: ScanInsights): string {
 « ${question} »
 
 Les réponses varient d'une fois sur l'autre, c'est précisément pourquoi nous en posons ${i.totalQueries} à plusieurs moteurs plutôt qu'une seule. Mais l'ordre de grandeur, vous le verrez tout de suite.`;
+}
+
+/**
+ * La question miroir : ce que le moteur raconte de l'entreprise elle-même.
+ *
+ * La pièce la plus personnelle du scan, et la seule question qui prononce le
+ * nom du prospect — le bloc l'annonce lui-même, sinon il contredirait le
+ * protocole deux paragraphes plus loin, et un dirigeant qui repère une
+ * incohérence dans l'email doute aussitôt de toute la mesure.
+ */
+function miroirBloc(i: ScanInsights): string {
+  if (!i.miroir) return "";
+  return `Avant de compter vos concurrents, nous avons posé une question plus simple, la seule qui prononce votre nom : qui est ${i.brand}, selon ${i.miroir.moteur}. Voici sa réponse, mot pour mot :
+
+« ${i.miroir.extrait} »
+
+Ce texte est votre fiche d'identité dans ${i.miroir.moteur} : ce qui y est daté, approximatif ou inventé se répète, à peu de variations près, à chaque personne qui pose la question. Vous seul pouvez dire ce qui est encore vrai.`;
+}
+
+/**
+ * La lecture d'analyste : ce que le score ne montre pas.
+ *
+ * C'est le bloc qui fait dire « ils ont vraiment regardé mon cas ». Tout est
+ * compté en RÉPONSES, l'unité du rapport : l'email et la page qu'il ouvre
+ * doivent dire le même nombre. Chaque phrase ne sort que si sa donnée existe,
+ * il n'y a jamais de trou ni de zéro embarrassant.
+ */
+const LIBELLE_INTENT: Record<string, string> = {
+  comparative: "questions où un acheteur compare avant de choisir",
+  probleme: "questions où un client décrit son problème",
+  locale: "questions posées avec votre ville",
+  confiance: "questions de confiance",
+};
+
+function lectureAnalyste(i: ScanInsights): string {
+  const phrases: string[] = [];
+
+  const comparatives = i.intentions.find((g) => g.intent === "comparative");
+  const locales = i.intentions.find((g) => g.intent === "locale");
+  if (comparatives && locales) {
+    phrases.push(
+      `Sur les ${comparatives.total} réponses aux ${LIBELLE_INTENT.comparative}, vous apparaissez dans ${comparatives.presentes} ; sur les ${locales.total} réponses aux ${LIBELLE_INTENT.locale}, dans ${locales.presentes}.`,
+    );
+  } else if (comparatives) {
+    phrases.push(
+      `Sur les ${comparatives.total} réponses aux ${LIBELLE_INTENT.comparative}, vous apparaissez dans ${comparatives.presentes}.`,
+    );
+  }
+
+  if (i.rangMoyen !== null && i.citationsCible > 0) {
+    phrases.push(`Quand vous êtes cité, votre position moyenne est ${String(i.rangMoyen).replace(".", ",")}.`);
+  }
+
+  if (i.classement) {
+    phrases.push(
+      `${i.classement.nbMarques} marques se partagent vos questions ; vous y êtes au rang ${i.classement.rang}.`,
+    );
+  }
+
+  if (i.weakestEngine && i.bestEngine && i.weakestEngine.label !== i.bestEngine.label) {
+    phrases.push(
+      `Le point faible est ${i.weakestEngine.label} ; le point d'appui, ${i.bestEngine.label}.`,
+    );
+  }
+
+  if (phrases.length === 0) return "";
+  return `Voici ce que votre score ne montre pas. ${phrases.join(" ")}`;
+}
+
+/**
+ * Le protocole : vendre la rigueur de la mesure, sans jargon.
+ *
+ * « De mesure » n'est pas un mot de trop : la question miroir, elle, prononce
+ * le nom, et le bloc miroir le dit. Les deux s'emboîtent au lieu de se
+ * contredire.
+ */
+function protocoleBloc(i: ScanInsights): string {
+  return `Nos questions de mesure ne prononcent jamais le nom de ${i.brand} : quand une marque sort, le moteur l'a choisie seul. Elles sont scellées, puis rejouées mot pour mot quatre-vingt-dix jours plus tard : l'écart devient un fait opposable. Et une panne de moteur est retirée du calcul, un incident chez eux ne fait pas une mauvaise note chez vous.`;
 }
 
 /**
@@ -226,12 +297,19 @@ export function emailImmediat(i: ScanInsights): Email {
             ? `Sur les ${i.totalQueries} questions, sans exception, aucun moteur ne mentionne ${i.brand}. Ce sont des questions que vos prospects posent au moment de choisir.`
             : `Vous êtes absent sur ${i.missedCount} de ces ${i.totalQueries} questions, celles où vos prospects comparent avant de trancher.`,
 
+        // La lecture d'analyste : la ventilation que le score ne montre pas.
+        // C'est elle qui remplace l'ancienne phrase générique de situation.
+        lectureAnalyste(i),
+
         // Les concurrents qu'il a nommés : la liste complète garde sa valeur
         // même quand l'un d'eux a servi d'ouverture, à cause du cas « jamais
         // cité non plus », qui désamorce l'idée qu'on cherche à faire peur.
         concurrentsNommes(i),
 
         dit("verbatim") ? "" : verbatim(i),
+
+        // La fiche d'identité : ce que le moteur raconte de l'entreprise.
+        miroirBloc(i),
 
         // Le blocage technique : jamais perdu, même quand il n'est pas
         // l'accroche. C'est notre meilleure preuve de sérieux, et la seule
@@ -247,6 +325,10 @@ export function emailImmediat(i: ScanInsights): Email {
         situation === "marginal"
           ? `C'est la situation où le travail paye le plus vite. Quand une marque existe déjà mais manque les bonnes questions, il s'agit de combler des trous identifiés, pas de tout construire.`
           : `Ce n'est presque jamais une question de budget ni de notoriété. Dans la grande majorité des cas que nous mesurons, l'essentiel vient de trois causes techniques et éditoriales identifiables en une vingtaine de minutes.`,
+
+        // La rigueur du protocole, juste avant l'offre : c'est elle qui rend
+        // l'offre crédible.
+        protocoleBloc(i),
 
         offreDiagnostic(),
         pied(),
@@ -271,6 +353,9 @@ export function emailImmediat(i: ScanInsights): Email {
         ? `Détail technique, sans urgence : votre site n'a pas de fichier llms.txt. C'est un résumé court que les moteurs lisent en priorité. Une heure de travail, et ça consolide une position que vous avez déjà.`
         : "",
       `Votre score de départ est archivé avec ses questions. Si vous refaites un scan dans six mois, vous aurez une comparaison exacte, mêmes questions, même formule. C'est la seule façon honnête de savoir si votre position tient.`,
+      // Le seul appel de ce message : la recommandation à un pair. Un bon
+      // score transféré à un confrère vaut plus que trois relances.
+      `Si un confrère se demande ce que les IA répondent à sa place, cet email vaut d'être transféré : le scan est gratuit, la mesure sera la même, les chiffres seront les siens.`,
       `Si un jour vous voulez qu'on en parle, mon agenda est ouvert : ${BOOKING()}. Mais dans votre situation, rien ne presse.`,
       pied(),
     ),

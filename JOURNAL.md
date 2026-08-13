@@ -5,6 +5,59 @@ d'une nouvelle session, après `CLAUDE.md`.
 
 ---
 
+## 2026-08-14 — Les emails apprennent à lire tout le scan
+
+Luigi a jugé les emails trop génériques : « ça vend pas assez notre
+technologie, c'est pas assez personnalisé ». Le diagnostic était juste, et la
+réponse n'était pas d'ajouter des adjectifs : la personnalisation qui
+convainc, ce sont les données du prospect, et les gabarits n'exploitaient
+qu'un dixième du scan. Trois plumes concurrentes, un contrôle de doctrine et
+un jury (un dirigeant de cabinet fictif, sévère) ont produit les nouveaux
+blocs ; le composite du jury est intégré tel quel, avec ses corrections.
+
+**Trois blocs nouveaux dans le mail 0**, chacun nourri de données qui
+existaient en base sans servir :
+
+- **Le miroir** : ce que ChatGPT répond quand on lui demande QUI est le
+  prospect. Sa fiche d'identité dans les IA, datée ou inventée, « qui se
+  répète à chaque personne qui pose la question ». La pièce la plus
+  personnelle du scan, et elle dormait dans `scans.miroir`.
+- **L'analyste** : « voici ce que votre score ne montre pas » — ventilation
+  comparatives/locales, position moyenne quand cité, rang parmi les N marques,
+  moteur faible et moteur d'appui. Chaque phrase ne sort que si sa donnée
+  existe.
+- **Le protocole** : la technologie vendue en trois faits vérifiables (nom
+  jamais prononcé dans les questions de mesure, scellement rejoué à J+90,
+  panne exclue du calcul). Placé juste avant l'offre : c'est lui qui la rend
+  crédible.
+
+**Le piège d'unité, attrapé par le jury.** Le premier jet comptait la
+ventilation en questions ; le rapport compte en réponses. L'email et la page
+qu'il ouvre auraient affiché deux nombres justes qui se contredisent,
+exactement le défaut corrigé sur le rapport le 09/08. Tout le bloc analyste et
+l'accroche « écart » comptent désormais en réponses (`reponsesTotal`,
+`reponsesAvecMarque`, `topCompetitor.reponses`).
+
+**La cohérence interne comme argument.** Le protocole jure « jamais votre
+nom », le miroir le prononce : le bloc miroir s'annonce donc lui-même comme
+« la seule question qui prononce votre nom ». Un dirigeant qui repère une
+contradiction dans l'email doute de toute la mesure ; l'exception explicitée
+renforce la doctrine au lieu de l'écorner. Un test le verrouille.
+
+**Les objets réécrits par le jury.** « Vous nous avez cité In Extenso. Les IA
+aussi. » (son mot, retourné avec une information) · « La phrase où une IA
+recommande votre concurrent » (l'article défini promet une pièce) · « Les IA
+répondent à vos clients sans vous citer ». Le mail « solide » gagne sa seule
+demande : inviter à transférer l'email à un confrère, le scan étant gratuit.
+
+**Et la coupe des verbatims finit sur une phrase.** « et accompagnemen... »
+en plein milieu d'un « mot pour mot » ruinait ce qu'il prétendait prouver.
+`coupePhrase` cherche la fin de phrase, à défaut la frontière de mot, et
+l'ouverture d'accroche passait encore par l'ancienne coupe : corrigé aux deux
+endroits. 216 tests, envoi réel du nouveau mail 0 Fiducial vérifié en boîte.
+
+---
+
 ## 2026-08-10 — L'emailing envoie enfin, et il sait surtout refuser
 
 Les 13 gabarits existaient, testés, remplis avec les vrais chiffres ; rien ne

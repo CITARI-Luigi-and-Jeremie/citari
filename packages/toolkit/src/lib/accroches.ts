@@ -1,4 +1,4 @@
-import { pct, type ScanInsights } from "./insights.js";
+import { coupePhrase, pct, type ScanInsights } from "./insights.js";
 
 /**
  * Ce qui, dans un scan, donne le plus envie d'appeler.
@@ -82,7 +82,9 @@ export function accrochesClassees(i: ScanInsights): Accroche[] {
       // 88 de base, jusqu'à +10 quand l'écart est écrasant.
       force: borne(88 + Math.min(10, (Number.isFinite(rapport) ? rapport : 12) - 2)),
       pourquoi: `Il a nommé ${nomme.saisi} lui-même : le chiffre confirme une inquiétude qu'il avait déjà.`,
-      sujet: `${nomme.saisi} est cité ${nomme.citations} fois. ${i.brand}, ${jamais ? "jamais" : i.citationsCible}.`,
+      // Son mot à lui, retourné avec une information nouvelle. Pas un chiffre
+      // dans l'objet : la confirmation suffit, les nombres suivent dedans.
+      sujet: `Vous nous avez cité ${nomme.saisi}. Les IA aussi.`,
       ouverture: `Vous nous aviez cité ${nomme.saisi}. Les moteurs le mentionnent ${nomme.citations} fois sur les ${i.totalQueries} questions testées. ${i.brand} : ${jamais ? "zéro" : i.citationsCible}.`,
     });
   }
@@ -96,8 +98,11 @@ export function accrochesClassees(i: ScanInsights): Accroche[] {
       type: "verbatim",
       force: 84,
       pourquoi: "Une phrase se lit, un pourcentage se discute.",
-      sujet: `Ce que ChatGPT répond quand on cherche ${i.sector ? i.sector.toLowerCase() : "un prestataire"} comme vous`,
-      ouverture: `Voici ce que ${i.killerQuote.engine} répond, mot pour mot, à la question « ${i.killerQuote.query} » :\n\n« ${i.killerQuote.excerpt.replace(/\*\*(.+?)\*\*/g, "$1").replace(/[*_`#]/g, "").replace(/\s+/g, " ").trim().slice(0, 300)} »\n\n${i.killerQuote.competitor} est nommé. ${i.brand} n'apparaît pas.`,
+      // L'article défini promet une pièce précise : c'est ce qu'on ouvre.
+      sujet: `La phrase où une IA recommande votre concurrent`,
+      // La coupe finit sur une phrase : un « mot pour mot » tronqué en plein
+      // mot ruine exactement ce qu'il prétend prouver.
+      ouverture: `Voici ce que ${i.killerQuote.engine} répond, mot pour mot, à la question « ${i.killerQuote.query} » :\n\n« ${coupePhrase(i.killerQuote.excerpt, 300)} »\n\n${i.killerQuote.competitor} est nommé. ${i.brand} n'apparaît pas.`,
     });
   }
 
@@ -107,7 +112,7 @@ export function accrochesClassees(i: ScanInsights): Accroche[] {
       type: "absence",
       force: 80,
       pourquoi: "Zéro est le seul chiffre qu'on ne peut pas relativiser.",
-      sujet: `${i.brand} n'apparaît sur aucune des ${i.totalQueries} questions testées`,
+      sujet: `Les IA répondent à vos clients sans vous citer`,
       ouverture: `Sur les ${i.totalQueries} questions d'achat testées dans votre secteur, aucun moteur ne mentionne ${i.brand}. Pas une seule fois. Vos concurrents comparables, ${i.citationsRivaux} fois.`,
     });
   }
@@ -125,11 +130,13 @@ export function accrochesClassees(i: ScanInsights): Accroche[] {
       // lui-même donné.
       force: borne(45 + Math.min(33, rapport * 4)),
       pourquoi: `Rapport de ${rapport.toFixed(1)} pour 1 : ${rapport >= 5 ? "l'écart parle tout seul" : "l'écart existe mais reste discutable"}.`,
+      // Compté en RÉPONSES, l'unité du rapport : l'objet, l'ouverture et la
+      // page que le prospect ouvre ensuite doivent dire le même nombre.
       sujet: i.topCompetitor
-        ? `${i.topCompetitor.name} est cité ${i.topCompetitor.count} fois. ${i.brand}, ${i.citationsCible}.`
+        ? `${i.topCompetitor.name} cité dans ${i.topCompetitor.reponses} réponses. Vous, ${i.reponsesAvecMarque}.`
         : `${i.brand} : ${i.citationsCible} citations contre ${i.citationsRivaux} pour vos concurrents`,
-      ouverture: `Le chiffre qui compte n'est pas le score, c'est l'écart. Sur les ${i.totalQueries} questions testées, ${i.brand} est cité ${i.citationsCible} fois. Vos concurrents comparables, ${i.citationsRivaux} fois.${
-        i.topCompetitor ? ` ${i.topCompetitor.name} à lui seul en récolte ${i.topCompetitor.count}.` : ""
+      ouverture: `Le chiffre qui compte n'est pas le score, c'est l'écart. Sur les ${i.reponsesTotal} réponses obtenues, ${i.brand} apparaît dans ${i.reponsesAvecMarque}.${
+        i.topCompetitor ? ` ${i.topCompetitor.name}, dans ${i.topCompetitor.reponses}.` : ` Vos concurrents comparables totalisent ${i.citationsRivaux} citations.`
       }`,
     });
   }
@@ -144,7 +151,7 @@ export function accrochesClassees(i: ScanInsights): Accroche[] {
       // frappe plus fort.
       force: borne(40 + part * 35),
       pourquoi: `${pct(part)} des questions d'achat sans aucune mention : c'est précis et actionnable.`,
-      sujet: `${i.brand} : absent sur ${i.missedCount} des ${i.totalQueries} questions testées`,
+      sujet: `Absent sur ${i.missedCount} questions que posent vos clients`,
       ouverture: `Vous êtes totalement absent sur ${i.missedCount} des ${i.totalQueries} questions testées.${
         i.missedQueries[0] ? ` Par exemple : « ${i.missedQueries[0]} ».` : ""
       } Ce sont des questions que vos prospects posent au moment de choisir.`,

@@ -159,3 +159,35 @@ describe("clé de cache et priorité commerciale", () => {
     expect(prioriteDuScore(55)).toBe("froid");
   });
 });
+
+describe("coupePhrase", () => {
+  it("ne coupe jamais en plein mot : elle finit sur une phrase", async () => {
+    const { coupePhrase } = await import("../src/lib/insights.js");
+    const texte =
+      "In Extenso est un très bon choix pour les PME. Son réseau national industrialise la paie et accompagne les dossiers complexes. Fiducial reste une alternative sérieuse.";
+    const coupe = coupePhrase(texte, 100);
+    expect(coupe).toBe("In Extenso est un très bon choix pour les PME.");
+  });
+
+  it("retombe sur le dernier espace quand aucune phrase ne finit avant la limite", async () => {
+    const { coupePhrase } = await import("../src/lib/insights.js");
+    const texte = "Une très longue énumération sans aucune ponctuation forte qui continue encore et encore";
+    const coupe = coupePhrase(texte, 60);
+    expect(coupe.endsWith("…")).toBe(true);
+    // La coupe tombe sur une frontière de mot : le texte avant « … » doit être
+    // un préfixe du texte original se terminant par un mot entier.
+    const avant = coupe.slice(0, -1);
+    expect(texte.startsWith(avant)).toBe(true);
+    expect(texte[avant.length]).toBe(" ");
+  });
+
+  it("nettoie le markdown des moteurs", async () => {
+    const { coupePhrase } = await import("../src/lib/insights.js");
+    expect(coupePhrase("**Evol**, puis `Comète` et _Astra_.", 100)).toBe("Evol, puis Comète et Astra.");
+  });
+
+  it("rend le texte intact quand il tient", async () => {
+    const { coupePhrase } = await import("../src/lib/insights.js");
+    expect(coupePhrase("Court.", 100)).toBe("Court.");
+  });
+});
