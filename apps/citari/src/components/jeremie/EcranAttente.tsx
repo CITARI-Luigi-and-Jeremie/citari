@@ -131,6 +131,7 @@ export function EcranAttente({ etat, instable }: Props) {
 
             <div className="progress-rail mt-3" aria-hidden>
               <span className="progress-fill" style={{ width: `${progression}%` }} />
+              <span className="progress-shimmer" />
             </div>
 
             <CartePerforee

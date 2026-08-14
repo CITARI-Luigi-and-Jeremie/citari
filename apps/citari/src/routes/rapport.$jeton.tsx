@@ -18,21 +18,11 @@ import {
 } from "@/components/rapport";
 import { dateFr, fr, frTitre, verdict, MOTEURS, NBSP } from "@/lib/typo";
 import { bookingUrl } from "@/lib/site";
-import { RapportApercu } from "@/components/jeremie/RapportApercu";
-import {
-  adversairePrincipal,
-  constatsDuSite,
-  moteursDesReponses,
-  partDeVoix,
-  preparerQuestions,
-  questionsPerdues,
-  reponseLaPlusDure,
-  reponsesAvecLaMarque,
-  reponsesRetenues,
-  type LigneMention,
-  type LigneQuestion,
-  type LigneReponse,
-} from "@/lib/rapport-apercu";
+import { useEffect, useMemo, useState } from "react";
+import { SequenceResultat } from "@/components/jeremie/rapport/SequenceResultat";
+import { BookingModal } from "@/components/jeremie/rapport/BookingModal";
+import { construireSequence } from "@/lib/rapport-sequence";
+import type { LigneMention, LigneQuestion, LigneReponse } from "@/lib/rapport-apercu";
 
 export const Route = createFileRoute("/rapport/$jeton")({
   loader: async ({ params }) => {
@@ -93,56 +83,66 @@ function Rapport() {
   return data.scan.mode === "apercu" ? <RapportDApercu /> : <RapportComplet />;
 }
 
+/**
+ * L'aperçu, version v3 : la séquence de pop-ups de Jérémie, une carte à la
+ * fois sur fond sombre quadrillé, alimentée par nos lignes réelles.
+ */
 function RapportDApercu() {
   const { scan, questions, reponses, mentions } = Route.useLoaderData();
+  const [reservation, setReservation] = useState(false);
+  const [large, setLarge] = useState(false);
 
-  const lignesReponses = reponses as unknown as LigneReponse[];
-  const lignes = mentions as unknown as LigneMention[];
-  const listeQuestions = questions as LigneQuestion[];
-  const moteurs = moteursDesReponses(lignesReponses);
-  const retenues = reponsesRetenues(lignesReponses);
+  useEffect(() => {
+    const mq = window.matchMedia("(min-width: 1100px)");
+    const onChange = () => setLarge(mq.matches);
+    onChange();
+    mq.addEventListener("change", onChange);
+    return () => mq.removeEventListener("change", onChange);
+  }, []);
 
-  const notes: Record<string, unknown> = {
-    ChatGPT: scan.score_chatgpt,
-    Claude: scan.score_claude,
-    Gemini: scan.score_gemini,
-    Perplexity: scan.score_perplexity,
-    Grok: scan.score_grok,
-    "Le Chat": scan.score_mistral,
-  };
+  const donnees = useMemo(
+    () =>
+      construireSequence({
+        marque: scan.brand_name,
+        domaine: scan.website_url,
+        date: scan.completed_at ?? scan.created_at,
+        score: Math.round(Number(scan.score_global ?? 0)),
+        secteur: scan.sector,
+        questions: questions as LigneQuestion[],
+        reponses: reponses as unknown as LigneReponse[],
+        mentions: mentions as unknown as LigneMention[],
+        classes: (scan.concurrent_classes ?? {}) as Record<string, string>,
+        alias: (scan.brand_aliases ?? {}) as Record<string, string>,
+      }),
+    [scan, questions, reponses, mentions],
+  );
 
   return (
-    <RapportApercu
-      marque={scan.brand_name}
-      domaine={scan.website_url}
-      date={scan.completed_at ?? scan.created_at}
-      score={Math.round(Number(scan.score_global ?? 0))}
-      questions={preparerQuestions(listeQuestions, lignesReponses, lignes, moteurs)}
-      adversaire={adversairePrincipal(
-        lignes,
-        retenues,
-        (scan.concurrent_classes ?? {}) as Record<string, string>,
-        (scan.brand_aliases ?? {}) as Record<string, string>,
-      )}
-      vosReponses={reponsesAvecLaMarque(lignes)}
-      reponsesRetenues={retenues}
-      questionsPerdues={questionsPerdues(listeQuestions, lignes)}
-      parMoteur={moteurs
-        .filter((m) => notes[m] !== null && notes[m] !== undefined)
-        .map((m) => ({ moteur: m, score: Math.round(Number(notes[m])) }))}
-      laPlusDure={reponseLaPlusDure(lignes)}
-      pdv={partDeVoix(lignes, (scan.brand_aliases ?? {}) as Record<string, string>)}
-      moteursVerrouilles={MOTEURS.filter((m) => !moteurs.includes(m))}
-      questionsDuComplet={QUESTIONS_COMPLET}
-      constats={constatsDuSite(
-        scan.audit as { ok?: boolean; bots?: Record<string, string>; llmstxt?: boolean } | null,
-      )}
-    />
+    <div className="flex min-h-screen flex-col bg-paper text-ink">
+      {/* barre haute */}
+      <div className="flex items-center justify-between gap-4 border-b border-rule-strong bg-paper px-4 py-3 sm:px-10 sm:py-4">
+        <Link to="/" aria-label="Citari, retour à l'accueil" className="block">
+          <img src="/img/citari-logo.png" alt="Citari" width={680} height={160} className="h-[20px] w-auto" />
+        </Link>
+
+        <div className="flex items-center gap-2.5 sm:gap-5">
+          <span className="mono hidden text-[13px] text-ink-2 sm:inline">{donnees.domaine}</span>
+          <button
+            type="button"
+            onClick={() => setReservation(true)}
+            className="cta cta-sweep whitespace-nowrap rounded-[4px] px-3 py-2 text-[13px] sm:px-4 sm:py-2.5 sm:text-[15px]"
+          >
+            Réserver mon diagnostic
+          </button>
+        </div>
+      </div>
+
+      <SequenceResultat data={donnees} wide={large} onBook={() => setReservation(true)} />
+
+      <BookingModal open={reservation} onClose={() => setReservation(false)} marque={donnees.marque} />
+    </div>
   );
 }
-
-/** Le mix figé du diagnostic complet : 10 comparatives, 6 problème, 5 locales, 3 confiance. */
-const QUESTIONS_COMPLET = 24;
 
 function RapportComplet() {
   const { scan, questions, reponses, mentions, precedent } = Route.useLoaderData();

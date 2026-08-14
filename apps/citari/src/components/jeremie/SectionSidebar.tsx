@@ -1,0 +1,157 @@
+import { useEffect, useState } from "react";
+
+/**
+ * Barre latérale de sections, fixée à gauche de la landing.
+ *
+ * Portée du projet Lovable de Jérémie le 14/08/2026. Au repos : une fine
+ * ligne verticale et de petits repères. Au survol : les labels apparaissent
+ * en IBM Plex Mono. Cachée sur mobile.
+ *
+ * Elle détecte la luminosité du fond derrière elle : sur les sections sombres
+ * (méthode, contact), ses repères passent en papier ; au survol, le panneau
+ * devient papier et les repères repassent en encre pour rester lisibles.
+ */
+
+type Section = {
+  id: string;
+  label: string;
+};
+
+const SECTIONS: Section[] = [
+  { id: "scan", label: "Scan" },
+  { id: "probleme", label: "Problème" },
+  { id: "cout", label: "Coût" },
+  { id: "methode", label: "Méthode" },
+  { id: "faq", label: "FAQ" },
+  { id: "contact", label: "Contact" },
+];
+
+export function SectionSidebar() {
+  const [active, setActive] = useState<string>(SECTIONS[0]!.id);
+  const [surFondSombre, setSurFondSombre] = useState(false);
+
+  useEffect(() => {
+    // Détecte si le fond derrière la sidebar est sombre, pour choisir des
+    // repères clairs ou encre plutôt qu'un mélange peu lisible.
+    const updateFond = () => {
+      const cible = document.elementFromPoint(30, Math.round(window.innerHeight / 2));
+      let el: Element | null = cible;
+      while (el) {
+        const bg = getComputedStyle(el).backgroundColor;
+        const m = bg.match(/rgba?\(([^)]+)\)/);
+        if (m) {
+          const [r = 255, g = 255, b = 255, a = 1] = m[1]!.split(",").map((v) => parseFloat(v));
+          if (a > 0.5) {
+            setSurFondSombre(0.299 * r + 0.587 * g + 0.114 * b < 128);
+            return;
+          }
+        }
+        el = el.parentElement;
+      }
+      setSurFondSombre(false);
+    };
+
+    // Section active : celle dont le haut est le plus proche du haut du
+    // viewport, parmi les sections visibles. Fidèle même quand une section est
+    // très courte (le pont « Problème » par exemple).
+    const updateActive = () => {
+      let activeId: string | null = null;
+      let bestDistance = Infinity;
+
+      for (const section of SECTIONS) {
+        const el = document.getElementById(section.id);
+        if (!el) continue;
+
+        const rect = el.getBoundingClientRect();
+        if (rect.bottom <= 0 || rect.top >= window.innerHeight) continue;
+
+        const distance = Math.abs(rect.top);
+        if (distance < bestDistance) {
+          bestDistance = distance;
+          activeId = section.id;
+        }
+      }
+
+      if (activeId) setActive(activeId);
+      updateFond();
+    };
+
+    let ticking = false;
+    const onScroll = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          updateActive();
+          ticking = false;
+        });
+        ticking = true;
+      }
+    };
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    updateActive();
+
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  const scrollTo = (id: string) => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
+
+  return (
+    <nav
+      aria-label="Sections de la page"
+      className="group/sidebar fixed left-0 top-1/2 z-40 hidden -translate-y-1/2 sm:block"
+    >
+      <div
+        className={`relative flex w-12 flex-col items-start gap-5 py-6 pl-5 pr-5 transition-[width,background-color] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] hover:w-32 ${
+          surFondSombre ? "hover:bg-paper/90" : "hover:bg-paper/85"
+        }`}
+      >
+        {/* Ligne verticale de fond. */}
+        <div
+          className={`pointer-events-none absolute bottom-6 left-5 top-6 w-px transition-colors duration-300 ${
+            surFondSombre ? "bg-paper/25 group-hover/sidebar:bg-ink/20" : "bg-ink/15"
+          }`}
+        />
+
+        {SECTIONS.map((section) => {
+          const isActive = active === section.id;
+          return (
+            <button
+              key={section.id}
+              type="button"
+              onClick={() => scrollTo(section.id)}
+              aria-label={`Aller à ${section.label}`}
+              className="group/button relative flex w-full items-center gap-3 text-left"
+            >
+              {/* Repère actif : signal rouge. */}
+              {isActive ? (
+                <span className="h-2 w-2 shrink-0 rounded-full bg-signal transition-all duration-300" />
+              ) : (
+                <span
+                  className={`h-px w-3 shrink-0 transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover/button:w-4 ${
+                    surFondSombre
+                      ? "bg-paper/40 group-hover/sidebar:bg-ink/40"
+                      : "bg-ink/35 group-hover/button:bg-ink/60"
+                  }`}
+                />
+              )}
+
+              {/* Label, révélé au survol de la sidebar. */}
+              <span
+                className={`mono pointer-events-none -translate-x-2 whitespace-nowrap text-[11px] uppercase tracking-[0.1em] opacity-0 transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover/sidebar:translate-x-0 group-hover/sidebar:opacity-75 ${
+                  surFondSombre ? "text-paper group-hover/sidebar:text-ink" : "text-ink"
+                } ${isActive ? "group-hover/sidebar:opacity-100" : ""}`}
+              >
+                {section.label}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+    </nav>
+  );
+}

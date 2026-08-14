@@ -60,10 +60,20 @@ région Paris) et Notion (espace CITARI, où vit toute la documentation
 commerciale). Les clés des six moteurs sont dans `apps/citari/.env.local`,
 jamais versionnées.
 
-**Le front de Jérémie est porté en entier** (08/08/2026). Landing, en-tête,
-pied, page `/methode`, écran de scan et rapport viennent de son projet Lovable
-`citari-ai-audit` ; ses composants vivent dans `src/components/jeremie/`. Il
-n'y a plus qu'une seule charte sur le site.
+**Le front de Jérémie est porté en entier** (08/08/2026, refonte v3 reportée
+le 14/08/2026). Landing, page `/methode`, écran de scan et rapport viennent de
+son projet Lovable `citari-ai-audit` ; ses composants vivent dans
+`src/components/jeremie/`. Il n'y a plus qu'une seule charte sur le site.
+
+La v3 a remplacé le bandeau d'en-tête par une navigation flottante (marque,
+contact, barre latérale de sections qui détecte la luminosité sous elle),
+ajouté le pont problème/solution en `StrokeText` (texte SVG rempli par
+balayage : les « animations 3D » de Jérémie) et passé procédure, FAQ, CTA
+final et pied de page en sombre. Il a supprimé sa `/methode` ; la nôtre est
+CONSERVÉE, c'est l'engagement de vérifiabilité. Piège appris : ses composants
+Lovable rendent côté client, chez nous ils s'hydratent après un rendu
+serveur — **aucun aléa dans le rendu** (`useId`, jamais `Math.random()` pour
+un id), sinon React marque l'arbre entier en erreur d'hydratation.
 
 Ce que le premier passage avait manqué, et qui a été rattrapé :
 
@@ -80,16 +90,15 @@ Ce que le premier passage avait manqué, et qui a été rattrapé :
 - les pages de contenu avaient **deux** en-têtes, le leur et celui de la racine.
 
 **`/rapport/$jeton` sert deux artefacts, et c'est le mode du scan qui tranche.**
-En `apercu`, c'est la maquette de conversion de Jérémie
-(`components/jeremie/RapportApercu.tsx`) : verdict, « qui prend votre place »,
-bande de questions, réponses moteur par moteur, et les quatre moteurs non
-interrogés montrés verrouillés. En `complet` ou `controle`, c'est le document de
-mesure. Verrouiller un moteur qu'on vient d'interroger et de facturer serait un
-mensonge : ne jamais rendre cet aiguillage configurable.
-
-Une carte verrouillée ne contient **aucun texte**. Sa maquette floutait la vraie
-réponse en CSS ; chez nous le moteur n'a pas été interrogé, il n'y a rien à
-cacher et rien à inventer pour remplir la carte.
+En `apercu`, c'est la séquence de conversion de Jérémie (v3, 14/08/2026) : six
+pop-ups, une carte à la fois — score, « qui prend votre place », la phrase
+exacte, part de voix, diagnostic, réservation. L'assemblage des données vit
+dans `lib/rapport-sequence.ts`, les cartes dans `components/jeremie/rapport/`.
+Une étape sans donnée (pas d'adversaire, pas de verbatim) sort de la
+séquence : jamais de carte vide, jamais de texte inventé. En `complet` ou
+`controle`, c'est le document de mesure. Présenter comme « verrouillé » un
+moteur qu'on vient d'interroger et de facturer serait un mensonge : ne jamais
+rendre cet aiguillage configurable.
 
 **Le parcours a trois écrans, pas quatre.** Landing → `/scan/$id` (l'attente,
 carte perforée) → `/rapport/$jeton`. L'aguiche qui vivait sur l'écran de scan a

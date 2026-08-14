@@ -366,17 +366,42 @@
 /* Barre de progression : ancrée sur des données réelles, jamais scriptée. */
 @utility progress-rail {
   position: relative;
-  height: 2px;
+  height: 6px;
   width: 100%;
   background-color: var(--rule);
   overflow: hidden;
+  border-radius: 3px;
 }
 
 @utility progress-fill {
   display: block;
   height: 100%;
   background-color: var(--ink);
-  transition: width 520ms cubic-bezier(0.16, 0.8, 0.3, 1);
+  transition: width 700ms cubic-bezier(0.16, 0.8, 0.3, 1);
+}
+
+@keyframes citari-shimmer {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(100%);
+  }
+}
+
+/* Reflet qui balaie la barre : du mouvement sans inventer de progression. */
+@utility progress-shimmer {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    color-mix(in srgb, var(--paper-2) 80%, transparent) 50%,
+    transparent 100%
+  );
+  width: 50%;
+  animation: citari-shimmer 1.8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  opacity: 0.6;
 }
 
 /* Colonne de moteur verrouillée (mode aperçu) */
@@ -568,6 +593,95 @@
 .reveal-on {
   opacity: 1;
   transform: none;
+}
+
+
+/* ---- Stroke Text : contour puis remplissage en balayage ---- */
+
+.stroke-text {
+  display: block;
+  width: 100%;
+  line-height: 0;
+}
+
+.stroke-text__svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 80px;
+}
+
+@media (min-width: 640px) {
+  .stroke-text__svg {
+    max-height: 100px;
+  }
+}
+
+.stroke-text__stroke,
+.stroke-text__fill {
+  user-select: none;
+  font-family: var(--font-sans);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+@keyframes stroke-text-wipe {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@keyframes stroke-text-edge {
+  0% {
+    transform: translateX(0);
+    opacity: 0;
+  }
+  8% {
+    opacity: 1;
+  }
+  88% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(var(--cit-edge-x, 100%));
+    opacity: 0;
+  }
+}
+
+.stroke-text__wipe {
+  transform: scaleX(0);
+  transform-origin: left center;
+  transform-box: fill-box;
+}
+
+.stroke-text__wipe--on {
+  animation-name: stroke-text-wipe;
+  animation-timing-function: linear;
+  animation-fill-mode: forwards;
+}
+
+.stroke-text__edge {
+  opacity: 0;
+}
+
+.stroke-text__edge--on {
+  animation-name: stroke-text-edge;
+  animation-timing-function: linear;
+  animation-fill-mode: forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stroke-text__wipe {
+    transform: scaleX(1);
+    animation: none !important;
+  }
+  .stroke-text__edge {
+    animation: none !important;
+    opacity: 0;
+  }
 }
 
 /* ---- Micro-interactions ---- */

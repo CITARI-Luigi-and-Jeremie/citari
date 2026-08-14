@@ -2,23 +2,36 @@ import { useState } from "react";
 import { ChevronDown } from "lucide-react";
 
 import { CONTACT_EMAIL } from "@/lib/site";
+import { Quadrillage } from "@/components/jeremie/Quadrillage";
 
 /**
- * Les questions qu'on nous pose, y compris les désagréables.
+ * La FAQ, version v3 de Jérémie portée le 14/08/2026 : vingt questions en
+ * deux groupes (Comprendre, L'offre), chacune avec son ancre et son balisage
+ * schema.org — la FAQ est une page que les moteurs d'IA citent volontiers, et
+ * ce site est sa propre démonstration.
  *
- * Portée du projet Lovable de Jérémie le 07/08/2026. Elle est balisée en
- * schema.org FAQPage, ce qui est exactement le format que les moteurs d'IA
- * reprennent le plus volontiers : le site est sa propre démonstration.
- *
- * Le fond de ces réponses EST le produit. Chacune est vérifiable, y compris
- * « nous n'avons pas encore de clients » et « nous ne garantissons aucun
- * score » : la doctrine d'honnêteté interdit de les adoucir.
+ * Une correction factuelle par rapport à sa copie : le scan gratuit interroge
+ * ChatGPT et Gemini (2 moteurs), pas « les quatre principaux moteurs ». Dire
+ * l'inverse sur la page qui vend l'exactitude serait fatal.
  */
 
 const LABEL = "questions reçues";
-const TITRE = "Les questions que l'on nous pose, y compris les désagréables.";
+const TITRE = "Les questions qui reviennent";
 
-type Entree = { q: string; r: React.ReactNode; plain: string };
+type Groupe = "comprendre" | "offre";
+
+type Entree = {
+  q: string;
+  r: React.ReactNode;
+  plain: string;
+  ancre: string;
+  groupe: Groupe;
+};
+
+const TITRES_GROUPE: Record<Groupe, string> = {
+  comprendre: "Comprendre",
+  offre: "L'offre",
+};
 
 const M = ({ children }: { children: React.ReactNode }) => (
   <span className="font-mono text-[0.92em] tabular-nums">{children}</span>
@@ -26,6 +39,268 @@ const M = ({ children }: { children: React.ReactNode }) => (
 
 const ENTREES: Entree[] = [
   {
+    groupe: "comprendre",
+    ancre: "geo-definition",
+    q: "Qu'est-ce que le GEO (Generative Engine Optimization) ?",
+    plain:
+      "Le GEO consiste à faire citer une marque dans les réponses des IA comme ChatGPT, Claude, Gemini ou Perplexity. Là où le SEO vous classe dans une liste de liens, le GEO vous place dans la réponse elle-même, celle que lit un acheteur qui ne cliquera sur rien. C'est le métier de Citari : mesurer votre visibilité dans ces réponses, puis la construire.",
+    r: (
+      <>
+        Le <M>GEO</M> consiste à faire citer une marque dans les réponses des IA comme{" "}
+        <M>ChatGPT</M>, <M>Claude</M>, <M>Gemini</M> ou <M>Perplexity</M>. Là où le <M>SEO</M> vous
+        classe dans une liste de liens, le <M>GEO</M> vous place dans la réponse elle-même, celle que
+        lit un acheteur qui ne cliquera sur rien. C'est le métier de Citari : mesurer votre
+        visibilité dans ces réponses, puis la construire.
+      </>
+    ),
+  },
+  {
+    groupe: "comprendre",
+    ancre: "absence-chatgpt",
+    q: "Pourquoi mon entreprise n'apparaît-elle pas dans les réponses de ChatGPT ?",
+    plain:
+      "Presque toujours pour l'une de ces trois raisons : votre site bloque les robots d'IA sans que vous le sachiez, vos pages ne répondent pas aux questions que posent vos acheteurs, et les sources que les IA consultent (annuaires, presse, comparateurs) ne mentionnent pas votre nom. Le scan gratuit vous dit en 90 secondes lesquelles de ces trois causes vous concernent.",
+    r: (
+      <>
+        Presque toujours pour l'une de ces trois raisons : votre site bloque les robots d'IA sans que
+        vous le sachiez, vos pages ne répondent pas aux questions que posent vos acheteurs, et les
+        sources que les IA consultent (annuaires, presse, comparateurs) ne mentionnent pas votre
+        nom. Le scan gratuit vous dit en <M>90 secondes</M> lesquelles de ces trois causes vous
+        concernent.
+      </>
+    ),
+  },
+  {
+    groupe: "comprendre",
+    ancre: "etre-recommande",
+    q: "Comment être recommandé par une IA ?",
+    plain:
+      "Une IA recommande les entreprises qu'elle peut lire, comprendre et vérifier ailleurs. Concrètement : un site techniquement ouvert à ses robots, des pages qui répondent directement aux questions des acheteurs, et une présence sur les sources tierces qu'elle consulte avant de répondre. Ce sont les trois chantiers du Sprint Citari, menés en 30 jours.",
+    r: (
+      <>
+        Une IA recommande les entreprises qu'elle peut lire, comprendre et vérifier ailleurs.
+        Concrètement : un site techniquement ouvert à ses robots, des pages qui répondent directement
+        aux questions des acheteurs, et une présence sur les sources tierces qu'elle consulte avant
+        de répondre. Ce sont les trois chantiers du Sprint Citari, menés en <M>30 jours</M>.
+      </>
+    ),
+  },
+  {
+    groupe: "comprendre",
+    ancre: "geo-vs-seo",
+    q: "Le GEO remplace-t-il le SEO ?",
+    plain:
+      "Non, il s'y ajoute, et les deux ne mesurent pas la même chose. Un site parfaitement référencé sur Google peut être totalement absent des réponses de ChatGPT, parce que les IA s'appuient sur d'autres signaux : la lisibilité machine, les réponses directes, et surtout ce que les sources tierces disent de vous. Votre position Google ne vous protège pas.",
+    r: (
+      <>
+        Non, il s'y ajoute, et les deux ne mesurent pas la même chose. Un site parfaitement référencé
+        sur <M>Google</M> peut être totalement absent des réponses de <M>ChatGPT</M>, parce que les
+        IA s'appuient sur d'autres signaux : la lisibilité machine, les réponses directes, et surtout
+        ce que les sources tierces disent de vous. Votre position <M>Google</M> ne vous protège pas.
+      </>
+    ),
+  },
+  {
+    groupe: "comprendre",
+    ancre: "durabilite",
+    q: "Les IA évoluent sans arrêt. Ce travail restera-t-il valable ?",
+    plain:
+      "Oui, parce qu'on ne travaille pas sur une astuce mais sur les fondamentaux que tous les moteurs partagent : un site lisible, des contenus qui répondent, des sources qui vous citent. Les modèles apprennent lentement et retiennent longtemps. C'est précisément pourquoi les places se prennent maintenant : ceux qui s'installent aujourd'hui dans les réponses partent avec une avance difficile à déloger.",
+    r: (
+      <>
+        Oui, parce qu'on ne travaille pas sur une astuce mais sur les fondamentaux que tous les
+        moteurs partagent : un site lisible, des contenus qui répondent, des sources qui vous citent.
+        Les modèles apprennent lentement et retiennent longtemps. C'est précisément pourquoi les
+        places se prennent maintenant : ceux qui s'installent aujourd'hui dans les réponses partent
+        avec une avance difficile à déloger.
+      </>
+    ),
+  },
+  {
+    groupe: "comprendre",
+    ancre: "calcul-score",
+    q: "Comment calculez-vous le score de visibilité IA ?",
+    plain:
+      "Le score de visibilité IA mesure la part des questions d'acheteurs sur lesquelles votre marque est citée, pondérée par sa position dans la réponse, les recommandations explicites et le ton employé. Il va de 0 à 100 et se lit avec la part de voix : vos mentions rapportées à celles de vos concurrents. La méthode est strictement identique au scan initial et à la remesure de J+90, sans quoi la comparaison ne vaudrait rien.",
+    r: (
+      <>
+        Le score de visibilité IA mesure la part des questions d'acheteurs sur lesquelles votre
+        marque est citée, pondérée par sa position dans la réponse, les recommandations explicites et
+        le ton employé. Il va de <M>0 à 100</M> et se lit avec la part de voix : vos mentions
+        rapportées à celles de vos concurrents. La méthode est strictement identique au scan initial
+        et à la remesure de <M>J+90</M>, sans quoi la comparaison ne vaudrait rien.
+      </>
+    ),
+  },
+  {
+    groupe: "comprendre",
+    ancre: "pme-locale",
+    q: "Est-ce que ça fonctionne pour une entreprise locale ou une PME ?",
+    plain:
+      "C'est même là que les résultats sont les plus rapides. Sur une requête locale comme « meilleur cabinet comptable à Lyon », la concurrence se joue entre quelques acteurs, dont la plupart n'ont jamais entendu parler de GEO. Trois places, peu de candidats sérieux : l'avantage du premier arrivé y est maximal.",
+    r: (
+      <>
+        C'est même là que les résultats sont les plus rapides. Sur une requête locale comme
+        «&nbsp;meilleur cabinet comptable à Lyon&nbsp;», la concurrence se joue entre quelques
+        acteurs, dont la plupart n'ont jamais entendu parler de <M>GEO</M>. Trois places, peu de
+        candidats sérieux : l'avantage du premier arrivé y est maximal.
+      </>
+    ),
+  },
+  {
+    groupe: "offre",
+    ancre: "scan-gratuit",
+    q: "Que contient le scan gratuit ?",
+    plain:
+      "Le scan pose à ChatGPT et Gemini, les deux moteurs les plus utilisés, les questions que vos acheteurs posent réellement, et compte qui est cité : vous, et toutes les marques qui sortent, y compris les concurrents que vous nommez. Vous voyez votre score, votre part de voix, et la phrase exacte où une IA recommande quelqu'un de votre secteur. Gratuit, sans compte, sans carte bancaire, résultat en 90 secondes. Les quatre autres moteurs sont couverts par le diagnostic complet.",
+    r: (
+      <>
+        Le scan pose à <M>ChatGPT</M> et <M>Gemini</M>, les deux moteurs les plus utilisés, les
+        questions que vos acheteurs posent réellement, et compte qui est cité : vous, et toutes les
+        marques qui sortent, y compris les concurrents que vous nommez. Vous voyez votre score, votre
+        part de voix, et la phrase exacte où une IA recommande quelqu'un de votre secteur. Gratuit,
+        sans compte, sans carte bancaire, résultat en <M>90 secondes</M>. Les quatre autres moteurs
+        sont couverts par le diagnostic complet.
+      </>
+    ),
+  },
+  {
+    groupe: "offre",
+    ancre: "prix",
+    q: "Combien coûte Citari ?",
+    plain:
+      "Le scan et le diagnostic en visio sont gratuits. Le Sprint coûte 2 900 € HT, payés une seule fois : 30 jours de travail sur les trois chantiers, 50 % à la commande, 50 % à la livraison. Aucun abonnement, aucune reconduction, rien à résilier.",
+    r: (
+      <>
+        Le scan et le diagnostic en visio sont gratuits. Le Sprint coûte <M>2 900 € HT</M>, payés une
+        seule fois : <M>30 jours</M> de travail sur les trois chantiers, <M>50 %</M> à la commande,{" "}
+        <M>50 %</M> à la livraison. Aucun abonnement, aucune reconduction, rien à résilier.
+      </>
+    ),
+  },
+  {
+    groupe: "offre",
+    ancre: "paiement-unique",
+    q: "Pourquoi un paiement unique plutôt qu'un abonnement ?",
+    plain:
+      "Parce que l'essentiel du travail se fait une fois, et bien. Ouvrir votre site aux IA, créer les contenus manquants, vous installer sur les bonnes sources : c'est un chantier, pas une rente. Vous jugez sur pièces à J+90, et la suite est votre décision, pas un prélèvement automatique.",
+    r: (
+      <>
+        Parce que l'essentiel du travail se fait une fois, et bien. Ouvrir votre site aux IA, créer
+        les contenus manquants, vous installer sur les bonnes sources : c'est un chantier, pas une
+        rente. Vous jugez sur pièces à <M>J+90</M>, et la suite est votre décision, pas un
+        prélèvement automatique.
+      </>
+    ),
+  },
+  {
+    groupe: "offre",
+    ancre: "faire-soi-meme",
+    q: "Puis-je faire ce travail moi-même ?",
+    plain:
+      "En partie, oui. La couche technique est documentée publiquement et un bon développeur peut la traiter. La vraie difficulté est ailleurs : savoir précisément quoi corriger, écrire des contenus que les moteurs acceptent de citer, et obtenir une présence sur les sources qu'ils consultent. C'est un travail d'enquête et de relances, pas de code, et c'est celui qui ne se fait presque jamais en interne. Le scan gratuit vous montrera l'ampleur exacte du chantier : vous déciderez ensuite.",
+    r: (
+      <>
+        En partie, oui. La couche technique est documentée publiquement et un bon développeur peut la
+        traiter. La vraie difficulté est ailleurs : savoir précisément quoi corriger, écrire des
+        contenus que les moteurs acceptent de citer, et obtenir une présence sur les sources qu'ils
+        consultent. C'est un travail d'enquête et de relances, pas de code, et c'est celui qui ne se
+        fait presque jamais en interne. Le scan gratuit vous montrera l'ampleur exacte du chantier :
+        vous déciderez ensuite.
+      </>
+    ),
+  },
+  {
+    groupe: "offre",
+    ancre: "temps-demande",
+    q: "Combien de temps cela me demande-t-il ?",
+    plain:
+      "Deux appels : une heure de cadrage au départ, trente minutes de validation en cours de Sprint. Nous écrivons, nous corrigeons, nous contactons les sources. Rien ne repose sur vos équipes, et c'est volontaire : un projet qui demande du temps au dirigeant est un projet qui ne se fait pas.",
+    r: (
+      <>
+        Deux appels : une heure de cadrage au départ, trente minutes de validation en cours de
+        Sprint. Nous écrivons, nous corrigeons, nous contactons les sources. Rien ne repose sur vos
+        équipes, et c'est volontaire : un projet qui demande du temps au dirigeant est un projet qui
+        ne se fait pas.
+      </>
+    ),
+  },
+  {
+    groupe: "offre",
+    ancre: "garantie",
+    q: "Garantissez-vous que je serai cité ?",
+    plain:
+      "Non, et méfiez-vous de quiconque vous le promet : personne ne contrôle les modèles. Nous garantissons deux choses vérifiables : l'exécution intégrale des trois chantiers, détaillée dans un rapport de fin de mission, et la remesure à J+90, mêmes questions, mêmes moteurs, mot pour mot. Vous comparez, chiffre contre chiffre.",
+    r: (
+      <>
+        Non, et méfiez-vous de quiconque vous le promet : personne ne contrôle les modèles. Nous
+        garantissons deux choses vérifiables : l'exécution intégrale des trois chantiers, détaillée
+        dans un rapport de fin de mission, et la remesure à <M>J+90</M>, mêmes questions, mêmes
+        moteurs, mot pour mot. Vous comparez, chiffre contre chiffre.
+      </>
+    ),
+  },
+  {
+    groupe: "offre",
+    ancre: "delai-resultats",
+    q: "Combien de temps avant de voir des résultats ?",
+    plain:
+      "Les moteurs intègrent les changements en 4 à 12 semaines : c'est le temps qu'il leur faut pour relire votre site et réévaluer les sources. C'est exactement pourquoi la remesure a lieu à J+90, et pourquoi elle est incluse. Un prestataire qui vous promet un effet immédiat décrit un mécanisme qui n'existe pas.",
+    r: (
+      <>
+        Les moteurs intègrent les changements en <M>4 à 12 semaines</M> : c'est le temps qu'il leur
+        faut pour relire votre site et réévaluer les sources. C'est exactement pourquoi la remesure a
+        lieu à <M>J+90</M>, et pourquoi elle est incluse. Un prestataire qui vous promet un effet
+        immédiat décrit un mécanisme qui n'existe pas.
+      </>
+    ),
+  },
+  {
+    groupe: "offre",
+    ancre: "site-agence",
+    q: "Mon site est géré par une agence. C'est un problème ?",
+    plain:
+      "Aucun. Soit nous intervenons directement avec un accès, soit nous livrons à votre agence un cahier de spécifications prêt à appliquer. Les deux formats sont prévus, et de votre côté rien ne change : deux appels, rien d'autre.",
+    r: (
+      <>
+        Aucun. Soit nous intervenons directement avec un accès, soit nous livrons à votre agence un
+        cahier de spécifications prêt à appliquer. Les deux formats sont prévus, et de votre côté
+        rien ne change : deux appels, rien d'autre.
+      </>
+    ),
+  },
+  {
+    groupe: "offre",
+    ancre: "apres-sprint",
+    q: "Que se passe-t-il après le Sprint ?",
+    plain:
+      "Vous recevez le rapport de fin de mission, puis la remesure à J+90. Ensuite, trois chemins possibles : vous arrêter là, relancer un Sprint sur un nouveau territoire de questions, ou nous confier la suite en continu. Aucun n'est automatique. Les contenus, le balisage et les citations obtenues vous appartiennent et continuent de travailler sans nous.",
+    r: (
+      <>
+        Vous recevez le rapport de fin de mission, puis la remesure à <M>J+90</M>. Ensuite, trois
+        chemins possibles : vous arrêter là, relancer un Sprint sur un nouveau territoire de
+        questions, ou nous confier la suite en continu. Aucun n'est automatique. Les contenus, le
+        balisage et les citations obtenues vous appartiennent et continuent de travailler sans nous.
+      </>
+    ),
+  },
+  {
+    groupe: "offre",
+    ancre: "concurrents",
+    q: "Travaillez-vous avec mes concurrents ?",
+    plain:
+      "Non : un seul client par secteur et par zone, c'est une règle absolue. On ne peut pas pousser deux noms sur les trois mêmes places. Le premier arrivé bloque la sienne, chez nous et dans les réponses.",
+    r: (
+      <>
+        Non : un seul client par secteur et par zone, c'est une règle absolue. On ne peut pas pousser
+        deux noms sur les trois mêmes places. Le premier arrivé bloque la sienne, chez nous et dans
+        les réponses.
+      </>
+    ),
+  },
+  {
+    groupe: "offre",
+    ancre: "prix-affiche",
     q: "Pourquoi le prix est-il affiché ?",
     plain:
       "Parce qu'un prix caché sert le vendeur, pas l'acheteur. Le Sprint GEO coûte 2 900 € HT, quel que soit votre chiffre d'affaires, et vous le savez avant de nous parler. Cela nous oblige à consacrer le rendez-vous à votre situation plutôt qu'à négocier un chiffre.",
@@ -33,100 +308,14 @@ const ENTREES: Entree[] = [
       <>
         Parce qu'un prix caché sert le vendeur, pas l'acheteur. Le Sprint GEO coûte{" "}
         <M>2 900 € HT</M>, quel que soit votre chiffre d'affaires, et vous le savez avant de nous
-        parler. Cela nous oblige à consacrer le rendez-vous à votre situation plutôt qu'à négocier
-        un chiffre.
+        parler. Cela nous oblige à consacrer le rendez-vous à votre situation plutôt qu'à négocier un
+        chiffre.
       </>
     ),
   },
   {
-    q: "Pourquoi un paiement unique et pas un abonnement ?",
-    plain:
-      "Parce qu'un abonnement récompense la durée, pas le résultat. Un sprint dure 30 jours, avec une mesure de contrôle 90 jours plus tard. Si vous n'avez plus besoin de nous ensuite, c'est le fonctionnement normal, pas un échec.",
-    r: (
-      <>
-        Parce qu'un abonnement récompense la durée, pas le résultat. Un sprint dure <M>30 jours</M>,
-        avec une mesure de contrôle <M>90 jours</M> plus tard. Si vous n'avez plus besoin de nous
-        ensuite, c'est le fonctionnement normal, pas un échec.
-      </>
-    ),
-  },
-  {
-    q: "Quel résultat garantissez-vous ?",
-    plain:
-      "Aucun score, aucune position. Il n'y a pas de classement dans ChatGPT : personne ne peut vendre une place qui n'existe pas. Nous garantissons les actions livrées, les correctifs posés, les contenus écrits, les cibles de citation traitées, et la mesure rejouée à l'identique pour que vous constatiez vous-même l'écart.",
-    r: (
-      <>
-        Aucun score, aucune position. Il n'y a pas de classement dans <M>ChatGPT</M> : personne ne
-        peut vendre une place qui n'existe pas. Nous garantissons les actions livrées, les
-        correctifs posés, les contenus écrits, les cibles de citation traitées, et la mesure rejouée
-        à l'identique pour que vous constatiez vous-même l'écart.
-      </>
-    ),
-  },
-  {
-    q: "Combien de temps avant que ça se voie ?",
-    plain:
-      "Les moteurs intègrent les modifications d'un site en 4 à 12 semaines, selon leurs propres cycles. C'est pourquoi la mesure de contrôle est fixée à J+90 et pas à J+30.",
-    r: (
-      <>
-        Les moteurs intègrent les modifications d'un site en <M>4 à 12 semaines</M>, selon leurs
-        propres cycles. C'est pourquoi la mesure de contrôle est fixée à <M>J+90</M> et pas à{" "}
-        <M>J+30</M>.
-      </>
-    ),
-  },
-  {
-    q: "Comment savoir que l'écart ne vient pas du hasard ?",
-    plain:
-      "Les questions sont scellées le premier jour et rejouées telles quelles, sur les mêmes moteurs, avec la même formule. Nous ne pouvons pas choisir après coup des questions plus favorables. Une partie de l'écart vient malgré tout des mises à jour de modèles par les éditeurs : nous figeons les versions quand l'API le permet, et nous l'écrivons dans le rapport quand elle ne le permet pas.",
-    r: (
-      <>
-        Les questions sont scellées le premier jour et rejouées telles quelles, sur les mêmes
-        moteurs, avec la même formule. Nous ne pouvons pas choisir après coup des questions plus
-        favorables. Une partie de l'écart vient malgré tout des mises à jour de modèles par les
-        éditeurs : nous figeons les versions quand l'<M>API</M> le permet, et nous l'écrivons dans
-        le rapport quand elle ne le permet pas.
-      </>
-    ),
-  },
-  {
-    q: "Le scan gratuit, c'est un teaser ?",
-    plain:
-      "C'est une mesure réelle, sur un échantillon réduit du même protocole. Votre score s'affiche entier. Ce que vous n'avez pas gratuitement, ce sont les phrases exactes et le plan de correction, pas la mesure.",
-    r: (
-      <>
-        C'est une mesure réelle, sur un échantillon réduit du même protocole. Votre score s'affiche
-        entier. Ce que vous n'avez pas gratuitement, ce sont les phrases exactes et le plan de
-        correction, pas la mesure.
-      </>
-    ),
-  },
-  {
-    q: "Et si mon score est déjà bon ?",
-    plain:
-      "Nous vous le disons et nous ne vous vendons rien. C'est le cas le plus probable pour une marque déjà bien référencée sur son secteur, et ce n'est pas un problème : le scan aura répondu à la question que vous vous posiez.",
-    r: (
-      <>
-        Nous vous le disons et nous ne vous vendons rien. C'est le cas le plus probable pour une
-        marque déjà bien référencée sur son secteur, et ce n'est pas un problème : le scan aura
-        répondu à la question que vous vous posiez.
-      </>
-    ),
-  },
-  {
-    q: "En quoi est-ce différent du SEO ?",
-    plain:
-      "Le SEO vous fait apparaître dans une liste de liens. Le GEO vous fait citer dans une phrase. Un moteur d'IA ne classe pas dix résultats : il en nomme deux ou trois, et il n'y a pas de deuxième page. Les leviers se recouvrent en partie, la mesure et les priorités non.",
-    r: (
-      <>
-        Le <M>SEO</M> vous fait apparaître dans une liste de liens. Le <M>GEO</M> vous fait citer
-        dans une phrase. Un moteur d'IA ne classe pas dix résultats : il en nomme deux ou trois, et
-        il n'y a pas de deuxième page. Les leviers se recouvrent en partie, la mesure et les
-        priorités non.
-      </>
-    ),
-  },
-  {
+    groupe: "offre",
+    ancre: "outil-de-suivi",
     q: "Pourquoi pas un outil de suivi à 59 € par mois ?",
     plain:
       "Un outil mesure et affiche. Il ne réécrit pas vos pages, ne pose pas vos correctifs techniques et ne va pas chercher les sources que les IA citent. Si vous avez déjà l'équipe pour agir, un outil suffit peut-être. Le sprint existe pour ceux qui n'ont personne pour faire le travail.",
@@ -140,42 +329,8 @@ const ENTREES: Entree[] = [
     ),
   },
   {
-    q: "Pourquoi pas mon agence SEO actuelle ?",
-    plain:
-      "Si elle mesure votre présence dans les réponses d'IA et sait la corriger, gardez-la. Posez-lui la question avant de nous appeler : c'est la façon la plus rapide de savoir si vous avez besoin de nous.",
-    r: (
-      <>
-        Si elle mesure votre présence dans les réponses d'IA et sait la corriger, gardez-la.
-        Posez-lui la question avant de nous appeler : c'est la façon la plus rapide de savoir si
-        vous avez besoin de nous.
-      </>
-    ),
-  },
-  {
-    q: "Vous avez des clients à montrer ?",
-    plain:
-      "Pas encore. Citari est récente et nous préférons l'écrire plutôt que de maquiller trois logos. C'est aussi la raison pour laquelle le prix est affiché, la formule publiée et les questions scellées : nous n'avons rien d'autre à vous offrir que ce que vous pouvez vérifier vous-même.",
-    r: (
-      <>
-        Pas encore. Citari est récente et nous préférons l'écrire plutôt que de maquiller trois
-        logos. C'est aussi la raison pour laquelle le prix est affiché, la formule publiée et les
-        questions scellées : nous n'avons rien d'autre à vous offrir que ce que vous pouvez vérifier
-        vous-même.
-      </>
-    ),
-  },
-  {
-    q: "Travaillez-vous avec mes concurrents ?",
-    plain:
-      "Un seul client par secteur et par zone, et trois sprints par mois au maximum. Si un concurrent direct est déjà engagé sur votre zone, nous vous le disons au premier échange.",
-    r: (
-      <>
-        Un seul client par secteur et par zone, et <M>trois sprints par mois</M> au maximum. Si un
-        concurrent direct est déjà engagé sur votre zone, nous vous le disons au premier échange.
-      </>
-    ),
-  },
-  {
+    groupe: "offre",
+    ancre: "email",
     q: "Que faites-vous de mon adresse email ?",
     plain:
       "Elle sert à vous envoyer votre rapport et, si vous ne donnez pas suite, deux ou trois relances. Elle n'est ni revendue, ni transmise. Vous pouvez demander sa suppression à tout moment.",
@@ -184,18 +339,6 @@ const ENTREES: Entree[] = [
         Elle sert à vous envoyer votre rapport et, si vous ne donnez pas suite, deux ou trois
         relances. Elle n'est ni revendue, ni transmise. Vous pouvez demander sa suppression à tout
         moment.
-      </>
-    ),
-  },
-  {
-    q: "Qu'attendez-vous de moi pendant le sprint ?",
-    plain:
-      "Un accès à votre site ou un interlocuteur technique disponible la première semaine, et une validation des contenus. C'est la seule dépendance du calendrier : un accès qui tarde décale tout le reste.",
-    r: (
-      <>
-        Un accès à votre site ou un interlocuteur technique disponible la <M>première semaine</M>,
-        et une validation des contenus. C'est la seule dépendance du calendrier : un accès qui tarde
-        décale tout le reste.
       </>
     ),
   },
@@ -211,13 +354,15 @@ const faqJsonLd = {
   })),
 };
 
-const num = (i: number) => String(i + 1).padStart(2, "0");
+function num(i: number) {
+  return String(i + 1).padStart(2, "0");
+}
 
 function Entree({ entree, index }: { entree: Entree; index: number }) {
   const [ouvert, setOuvert] = useState(false);
   return (
     <div className="border-b border-rule">
-      <h3 className="m-0">
+      <h3 id={entree.ancre} className="m-0 scroll-mt-28">
         <button
           type="button"
           onClick={() => setOuvert((v) => !v)}
@@ -262,6 +407,7 @@ export function SectionFAQ() {
 
   return (
     <section id="faq" className="surface-hollow relative">
+      <Quadrillage variante="clair" />
       <div className="rule-fade absolute inset-x-0 top-0" />
       <script
         type="application/ld+json"
@@ -273,10 +419,24 @@ export function SectionFAQ() {
           {TITRE}
         </h2>
 
-        <div className="mt-12 border-t border-ink">
-          {liste.map((e, i) => (
-            <Entree key={e.q} entree={e} index={i} />
-          ))}
+        <div className="mt-12">
+          {liste.map((e, i) => {
+            const nouveauGroupe = i === 0 || liste[i - 1]!.groupe !== e.groupe;
+            return (
+              <div key={e.ancre}>
+                {nouveauGroupe ? (
+                  <p
+                    className={`border-t border-ink pb-2 pt-4 font-mono text-[12px] uppercase tracking-[0.16em] text-ink-2 ${
+                      i === 0 ? "" : "mt-10"
+                    }`}
+                  >
+                    {TITRES_GROUPE[e.groupe]}
+                  </p>
+                ) : null}
+                <Entree entree={e} index={i} />
+              </div>
+            );
+          })}
         </div>
 
         {reste ? (

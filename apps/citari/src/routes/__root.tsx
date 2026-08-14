@@ -8,24 +8,24 @@ import {
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
-import { useEffect, useState, type ReactNode } from "react";
+import type { ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { ClickSpark, PageCanvas, ScrollProgress } from "@/components/jeremie/decor";
-import { ScanFormFocusProvider, useScanFormFocus } from "@/lib/scan-form-focus";
+import { SiteMark } from "@/components/jeremie/SiteMark";
+import { SiteFloatingContact } from "@/components/jeremie/SiteFloatingContact";
+import { SectionSidebar } from "@/components/jeremie/SectionSidebar";
+import { ScanFormFocusProvider } from "@/lib/scan-form-focus";
 
 /**
  * Racine du site.
  *
- * L'habillage (en-tête, fond de page, barre de lecture) vient du projet
- * Lovable de Jérémie, porté le 07/08/2026. Les métadonnées, le balisage
- * schema.org et les polices restent ceux de ce dépôt : ils décrivent l'offre
- * réelle, et le site est sa propre démonstration GEO.
- *
- * Les trois familles typographiques sont celles de la charte de Jérémie :
- * Archivo pour Citari, Newsreader italique pour les citations d'IA, IBM Plex
- * Mono pour toute donnée. Cormorant Garamond et Manrope, utilisés par
- * l'ancienne maquette, ne sont plus chargés.
+ * Navigation v3 de Jérémie, portée le 14/08/2026 : l'en-tête collant a disparu
+ * au profit de trois éléments flottants — le logo en haut à gauche, le contact
+ * en haut à droite, et sur la landing seulement une barre latérale de sections
+ * qui se déploie au survol. Les métadonnées, le balisage schema.org et les
+ * polices restent ceux de ce dépôt : ils décrivent l'offre réelle, et le site
+ * est sa propre démonstration GEO.
  */
 
 function NotFoundComponent() {
@@ -126,86 +126,12 @@ function RootShell({ children }: { children: ReactNode }) {
   );
 }
 
-function SiteHeader() {
-  const { focusAndScroll } = useScanFormFocus();
-  const [defile, setDefile] = useState(false);
-
-  useEffect(() => {
-    const onScroll = () => setDefile(window.scrollY > 220);
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
-
-  return (
-    <header
-      className={`sticky top-0 z-40 transition-all duration-500 lg:border-b lg:border-rule lg:bg-paper/75 lg:backdrop-blur-md ${
-        defile
-          ? "border-b border-transparent bg-transparent backdrop-blur-none"
-          : "border-b border-rule bg-paper/75 backdrop-blur-md"
-      }`}
-    >
-      <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-5 py-4 sm:px-8">
-        <Link to="/" aria-label="Citari, retour à l'accueil" className="flex items-center">
-          <img
-            src="/img/citari-monogramme.svg"
-            alt="Citari"
-            width={100}
-            height={100}
-            className={`h-[34px] w-[34px] rounded-full transition-all duration-500 [transition-timing-function:cubic-bezier(0.22,1,0.36,1)] lg:hidden ${
-              defile
-                ? "rotate-0 scale-100 opacity-100"
-                : "pointer-events-none absolute -rotate-180 scale-50 opacity-0"
-            }`}
-          />
-          <img
-            src="/img/citari-logo.png"
-            alt="Citari"
-            width={680}
-            height={160}
-            className={`h-[22px] w-auto transition-all duration-500 [transition-timing-function:cubic-bezier(0.22,1,0.36,1)] sm:h-[26px] lg:!static lg:rotate-0 lg:scale-100 lg:opacity-100 ${
-              defile
-                ? "pointer-events-none absolute rotate-180 scale-50 opacity-0"
-                : "rotate-0 scale-100 opacity-100"
-            }`}
-          />
-        </Link>
-
-        <nav className="flex items-center gap-5 text-[15px]">
-          <Link
-            to="/"
-            onClick={focusAndScroll}
-            className="cta-sweep mono hidden border border-ink bg-ink px-3.5 py-2 text-[13px] text-paper lg:inline-flex"
-          >
-            Scan gratuit
-          </Link>
-        </nav>
-      </div>
-    </header>
-  );
-}
-
-/** Bouton d'appel permanent, mobile seulement. */
-function FloatingScanCta() {
-  const { focusAndScroll } = useScanFormFocus();
-  return (
-    <Link
-      to="/"
-      onClick={focusAndScroll}
-      className="mono fixed bottom-5 left-1/2 z-40 -translate-x-1/2 rounded-[4px] border border-ink bg-ink px-5 py-3 text-[13px] uppercase tracking-[0.08em] text-paper transition-transform duration-200 active:scale-[0.97] lg:hidden"
-      style={{ bottom: "calc(1.25rem + env(safe-area-inset-bottom))" }}
-    >
-      Scan gratuit
-    </Link>
-  );
-}
-
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
-  // L'écran de scan et le rapport se lisent sans distraction : ni en-tête, ni
-  // bouton flottant. L'admin non plus, ce n'est pas une page publique.
+  // L'écran de scan et le rapport se lisent sans distraction : ni logo
+  // flottant, ni contact. L'admin non plus, ce n'est pas une page publique.
   const sansChrome =
     pathname.startsWith("/scan") || pathname.startsWith("/rapport") || pathname.startsWith("/admin");
 
@@ -215,8 +141,13 @@ function RootComponent() {
         <PageCanvas />
         <ScrollProgress />
         <ClickSpark />
-        {!sansChrome ? <SiteHeader /> : null}
-        {!sansChrome ? <FloatingScanCta /> : null}
+        {!sansChrome ? (
+          <>
+            <SiteMark className="fixed left-5 top-5 z-50 rounded-[4px] border border-rule/40 bg-paper/95 px-2.5 py-1.5 backdrop-blur-sm sm:left-8 sm:top-7" />
+            <SiteFloatingContact />
+          </>
+        ) : null}
+        {pathname === "/" ? <SectionSidebar /> : null}
         <main className="relative z-10">
           <Outlet />
         </main>

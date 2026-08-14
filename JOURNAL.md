@@ -5,6 +5,64 @@ d'une nouvelle session, après `CLAUDE.md`.
 
 ---
 
+## 2026-08-14 — Front v3 : la séquence remplace la page longue
+
+Jérémie a retravaillé son Lovable en profondeur et Luigi a demandé le report
+intégral, avec une insistance : « il y a des animations 3D magnifiques, ne les
+oublie pas ». Ces animations sont `StrokeText` (texte SVG en contour rempli
+par balayage de masque, trait de tête couleur signal) et le `Quadrillage`
+dérivant : elles ne s'affichaient pas dans SON aperçu Lovable, d'où sa crainte.
+Tout le port passe par nos fonctions serveur ; rien de sa couche données.
+
+**Ce qui a changé de structure.**
+
+- La navigation n'est plus un bandeau : marque flottante, contact flottant,
+  et une barre latérale de sections qui détecte la luminosité sous elle
+  (`elementFromPoint`) pour rester lisible sur les sections sombres.
+- Le pont problème/solution en StrokeText s'insère entre le héros et le
+  calculateur, refait en deux cartes de preuve (McKinsey 38, Arcom 56,6).
+- Procédure, FAQ (20 questions, 2 groupes, ancres et JSON-LD), CTA final et
+  pied de page passent en sombre.
+- **Le rapport d'aperçu n'est plus une page longue mais une séquence de six
+  pop-ups** : score → qui prend votre place → la phrase exacte → part de voix
+  → diagnostic → réservation. Une carte à la fois, dont l'utilisateur ne peut
+  pas rater le verbatim. `RapportApercu.tsx` supprimé ; `rapport-apercu.ts`
+  réduit aux dérivations que la séquence consomme ; l'assemblage vit dans
+  `rapport-sequence.ts`. Les étapes sans donnée (pas d'adversaire, pas de
+  verbatim) sortent de la séquence : jamais de carte vide. Le document de
+  mesure des modes `complet`/`controle` n'a pas bougé.
+
+**Ses suppressions ne sont pas symétriques des nôtres.** Il a effacé sa page
+`/methode` et son écran de scan démo. Le scan démo reste banni comme avant,
+mais `/methode` est CONSERVÉE : c'est notre engagement de vérifiabilité, pas
+un choix de maquette. Elle garde le pied de page sombre du v3.
+
+**Corrections de doctrine faites pendant le port**, parce que sa maquette
+vendait plus large que ce qu'on mesure : la FAQ disait le scan gratuit sur
+4 moteurs (c'est 2) ; « la plupart de nos prospects » supposait des prospects
+qu'on n'a pas ; son score auto-affiché 61 n'existe dans aucun scan enregistré
+(le nôtre reste absent tant qu'il n'est pas mesuré) ; « Ledgio est nommé deux
+fois plus souvent » était codé en dur, la carte le calcule ; le coût affiché
+de l'appel passe de 2 € à « environ 1 € », notre coût réel ; la modale disait
+« robots non vérifiés en aperçu » alors que l'audit flash tourne pendant le
+scan gratuit — la ligne vendable et vraie, ce sont les sources, activées
+seulement au diagnostic. Un résidu de sa numérotation commerciale
+(« ÉTAPE 02 ») lisait comme un compteur cassé à côté du « 05 / 06 » de la
+carte : retiré.
+
+**Le piège du port : l'id aléatoire en SSR.** Son `StrokeText` tirait l'id du
+masque SVG avec `Math.random()`. Le site étant rendu côté serveur, l'id du
+serveur et celui du client divergeaient à chaque hydratation et React marquait
+l'arbre entier « won't be patched up » : quatre erreurs console sur la landing.
+`useId()` règle le cas. Règle à retenir pour tout composant porté de Lovable
+(qui rend côté client uniquement) : **aucun aléa dans le rendu**.
+
+Vérifié : séquence complète cliquée sur le vrai aperçu Fiducial (score 31,
+In Extenso 30 contre 13 réponses sur 40, verbatim Gemini avec Dougs marquée),
+document Dougs complet intact, 216 tests, typecheck, build de production.
+
+---
+
 ## 2026-08-14 — Les emails apprennent à lire tout le scan
 
 Luigi a jugé les emails trop génériques : « ça vend pas assez notre

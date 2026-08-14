@@ -1,17 +1,21 @@
 /**
- * Le coût de l'absence : trois chiffres publics sourcés, puis un simulateur.
+ * Le coût de l'absence : deux chiffres publics sourcés, puis un simulateur.
  *
- * Porté du projet Lovable de Jérémie le 07/08/2026. Styles en ligne, sans
- * dépendance à la configuration Tailwind : le bloc est autonome et se déplace
- * d'une page à l'autre sans rien casser.
+ * Version v3 de Jérémie, portée le 14/08/2026 : la carte Pew a été retirée
+ * (deux cartes au lieu de trois), le simulateur est compacté sur un rang et
+ * le curseur « part IA » a disparu — la part est fixée au repère McKinsey
+ * 38 %, affiché comme base de calcul. Styles en ligne, bloc autonome.
  *
- * Calcul : panier moyen × nouveaux clients par mois × part passant par une IA.
- * Les trois sources affichées (McKinsey, Pew, Arcom) sont datées et nommées —
- * la doctrine interdit d'avancer un chiffre sans sa provenance.
+ * Les couleurs sont alignées sur NOS jetons : encre #17160F et signal
+ * #C0371D, pas la palette historique de sa maquette. Les sources affichées
+ * (McKinsey, Arcom) restent datées et nommées — la doctrine interdit
+ * d'avancer un chiffre sans sa provenance.
  */
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 
 import { ScrollFloat } from "@/components/jeremie/ScrollFloat";
+import { Quadrillage } from "@/components/jeremie/Quadrillage";
+import { useScanFormFocus } from "@/lib/scan-form-focus";
 
 const INK = "#17160F";
 const PAPER = "#FBFAF7";
@@ -26,8 +30,6 @@ const BODY = "#55514A";
 const BODY_STRONG = "#3A3733";
 const RED = "#C0371D";
 const RED_DARK = "#9E2C17";
-const RED_TINT = "#F6DFD8";
-const CORAL = "#E0553A";
 const ON_INK_MUTED = "#8B857A";
 const ON_INK_BODY = "#C9C4B8";
 
@@ -35,20 +37,17 @@ const SANS = "'Archivo', Helvetica, Arial, sans-serif";
 const MONO = "'IBM Plex Mono', ui-monospace, monospace";
 
 const nf = new Intl.NumberFormat("fr-FR");
-const fmt = (n: number) => nf.format(Math.round(n)).replace(/ | /g, " ");
+const fmt = (n: number) => nf.format(Math.round(n)).replace(/ | |\s/g, " ");
+const eur = (n: number) => `${fmt(n)} €`;
 
+/** Bornes des curseurs : [min, max, pas]. */
 const RANGE = {
-  basket: [50, 20000, 10] as const,
+  basket: [50, 20000, 50] as const,
   clients: [1, 60, 1] as const,
-  share: [0, 100, 1] as const,
 };
 
-export type CostCalculatorProps = {
-  defaults?: { basket?: number; clients?: number; share?: number };
-  sprintPrice?: number;
-  onCta?: () => void;
-  ctaLabel?: string;
-};
+/** Part des acheteurs qui interrogent une IA avant de décider, repère McKinsey 2026. */
+const PART_IA = 38;
 
 function useWide(px = 1100) {
   const [wide, setWide] = useState(false);
@@ -61,6 +60,8 @@ function useWide(px = 1100) {
   }, [px]);
   return wide;
 }
+
+/* ---------------------------------------------------------------- chiffres */
 
 /** Chiffre qui se compose à l'entrée dans le champ de vision. */
 function CountUp({ value, style }: { value: string; style?: CSSProperties }) {
@@ -87,7 +88,8 @@ function CountUp({ value, style }: { value: string; style?: CSSProperties }) {
         const duree = 1100;
         const tick = (now: number) => {
           const t = Math.min(1, (now - debut) / duree);
-          setAffiche(cible * (1 - Math.pow(1 - t, 3)));
+          const eased = 1 - Math.pow(1 - t, 3);
+          setAffiche(cible * eased);
           if (t < 1) frame = requestAnimationFrame(tick);
         };
         frame = requestAnimationFrame(tick);
@@ -117,15 +119,17 @@ function StatCard({
   logoAlt,
   value,
   unit,
+  suffix,
   line,
   chart,
   source,
   wide,
 }: {
-  logo?: string;
+  logo?: string | undefined;
   logoAlt: string;
   value: string;
   unit: string;
+  suffix?: string;
   line: string;
   chart: React.ReactNode;
   source: string;
@@ -144,7 +148,7 @@ function StatCard({
         gap: 14,
       }}
     >
-      <div style={{ display: "flex", alignItems: "baseline", gap: 4 }}>
+      <div style={{ display: "flex", alignItems: "baseline", gap: suffix ? 6 : 4 }}>
         <CountUp
           value={value}
           style={{
@@ -155,16 +159,16 @@ function StatCard({
             fontVariantNumeric: "tabular-nums",
           }}
         />
-        <span
-          style={{ fontSize: wide ? 30 : 25, fontWeight: 800, letterSpacing: "-0.03em", color: FAINT }}
-        >
+        <span style={{ fontSize: wide ? 30 : 25, fontWeight: 800, letterSpacing: "-0.03em", color: FAINT }}>
           {unit}
         </span>
+        {suffix ? <span style={{ fontFamily: MONO, fontSize: 12.5, color: ON_INK_MUTED }}>{suffix}</span> : null}
       </div>
 
-      <span style={{ fontSize: 15.5, lineHeight: 1.4, color: BODY_STRONG }}>{line}</span>
+      <span style={{ fontSize: 15.5, lineHeight: 1.4, color: BODY_STRONG, textWrap: "pretty" as never }}>
+        {line}
+      </span>
       {chart}
-
       <div
         style={{
           marginTop: "auto",
@@ -188,34 +192,11 @@ function StatCard({
   );
 }
 
+/** Barre pleine à l'échelle 0-100. */
 function Bar({ pct, color = INK }: { pct: number; color?: string }) {
   return (
     <div style={{ position: "relative", height: 8, background: TRACK, borderRadius: 99, overflow: "hidden" }}>
       <div style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: `${pct}%`, background: color, borderRadius: 99 }} />
-    </div>
-  );
-}
-
-function CompareBar({
-  label,
-  pct,
-  value,
-  color,
-  dim,
-}: { label: string; pct: number; value: string; color: string; dim?: boolean }) {
-  return (
-    <div style={{ display: "flex", alignItems: "center", gap: 9 }}>
-      <span style={{ fontFamily: MONO, fontSize: 10, color: dim ? FAINT : BODY, width: 74, flex: "none" }}>
-        {label}
-      </span>
-      <div style={{ flex: 1, height: 8, background: TRACK, borderRadius: 99, overflow: "hidden" }}>
-        <div style={{ width: `${pct}%`, height: "100%", background: color, borderRadius: 99 }} />
-      </div>
-      <span
-        style={{ fontFamily: MONO, fontSize: 10, color: dim ? FAINT : BODY, width: 26, flex: "none", textAlign: "right" }}
-      >
-        {value}
-      </span>
     </div>
   );
 }
@@ -231,6 +212,8 @@ function DotScale({ filled = 9, total = 25 }: { filled?: number; total?: number 
   );
 }
 
+/* --------------------------------------------------------------- curseurs */
+
 function Slider({
   label,
   value,
@@ -240,8 +223,6 @@ function Slider({
   step,
   minLabel,
   maxLabel,
-  marker,
-  markerLabel,
   onChange,
 }: {
   label: string;
@@ -252,8 +233,6 @@ function Slider({
   step: number;
   minLabel: string;
   maxLabel: string;
-  marker?: number;
-  markerLabel?: string;
   onChange: (v: number) => void;
 }) {
   const track = useRef<HTMLDivElement | null>(null);
@@ -334,9 +313,6 @@ function Slider({
       >
         <div style={{ position: "absolute", left: 0, right: 0, height: 6, background: TRACK, borderRadius: 99 }} />
         <div style={{ position: "absolute", left: 0, width: `${pct}%`, height: 6, background: INK, borderRadius: 99 }} />
-        {marker !== undefined ? (
-          <div style={{ position: "absolute", left: `${marker}%`, top: 3, bottom: 3, width: 2, background: RED, borderRadius: 99 }} />
-        ) : null}
         <div
           style={{
             position: "absolute",
@@ -353,37 +329,40 @@ function Slider({
       </div>
 
       <div
-        style={{ display: "flex", justifyContent: "space-between", gap: 12, fontFamily: MONO, fontSize: 10.5, color: FAINT }}
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          gap: 12,
+          fontFamily: MONO,
+          fontSize: 10.5,
+          color: FAINT,
+        }}
       >
         <span>{minLabel}</span>
-        {markerLabel ? <span style={{ color: RED_DARK }}>{markerLabel}</span> : null}
         <span>{maxLabel}</span>
       </div>
     </div>
   );
 }
 
-export function CostCalculator({
-  defaults,
-  sprintPrice = 2900,
-  onCta,
-  ctaLabel = "Lancer mon scan gratuit",
-}: CostCalculatorProps) {
+/* ------------------------------------------------------------------ écran */
+
+export function CostCalculator({ sprintPrice = 2900 }: { sprintPrice?: number } = {}) {
   const wide = useWide(1100);
-  const [basket, setBasket] = useState(defaults?.basket ?? 200);
-  const [clients, setClients] = useState(defaults?.clients ?? 5);
-  const [share, setShare] = useState(defaults?.share ?? 38);
+  const { focusAndScroll } = useScanFormFocus();
+  const [basket, setBasket] = useState(3000);
+  const [clients, setClients] = useState(8);
   const [period, setPeriod] = useState<"month" | "year">("month");
 
-  const { monthly, yearly, aiClients } = useMemo(() => {
-    const ai = (clients * share) / 100;
+  const { monthly, yearly } = useMemo(() => {
+    const ai = (clients * PART_IA) / 100;
     const m = Math.round(basket * ai);
-    return { monthly: m, yearly: m * 12, aiClients: ai };
-  }, [basket, clients, share]);
+    return { monthly: m, yearly: m * 12 };
+  }, [basket, clients]);
 
   const isYear = period === "year";
   const result = isYear ? yearly : monthly;
-  void sprintPrice;
+  const payClients = Math.ceil(sprintPrice / Math.max(1, basket));
 
   const segment = (active: boolean) => ({
     fontFamily: MONO,
@@ -398,101 +377,113 @@ export function CostCalculator({
 
   return (
     <section
+      id="cout"
       style={{
+        position: "relative",
         background: "var(--surface-hollow)",
         color: INK,
         fontFamily: SANS,
         padding: wide ? "56px 40px 88px" : "36px 20px 64px",
         display: "flex",
         justifyContent: "center",
+        overflow: "hidden",
       }}
     >
-      <div style={{ width: "100%", maxWidth: 960, display: "flex", flexDirection: "column", gap: wide ? 52 : 40 }}>
+      <Quadrillage variante="clair" />
+      <div
+        style={{
+          position: "relative",
+          zIndex: 1,
+          width: "100%",
+          maxWidth: 960,
+          display: "flex",
+          flexDirection: "column",
+          gap: wide ? 52 : 40,
+        }}
+      >
+        {/* les deux chiffres publics */}
         <div style={{ display: "flex", flexDirection: "column", gap: 26 }}>
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              gap: 14,
-              maxWidth: 600,
-              alignItems: wide ? "flex-start" : "center",
-              textAlign: wide ? "left" : "center",
-              margin: wide ? undefined : "0 auto",
-            }}
-          >
-            <span
-              style={{
-                fontFamily: MONO,
-                fontSize: 10.5,
-                letterSpacing: "0.16em",
-                textTransform: "uppercase",
-                color: ON_INK_MUTED,
-              }}
-            >
-              Ce qui a changé
-            </span>
-
-            <ScrollFloat
-              style={{
-                margin: 0,
-                fontSize: wide ? 52 : 34,
-                fontWeight: 800,
-                letterSpacing: "-0.04em",
-                lineHeight: 1.05,
-                textWrap: "pretty" as never,
-              }}
-            >
-              Le trafic baisse. La demande, non.
-            </ScrollFloat>
-
-            <p
-              style={{
-                margin: 0,
-                fontSize: wide ? 17 : 15.5,
-                lineHeight: 1.55,
-                color: BODY,
-                textWrap: "pretty" as never,
-              }}
-            >
-              Votre marché n'a pas disparu. C'est{" "}
-              <strong style={{ color: BODY_STRONG }}>l'endroit où il se décide</strong> qui a
-              changé de place, et personne ne vous a prévenu.
-            </p>
-
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", gap: 32 }}>
             <div
               style={{
-                height: 1,
-                width: "100%",
-                maxWidth: 420,
-                background: LINE_INK,
-                margin: wide ? "14px 0 4px" : "10px 0 2px",
-              }}
-            />
-
-            <p
-              style={{
-                margin: 0,
-                fontSize: wide ? 26 : 21,
-                fontWeight: 600,
-                letterSpacing: "-0.02em",
-                lineHeight: 1.2,
-                color: INK,
-                textWrap: "pretty" as never,
+                display: "flex",
+                flexDirection: "column",
+                gap: 14,
+                maxWidth: 600,
+                alignItems: wide ? "flex-start" : "center",
+                textAlign: wide ? "left" : "center",
+                margin: wide ? undefined : "0 auto",
               }}
             >
-              La décision se prend désormais dans la réponse, pas sur votre site.
-            </p>
-
-            <p style={{ margin: 0, fontSize: 15.5, lineHeight: 1.5, color: BODY }}>
-              Et dans cette réponse, il n'y a que{" "}
-              <span style={{ color: RED_DARK }}>trois noms</span>.
-            </p>
+              <span
+                style={{
+                  fontFamily: MONO,
+                  fontSize: 10.5,
+                  letterSpacing: "0.16em",
+                  textTransform: "uppercase",
+                  color: ON_INK_MUTED,
+                }}
+              >
+                Ce qui a changé
+              </span>
+              <ScrollFloat
+                style={{
+                  margin: 0,
+                  fontSize: wide ? 52 : 34,
+                  fontWeight: 800,
+                  letterSpacing: "-0.04em",
+                  lineHeight: 1.05,
+                  textWrap: "pretty" as never,
+                }}
+              >
+                Le trafic baisse. La demande, non.
+              </ScrollFloat>
+              <p
+                style={{
+                  margin: 0,
+                  fontSize: wide ? 17 : 15.5,
+                  lineHeight: 1.55,
+                  color: BODY,
+                  textWrap: "pretty" as never,
+                }}
+              >
+                Votre marché n'a pas disparu. C'est{" "}
+                <strong style={{ color: BODY_STRONG }}>l'endroit où il se décide</strong> qui a
+                changé de place, et personne ne vous a prévenu.
+              </p>
+              <div
+                style={{
+                  height: 1,
+                  width: "100%",
+                  maxWidth: 420,
+                  background: LINE_INK,
+                  margin: wide ? "14px 0 4px" : "10px 0 2px",
+                }}
+              />
+              <p
+                style={{
+                  margin: 0,
+                  fontSize: wide ? 26 : 21,
+                  fontWeight: 600,
+                  letterSpacing: "-0.02em",
+                  lineHeight: 1.2,
+                  color: INK,
+                  textWrap: "pretty" as never,
+                }}
+              >
+                La décision des clients se prend désormais via les moteurs IA, pas sur votre site.
+              </p>
+              <p style={{ margin: 0, fontSize: 15.5, lineHeight: 1.5, color: BODY }}>
+                Et dans cette réponse, il n'y a que{" "}
+                <span style={{ color: RED_DARK }}>trois noms</span>.
+              </p>
+            </div>
           </div>
 
           <div
             style={
               wide
-                ? { display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16 }
+                ? { display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 16 }
                 : {
                     display: "flex",
                     gap: 0,
@@ -513,28 +504,9 @@ export function CostCalculator({
                 logoAlt="McKinsey"
                 value="38"
                 unit="%"
-                line="de vos acheteurs interrogent une IA avant de décider. Trois noms sortent. Le vôtre, ou trois concurrents."
+                line="Près de 38 % des acheteurs demandent à une IA avant de choisir leur prestataire."
                 chart={<DotScale />}
                 source="McKinsey · mars 2026"
-              />,
-              <StatCard
-                key="pew"
-                wide={wide}
-                logo="/img/pew.jpg"
-                logoAlt="Pew Research Center"
-                value="1"
-                unit="sur 2"
-                line="C'est la part des clics qui disparaît dès qu'une réponse d'IA s'affiche."
-                chart={
-                  // Les deux valeurs brutes de l'étude sont sous le titre : 15 % de
-                  // clics sans réponse d'IA, 8 % avec. Le « 1 sur 2 » les résume,
-                  // il ne les remplace pas.
-                  <div style={{ display: "flex", flexDirection: "column", gap: 7 }}>
-                    <CompareBar label="sans rép. d'IA" pct={100} value="15 %" color={ON_INK_BODY} dim />
-                    <CompareBar label="avec rép. d'IA" pct={53} value="8 %" color={RED} />
-                  </div>
-                }
-                source="Pew Research Center · juill. 2025 · n = 900"
               />,
               <StatCard
                 key="arcom"
@@ -561,6 +533,7 @@ export function CostCalculator({
                     display: "flex",
                     flexDirection: "column",
                     scrollSnapAlign: "center",
+                    scrollSnapStop: "always" as never,
                   }}
                 >
                   {card}
@@ -570,59 +543,80 @@ export function CostCalculator({
           </div>
         </div>
 
-        <div style={{ display: "flex", flexDirection: "column", gap: 22 }}>
+        {/* le simulateur, compacté sur un rang */}
+        <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
           <div
             style={{
               display: "flex",
               flexDirection: "column",
-              gap: 11,
+              gap: 8,
               maxWidth: 660,
               alignItems: wide ? "flex-start" : "center",
               textAlign: wide ? "left" : "center",
               margin: wide ? undefined : "0 auto",
             }}
           >
-            <h3 style={{ margin: 0, fontSize: wide ? 28 : 24, fontWeight: 800, letterSpacing: "-0.032em", lineHeight: 1.2 }}>
-              Calculez le chiffre d'affaires que vous exposez aux recherches IA.
+            <h3
+              style={{
+                margin: 0,
+                fontSize: wide ? 25 : 21,
+                fontWeight: 800,
+                letterSpacing: "-0.032em",
+                lineHeight: 1.18,
+                textWrap: "pretty" as never,
+              }}
+            >
+              Combien de vos clients passent par une IA avant de vous appeler ?
             </h3>
-            <p style={{ margin: 0, fontSize: 16.5, lineHeight: 1.55, color: BODY }}>
-              Trois chiffres que vous connaissez déjà, et vous voyez ce qui se joue chaque mois dans
-              les réponses des IA.
+            <p style={{ margin: 0, fontSize: 15.5, lineHeight: 1.5, color: BODY, textWrap: "pretty" as never }}>
+              Ça ne laisse aucune trace dans vos statistiques, mais vous pouvez l'estimer ci-dessous.
             </p>
           </div>
 
-          <div style={{ display: "flex", flexDirection: wide ? "row" : "column", gap: 24, alignItems: "stretch" }}>
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: wide ? "1fr 1fr" : "1fr",
+              gap: 14,
+              alignItems: "stretch",
+            }}
+          >
             <div
               style={{
-                flex: 1,
                 border: `1px solid ${HAIR}`,
                 borderRadius: 4,
                 background: CARD,
-                padding: wide ? "30px 30px 32px" : "24px 20px 26px",
+                padding: wide ? "22px 24px 24px" : "20px 18px 22px",
                 display: "flex",
                 flexDirection: "column",
-                gap: 34,
+                gap: 22,
               }}
             >
               <span
-                style={{ fontFamily: MONO, fontSize: 11.5, letterSpacing: "0.14em", textTransform: "uppercase", color: MUTED }}
+                style={{
+                  fontFamily: MONO,
+                  fontSize: 11,
+                  letterSpacing: "0.14em",
+                  textTransform: "uppercase",
+                  color: MUTED,
+                }}
               >
-                vos chiffres
+                Vos chiffres
               </span>
 
               <Slider
-                label="Panier moyen de vos nouveaux clients"
+                label="Ce que vous rapporte un nouveau client"
                 value={basket}
-                display={`${fmt(basket)} €`}
+                display={eur(basket)}
                 min={RANGE.basket[0]}
                 max={RANGE.basket[1]}
                 step={RANGE.basket[2]}
-                minLabel="50 €"
-                maxLabel="20 000 €"
+                minLabel={eur(50)}
+                maxLabel={eur(20000)}
                 onChange={setBasket}
               />
               <Slider
-                label="Vos nouveaux clients par mois"
+                label="Nombre de nouveaux clients par mois"
                 value={clients}
                 display={String(clients)}
                 min={RANGE.clients[0]}
@@ -632,146 +626,106 @@ export function CostCalculator({
                 maxLabel="60"
                 onChange={setClients}
               />
-              <Slider
-                label="Vos prospects qui passent par une IA avant de choisir"
-                value={share}
-                display={`${share} %`}
-                min={RANGE.share[0]}
-                max={RANGE.share[1]}
-                step={RANGE.share[2]}
-                minLabel="0 %"
-                maxLabel="100 %"
-                marker={38}
-                markerLabel="repère McKinsey 38 %"
-                onChange={setShare}
-              />
+
+              <span style={{ fontFamily: MONO, fontSize: 11, lineHeight: 1.45, color: MUTED, marginTop: "auto" }}>
+                Base : {PART_IA} % des acheteurs interrogent une IA avant de décider, repère
+                McKinsey 2026.
+              </span>
             </div>
 
             <div
               style={{
-                width: wide ? 392 : "auto",
-                flex: "none",
                 borderRadius: 4,
                 background: INK,
                 color: PAPER,
+                padding: wide ? "22px 24px 24px" : "20px 18px 22px",
                 display: "flex",
                 flexDirection: "column",
-                overflow: "hidden",
+                gap: 13,
               }}
             >
-              <div
-                style={{
-                  padding: "26px 26px 24px",
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: 16,
-                  borderBottom: `1px solid ${LINE_INK}`,
-                }}
-              >
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 14 }}>
-                  <span
-                    style={{ fontFamily: MONO, fontSize: 11, letterSpacing: "0.12em", textTransform: "uppercase", color: ON_INK_MUTED }}
-                  >
-                    Coût de l'absence
-                  </span>
-                  <div style={{ display: "flex", background: "#26241F", borderRadius: 99, padding: 2 }}>
-                    <button type="button" onClick={() => setPeriod("month")} style={segment(!isYear)}>
-                      mois
-                    </button>
-                    <button type="button" onClick={() => setPeriod("year")} style={segment(isYear)}>
-                      an
-                    </button>
-                  </div>
-                </div>
-                <div style={{ display: "flex", alignItems: "baseline", gap: 7 }}>
-                  <span
-                    style={{
-                      fontSize: 66,
-                      fontWeight: 800,
-                      letterSpacing: "-0.05em",
-                      lineHeight: 0.86,
-                      fontVariantNumeric: "tabular-nums",
-                      color: CORAL,
-                    }}
-                  >
-                    {fmt(result)}
-                  </span>
-                  <span style={{ fontSize: 28, fontWeight: 800, letterSpacing: "-0.03em", color: CORAL }}>€</span>
-                </div>
-                <span style={{ fontSize: 18, fontWeight: 600, letterSpacing: "-0.02em", lineHeight: 1.35 }}>
-                  d'affaires {isYear ? "par an" : "par mois"} se décident dans une réponse d'IA.
-                </span>
-                <span style={{ fontFamily: MONO, fontSize: 11, color: ON_INK_MUTED }}>
-                  soit {isYear ? `${fmt(monthly)} € par mois` : `${fmt(yearly)} € par an`}
-                </span>
-              </div>
-
-              <div
-                style={{
-                  padding: "20px 26px",
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: 11,
-                  borderBottom: `1px solid ${LINE_INK}`,
-                }}
-              >
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12 }}>
                 <span
-                  style={{ fontFamily: MONO, fontSize: 11, letterSpacing: "0.12em", textTransform: "uppercase", color: ON_INK_MUTED }}
-                >
-                  Le calcul
-                </span>
-                <div style={{ display: "flex", justifyContent: "space-between", gap: 14, alignItems: "baseline", fontSize: 14.5 }}>
-                  <span style={{ color: ON_INK_BODY }}>
-                    {isYear ? "clients par an passés par une IA" : "clients par mois passés par une IA"}
-                  </span>
-                  <span style={{ fontFamily: MONO, fontVariantNumeric: "tabular-nums" }}>
-                    {isYear ? fmt(aiClients * 12) : aiClients.toFixed(1).replace(".", ",")}
-                  </span>
-                </div>
-                <div style={{ display: "flex", justifyContent: "space-between", gap: 14, alignItems: "baseline", fontSize: 14.5 }}>
-                  <span style={{ color: ON_INK_BODY }}>× panier moyen</span>
-                  <span style={{ fontFamily: MONO, fontVariantNumeric: "tabular-nums" }}>{fmt(basket)} €</span>
-                </div>
-                <div
                   style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    gap: 14,
-                    alignItems: "baseline",
-                    fontSize: 14.5,
-                    borderTop: `1px solid ${LINE_INK}`,
-                    paddingTop: 11,
+                    fontFamily: MONO,
+                    fontSize: 11,
+                    letterSpacing: "0.12em",
+                    textTransform: "uppercase",
+                    color: ON_INK_MUTED,
                   }}
                 >
-                  <span style={{ color: PAPER, fontWeight: 600 }}>chiffre d'affaires exposé</span>
-                  <span style={{ fontFamily: MONO, fontVariantNumeric: "tabular-nums", color: CORAL }}>
-                    {fmt(result)} €
-                  </span>
+                  Ce que vous ne voyez pas
+                </span>
+                <div style={{ display: "flex", background: "#26241F", borderRadius: 99, padding: 2 }}>
+                  <button type="button" onClick={() => setPeriod("month")} style={segment(!isYear)}>
+                    mois
+                  </button>
+                  <button type="button" onClick={() => setPeriod("year")} style={segment(isYear)}>
+                    an
+                  </button>
                 </div>
               </div>
 
-              <div style={{ padding: "20px 26px 24px", display: "flex", flexDirection: "column", gap: 13, marginTop: "auto" }}>
-                <span style={{ fontFamily: MONO, fontSize: 11, lineHeight: 1.5, color: ON_INK_MUTED }}>
-                  Une estimation à partir de vos chiffres, pas une mesure. La mesure, c'est le scan.
-                </span>
-                <button
-                  type="button"
-                  onClick={onCta}
+              <div style={{ display: "flex", alignItems: "baseline", gap: 6 }}>
+                <span
                   style={{
-                    background: RED,
-                    color: PAPER,
-                    padding: 14,
-                    border: "none",
-                    borderRadius: 3,
-                    fontFamily: SANS,
-                    fontSize: 16,
-                    fontWeight: 700,
-                    cursor: "pointer",
+                    fontFamily: MONO,
+                    fontSize: wide ? 46 : 40,
+                    fontWeight: 600,
+                    letterSpacing: "-0.04em",
+                    lineHeight: 0.92,
+                    fontVariantNumeric: "tabular-nums",
+                    color: RED,
                   }}
                 >
-                  {ctaLabel}
-                </button>
+                  {fmt(result)}
+                </span>
+                <span style={{ fontFamily: MONO, fontSize: 22, fontWeight: 600, color: RED }}>€</span>
               </div>
+
+              <span style={{ fontSize: 16.5, fontWeight: 600, letterSpacing: "-0.02em", lineHeight: 1.32 }}>
+                d'affaires {isYear ? "par an" : "par mois"} se décident dans une conversation d'un
+                moteur IA dans lequel vous n'êtes peut-être pas.
+              </span>
+
+              <span
+                style={{
+                  fontFamily: MONO,
+                  fontSize: 11,
+                  lineHeight: 1.5,
+                  color: ON_INK_BODY,
+                  borderTop: `1px solid ${LINE_INK}`,
+                  paddingTop: 11,
+                }}
+              >
+                {isYear ? fmt(clients * 12) : String(clients)} clients × {PART_IA} % (McKinsey) ×{" "}
+                {eur(basket)} = {eur(result)} {isYear ? "/ an" : "/ mois"}
+              </span>
+
+              <button
+                type="button"
+                onClick={focusAndScroll}
+                style={{
+                  marginTop: "auto",
+                  background: PAPER,
+                  color: INK,
+                  padding: 13,
+                  border: "none",
+                  borderRadius: 3,
+                  fontFamily: SANS,
+                  fontSize: 15.5,
+                  fontWeight: 700,
+                  cursor: "pointer",
+                }}
+              >
+                Voir si je suis cité
+              </button>
+
+              <span style={{ fontSize: 11.5, lineHeight: 1.45, color: ON_INK_MUTED }}>
+                {basket >= sprintPrice
+                  ? `Notre prix Sprint GEO à ${eur(sprintPrice)} : un seul client récupéré le rembourse.`
+                  : `Notre prix Sprint GEO à ${eur(sprintPrice)} : remboursé au ${payClients}e client récupéré sur l'année.`}
+              </span>
             </div>
           </div>
         </div>
@@ -779,5 +733,3 @@ export function CostCalculator({
     </section>
   );
 }
-
-export default CostCalculator;

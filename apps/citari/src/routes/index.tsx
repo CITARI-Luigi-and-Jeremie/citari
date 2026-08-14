@@ -6,20 +6,19 @@ import { SectionProcedure } from "@/components/jeremie/SectionProcedure";
 import { SectionFAQ } from "@/components/jeremie/SectionFAQ";
 import { SectionFinalCTA, SiteFooter } from "@/components/jeremie/SectionFinalCTA";
 import { HeroSpecimen } from "@/components/jeremie/HeroSpecimen";
+import { ProblemSolutionBridge } from "@/components/jeremie/ProblemSolutionBridge";
+import { Quadrillage } from "@/components/jeremie/Quadrillage";
 import { Reveal } from "@/components/jeremie/Reveal";
 import { CursorHalo, WaveField } from "@/components/jeremie/decor";
-import { useScanFormFocus } from "@/lib/scan-form-focus";
 
 /**
  * Page d'accueil.
  *
- * Portée du projet Lovable de Jérémie ; maquette remise à l'identique le
- * 08/08/2026 (deux colonnes, spécimen de rapport à droite). Le formulaire
- * appelle NOTRE fonction serveur `lancerScan` : rien de la couche données de
- * son projet n'a été repris.
- *
- * Elle a un seul objectif de conversion, faire lancer le scan gratuit. Le
- * sprint ne se vend pas ici : il se vend au diagnostic, en visio.
+ * Maquette v3 de Jérémie, portée le 14/08/2026 : quadrillage sur le héros,
+ * pont problème/solution en StrokeText après le héros, sections identifiées
+ * pour la barre latérale (scan · probleme · cout · methode · faq · contact).
+ * Le formulaire appelle NOTRE fonction serveur `lancerScan` : rien de la
+ * couche données de son projet n'a été repris.
  */
 
 const HERO_TITRE = "Vous perdez des clients que vous ne verrez jamais.";
@@ -42,11 +41,10 @@ export const Route = createFileRoute("/")({
 });
 
 function Accueil() {
-  const { focusAndScroll } = useScanFormFocus();
-
   return (
     <>
-      <section className="surface-edge relative overflow-hidden">
+      <section id="scan" className="surface-edge relative overflow-hidden">
+        <Quadrillage variante="clair" />
         <CursorHalo />
         <WaveField />
         <div className="relative z-10 mx-auto max-w-6xl px-5 pb-14 pt-12 sm:px-8 sm:pb-20 sm:pt-16">
@@ -89,7 +87,8 @@ function Accueil() {
         <div className="rule-fade absolute inset-x-0 bottom-0" />
       </section>
 
-      <CostCalculator onCta={focusAndScroll} />
+      <ProblemSolutionBridge />
+      <CostCalculator />
       <SectionProcedure />
       <SectionFAQ />
       <SectionFinalCTA />
