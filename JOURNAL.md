@@ -5,6 +5,42 @@ d'une nouvelle session, après `CLAUDE.md`.
 
 ---
 
+## 2026-08-14 — Winamax : la redirection qui boucle, et OpenAI à sec à son tour
+
+Le scan Winamax de Luigi, POSTÉRIEUR au correctif Unibet, sortait encore des
+questions ERP/CRM et un 0/100. Deux couches de plus sous l'oignon.
+
+**La lecture du site échouait silencieusement** : winamax.fr accueille un
+client sans cookies par une 302 « switch_language » qui boucle à l'infini —
+`redirect: "follow"` explosait (« redirect count exceeded »), la matière
+revenait vide, et le générateur retombait sur « Secteur : Autre » et brodait.
+`matiereDuSite` suit désormais les redirections À LA MAIN (5 sauts max), en
+conservant les cookies entre les sauts, avec `Accept-Language: fr` (qui
+suffit à éviter la plupart des aiguillages de langue) et un en-tête
+navigateur. Vérifié : winamax.fr répond 200 au premier saut.
+
+**Et le prompt refuse maintenant d'inventer.** La marque est passée en
+CONTEXTE (« jamais dans les questions », la règle tient) pour ancrer le
+métier quand le site reste illisible ; l'ordre de vérité est site → marque
+connue → secteur précis ; si aucun ne suffit, le modèle doit renvoyer zéro
+question et la génération échoue franchement : un échec honnête vaut mieux
+qu'un faux score sous nos couleurs.
+
+Rejoué en réel : winamax.fr, secteur « Autre » — questions paris
+sportifs/poker ANJ/cotes, **85/100, cité dans 19 réponses sur 20 valides**.
+Le chiffre que le réel commande.
+
+**Mais la même mesure a révélé la panne suivante : OpenAI est à sec.**
+`OpenAI [429] « You have no credits remaining »` — les 20 réponses ChatGPT
+du scan en erreur. La règle du dénominateur a tenu (le 85 est calculé sur
+les 20 réponses Gemini valides), mais l'aperçu tourne de fait sur UN moteur.
+Google rechargé à 18 h, OpenAI mort vers 18 h 10 : les crédits moteurs
+partent en cascade le jour où on teste fort. À recharger par Luigi sur
+platform.openai.com avant tout scan sérieux — et le baromètre à 100 scans
+exigera des soldes provisionnés d'avance.
+
+---
+
 ## 2026-08-14 — La génération lit enfin le site : l'affaire Unibet
 
 Luigi, crédit Google rechargé, relance un scan : « résultat en 2 secondes,

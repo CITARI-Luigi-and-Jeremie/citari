@@ -29,13 +29,13 @@ ont tourné contre la vraie base. 180 tests passent.
 avait été à court, et la panne avait appris une règle qui, elle, reste : une
 réponse en erreur ne compte pas au dénominateur du score.
 
-**Le crédit GOOGLE est à sec depuis le 14/08/2026 après-midi** (`429 — Your
-prepayment credits are depleted` sur la génération). Tant qu'il n'est pas
-rechargé sur AI Studio, AUCUN scan ne peut tourner : la génération des
-questions et l'analyse passent par `gemini-3.1-flash-lite`, et Gemini est un
-des deux moteurs de l'aperçu. À recharger avant tout test et avant le
-lancement ; un scan tombé en erreur se reprend ensuite par « Reprendre la
-mesure ».
+**Les crédits moteurs meurent en cascade les jours de test.** Le 14/08 :
+Google à sec l'après-midi (rechargé par Luigi à 18 h), puis OPENAI à sec dès
+18 h 10 (`429 — You have no credits remaining`, les 20 réponses ChatGPT d'un
+scan en erreur). La règle du dénominateur protège le score, mais un aperçu
+sans ChatGPT tourne de fait sur UN moteur. Avant tout test sérieux et avant
+le lancement : vérifier les soldes OpenAI ET Google, et provisionner d'avance
+pour le baromètre à 100 scans.
 
 **Les deux dettes historiques sont soldées** (10/08/2026). `pnpm toolkit
 effacer` répond au droit à l'effacement (simulation par défaut, `--vraiment`

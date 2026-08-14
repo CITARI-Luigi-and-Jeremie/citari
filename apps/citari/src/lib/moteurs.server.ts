@@ -416,14 +416,45 @@ export async function classerConcurrents(
  */
 export async function matiereDuSite(url: string | null): Promise<string> {
   if (!url) return "";
-  const adresse = /^https?:\/\//i.test(url) ? url : `https://${url}`;
+  let adresse = /^https?:\/\//i.test(url) ? url : `https://${url}`;
+  // Les redirections sont suivies À LA MAIN, cookies compris : winamax.fr
+  // renvoie une 302 « switch_language » qui boucle à l'infini pour un client
+  // sans cookies — `redirect: "follow"` explosait (« redirect count
+  // exceeded ») et la matière revenait vide. L'Accept-Language évite la
+  // plupart de ces aiguillages de langue, l'en-tête navigateur passe les
+  // murs qui refusent les robots déclarés (on lit UNE page publique, comme
+  // un aperçu de lien).
+  const biscuits = new Map<string, string>();
   try {
-    const res = await fetch(adresse, {
-      signal: AbortSignal.timeout(6000),
-      headers: { "User-Agent": "CitariScan/1.0 (+https://citari.fr)" },
-      redirect: "follow",
-    });
-    if (!res.ok) return "";
+    let res: Response | null = null;
+    for (let saut = 0; saut < 5; saut++) {
+      res = await fetch(adresse, {
+        signal: AbortSignal.timeout(6000),
+        redirect: "manual",
+        headers: {
+          "User-Agent":
+            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
+          "Accept-Language": "fr-FR,fr;q=0.9",
+          Accept: "text/html,application/xhtml+xml",
+          ...(biscuits.size
+            ? { Cookie: [...biscuits].map(([n, v]) => `${n}=${v}`).join("; ") }
+            : {}),
+        },
+      });
+      for (const ligne of res.headers.getSetCookie?.() ?? []) {
+        const paire = ligne.split(";")[0] ?? "";
+        const egal = paire.indexOf("=");
+        if (egal > 0) biscuits.set(paire.slice(0, egal).trim(), paire.slice(egal + 1).trim());
+      }
+      if (res.status >= 300 && res.status < 400) {
+        const cible = res.headers.get("location");
+        if (!cible) return "";
+        adresse = new URL(cible, adresse).toString();
+        continue;
+      }
+      break;
+    }
+    if (!res || !res.ok) return "";
     const html = (await res.text()).slice(0, 300_000);
     const prendre = (motif: RegExp) => (html.match(motif)?.[1] ?? "").trim();
     const titre = prendre(/<title[^>]*>([\s\S]*?)<\/title>/i);
@@ -464,14 +495,17 @@ export async function genererQuestions(input: {
       "Tu génères un échantillon de questions réellement posées à une IA par un décideur en phase d'achat. " +
         'Renvoie UNIQUEMENT du JSON : {"queries":[{"text":"","intent":"comparative|probleme|locale|confiance"}]}. ' +
         mix +
-        " Jamais le nom de la marque suivie dans la question : on mesure si l'IA la cite spontanément." +
-        " Le MÉTIER de l'entreprise se déduit D'ABORD de l'extrait de son site quand il est fourni :" +
-        " le libellé de secteur peut être générique (« Autre ») et ne doit JAMAIS être remplacé par un" +
-        " métier inventé. Sans extrait ni secteur précis, pose des questions du secteur déclaré, sans broder.",
-      `Secteur déclaré : ${input.secteur}. Zone : ${input.ville ?? "France"}. Langue des questions : ${input.langue}.` +
+        " Le nom de la marque suivie ne doit JAMAIS apparaître dans une question : on mesure si l'IA la cite spontanément." +
+        " Le MÉTIER de l'entreprise se déduit dans cet ordre : 1) l'extrait du site s'il est fourni ;" +
+        " 2) ce que tu sais toi-même de la marque suivie si elle t'est connue ;" +
+        " 3) le secteur déclaré s'il est précis. Le libellé « Autre » n'est PAS un métier :" +
+        ' si aucune de ces trois sources ne te permet d\'identifier le métier avec certitude, renvoie {"queries":[]}' +
+        " plutôt que d'inventer — un échantillon hors métier fabrique un faux score.",
+      `Marque suivie (contexte pour identifier le métier, jamais dans les questions) : ${input.marque}.` +
+        `\nSecteur déclaré : ${input.secteur}. Zone : ${input.ville ?? "France"}. Langue des questions : ${input.langue}.` +
         (input.matiereSite
           ? `\nExtrait de la page d'accueil du site (source de vérité du métier) : """${input.matiereSite}"""`
-          : ""),
+          : "\nExtrait du site indisponible (site injoignable) : appuie-toi sur la marque si tu la connais, sinon sur le secteur déclaré s'il est précis."),
       { maxTokens: 4096 },
     );
     const match = raw.match(/\{[\s\S]*\}/);
