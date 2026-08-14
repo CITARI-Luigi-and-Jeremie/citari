@@ -357,3 +357,128 @@ export function LimiteMethodologique() {
     </div>
   );
 }
+
+/* ---------- Toutes les réponses, mot pour mot ---------- */
+
+/**
+ * L'intégralité des réponses collectées, question par question, moteur par
+ * moteur — texte complet compris.
+ *
+ * Ajoutée le 14/08/2026 sur une remarque de Luigi : « on vend 144 réponses
+ * et on n'en montre que quelques-unes ». Les textes étaient DÉJÀ envoyés au
+ * navigateur (`raw_text` dans `rapportParJeton`), simplement jamais affichés.
+ * C'est la pièce qui prouve la mesure : un dirigeant sceptique peut relire
+ * chaque réponse, et retrouver mot pour mot celle qui recommande son
+ * concurrent.
+ *
+ * En `<details>` natif : aucun JavaScript, imprimable, et la page reste
+ * courte tant que rien n'est déplié.
+ */
+/**
+ * Les moteurs répondent en markdown léger : sans rendu, le prospect lit des
+ * `**astérisques**` en clair et croit à un bug. On ne réécrit rien — les
+ * gras deviennent des gras, les titres et puces perdent leurs marqueurs, le
+ * texte reste mot pour mot.
+ */
+function TexteMoteur({ texte }: { texte: string }) {
+  const propre = texte
+    .replace(/^#{1,6}\s*/gm, "")
+    .replace(/^\s*[-*•]\s+/gm, "· ")
+    .replace(/`{1,3}/g, "");
+  const morceaux = propre.split(/(\*\*[^*]+\*\*)/g);
+  return (
+    <>
+      {morceaux.map((bout, i) =>
+        bout.startsWith("**") && bout.endsWith("**") ? (
+          <strong key={i} className="font-semibold text-ink">
+            {bout.slice(2, -2)}
+          </strong>
+        ) : (
+          <span key={i}>{bout}</span>
+        ),
+      )}
+    </>
+  );
+}
+
+export function ToutesLesReponses({
+  questions,
+  reponses,
+  mentions,
+  marque,
+}: {
+  questions: Question[];
+  reponses: Reponse[];
+  mentions: Mention[];
+  marque: string;
+}) {
+  const valides = reponses.filter((r) => !r.error && r.raw_text);
+  if (!valides.length) return <Vide>Aucune réponse n'a pu être conservée.</Vide>;
+
+  const moteursPresents = MOTEURS.filter((m) => valides.some((r) => r.engine === m));
+
+  return (
+    <div className="space-y-3">
+      {questions.map((q) => {
+        const deLaQuestion = valides.filter((r) => r.query_id === q.id);
+        if (!deLaQuestion.length) return null;
+        const citee = mentions.some((m) => m.query_id === q.id && m.is_target);
+        const moteursCitants = moteursPresents.filter((m) =>
+          mentions.some((x) => x.query_id === q.id && x.engine === m && x.is_target),
+        );
+
+        return (
+          <details key={q.id} className="avoid-break border-t border-rule-strong">
+            <summary className="flex cursor-pointer list-none items-baseline gap-3 py-3 hover:bg-paper-2">
+              <span className="num shrink-0 text-[11px] text-ink-3">
+                {String(q.rank).padStart(2, "0")}
+              </span>
+              <span className="flex-1 text-[14px] leading-snug">{q.text}</span>
+              <span className="num shrink-0 text-[11px]">
+                {citee ? (
+                  <span className="text-ink-3">
+                    cité{moteursCitants.length ? ` · ${moteursCitants.join(", ")}` : ""}
+                  </span>
+                ) : (
+                  <span className="text-signal">absent partout</span>
+                )}
+              </span>
+            </summary>
+
+            <div className="space-y-5 pb-6 pl-8 pr-2">
+              {moteursPresents.map((m) => {
+                const rep = deLaQuestion.find((r) => r.engine === m);
+                if (!rep) return null;
+                const citations = mentions.filter((x) => x.response_id === rep.id);
+                const cible = citations.find((x) => x.is_target);
+                const concurrents = citations.filter((x) => !x.is_target).map((x) => x.brand);
+                return (
+                  <div key={m}>
+                    <p className="num flex flex-wrap items-baseline gap-x-3 text-[11px] text-ink-3">
+                      <span className="inline-flex items-center gap-1.5 text-ink">
+                        <MoteurLogo moteur={m} className="text-[12px]" />
+                        {m}
+                      </span>
+                      {cible ? (
+                        <span>
+                          {marque} en position {cible.position ?? "?"}
+                          {cible.recommended ? " · recommandé" : ""}
+                        </span>
+                      ) : (
+                        <span className="text-signal">{marque} absent de cette réponse</span>
+                      )}
+                      {concurrents.length ? <span>cités : {concurrents.join(", ")}</span> : null}
+                    </p>
+                    <p className="mt-1.5 max-w-[80ch] whitespace-pre-line text-[13.5px] leading-[1.6] text-ink-2">
+                      <TexteMoteur texte={rep.raw_text ?? ""} />
+                    </p>
+                  </div>
+                );
+              })}
+            </div>
+          </details>
+        );
+      })}
+    </div>
+  );
+}

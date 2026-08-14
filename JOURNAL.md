@@ -5,6 +5,32 @@ d'une nouvelle session, après `CLAUDE.md`.
 
 ---
 
+## 2026-08-14 — Les 144 réponses étaient déjà dans la page, invisibles
+
+Luigi : « on vend 144 réponses et on n'en montre que quelques-unes ». Vérifié :
+le rapport complet servait une grille questions × moteurs (position,
+recommandation, trois concurrents) et cinq verbatims. Le TEXTE des réponses,
+lui, n'était affiché nulle part — alors que `rapportParJeton` envoyait déjà
+`raw_text` au navigateur depuis toujours. La pièce la plus convaincante du
+produit voyageait dans la page et personne ne la voyait.
+
+`ToutesLesReponses` : une question par ligne dépliable (`<details>` natif,
+zéro JavaScript, imprimable), et sous chacune, chaque moteur avec son statut
+(position, recommandé, concurrents cités) puis sa réponse intégrale. Les
+moteurs répondent en markdown léger : `TexteMoteur` rend les gras et retire
+les marqueurs, sans réécrire un mot.
+
+**Elle sert les DEUX rapports, et c'est un choix de doctrine.** Au complet,
+c'est la section 05, la démonstration de ce qui est facturé. À l'aperçu,
+c'est une annexe repliée sous la séquence : nous avons posé ces 20 questions,
+les cacher à un prospect qui veut vérifier contredirait tout ce que le site
+promet. Le tunnel de conversion reste intact (elle est fermée par défaut,
+après les six cartes), et ce qui reste au diagnostic est ailleurs — quatre
+moteurs de plus, la recherche web, les sources, la cause de chaque absence,
+le plan. On ne vend pas l'accès à nos données : on vend leur lecture.
+
+---
+
 ## 2026-08-14 — La ville n'est plus imposée : le mix suit la portée de l'entreprise
 
 Luigi, en testant Netflix : « est-ce vraiment nécessaire de mettre secteur et

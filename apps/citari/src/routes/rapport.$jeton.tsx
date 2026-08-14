@@ -10,6 +10,7 @@ import {
   ScoresMoteurs,
   Sources,
   TableauRequetes,
+  ToutesLesReponses,
   Verbatims,
   Vide,
   type Mention,
@@ -63,6 +64,7 @@ const SECTIONS = [
   ["voix", "Part de voix"],
   ["requetes", "Requête par requête"],
   ["verbatims", "Verbatims"],
+  ["reponses", "Toutes les réponses"],
   ["sources", "Sources citées"],
   ["actions", "Actions prioritaires"],
 ] as const;
@@ -149,6 +151,42 @@ function RapportDApercu() {
       </div>
 
       <SequenceResultat data={donnees} wide={large} onBook={() => setReservation(true)} />
+
+      {/* L'annexe : les 20 questions et leurs 40 réponses, sous la séquence.
+          Repliée par défaut — le tunnel de conversion reste intact — mais
+          disponible : nous avons posé ces questions, les cacher au prospect
+          qui veut vérifier serait contraire à tout ce que le site promet.
+          Ce qui reste au diagnostic est ailleurs : quatre moteurs de plus,
+          la recherche web, les sources, la cause de chaque absence. */}
+      <section className="border-t border-rule-strong bg-paper">
+        <div className="mx-auto max-w-5xl px-5 py-12 sm:px-8 sm:py-16">
+          <details className="group">
+            <summary className="flex cursor-pointer list-none items-baseline justify-between gap-4 border-b border-rule-strong pb-3">
+              <span className="text-[19px] font-semibold tracking-[-0.02em] sm:text-[22px]">
+                Les {donnees.totalQuestions} questions, réponse par réponse
+              </span>
+              <span className="mono shrink-0 text-[12px] text-ink-2 group-open:hidden">
+                tout déplier ↓
+              </span>
+              <span className="mono hidden shrink-0 text-[12px] text-ink-2 group-open:inline">
+                replier ↑
+              </span>
+            </summary>
+            <p className="measure mt-5 text-[15px] text-ink-2">
+              Rien n'est résumé : chaque réponse est conservée telle que le moteur l'a produite, et
+              sera rejouée à l'identique dans 90 jours.
+            </p>
+            <div className="mt-6">
+              <ToutesLesReponses
+                questions={questions as Question[]}
+                reponses={reponses as unknown as Reponse[]}
+                mentions={mentions as unknown as Mention[]}
+                marque={donnees.marque}
+              />
+            </div>
+          </details>
+        </div>
+      </section>
 
       <BookingModal
         open={reservation}
@@ -306,6 +344,20 @@ function RapportComplet() {
 
           <Section id="verbatims" titre="Verbatims bruts">
             <Verbatims mentions={mentions as unknown as Mention[]} marque={marque} />
+          </Section>
+
+          <Section id="reponses" titre="Toutes les réponses, mot pour mot">
+            <p className="mb-6 max-w-[58ch] text-[15px] text-ink-2">
+              {fr(
+                "Rien n'est résumé ni reformulé : chaque réponse est conservée telle que le moteur l'a produite, et rejouable à l'identique au re-scan. Dépliez une question pour lire ce que chaque IA a répondu.",
+              )}
+            </p>
+            <ToutesLesReponses
+              questions={questions as Question[]}
+              reponses={reponses as unknown as Reponse[]}
+              mentions={mentions as unknown as Mention[]}
+              marque={marque}
+            />
           </Section>
 
           <Section id="sources" titre="Sources citées par Perplexity">
