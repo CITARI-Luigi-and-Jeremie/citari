@@ -148,7 +148,16 @@ function RapportDApercu() {
         </Link>
 
         <div className="flex items-center gap-2.5 sm:gap-5">
-          <span className="mono hidden text-[13px] text-ink-2 sm:inline">{donnees.domaine}</span>
+          <span className="mono hidden text-[13px] text-ink-2 lg:inline">{donnees.domaine}</span>
+          {/* L'accès aux questions vit dans la barre HAUTE, visible dès la
+              première carte : en bas de page, l'annexe restait introuvable
+              pour qui ne fait pas défiler jusqu'au pied. */}
+          <a
+            href="#toutes-les-reponses"
+            className="mono whitespace-nowrap text-[13px] text-ink-2 underline underline-offset-4 transition-colors hover:text-ink sm:text-[14px]"
+          >
+            Les {donnees.totalQuestions} questions ↓
+          </a>
           <button
             type="button"
             onClick={() => setReservation(true)}
@@ -161,6 +170,18 @@ function RapportDApercu() {
 
       <SequenceResultat data={donnees} wide={large} onBook={() => setReservation(true)} />
 
+      {/* Un second appel, juste sous la séquence : le prospect qui vient de
+          finir les cartes tombe dessus sans avoir à chercher. */}
+      <div className="flex justify-center border-t border-rule-strong bg-ink px-5 pb-10 sm:pb-14">
+        <a
+          href="#toutes-les-reponses"
+          className="mono inline-flex items-center gap-2 rounded-[4px] border border-[color-mix(in_srgb,var(--paper)_35%,transparent)] px-5 py-3 text-[13px] text-paper transition-colors hover:bg-[color-mix(in_srgb,var(--paper)_10%,transparent)]"
+        >
+          Lire les {donnees.totalQuestions} questions et leurs réponses
+          <span aria-hidden>↓</span>
+        </a>
+      </div>
+
       {/* L'annexe : les 20 questions et leurs 40 réponses, sous la séquence.
           Repliée par défaut — le tunnel de conversion reste intact — mais
           disponible : nous avons posé ces questions, les cacher au prospect
@@ -170,7 +191,7 @@ function RapportDApercu() {
       {/* Annexe OUVERTE par défaut depuis le 14/08/2026 : repliée, elle
           passait pour un pied de page et le prospect ne la voyait pas. C'est
           pourtant la pièce qui prouve toute la mesure. */}
-      <section className="border-t-2 border-ink bg-paper-2">
+      <section id="toutes-les-reponses" className="scroll-mt-16 border-t-2 border-ink bg-paper-2">
         <div className="mx-auto max-w-5xl px-5 py-12 sm:px-8 sm:py-16">
           <details className="group" open>
             <summary className="flex cursor-pointer list-none items-baseline justify-between gap-4 border-b border-rule-strong pb-3">

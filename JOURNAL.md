@@ -5,6 +5,33 @@ d'une nouvelle session, après `CLAUDE.md`.
 
 ---
 
+## 2026-08-14 — La dernière carte vendait le cas où il ne se passe rien
+
+Luigi, sur la carte de réservation : « ça vend mal et pas la vérité de ce
+qu'on va lui montrer ». Elle titrait « Si votre score est bon, on vous le dit
+et on ne vous vend rien » — la plus belle phrase du site, et la pire en TITRE
+de l'écran où le prospect doit cliquer : elle met en avant le cas où il ne se
+passe RIEN.
+
+La carte dit maintenant ce qui se passe vraiment : « Réservez, et la mesure
+complète part aussitôt. Nous la lisons ensemble. » Puis le fait qui change
+tout : ce n'est pas un appel de découverte, les 144 réponses sont déjà
+collectées quand on se parle. Le panneau de preuve, jusque-là presque vide,
+porte le déroulé en trois temps — AVANT (la mesure tourne : 24 questions, six
+moteurs, recherche web), PENDANT (on ouvre le rapport : note par moteur,
+sites où les concurrents sont trouvés, cause de chaque absence), À LA FIN
+(les actions classées, et celles qu'il peut faire seul). Chaque ligne
+correspond à une section réelle du rapport complet. Le renoncement reste,
+à sa place : en réassurance, en bas.
+
+**Et l'annexe des questions cesse d'être un secret.** Ouverte par défaut ne
+suffisait pas : elle vit en bas d'une page dont le contenu principal tient
+dans un écran, personne ne descend. Deux accès permanents : un lien dans la
+barre haute (« Les 20 questions ↓ », visible dès la première carte) et un
+bouton juste sous la séquence, sur le fond sombre. Une ancre les relie.
+
+---
+
 ## 2026-08-14 — L'audit des huit agents : ce qui dormait, ce qui mentait
 
 Luigi voulait deux choses : mieux vendre le diagnostic sur ses trois surfaces,
