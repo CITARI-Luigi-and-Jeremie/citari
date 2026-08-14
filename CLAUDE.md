@@ -29,6 +29,14 @@ ont tourné contre la vraie base. 180 tests passent.
 avait été à court, et la panne avait appris une règle qui, elle, reste : une
 réponse en erreur ne compte pas au dénominateur du score.
 
+**Le crédit GOOGLE est à sec depuis le 14/08/2026 après-midi** (`429 — Your
+prepayment credits are depleted` sur la génération). Tant qu'il n'est pas
+rechargé sur AI Studio, AUCUN scan ne peut tourner : la génération des
+questions et l'analyse passent par `gemini-3.1-flash-lite`, et Gemini est un
+des deux moteurs de l'aperçu. À recharger avant tout test et avant le
+lancement ; un scan tombé en erreur se reprend ensuite par « Reprendre la
+mesure ».
+
 **Les deux dettes historiques sont soldées** (10/08/2026). `pnpm toolkit
 effacer` répond au droit à l'effacement (simulation par défaut, `--vraiment`
 pour exécuter, les scans ne portent aucune donnée personnelle et restent). Et
