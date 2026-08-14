@@ -94,7 +94,12 @@ function CountUp({ value, style }: { value: string; style?: CSSProperties }) {
         };
         frame = requestAnimationFrame(tick);
       },
-      { threshold: 0.9, rootMargin: "0px -25% 0px -25%" },
+      // Sa maquette exigeait 90 % de visibilité dans une fenêtre rognée de
+      // 25 % de chaque côté (le centrage du carrousel mobile) : selon la
+      // largeur d'écran, le chiffre de GAUCHE tombait dans la zone exclue et
+      // restait à 0 pour toujours. Un seuil simple suffit : les deux cartes
+      // démarrent dès qu'elles entrent à l'écran, de la même manière.
+      { threshold: 0.6 },
     );
     io.observe(el);
     return () => {
