@@ -16,7 +16,10 @@ export type PdvItem = {
 };
 export type Action = { chantier: string; titre: string; pourquoi: string; effort: string };
 
-export const PLAFOND_SCANS_PAR_IP = 2;
+// Réglable par variable d'environnement, comme les plafonds de coût : les
+// tests internes posent PLAFOND_SCANS_PAR_IP dans `.env.local` (jamais
+// versionné), la production garde ce défaut sans redéploiement.
+export const PLAFOND_SCANS_PAR_IP = Number(process.env.PLAFOND_SCANS_PAR_IP ?? 2);
 /**
  * Plafond de dépense par scan, au-delà duquel la collecte s'arrête et le scan
  * est finalisé avec ce qu'il a déjà.
