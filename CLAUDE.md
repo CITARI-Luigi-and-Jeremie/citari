@@ -341,8 +341,15 @@ entière pour le baromètre.
 - « Le Chat » est l'étiquette affichée, `mistral` l'identifiant et
   `score_mistral` la colonne : on nomme partout l'assistant que le public
   utilise, mais la base garde le nom de l'éditeur, plus stable.
-- Mix de questions : 24 en complet (10 comparatives, 6 problème, 5 locales,
-  3 confiance), 20 en aperçu.
+- Mix de questions, **adaptatif selon la portée** (14/08/2026). Avec ville :
+  24 en complet (10 comparatives, 6 problème, 5 locales, 3 confiance), 20 en
+  aperçu (8/5/4/3). Sans ville — clientèle nationale : **aucune question
+  locale**, redistribuées sur comparatives et problème (24 = 14/7/3, 20 =
+  11/6/3). La ville était imposée à tous : un quart de l'échantillon de
+  Netflix partait en « meilleur service de streaming à Paris ? », ce qui ne
+  mesure rien et fait baisser le score d'une marque sans clientèle de
+  quartier. Le champ ville est donc facultatif ET porteur de sens : le
+  remplir déclare une clientèle locale.
 - Le nom de la marque n'est **jamais** prononcé dans une question de mesure :
   on mesurerait la mémoire du moteur, pas la découverte spontanée. La « question
   miroir » fait exception, elle est explicitement hors méthodologie.

@@ -487,10 +487,21 @@ export async function genererQuestions(input: {
 }): Promise<{ text: string; intent: string }[]> {
   if (!process.env.GOOGLE_AI_API_KEY) throw new Error("GOOGLE_AI_API_KEY absente");
   const nombre = input.nombre ?? 24;
-  const mix =
-    nombre === 20
+
+  // Le mix s'adapte à la PORTÉE de l'entreprise (14/08/2026). Sans ville, le
+  // quart de l'échantillon partait en questions locales absurdes pour une
+  // marque nationale — « meilleur service de streaming à Paris ? » ne mesure
+  // rien et fait baisser le score d'un acteur qui n'a pas de clientèle de
+  // quartier. Les questions locales sont redistribuées sur les comparatives
+  // et les problèmes, qui sont les vraies questions d'achat.
+  const locale = Boolean(input.ville && input.ville.trim());
+  const mix = locale
+    ? nombre === 20
       ? "Exactement 20 questions : 8 comparatives, 5 problème, 4 locales, 3 confiance."
-      : "Exactement 24 questions : 10 comparatives, 6 problème, 5 locales, 3 confiance.";
+      : "Exactement 24 questions : 10 comparatives, 6 problème, 5 locales, 3 confiance."
+    : nombre === 20
+      ? "Exactement 20 questions : 11 comparatives, 6 problème, 3 confiance. AUCUNE question locale."
+      : "Exactement 24 questions : 14 comparatives, 7 problème, 3 confiance. AUCUNE question locale.";
   const tirage = async (): Promise<{ text: string; intent: string }[]> => {
     const { text: raw } = await gemini_(
       process.env.GEMINI_MODEL || "gemini-3.6-flash",
@@ -508,7 +519,10 @@ export async function genererQuestions(input: {
         ' si aucune de ces trois sources ne te permet d\'identifier le métier avec certitude, renvoie {"queries":[]}' +
         " plutôt que d'inventer — un échantillon hors métier fabrique un faux score.",
       `Marque suivie (contexte pour identifier le métier, jamais dans les questions) : ${input.marque}.` +
-        `\nSecteur déclaré : ${input.secteur}. Zone : ${input.ville ?? "France"}. Langue des questions : ${input.langue}.` +
+        `\nSecteur déclaré : ${input.secteur}. Langue des questions : ${input.langue}.` +
+        (locale
+          ? `\nClientèle LOCALE, à ${input.ville!.trim()} : les questions locales nomment cette ville ou sa région.`
+          : "\nClientèle NATIONALE, sans ancrage géographique : aucune question ne doit nommer une ville ou une région.") +
         (input.matiereSite
           ? `\nExtrait de la page d'accueil du site (source de vérité du métier) : """${input.matiereSite}"""`
           : "\nExtrait du site indisponible (site injoignable) : appuie-toi sur la marque si tu la connais, sinon sur le secteur déclaré s'il est précis."),

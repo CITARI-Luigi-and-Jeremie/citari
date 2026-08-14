@@ -206,14 +206,15 @@ export function ScanForm({ centered = false }: { centered?: boolean }) {
                 <ChampSecteur value={secteur} onChange={setSecteur} />
                 <Champ
                   id="w-ville"
-                  label="Ville de votre entreprise"
+                  label="Votre ville — seulement si vos clients sont locaux"
                   value={ville}
                   onChange={setVille}
-                  placeholder="Lyon"
+                  placeholder="Lyon (laissez vide si vous vendez partout)"
                 />
                 <p className="mono text-[13px] text-ink-2">
-                  Votre site est lu, puis les questions sont générées pour ce métier et cette
-                  ville — celles que vos acheteurs posent vraiment.
+                  {ville.trim()
+                    ? `Une partie des questions cherchera un prestataire à ${ville.trim()} : c'est ainsi que vos clients cherchent.`
+                    : "Sans ville, aucune question locale : on mesure votre place sur des recherches nationales."}
                 </p>
               </div>
             ) : null}
@@ -318,7 +319,7 @@ function ChampSecteur({
         id="w-secteur"
         className="field mt-1.5 transition-colors focus:border-ink"
         value={value}
-        placeholder="Expertise comptable, agence immobilière, poker en ligne…"
+        placeholder="Streaming vidéo, expertise comptable, location de vélos…"
         required
         autoFocus
         autoComplete="off"

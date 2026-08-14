@@ -5,6 +5,37 @@ d'une nouvelle session, après `CLAUDE.md`.
 
 ---
 
+## 2026-08-14 — La ville n'est plus imposée : le mix suit la portée de l'entreprise
+
+Luigi, en testant Netflix : « est-ce vraiment nécessaire de mettre secteur et
+ville ? » La question portait plus loin qu'un champ de formulaire.
+
+**La ville était obligatoire de fait, et elle faussait la mesure.** Le mix
+imposait 4 questions locales sur 20 quelle que soit l'entreprise : pour une
+marque nationale, un cinquième de l'échantillon partait en « meilleur service
+de streaming à Paris ? ». Ces questions ne mesurent rien — personne ne
+cherche un abonnement SVOD par quartier — et leur absence de citation faisait
+BAISSER le score d'une marque qui n'a pas de clientèle locale.
+
+Le mix est désormais adaptatif : avec ville, inchangé ; sans ville, aucune
+question locale, redistribuées sur les comparatives et les problèmes (20 =
+11/6/3). Le prompt reçoit explicitement « clientèle NATIONALE, aucune
+question ne doit nommer une ville ». Le champ devient facultatif ET porteur
+de sens — le remplir déclare une clientèle locale — avec une aide qui dit
+laquelle des deux mesures va tourner.
+
+Vérifié en réel : netflix.com, secteur « Streaming vidéo par abonnement »,
+sans ville → 11 comparatives, 6 problème, 3 confiance, zéro locale, et des
+questions sur les catalogues et les abonnements sans engagement.
+
+**Quant au secteur introuvable** : il était déjà libre depuis la refonte de
+l'heure précédente, mais son placeholder ne montrait que des métiers de PME
+locales (« expertise comptable, agence immobilière, poker en ligne »), ce qui
+laissait croire à une liste fermée. Il montre maintenant « streaming vidéo »
+en premier exemple.
+
+---
+
 ## 2026-08-14 — Le formulaire perd une étape, le secteur devient libre
 
 Deux décisions de Luigi sur le formulaire, appliquées ensemble.
