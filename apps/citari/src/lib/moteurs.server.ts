@@ -366,11 +366,13 @@ export async function classerConcurrents(
     const { text: raw } = await gemini_(
       process.env.GEMINI_ANALYSE_MODEL || "gemini-3.1-flash-lite",
       "Tu classes des entreprises citées par une IA, du point de vue d'une entreprise précise. " +
+        "Le classement est STRICTEMENT RELATIF à l'entreprise suivie, jamais absolu. " +
         'Renvoie UNIQUEMENT du JSON valide de la forme {"classes":[{"nom":"","classe":"rival|geant|outil|institution"}]}. ' +
-        "rival = concurrent de taille et de nature comparables, que l'entreprise suivie peut réellement " +
-        "dépasser dans les réponses d'IA. " +
-        "geant = groupe national ou international, réseau majeur, acteur dont la notoriété est hors " +
-        "de portée d'une PME. " +
+        "rival = un client qui hésite entre cette entreprise et l'entreprise suivie existe réellement : " +
+        "taille et nature comparables DU POINT DE VUE de l'entreprise suivie. Si l'entreprise suivie est " +
+        "elle-même un acteur national ou mondial, ses pairs directs — même immenses — sont des RIVAUX. " +
+        "geant = acteur d'un ordre de grandeur clairement supérieur à l'entreprise suivie, que SES clients " +
+        "ne mettent pas dans la même comparaison (le réseau mondial face au cabinet de quinze personnes). " +
         "outil = logiciel, plateforme, place de marché, annuaire : occupe la réponse mais n'est pas un " +
         "prestataire de même nature. " +
         "institution = ordre professionnel, syndicat, chambre de commerce, administration, organisme " +

@@ -5,6 +5,26 @@ d'une nouvelle session, après `CLAUDE.md`.
 
 ---
 
+## 2026-08-14 — Booking classé « géant »… pour Airbnb : la relativité du classement était un vœu
+
+Luigi : « pourquoi ça parle d'Abritel alors que Booking est bien plus sérieux
+comme concurrent ? » La carte privilégie les rivaux — c'est la règle voulue —
+mais Booking.com était classé GÉANT pour Airbnb, donc écarté. La définition
+de « géant » dans le prompt de classement était ABSOLUE (« hors de portée
+d'une PME ») : Booking coche « groupe international » quel que soit le
+client. La relativité annoncée par CLAUDE.md n'existait que dans
+l'intention.
+
+Le prompt classe désormais STRICTEMENT du point de vue de l'entreprise
+suivie, avec le test opérant : « un client qui hésite entre les deux
+existe-t-il ? Si oui, c'est un rival » — et la précision explicite : si
+l'entreprise suivie est elle-même un acteur mondial, ses pairs immenses sont
+des rivaux. Le scan Airbnb existant a été corrigé à la main (Booking.com →
+rival, l'équivalent d'un `concurrents --corriger`) : la carte lit « Vous
+menez. Booking.com reste dans la conversation », 14 contre 6.
+
+---
+
 ## 2026-08-14 — « Trop d'erreurs » : la couche de présentation gagne ses invariants
 
 Scan Airbnb de Luigi : « Abritel est nommé plus souvent que vous » au-dessus
