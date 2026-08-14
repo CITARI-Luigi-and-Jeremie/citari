@@ -23,24 +23,56 @@ export function CarteTechnique({
   part,
 }: {
   bloques: string[];
-  autorises: string[];
+  autorises: { nom: string; explicite: boolean }[];
   llmstxt: boolean;
   domaine: string;
   wide: boolean;
   part: "recit" | "preuve";
 }) {
   const ferme = bloques.length > 0;
+  const total = bloques.length + autorises.length;
 
   if (part === "preuve") {
     const lignes = [
-      ...bloques.map((r) => ({ nom: r, bloque: true })),
-      ...autorises.map((r) => ({ nom: r, bloque: false })),
+      ...bloques.map((r) => ({ nom: r, bloque: true, explicite: true })),
+      ...autorises.map((a) => ({ nom: a.nom, bloque: false, explicite: a.explicite })),
     ];
     return (
       <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
         <span style={{ fontFamily: MONO, fontSize: 11, letterSpacing: "0.12em", color: MUTED }}>
           {domaine.toUpperCase()} / ROBOTS.TXT
         </span>
+
+        {/* Le verdict d'un coup d'œil, avant le détail ligne à ligne. */}
+        <div
+          style={{
+            display: "flex",
+            alignItems: "baseline",
+            gap: 10,
+            padding: wide ? "14px 16px" : "12px 14px",
+            background: ferme ? PANEL : "transparent",
+            border: `1px solid ${ferme ? RED : HAIR}`,
+            borderRadius: 3,
+          }}
+        >
+          <span
+            style={{
+              fontSize: wide ? 40 : 32,
+              fontWeight: 800,
+              letterSpacing: "-0.05em",
+              lineHeight: 0.9,
+              color: ferme ? RED : INK,
+            }}
+          >
+            {ferme ? bloques.length : total}
+          </span>
+          <span style={{ fontFamily: MONO, fontSize: 11, lineHeight: 1.4, color: ferme ? RED : MUTED }}>
+            {ferme
+              ? `ROBOT${bloques.length > 1 ? "S" : ""} D'IA REFUSÉ${bloques.length > 1 ? "S" : ""}\nSUR ${total} TESTÉ${total > 1 ? "S" : ""}`
+              : `ROBOT${total > 1 ? "S" : ""} D'IA SUR ${total}\nPEUVENT VOUS LIRE`}
+          </span>
+        </div>
+
         {lignes.map((l) => (
           <div
             key={l.nom}
@@ -63,9 +95,10 @@ export function CarteTechnique({
                 fontWeight: l.bloque ? 700 : 400,
                 letterSpacing: "0.06em",
                 color: l.bloque ? RED : MUTED,
+                textAlign: "right",
               }}
             >
-              {l.bloque ? "BLOQUÉ" : "autorisé"}
+              {l.bloque ? "BLOQUÉ" : l.explicite ? "autorisé" : "autorisé par défaut"}
             </span>
           </div>
         ))}

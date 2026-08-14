@@ -73,7 +73,8 @@ export interface DonneesSequence {
    */
   technique: {
     bloques: string[];
-    autorises: string[];
+    /** Autorisés explicitement, ou non mentionnés donc permis par défaut. */
+    autorises: { nom: string; explicite: boolean }[];
     llmstxt: boolean;
   } | null;
 }
@@ -311,14 +312,23 @@ export function construireSequence(entree: {
     | { ok?: boolean; bots?: Record<string, string>; llmstxt?: boolean }
     | null
     | undefined;
+  // Trois états, pas deux : `auditFlash` écrit aussi « non_mentionne » quand
+  // le robots.txt ne dit rien du robot. C'est une AUTORISATION (ce qui n'est
+  // pas interdit est permis), et la première version les perdait tous les
+  // deux filtres — le tableau s'affichait vide sur un site parfaitement
+  // ouvert (scan snapdesk.co du 14/08/2026).
   const bots = auditBrut?.ok && auditBrut.bots ? auditBrut.bots : null;
-  const technique = bots
-    ? {
-        bloques: ROBOTS.filter((r) => bots[r] === "bloque"),
-        autorises: ROBOTS.filter((r) => bots[r] === "autorise"),
-        llmstxt: Boolean(auditBrut?.llmstxt),
-      }
-    : null;
+  const connus = bots ? ROBOTS.filter((r) => typeof bots[r] === "string") : [];
+  const technique =
+    bots && connus.length > 0
+      ? {
+          bloques: connus.filter((r) => bots[r] === "bloque"),
+          autorises: connus
+            .filter((r) => bots[r] !== "bloque")
+            .map((r) => ({ nom: r, explicite: bots[r] === "autorise" })),
+          llmstxt: Boolean(auditBrut?.llmstxt),
+        }
+      : null;
 
   return {
     marque,

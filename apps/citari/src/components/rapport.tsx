@@ -428,8 +428,18 @@ export function ToutesLesReponses({
         );
 
         return (
-          <details key={q.id} className="avoid-break border-t border-rule-strong">
-            <summary className="flex cursor-pointer list-none items-baseline gap-3 py-3 hover:bg-paper-2">
+          <details key={q.id} className="avoid-break group border-t border-rule-strong">
+            {/* L'affordance de clic était invisible (14/08/2026) : la ligne
+                ressemblait à du texte. Chevron, fond au survol et libellé
+                explicite à droite — un prospect qui ne devine pas qu'il peut
+                ouvrir ne lira jamais la meilleure pièce du rapport. */}
+            <summary className="-mx-2 flex cursor-pointer list-none items-baseline gap-3 rounded-[3px] px-2 py-3 transition-colors hover:bg-paper-2">
+              <span
+                aria-hidden
+                className="num shrink-0 text-[11px] text-signal transition-transform duration-200 group-open:rotate-90"
+              >
+                ▸
+              </span>
               <span className="num shrink-0 text-[11px] text-ink-3">
                 {String(q.rank).padStart(2, "0")}
               </span>
@@ -442,6 +452,9 @@ export function ToutesLesReponses({
                 ) : (
                   <span className="text-signal">absent partout</span>
                 )}
+              </span>
+              <span className="num hidden shrink-0 text-[11px] text-ink-3 underline underline-offset-2 group-open:hidden sm:inline">
+                lire {deLaQuestion.length} réponse{deLaQuestion.length > 1 ? "s" : ""}
               </span>
             </summary>
 
@@ -532,7 +545,11 @@ export function AuditRobots({ audit, domaine }: { audit: unknown; domaine: strin
   if (!a?.ok || !a.bots)
     return <Vide>Le fichier robots.txt du site n'a pas pu être lu pendant la mesure.</Vide>;
 
-  const robots = ["GPTBot", "ClaudeBot", "PerplexityBot", "Google-Extended"];
+  // Trois états : bloqué, autorisé, ou non mentionné — ce dernier vaut
+  // autorisation (ce qui n'est pas interdit est permis).
+  const robots = ["GPTBot", "ClaudeBot", "PerplexityBot", "Google-Extended"].filter(
+    (r) => typeof a.bots![r] === "string",
+  );
   const bloques = robots.filter((r) => a.bots![r] === "bloque");
 
   return (
@@ -550,7 +567,7 @@ export function AuditRobots({ audit, domaine }: { audit: unknown; domaine: strin
                     bloque ? "font-semibold text-signal" : "text-ink-3",
                   )}
                 >
-                  {bloque ? "BLOQUÉ" : "autorisé"}
+                  {bloque ? "BLOQUÉ" : a.bots![r] === "autorise" ? "autorisé" : "autorisé par défaut"}
                 </td>
               </tr>
             );

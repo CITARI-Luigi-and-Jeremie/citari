@@ -273,8 +273,32 @@ describe("miroir et audit — les données payées par le gratuit sont montrées
       },
     });
     expect(seq.technique?.bloques).toEqual(["GPTBot", "PerplexityBot"]);
-    expect(seq.technique?.autorises).toEqual(["ClaudeBot", "Google-Extended"]);
+    expect(seq.technique?.autorises).toEqual([
+      { nom: "ClaudeBot", explicite: true },
+      { nom: "Google-Extended", explicite: true },
+    ]);
     expect(seq.technique?.llmstxt).toBe(true);
+  });
+
+  it("un robot non mentionné est autorisé par défaut, jamais perdu", () => {
+    // Le bug du 14/08/2026 : `non_mentionne` n'était capté par aucun des deux
+    // filtres, et le tableau s'affichait VIDE sur un site parfaitement ouvert.
+    const seq = sequenceDe({
+      ...base(),
+      audit: {
+        ok: true,
+        bots: {
+          GPTBot: "non_mentionne",
+          ClaudeBot: "non_mentionne",
+          PerplexityBot: "non_mentionne",
+          "Google-Extended": "non_mentionne",
+        },
+        llmstxt: false,
+      },
+    });
+    expect(seq.technique?.bloques).toEqual([]);
+    expect(seq.technique?.autorises).toHaveLength(4);
+    expect(seq.technique?.autorises.every((a) => a.explicite === false)).toBe(true);
   });
 
   it("un audit qui a échoué n'annonce jamais de portes ouvertes", () => {

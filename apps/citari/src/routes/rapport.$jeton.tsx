@@ -167,21 +167,27 @@ function RapportDApercu() {
           qui veut vérifier serait contraire à tout ce que le site promet.
           Ce qui reste au diagnostic est ailleurs : quatre moteurs de plus,
           la recherche web, les sources, la cause de chaque absence. */}
-      <section className="border-t border-rule-strong bg-paper">
+      {/* Annexe OUVERTE par défaut depuis le 14/08/2026 : repliée, elle
+          passait pour un pied de page et le prospect ne la voyait pas. C'est
+          pourtant la pièce qui prouve toute la mesure. */}
+      <section className="border-t-2 border-ink bg-paper-2">
         <div className="mx-auto max-w-5xl px-5 py-12 sm:px-8 sm:py-16">
-          <details className="group">
+          <details className="group" open>
             <summary className="flex cursor-pointer list-none items-baseline justify-between gap-4 border-b border-rule-strong pb-3">
               <span className="text-[19px] font-semibold tracking-[-0.02em] sm:text-[22px]">
                 Les {donnees.totalQuestions} questions, réponse par réponse
               </span>
               <span className="mono shrink-0 text-[12px] text-ink-2 group-open:hidden">
-                tout déplier ↓
+                déplier ↓
               </span>
               <span className="mono hidden shrink-0 text-[12px] text-ink-2 group-open:inline">
                 replier ↑
               </span>
             </summary>
             <p className="measure mt-5 text-[15px] text-ink-2">
+              <strong className="font-semibold text-ink">
+                Cliquez sur une question pour lire les réponses en entier.
+              </strong>{" "}
               Rien n'est résumé : chaque réponse est conservée telle que le moteur l'a produite, et
               sera rejouée à l'identique dans 90 jours.
             </p>

@@ -1,5 +1,5 @@
 import { marked } from "../marked";
-import { BODY, SERIF, labelStyle } from "../theme";
+import { BODY, MONO, SERIF, labelStyle } from "../theme";
 
 type Props = {
   question: string;
@@ -53,6 +53,12 @@ export function CarteVerbatim({
             le moteur et la réponse complète sont conservés pour être rejoués à l'identique dans 90
             jours.
           </span>
+        </p>
+        {/* Le pont vers l'annexe : sans lui, le prospect ne soupçonne pas que
+            les autres réponses sont lisibles sous la séquence. */}
+        <p style={{ fontFamily: MONO, fontSize: 12, lineHeight: 1.5, color: "var(--ink-3)", margin: 0 }}>
+          Les {Math.max(0, totalQuestions - 1)} autres questions et leurs réponses complètes vous
+          attendent en bas de cette page.
         </p>
       </>
     );

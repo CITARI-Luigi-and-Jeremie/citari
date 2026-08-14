@@ -284,10 +284,16 @@ du toolkit et les colonnes réelles vit dans
 
 ```bash
 pnpm install
-pnpm -r test        # 180 tests
-pnpm -r typecheck   # couvre aussi le site, via l'alias des tests
+pnpm -r test                        # 235 tests
+pnpm -r typecheck                   # paquets + fichiers du site importés par les tests
+npm --prefix apps/citari run typecheck   # TOUT le site (ajouté le 14/08/2026)
 npm --prefix apps/citari run build
 ```
+
+Les deux typecheck sont nécessaires : `pnpm -r typecheck` ne voit du site que
+les fichiers que les tests importent. Un composant jamais importé pouvait
+utiliser une constante non importée et ne planter qu'à l'exécution, dans le
+navigateur du prospect (cas réel : `MONO` dans `CarteVerbatim`, 14/08/2026).
 
 **Les tests importent le vrai code du site**, ils n'en recopient plus une
 version. L'alias `@/` est résolu par `packages/toolkit/vitest.config.ts` pour
