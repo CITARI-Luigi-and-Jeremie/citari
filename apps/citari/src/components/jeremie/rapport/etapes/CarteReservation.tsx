@@ -85,12 +85,19 @@ export function CarteReservation({ wide, part }: { wide: boolean; part: "recit" 
             fontFamily: MONO,
           }}
         >
-          {/* « Nous en tenons 3 par semaine » a été coupé le 14/08/2026 : aucun
-              compteur n'enregistre cette rareté, c'était la seule affirmation
-              invérifiable du parcours. La doctrine interdit le faux compteur, y
-              compris quand il sert à faire réserver. */}
-          Pourquoi c'est offert : ce diagnostic nous coûte environ 1 € en appels d'API. C'est le
-          prix que nous acceptons de payer pour 30 minutes de votre attention.
+          {/* Le montant a été retiré le 14/08/2026 : annoncer « environ 1 € »
+              dévalorisait ce qu'on offre. Le VOLUME technique dit la même
+              vérité et pèse davantage. Le compte est exact et vérifiable dans
+              l'orchestrateur : 144 interrogations de moteurs, 144 analyses
+              (une par réponse, ligne 650), 6 questions miroir, plus la
+              génération de l'échantillon, le classement des concurrents et
+              les actions. Environ 300.
+              (« Nous en tenons 3 par semaine » avait été coupé plus tôt le
+              même jour : aucun compteur n'enregistrait cette rareté.) */}
+          Pourquoi c'est offert : un diagnostic complet déclenche près de 300 appels payants chez
+          six éditeurs d'IA, recherche web activée, chaque réponse étant ensuite relue par un
+          modèle. Neuf minutes de calcul. Nous le prenons à notre charge, parce qu'il n'y a pas de
+          conversation utile sans mesure.
         </p>
       </div>
     );
