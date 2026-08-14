@@ -29,7 +29,11 @@ const CreerInput = z.object({
     .toLowerCase()
     .max(160)
     .email({ message: "Cette adresse email ne semble pas valide." }),
-  secteur: z.string().trim().min(1).max(80),
+  // Facultatif depuis le 14/08/2026 : le formulaire ne le demande plus, il
+  // est déduit du site pendant la phase « on lit votre site ». Le toolkit
+  // (scan par lot, re-scan) continue de le poser explicitement, et sa valeur
+  // n'est alors jamais écrasée.
+  secteur: z.string().trim().max(80).default(""),
   ville: z.string().trim().max(80).optional().nullable(),
   concurrents: z.array(z.string().trim().max(80)).max(3).default([]),
   langue: z.enum(["fr", "it", "en"]).default("fr"),

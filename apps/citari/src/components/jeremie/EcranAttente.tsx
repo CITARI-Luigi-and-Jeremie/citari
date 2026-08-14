@@ -47,10 +47,18 @@ function construireEtapes(etat: EtatScan | null): [string, string][] {
     moteurs.length === 2 ? `${moteurs[0]} et ${moteurs[1]}` : `les ${moteurs.length || 6} moteurs`;
   const total = etat?.total ?? 0;
 
+  // Le métier est DÉDUIT du site (le formulaire ne le demande plus) : dès que
+  // l'orchestrateur l'a écrit en base, l'étape 01 affiche ce qu'on a compris.
+  // C'est la seule preuve que la lecture a bien eu lieu.
+  const metier = etat?.secteur?.trim() ?? "";
+  const zone = etat?.ville?.trim() ?? "";
+
   return [
     [
       "On lit votre site",
-      `${domaine ?? "Votre site"} est lu comme le ferait un nouveau client : votre métier, vos services, votre zone. C'est lui qui dicte les questions.`,
+      metier
+        ? `Compris : ${metier}${zone ? `, clientèle locale à ${zone}` : ", clientèle nationale"}. C'est ce que ${domaine ?? "votre site"} dit de vous, et c'est ce qui dicte les questions.`
+        : `${domaine ?? "Votre site"} est lu comme le ferait un nouveau client : votre métier, vos services, votre zone. C'est lui qui dicte les questions.`,
     ],
     [
       "On écrit les questions de vos acheteurs",
@@ -244,9 +252,23 @@ export function EcranAttente({ etat, scelle = false, instable }: Props) {
                 <br />
                 Citari
               </h1>
-              <p style={{ fontFamily: MONO, fontSize: 12, color: MUTED, margin: "0 0 36px" }}>
+              <div style={{ margin: "0 0 36px" }}>
+                <p style={{ fontFamily: MONO, fontSize: 12, color: MUTED, margin: 0 }}>
                 {etat ? `${etat.brand}${etat.domaine ? ` · ${etat.domaine}` : ""}` : " "}
-              </p>
+                </p>
+                {/* Le métier déduit du site, dès qu'il est écrit en base : la
+                    preuve visible que la lecture a eu lieu. L'étape 01 ne peut
+                    pas le porter, elle n'est plus active à ce moment-là. */}
+                {etat?.secteur?.trim() ? (
+                  <p
+                    className="cit-fade"
+                    style={{ fontFamily: MONO, fontSize: 12, color: "#C0371D", margin: "6px 0 0" }}
+                  >
+                    Compris : {etat.secteur.trim()}
+                    {etat.ville?.trim() ? ` · ${etat.ville.trim()}` : " · clientèle nationale"}
+                  </p>
+                ) : null}
+              </div>
 
               <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
                 {construireEtapes(etat).map(([libelle, description], i) => {

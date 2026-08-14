@@ -476,6 +476,59 @@ export async function matiereDuSite(url: string | null): Promise<string> {
   }
 }
 
+/**
+ * Le métier et la zone, DÉDUITS du site.
+ *
+ * Ajoutée le 14/08/2026 : le formulaire demandait le secteur et la ville, et
+ * Luigi a tranché — « si ça ne change rien de le demander, autant le
+ * supprimer ». Ça ne changeait effectivement plus rien depuis que la
+ * génération lit la page d'accueil en priorité, mais le secteur reste utile
+ * en aval (désambiguïsation du miroir, classement des concurrents, corrections
+ * humaines par secteur, vocabulaire du rapport). On le déduit donc au lieu de
+ * le réclamer.
+ *
+ * La ville n'est renvoyée QUE si le site montre une clientèle locale : une
+ * marque nationale ne doit pas hériter d'une adresse de siège, sinon un
+ * quart de l'échantillon partirait en questions de quartier.
+ *
+ * Sans matière ou en cas d'échec : `{ secteur: "", ville: null }`. La
+ * génération retombe alors sur la marque connue, et refuse d'inventer si
+ * elle ne l'est pas.
+ */
+export async function deduireMetier(
+  marque: string,
+  matiereSite: string,
+): Promise<{ secteur: string; ville: string | null }> {
+  if (!process.env.GOOGLE_AI_API_KEY) return { secteur: "", ville: null };
+  try {
+    const { text: raw } = await gemini_(
+      process.env.GEMINI_ANALYSE_MODEL || "gemini-3.1-flash-lite",
+      "Tu déduis DEUX choses sur une entreprise. " +
+        'Renvoie UNIQUEMENT du JSON : {"secteur":"","ville":""}. ' +
+        "secteur = son métier en trois mots maximum, tel qu'un client le dirait " +
+        "(« expertise comptable », « paris sportifs en ligne », « agence immobilière »). " +
+        "ville = la ville UNIQUEMENT si l'entreprise sert une clientèle locale (commerce, cabinet, " +
+        "artisan, agence de proximité). Pour une marque nationale ou internationale, même si son " +
+        "siège est mentionné, renvoie une chaîne vide : ses clients ne la cherchent pas par ville. " +
+        "Appuie-toi D'ABORD sur l'extrait du site s'il est fourni, sinon sur ce que tu sais de la " +
+        "marque. Si le métier n'est pas identifiable avec certitude, renvoie deux chaînes vides " +
+        "plutôt que d'inventer : un métier faux fabrique une mesure fausse.",
+      `Marque : ${marque}.` +
+        (matiereSite.trim()
+          ? `\nExtrait de la page d'accueil : """${matiereSite}"""`
+          : "\nLe site n'a pas pu être lu (bloqué ou injoignable) : réponds seulement si tu connais réellement cette marque."),
+      { maxTokens: 256 },
+    );
+    const m = raw.match(/\{[\s\S]*\}/);
+    const parsed = JSON.parse(m ? m[0] : "{}") as { secteur?: string; ville?: string };
+    const secteur = (parsed.secteur ?? "").trim().slice(0, 80);
+    const ville = (parsed.ville ?? "").trim().slice(0, 80);
+    return { secteur, ville: ville || null };
+  } catch {
+    return { secteur: "", ville: null };
+  }
+}
+
 export async function genererQuestions(input: {
   marque: string;
   secteur: string;

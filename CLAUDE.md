@@ -347,6 +347,15 @@ entière pour le baromètre.
 - « Le Chat » est l'étiquette affichée, `mistral` l'identifiant et
   `score_mistral` la colonne : on nomme partout l'assistant que le public
   utilise, mais la base garde le nom de l'éditeur, plus stable.
+- **Le formulaire ne demande que le site, la marque et l'email** (deux
+  étapes, 14/08/2026). Le métier et la ville sont DÉDUITS de la page
+  d'accueil par `deduireMetier`, écrits dans `scans.sector` / `scans.city`
+  pendant la phase « questions », et affichés au prospect sur l'écran de
+  mesure (« Compris : … »). Une valeur déjà posée n'est jamais écrasée : les
+  scans par lot du toolkit gardent la leur. Le secteur reste nécessaire en
+  aval (question miroir, classement des concurrents, `brand_overrides` par
+  secteur, vocabulaire du rapport) : on ne l'a pas supprimé, on a supprimé
+  l'effort de le taper.
 - Mix de questions, **adaptatif selon la portée** (14/08/2026). Avec ville :
   24 en complet (10 comparatives, 6 problème, 5 locales, 3 confiance), 20 en
   aperçu (8/5/4/3). Sans ville — clientèle nationale : **aucune question

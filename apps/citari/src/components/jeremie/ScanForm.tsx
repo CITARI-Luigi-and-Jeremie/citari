@@ -3,7 +3,7 @@ import { createPortal } from "react-dom";
 import { useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 
-import { SECTORS, brandFromDomain } from "@/lib/site";
+import { brandFromDomain } from "@/lib/site";
 import { lancerScan } from "@/lib/scan.functions";
 import { useScanFormFocus } from "@/lib/scan-form-focus";
 import { LogosMoteurs } from "@/components/jeremie/LogosMoteurs";
@@ -26,18 +26,23 @@ import { LogosMoteurs } from "@/components/jeremie/LogosMoteurs";
  */
 
 /**
- * Trois étapes depuis le 14/08/2026 (décision Luigi) : l'étape
- * « concurrents » est retirée — la mesure les découvre elle-même, et le
- * champ n'alimentait que l'accroche d'email. Le secteur se tape librement,
- * avec nos verticales en suggestions : « poker en ligne » vaut mieux
- * qu'« Autre », et c'est le site qui dicte les questions de toute façon.
+ * DEUX étapes depuis le 14/08/2026 : le site, puis l'email.
+ *
+ * L'étape « concurrents » a été retirée le matin (la mesure les découvre
+ * elle-même), puis l'étape « secteur et ville » l'après-midi — décision de
+ * Luigi : « si ça ne change rien de le demander, autant le supprimer ». Le
+ * métier et la zone sont maintenant DÉDUITS de la page d'accueil pendant la
+ * phase « on lit votre site » (`deduireMetier`), et écrits en base pour tout
+ * l'aval. Le prospect voit ce qu'on a compris sur l'écran de mesure.
+ *
+ * Ce qui reste demandé est ce qu'aucune lecture ne peut donner : l'adresse
+ * du site, le nom exact de la marque à suivre, et l'email du rapport.
  */
-type Etape = 1 | 2 | 3;
+type Etape = 1 | 2;
 
 const TITRE_ETAPE: Record<Etape, string> = {
   1: "Votre site",
-  2: "Votre secteur et votre ville",
-  3: "Où envoyons-nous votre rapport ?",
+  2: "Où envoyons-nous votre rapport ?",
 };
 
 export function ScanForm({ centered = false }: { centered?: boolean }) {
@@ -49,8 +54,6 @@ export function ScanForm({ centered = false }: { centered?: boolean }) {
   const [etape, setEtape] = useState<Etape>(1);
   const [domaine, setDomaine] = useState("");
   const [marque, setMarque] = useState("");
-  const [secteur, setSecteur] = useState("");
-  const [ville, setVille] = useState("");
   const [email, setEmail] = useState("");
   const [etat, setEtat] = useState<"repos" | "envoi" | "erreur">("repos");
   const [messageErreur, setMessageErreur] = useState<string | null>(null);
@@ -77,8 +80,9 @@ export function ScanForm({ centered = false }: { centered?: boolean }) {
           marque: marque.trim(),
           url: domaine.trim() || null,
           email: email.trim(),
-          secteur: secteur.trim(),
-          ville: ville.trim() || null,
+          // Déduits du site pendant la mesure : voir `deduireMetier`.
+          secteur: "",
+          ville: null,
           concurrents: [],
           langue: "fr",
           mode: "apercu",
@@ -118,11 +122,6 @@ export function ScanForm({ centered = false }: { centered?: boolean }) {
     if (etape === 1) {
       if (!domaine.trim() || !marque.trim()) return;
       setEtape(2);
-      return;
-    }
-    if (etape === 2) {
-      if (!secteur.trim()) return;
-      setEtape(3);
       return;
     }
     void soumettre();
@@ -202,24 +201,6 @@ export function ScanForm({ centered = false }: { centered?: boolean }) {
             ) : null}
 
             {etape === 2 ? (
-              <div className="grid gap-4">
-                <ChampSecteur value={secteur} onChange={setSecteur} />
-                <Champ
-                  id="w-ville"
-                  label="Votre ville — seulement si vos clients sont locaux"
-                  value={ville}
-                  onChange={setVille}
-                  placeholder="Lyon (laissez vide si vous vendez partout)"
-                />
-                <p className="mono text-[13px] text-ink-2">
-                  {ville.trim()
-                    ? `Une partie des questions cherchera un prestataire à ${ville.trim()} : c'est ainsi que vos clients cherchent.`
-                    : "Sans ville, aucune question locale : on mesure votre place sur des recherches nationales."}
-                </p>
-              </div>
-            ) : null}
-
-            {etape === 3 ? (
               <div>
                 <label htmlFor="w-email" className="mono block text-[13px] text-ink-2">
                   Votre adresse email professionnelle
@@ -265,7 +246,7 @@ export function ScanForm({ centered = false }: { centered?: boolean }) {
               className="cta ml-auto transition-opacity hover:opacity-90 disabled:opacity-60"
               disabled={etat === "envoi"}
             >
-              {etape === 3 ? (etat === "envoi" ? "Lancement…" : "Démarrer le scan") : "Continuer"}
+              {etape === 2 ? (etat === "envoi" ? "Lancement…" : "Démarrer le scan") : "Continuer"}
             </button>
           </div>
 
@@ -275,90 +256,6 @@ export function ScanForm({ centered = false }: { centered?: boolean }) {
         </Fenetre>
       ) : null}
     </>
-  );
-}
-
-/**
- * Le secteur se tape librement, nos verticales servent de suggestions
- * (filtrées par la saisie, cliquables). « Poker en ligne » vaut mieux que
- * le « Autre » de l'ancien menu : le texte libre nourrit la génération, la
- * question miroir et le classement des concurrents. Le serveur acceptait
- * déjà n'importe quel texte, seul ce composant l'interdisait.
- */
-function ChampSecteur({
-  value,
-  onChange,
-}: {
-  value: string;
-  onChange: (value: string) => void;
-}) {
-  const [focus, setFocus] = useState(false);
-  const cadre = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!focus) return;
-    const onDown = (e: MouseEvent) => {
-      if (!cadre.current?.contains(e.target as Node)) setFocus(false);
-    };
-    document.addEventListener("mousedown", onDown);
-    return () => document.removeEventListener("mousedown", onDown);
-  }, [focus]);
-
-  const saisie = value.trim().toLowerCase();
-  const suggestions = SECTORS.filter(
-    (s) => s !== "Autre" && (saisie.length === 0 || s.toLowerCase().includes(saisie)),
-  );
-  const listeVisible = focus && suggestions.length > 0 && value !== suggestions[0];
-
-  return (
-    <div ref={cadre} className="relative">
-      <label htmlFor="w-secteur" className="mono block text-[13px] text-ink-2">
-        Votre métier, dans vos mots
-      </label>
-      <input
-        id="w-secteur"
-        className="field mt-1.5 transition-colors focus:border-ink"
-        value={value}
-        placeholder="Streaming vidéo, expertise comptable, location de vélos…"
-        required
-        autoFocus
-        autoComplete="off"
-        onFocus={() => setFocus(true)}
-        onKeyDown={(e) => {
-          if (e.key === "Escape") setFocus(false);
-        }}
-        onChange={(e) => {
-          onChange(e.target.value);
-          setFocus(true);
-        }}
-      />
-
-      {listeVisible ? (
-        <div
-          role="listbox"
-          aria-label="Suggestions de secteur"
-          className="anim-menu-in absolute left-0 right-0 top-full z-30 mt-1 max-h-[min(40dvh,16rem)] overflow-y-auto overscroll-contain border border-ink bg-paper p-1 shadow-[0_10px_24px_-16px_rgb(23_22_15_/_0.35)]"
-        >
-          {suggestions.map((s) => (
-            <button
-              key={s}
-              type="button"
-              role="option"
-              aria-selected={s === value}
-              onMouseDown={(e) => {
-                e.preventDefault();
-                onChange(s);
-                setFocus(false);
-              }}
-              className="flex w-full items-baseline gap-3 border-0 px-3 py-2.5 text-left transition-colors duration-150 hover:bg-paper-2"
-            >
-              <span className="mono text-[13px] text-ink-2">→</span>
-              <span className="flex-1">{s}</span>
-            </button>
-          ))}
-        </div>
-      ) : null}
-    </div>
   );
 }
 
@@ -446,7 +343,7 @@ function Fenetre({
         className="anim-panel my-auto w-full max-w-lg overflow-visible border border-rule-strong bg-paper p-5 will-change-transform sm:p-7"
       >
         <div className="flex items-baseline justify-between">
-          <p className="mono text-[13px] text-ink-2">Étape {etape} / 3</p>
+          <p className="mono text-[13px] text-ink-2">Étape {etape} / 2</p>
           <button
             type="button"
             onClick={onClose}
@@ -460,13 +357,13 @@ function Fenetre({
           className="mt-3 h-[3px] w-full bg-paper-2"
           role="progressbar"
           aria-valuemin={1}
-          aria-valuemax={3}
+          aria-valuemax={2}
           aria-valuenow={etape}
           aria-label="Progression du formulaire"
         >
           <div
             className="h-full bg-ink transition-[width] duration-500 ease-out"
-            style={{ width: `${(etape / 3) * 100}%` }}
+            style={{ width: `${(etape / 2) * 100}%` }}
           />
         </div>
 

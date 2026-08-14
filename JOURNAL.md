@@ -5,6 +5,42 @@ d'une nouvelle session, après `CLAUDE.md`.
 
 ---
 
+## 2026-08-14 — Le formulaire tombe à deux champs : on lit au lieu de demander
+
+Luigi, sur le secteur et la ville : « si ça change rien de le demander, autant
+le supprimer quand l'user lance le scan ». C'était vrai depuis le matin même :
+la génération lit la page d'accueil EN PRIORITÉ, le secteur n'était plus qu'un
+troisième filet. Mais il reste utile en aval — désambiguïsation de la question
+miroir, classement des concurrents, corrections humaines par secteur,
+vocabulaire du rapport. Donc on ne le supprime pas : **on le déduit**.
+
+`deduireMetier(marque, matiereSite)` lit l'extrait du site et renvoie le
+métier en trois mots et la ville. Deux règles dedans, chacune tirée d'un
+piège déjà payé : la ville n'est renvoyée QUE pour une clientèle locale (une
+marque nationale ne doit pas hériter d'une adresse de siège, sinon un quart
+de l'échantillon repart en questions de quartier), et le modèle doit renvoyer
+vide plutôt qu'inventer. Le résultat est ÉCRIT en base (`scans.sector`,
+`scans.city`) pour que tout l'aval en profite, et jamais écrasé s'il existe
+déjà — le toolkit continue de poser les siens sur les scans par lot.
+
+**Le formulaire tombe donc à deux étapes** : le site et la marque, puis
+l'email. Ce qui reste demandé est ce qu'aucune lecture ne peut donner.
+
+**Et le prospect voit ce qu'on a compris.** Sous le nom de la marque, sur
+l'écran de mesure : « Compris : boulangerie pâtisserie · Paris ». C'est la
+preuve visible que « on lit votre site » n'est pas une formule. L'étape 01 ne
+pouvait pas la porter — elle n'est plus l'étape active quand la déduction
+arrive.
+
+Vérifié sur deux profils : boulangerie-utopie.com donne « boulangerie
+pâtisserie · Paris » et des questions de client parisien qui cherche du pain ;
+leboncoin.fr, qui répond 403 aux robots, ne donne aucune matière — la
+déduction se rabat alors sur la marque connue, et l'échantillon parle de
+petites annonces, de portails immobiliers et de jobboards. Un site illisible
+ne prive plus l'aval de contexte.
+
+---
+
 ## 2026-08-14 — La dernière carte vendait le cas où il ne se passe rien
 
 Luigi, sur la carte de réservation : « ça vend mal et pas la vérité de ce

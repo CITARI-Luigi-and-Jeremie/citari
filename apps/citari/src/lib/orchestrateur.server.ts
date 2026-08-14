@@ -3,6 +3,7 @@ import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import {
   interroger,
   analyser,
+  deduireMetier,
   genererQuestions,
   matiereDuSite,
   questionMiroir,
@@ -403,10 +404,32 @@ async function preparerQuestions(scan: ScanRow): Promise<EtatQuestions> {
     // secteur — « Autre » avait fait générer des questions SIRH à un site
     // de poker (scan Unibet du 14/08/2026, score 0 artefactuel).
     const matiere = await matiereDuSite(scan.website_url);
+
+    // Le formulaire ne demande plus le métier ni la ville (14/08/2026) : on
+    // les déduit du site et on les ÉCRIT en base, parce que tout l'aval s'en
+    // sert — question miroir, classement des concurrents, corrections
+    // humaines par secteur, vocabulaire du rapport. Un secteur déjà rempli
+    // (scan par lot du toolkit, re-scan) n'est jamais écrasé.
+    let secteur = scan.sector ?? "";
+    let ville = scan.city as string | null;
+    // Même sans matière : un site bloqué (leboncoin.fr répond 403 aux robots)
+    // ne doit pas priver tout l'aval de contexte quand la marque est connue.
+    if (!secteur.trim()) {
+      const deduit = await deduireMetier(scan.brand_name, matiere);
+      if (deduit.secteur) {
+        secteur = deduit.secteur;
+        ville = ville ?? deduit.ville;
+        await supabaseAdmin
+          .from("scans")
+          .update({ sector: secteur, city: ville })
+          .eq("id", scan.id);
+      }
+    }
+
     lignes = await genererQuestions({
       marque: scan.brand_name,
-      secteur: scan.sector,
-      ville: scan.city,
+      secteur,
+      ville,
       langue: scan.language,
       nombre: scan.mode === "apercu" ? 20 : 24,
       matiereSite: matiere,
@@ -487,6 +510,10 @@ export async function etatScan(id: string) {
     error: scan.error_message ? MESSAGE_ECHEC_PUBLIC : null,
     brand: scan.brand_name,
     domaine: scan.website_url as string | null,
+    // Déduits du site pendant la phase « questions » : l'écran d'attente les
+    // affiche pour prouver que la lecture a bien eu lieu.
+    secteur: (scan.sector ?? null) as string | null,
+    ville: (scan.city ?? null) as string | null,
     demarreA: (scan.started_at ?? scan.created_at) as string | null,
     reportToken: scan.report_token,
     questions: questions ?? [],
