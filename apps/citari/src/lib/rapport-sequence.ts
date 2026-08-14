@@ -48,6 +48,20 @@ export interface DonneesSequence {
     termeSecteur: string;
   };
   /**
+   * Les quatre composantes du score, calculées sur l'aperçu depuis toujours
+   * et jamais montrées : elles transforment un chiffre opaque en diagnostic
+   * lisible, sans rien livrer de ce que le rendez-vous apporte. Les taux sont
+   * des ratios 0-1, la position une moyenne.
+   */
+  composantes: {
+    presence: number;
+    rang: number | null;
+    recommandation: number;
+    tonalite: number;
+    reponsesRetenues: number;
+    reponsesEnErreur: number;
+  } | null;
+  /**
    * La question miroir : ce qu'une IA répond quand on lui donne le nom de la
    * marque. Hors méthodologie et assumée comme telle (c'est la seule question
    * qui prononce le nom), mais c'est la pièce la plus personnelle du scan.
@@ -125,6 +139,13 @@ export function construireSequence(entree: {
   mentions: LigneMention[];
   classes: Record<string, string>;
   alias: Record<string, string>;
+  /** Les quatre composantes du score, telles qu'écrites par `finaliser`. */
+  mesures?: {
+    mention_rate?: number | string | null;
+    avg_position?: number | string | null;
+    reco_rate?: number | string | null;
+    sentiment_score?: number | string | null;
+  } | null;
   /** `scans.miroir` : tableau de { moteur, texte }. */
   miroir?: unknown;
   /** `scans.audit` : { ok, bots: { GPTBot: "autorise"|"bloque", … }, llmstxt }. */
@@ -251,6 +272,26 @@ export function construireSequence(entree: {
     mentions.map((m) => (m.is_target ? marque : (alias[m.brand] ?? m.brand))),
   ).size;
 
+  // Les quatre composantes du score. `mention_rate` sert de sentinelle : si
+  // elle manque, la mesure est d'avant leur enregistrement et on n'affiche
+  // rien plutôt que des zéros qui ressembleraient à un mauvais score.
+  const nombre = (v: unknown): number | null => {
+    const n = typeof v === "string" ? Number(v) : typeof v === "number" ? v : NaN;
+    return Number.isFinite(n) ? n : null;
+  };
+  const presence = nombre(entree.mesures?.mention_rate);
+  const composantes =
+    presence === null
+      ? null
+      : {
+          presence,
+          rang: nombre(entree.mesures?.avg_position),
+          recommandation: nombre(entree.mesures?.reco_rate) ?? 0,
+          tonalite: nombre(entree.mesures?.sentiment_score) ?? 0,
+          reponsesRetenues: retenues,
+          reponsesEnErreur: reponses.filter((r) => Boolean(r.error)).length,
+        };
+
   // Le miroir : première entrée exploitable. Une réponse en erreur n'est pas
   // écrite en base (`finaliser` les filtre), mais on reste prudent.
   const miroirBrut = Array.isArray(entree.miroir) ? entree.miroir : [];
@@ -290,6 +331,7 @@ export function construireSequence(entree: {
     vosReponses,
     laPlusDure,
     voix,
+    composantes,
     miroir,
     technique,
     voixMeta: {

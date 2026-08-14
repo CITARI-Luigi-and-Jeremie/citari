@@ -122,6 +122,7 @@ export function SequenceResultat({
             domaine={data.domaine}
             date={data.date}
             moteurs={data.moteurs}
+            composantes={data.composantes}
             wide={wide}
             part={part}
           />

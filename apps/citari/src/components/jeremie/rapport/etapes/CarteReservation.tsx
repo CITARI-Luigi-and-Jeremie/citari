@@ -28,9 +28,12 @@ export function CarteReservation({ wide, part }: { wide: boolean; part: "recit" 
             fontFamily: MONO,
           }}
         >
+          {/* « Nous en tenons 3 par semaine » a été coupé le 14/08/2026 : aucun
+              compteur n'enregistre cette rareté, c'était la seule affirmation
+              invérifiable du parcours. La doctrine interdit le faux compteur, y
+              compris quand il sert à faire réserver. */}
           Pourquoi c'est gratuit : ce diagnostic nous coûte environ 1 € en appels d'API. C'est le
-          prix que nous acceptons de payer pour 30 minutes de votre attention. Nous en tenons 3 par
-          semaine.
+          prix que nous acceptons de payer pour 30 minutes de votre attention.
         </p>
       </div>
     );

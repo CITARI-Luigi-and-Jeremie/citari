@@ -9,6 +9,8 @@ import {
   ScoreGeant,
   ScoresMoteurs,
   Sources,
+  Miroir,
+  AuditRobots,
   TableauRequetes,
   ToutesLesReponses,
   Verbatims,
@@ -65,6 +67,8 @@ const SECTIONS = [
   ["requetes", "Requête par requête"],
   ["verbatims", "Verbatims"],
   ["reponses", "Toutes les réponses"],
+  ["miroir", "Ce que les IA disent de vous"],
+  ["technique", "Accès des robots"],
   ["sources", "Sources citées"],
   ["actions", "Actions prioritaires"],
 ] as const;
@@ -126,8 +130,9 @@ function RapportDApercu() {
         mentions: mentions as unknown as LigneMention[],
         classes: (scan.concurrent_classes ?? {}) as Record<string, string>,
         alias: (scan.brand_aliases ?? {}) as Record<string, string>,
-        // Payés par le scan gratuit, invisibles jusqu'au 14/08/2026 : la
-        // question miroir et l'audit des robots d'IA.
+        // Payés par le scan gratuit, invisibles jusqu'au 14/08/2026 : les
+        // composantes du score, la question miroir et l'audit des robots.
+        mesures: scan,
         miroir: scan.miroir,
         audit: scan.audit,
       }),
@@ -362,6 +367,29 @@ function RapportComplet() {
               mentions={mentions as unknown as Mention[]}
               marque={marque}
             />
+          </Section>
+
+          {/* Le miroir et l'audit des robots : le rapport GRATUIT les affiche
+              depuis le 14/08/2026, et le tableau comparatif promet ici « 6
+              moteurs » et les robots contrôlés. Un rapport payant qui tient
+              moins que l'aperçu qu'il prolonge est la pire promesse rompue
+              possible. */}
+          <Section id="miroir" titre="Ce que les IA disent de vous">
+            <p className="mb-6 max-w-[58ch] text-[15px] text-ink-2">
+              {fr(
+                "La seule question du scan qui prononce votre nom, posée à chaque moteur. Elle est hors méthodologie et ne compte pas dans le score : les autres questions mesurent la découverte spontanée, celle-ci mesure ce que les IA récitent quand on les interroge sur vous.",
+              )}
+            </p>
+            <Miroir miroir={scan.miroir} marque={marque} />
+          </Section>
+
+          <Section id="technique" titre="Ce que les robots d'IA peuvent lire">
+            <p className="mb-6 max-w-[58ch] text-[15px] text-ink-2">
+              {fr(
+                "Relevé sur le fichier public robots.txt de votre site. Un robot refusé ne lira jamais ce que vous publiez, quel que soit le contenu.",
+              )}
+            </p>
+            <AuditRobots audit={scan.audit} domaine={scan.website_url} />
           </Section>
 
           <Section id="sources" titre="Sources citées par Perplexity">

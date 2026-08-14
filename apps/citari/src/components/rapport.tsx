@@ -482,3 +482,97 @@ export function ToutesLesReponses({
     </div>
   );
 }
+
+/* ---------- Miroir et audit des robots (rapport complet) ---------- */
+
+/**
+ * La question miroir, moteur par moteur.
+ *
+ * Ajoutée au rapport COMPLET le 14/08/2026 : la séquence gratuite l'affichait
+ * déjà (CarteMiroir) et le tableau comparatif promettait « 1 moteur / 6
+ * moteurs » sur une page qui n'en rendait aucun. Un rapport payant qui tient
+ * moins que l'aperçu qu'il prolonge est la pire promesse rompue possible.
+ *
+ * Un moteur en panne n'est pas ecrit en base (`finaliser` filtre les erreurs) :
+ * on affiche ce qui existe, sans jamais annoncer un nombre fixe.
+ */
+export function Miroir({ miroir, marque }: { miroir: unknown; marque: string }) {
+  const lignes = (Array.isArray(miroir) ? miroir : []).filter(
+    (m): m is { moteur?: string; texte: string } =>
+      Boolean(m) && typeof (m as { texte?: unknown }).texte === "string" &&
+      (m as { texte: string }).texte.trim().length > 40,
+  );
+  if (!lignes.length)
+    return <Vide>Aucune réponse exploitable n'a été obtenue sur la question miroir.</Vide>;
+
+  return (
+    <div className="space-y-6">
+      <p className="num text-[12px] text-ink-3">
+        Question posée : « Que peux-tu me dire de {marque} ? Est-ce une entreprise que tu
+        recommanderais ? »
+      </p>
+      {lignes.map((l, i) => (
+        <figure key={`${l.moteur ?? i}`} className="avoid-break border-t border-rule-strong pt-3">
+          <figcaption className="num mb-2 flex items-center gap-1.5 text-[11px] text-ink-3">
+            <MoteurLogo moteur={l.moteur ?? ""} className="text-[12px] text-ink" />
+            {l.moteur ?? "moteur"}
+          </figcaption>
+          <blockquote className="quote-serif max-w-[70ch] whitespace-pre-line text-[16px] leading-[1.45]">
+            {l.texte.trim()}
+          </blockquote>
+        </figure>
+      ))}
+    </div>
+  );
+}
+
+/** L'audit flash : les robots d'IA ont-ils le droit de lire le site ? */
+export function AuditRobots({ audit, domaine }: { audit: unknown; domaine: string | null }) {
+  const a = audit as { ok?: boolean; bots?: Record<string, string>; llmstxt?: boolean } | null;
+  if (!a?.ok || !a.bots)
+    return <Vide>Le fichier robots.txt du site n'a pas pu être lu pendant la mesure.</Vide>;
+
+  const robots = ["GPTBot", "ClaudeBot", "PerplexityBot", "Google-Extended"];
+  const bloques = robots.filter((r) => a.bots![r] === "bloque");
+
+  return (
+    <div className="max-w-[52ch]">
+      <table className="w-full border-collapse text-[13px]">
+        <tbody>
+          {robots.map((r) => {
+            const bloque = a.bots![r] === "bloque";
+            return (
+              <tr key={r} className="border-b border-rule">
+                <td className="num py-2 text-[12px]">{r}</td>
+                <td
+                  className={cn(
+                    "num py-2 text-right text-[12px]",
+                    bloque ? "font-semibold text-signal" : "text-ink-3",
+                  )}
+                >
+                  {bloque ? "BLOQUÉ" : "autorisé"}
+                </td>
+              </tr>
+            );
+          })}
+          <tr className="border-b border-rule">
+            <td className="num py-2 text-[12px]">llms.txt</td>
+            <td className="num py-2 text-right text-[12px] text-ink-3">
+              {a.llmstxt ? "présent" : "absent"}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <p className="mt-4 text-[14px] leading-snug text-ink-2">
+        {bloques.length
+          ? `${bloques.length === 1 ? "Un robot est refusé" : `${bloques.length} robots sont refusés`} par votre serveur. Tant que ce refus tient, aucun contenu publié ne pourra être cité par ${bloques.length === 1 ? "ce moteur" : "ces moteurs"}.`
+          : "Aucun robot d'IA n'est refusé : ce qui manque n'est pas l'autorisation, c'est la matière à lire."}
+      </p>
+      {domaine ? (
+        <p className="num mt-2 text-[11px] text-ink-3">
+          Relevé public, vérifiable sur {domaine}/robots.txt
+        </p>
+      ) : null}
+    </div>
+  );
+}

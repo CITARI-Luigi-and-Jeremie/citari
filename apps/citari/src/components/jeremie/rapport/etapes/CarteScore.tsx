@@ -8,6 +8,7 @@ export function CarteScore({
   domaine,
   date,
   moteurs,
+  composantes,
   wide,
   part,
 }: {
@@ -15,6 +16,21 @@ export function CarteScore({
   domaine: string;
   date: string;
   moteurs: number;
+  /**
+   * Les quatre composantes du score, montrées depuis le 14/08/2026 : elles
+   * étaient calculées et enregistrées à chaque scan gratuit sans jamais être
+   * affichées. Elles transforment un chiffre opaque en diagnostic lisible —
+   * « cité dans 45 % des réponses, en position 3,2 » dit où agir — sans rien
+   * livrer de ce que le rendez-vous apporte.
+   */
+  composantes: {
+    presence: number;
+    rang: number | null;
+    recommandation: number;
+    tonalite: number;
+    reponsesRetenues: number;
+    reponsesEnErreur: number;
+  } | null;
   wide: boolean;
   part: "recit" | "preuve";
 }) {
@@ -66,8 +82,25 @@ export function CarteScore({
   }
 
   const hauteur = Math.max(2, Math.min(100, shown));
+  const pct = (v: number) => `${Math.round(v * 100)} %`;
+  const lignes = composantes
+    ? [
+        { label: "Présence", poids: "50 %", valeur: pct(composantes.presence) },
+        {
+          label: "Rang moyen",
+          poids: "20 %",
+          valeur:
+            composantes.rang === null
+              ? "—"
+              : `${composantes.rang.toFixed(1).replace(".", ",")}e`,
+        },
+        { label: "Recommandation", poids: "20 %", valeur: pct(composantes.recommandation) },
+        { label: "Tonalité", poids: "10 %", valeur: pct(composantes.tonalite) },
+      ]
+    : [];
 
   return (
+    <div style={{ display: "flex", flexDirection: "column", gap: wide ? 22 : 16 }}>
     <div style={{ display: "flex", alignItems: "flex-end", gap: wide ? 26 : 18 }}>
       <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
         <div style={{ display: "flex", alignItems: "baseline", gap: 6 }}>
@@ -149,6 +182,58 @@ export function CarteScore({
           50
         </span>
       </div>
+    </div>
+
+      {/* Le détail du calcul : la formule est publiée sur /methode, autant
+          montrer ses quatre termes mesurés. */}
+      {lignes.length ? (
+        <div style={{ display: "flex", flexDirection: "column", borderTop: `1px solid ${HAIR}` }}>
+          {lignes.map((l) => (
+            <div
+              key={l.label}
+              style={{
+                display: "grid",
+                gridTemplateColumns: "minmax(0,1fr) auto auto",
+                alignItems: "baseline",
+                gap: "0 10px",
+                padding: "7px 0",
+                borderBottom: `1px solid ${HAIR}`,
+              }}
+            >
+              <span style={{ fontSize: wide ? 14 : 13, color: BODY }}>{l.label}</span>
+              <span style={{ fontFamily: MONO, fontSize: 10.5, color: SUFFIX, minWidth: 34, textAlign: "right" }}>
+                {l.poids}
+              </span>
+              <span
+                style={{
+                  fontFamily: MONO,
+                  fontSize: wide ? 14 : 13,
+                  fontWeight: 600,
+                  color: INK,
+                  minWidth: 52,
+                  textAlign: "right",
+                }}
+              >
+                {l.valeur}
+              </span>
+            </div>
+          ))}
+          <span
+            style={{
+              fontFamily: MONO,
+              fontSize: 10.5,
+              lineHeight: 1.5,
+              color: SUFFIX,
+              paddingTop: 8,
+            }}
+          >
+            Calculé sur {composantes!.reponsesRetenues} réponses obtenues
+            {composantes!.reponsesEnErreur > 0
+              ? ` · ${composantes!.reponsesEnErreur} en panne, exclue${composantes!.reponsesEnErreur > 1 ? "s" : ""} du calcul`
+              : ""}
+          </span>
+        </div>
+      ) : null}
     </div>
   );
 }
