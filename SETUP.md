@@ -29,42 +29,23 @@ pnpm --filter admin dev
 ```
 
 Cette consigne a longtemps dit d'écrire le mot de passe dans
-`apps/citari/.env.local`. **C'était le mauvais fichier**, et la commande a été
-suivie : le texte littéral `choisissez-un-mot-de-passe-solide` s'y trouve
-toujours, sans aucun effet sur `apps/admin`.
+`apps/citari/.env.local`. **C'était le mauvais fichier** : `apps/admin` lit le
+`.env` de la racine, et c'est là qu'il est renseigné.
 
-Il en a un, en revanche, sur la **route `/admin` du site**, qui est un second
-back-office et lit ce fichier-là. Elle s'ouvre donc aujourd'hui avec un mot de
-passe publié en clair dans ce dépôt, et donne accès aux emails des prospects.
-Voir « Deux back-offices » ci-dessous : c'est à trancher avant la mise en ligne.
+### ~~Deux back-offices, et il faut en supprimer un~~ — tranché le 14/08/2026
 
-### Deux back-offices, et il faut en supprimer un
+Il en a existé deux, découverts le 06/08/2026, écrivant dans les mêmes tables
+avec des vocabulaires de statuts divergents (`leads.status` est un `text` sans
+contrainte, la base acceptait les deux sans broncher). Le second était la
+route `/admin` du site public : une fois en ligne, elle aurait servi les
+emails des prospects derrière son propre mot de passe.
 
-Découvert le 06/08/2026. Il en existe deux, qui écrivent dans les mêmes tables :
-
-| Où | Quoi | Mot de passe lu dans |
-|---|---|---|
-| `apps/admin` | Next.js, port 3001, 844 lignes. Leads, clients, relances, checklist de sprint, re-scan J+90. **Celui qu'on utilise.** | `.env` racine, renseigné |
-| `apps/citari/src/routes/admin.tsx` | Route `/admin` du site public, 404 lignes. Leads et clients seulement. | `apps/citari/.env.local`, valeur bidon |
-
-**Leurs vocabulaires de statuts divergent**, et `leads.status` est un `text`
-sans contrainte, donc la base accepte les deux sans broncher :
-
-- `apps/admin` : `prospect`, `nouveau`, `contacte`, `rdv_pris`, `client`, `perdu`
-- route du site : `nouveau`, `contacté`, `call_planifié`, `proposition`, `gagné`, `perdu`
-
-Les trois leads en base sont en `prospect`, un statut que la route du site ne
-sait pas afficher. Cliquer dans l'une puis dans l'autre produirait des statuts
-que la première ne comprend plus. C'est exactement le problème des deux moteurs
-de scan, réglé le 06/08/2026 en n'en gardant qu'un.
-
-S'ajoute le risque de sécurité : une fois le site en ligne, `/admin` serait
-accessible publiquement avec un mot de passe écrit en clair dans ce dépôt, et
-donnerait les emails des prospects, donc des données personnelles.
-
-**À trancher avant la mise en ligne**, et la réponse est probablement de
-supprimer la route du site : `apps/admin` fait tout ce qu'elle fait et
-davantage.
+**La route du site a été supprimée** (`src/routes/admin.tsx` et
+`src/lib/admin.functions.ts`) lors de la revue de lancement : `apps/admin`
+fait tout ce qu'elle faisait et davantage, et `/admin` répond désormais 404.
+Le seul vocabulaire de statuts qui reste est celui d'`apps/admin`
+(`prospect`, `nouveau`, `contacte`, `rdv_pris`, `client`, `perdu`), auquel
+s'ajoutent ceux du toolkit (`relance`, `converti`, statut refusé à l'envoi).
 
 ## 2. Avant le premier client
 
