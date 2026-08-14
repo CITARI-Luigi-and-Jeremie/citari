@@ -48,7 +48,7 @@ const ETAPES: Etape[] = [
     duree: "Gratuit · 90 secondes",
     labelObtenu: "CE QUE VOUS RECEVEZ",
     obtenu: (
-      <div className="space-y-4">
+      <div className="space-y-3">
         <p>
           Nous posons à ChatGPT et Gemini les questions que vos acheteurs tapent vraiment. Pas des
           simulations : 40 réponses réelles, sous vos yeux, en direct.
@@ -82,7 +82,7 @@ const ETAPES: Etape[] = [
     duree: "Gratuit · 30 minutes",
     labelObtenu: "CE QUE VOUS RECEVEZ",
     obtenu: (
-      <div className="space-y-4">
+      <div className="space-y-3">
         <p>
           Dès que vous réservez, nous lançons l'analyse complète : 24 questions, 6 moteurs, 144
           réponses.{" "}
@@ -91,7 +91,7 @@ const ETAPES: Etape[] = [
           </strong>
         </p>
         <p>Lors de notre visio vous saurez :</p>
-        <ul className="list-disc space-y-2 pl-4">
+        <ul className="list-disc space-y-1.5 pl-4">
           <li>les sources exactes sur lesquelles les IA s'appuient pour citer vos concurrents ;</li>
           <li>ce qui bloque techniquement sur votre site ;</li>
           <li>l'ordre des corrections, et lesquelles vous pouvez faire seul.</li>
@@ -118,7 +118,7 @@ const ETAPES: Etape[] = [
     duree: "30 jours",
     labelObtenu: "CE QUE NOUS FAISONS",
     obtenu: (
-      <div className="space-y-4">
+      <div className="space-y-3">
         <p>Trois chantiers, menés en parallèle pendant un mois.</p>
         <p>
           Nous rendons votre site lisible par les IA, la plupart leur ferment la porte sans le
@@ -177,21 +177,26 @@ export function SectionProcedure() {
           </p>
         </Reveal>
 
-        {/* Cartes empilées : chaque étape se superpose à la précédente au défilement. */}
-        <ul className="mt-12">
+        {/* Cartes empilées : chaque étape se superpose à la précédente au
+            défilement. Compactées le 14/08/2026 (demande Luigi : « trop
+            longues de haut en bas ») : rien du texte n'a bougé, mais corps un
+            cran plus petit, interlignes et espacements resserrés, numéro
+            réduit, et l'image passe à 2/5 de la largeur pour que le texte
+            s'étale moins en hauteur. Une carte doit tenir sous un écran. */}
+        <ul className="mt-10">
           {ETAPES.map((etape, i) => (
             <li
               key={etape.num}
               className="stack-card"
               style={{
-                top: `calc(6rem + ${i * 1.25}rem)`,
-                marginBottom: i === ETAPES.length - 1 ? 0 : "2.5rem",
+                top: `calc(5rem + ${i * 1.25}rem)`,
+                marginBottom: i === ETAPES.length - 1 ? 0 : "2rem",
                 zIndex: i + 1,
               }}
             >
               <Reveal delay={i * 120} className="block">
                 <div>
-                  <div className="card-lift group grid gap-0 overflow-hidden border border-rule bg-paper shadow-[0_32px_70px_-36px_rgba(251,250,247,0.18)] hover:border-signal sm:grid-cols-2">
+                  <div className="card-lift group grid gap-0 overflow-hidden border border-rule bg-paper shadow-[0_32px_70px_-36px_rgba(251,250,247,0.18)] hover:border-signal sm:grid-cols-[2fr_3fr]">
                     <img
                       src={etape.image}
                       alt={etape.alt}
@@ -201,10 +206,10 @@ export function SectionProcedure() {
                       className={`${etape.imageAspect} w-full border-b border-rule object-cover sm:aspect-auto sm:h-full sm:border-b-0 sm:border-r`}
                     />
 
-                    <div className="flex flex-col p-7 sm:p-9">
+                    <div className="flex flex-col p-6 sm:p-7">
                       <div className="flex items-start justify-between gap-4">
                         <div className="flex flex-col">
-                          <span className="mono text-[56px] font-bold leading-[0.85] tracking-tighter text-ink sm:text-[64px]">
+                          <span className="mono text-[40px] font-bold leading-[0.85] tracking-tighter text-ink sm:text-[48px]">
                             {etape.num}
                           </span>
                           {etape.label ? (
@@ -218,20 +223,20 @@ export function SectionProcedure() {
                         </span>
                       </div>
 
-                      <h3 className="mt-5 text-[26px] leading-[1.15] text-ink sm:mt-4 sm:text-[30px]">
+                      <h3 className="mt-4 text-[22px] leading-[1.15] text-ink sm:mt-3 sm:text-[25px]">
                         {etape.titre}
                       </h3>
 
-                      <div className="mt-7 sm:mt-5">
+                      <div className="mt-5 sm:mt-4">
                         <p className="mono text-[11px] uppercase tracking-[0.12em] text-ink-2">
                           {etape.labelObtenu ?? "vous obtenez"}
                         </p>
-                        <div className="mt-2 text-[16px] leading-[1.65] text-ink-2">
+                        <div className="mt-2 text-[15px] leading-[1.55] text-ink-2">
                           {etape.obtenu}
                         </div>
                       </div>
 
-                      <dl className="mono mt-7 border-l-2 border-rule pl-4 text-[14px] tabular-nums sm:mt-8 sm:border-l sm:pl-3">
+                      <dl className="mono mt-5 border-l-2 border-rule pl-4 text-[13.5px] tabular-nums sm:mt-6 sm:border-l sm:pl-3">
                         <dt className="text-[11px] uppercase tracking-[0.1em] text-ink-2">
                           {etape.labelCout ?? "coût"}
                         </dt>
