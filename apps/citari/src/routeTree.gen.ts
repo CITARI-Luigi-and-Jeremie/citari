@@ -10,7 +10,6 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AlternativesAgenceSeoRouteImport } from './routes/alternatives-agence-seo'
 import { Route as ConfidentialiteRouteImport } from './routes/confidentialite'
 import { Route as GeoVsSeoRouteImport } from './routes/geo-vs-seo'
@@ -23,11 +22,6 @@ import { Route as ScanIdRouteImport } from './routes/scan.$id'
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminRoute = AdminRouteImport.update({
-  id: '/admin',
-  path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AlternativesAgenceSeoRoute = AlternativesAgenceSeoRouteImport.update({
@@ -73,7 +67,6 @@ const ScanIdRoute = ScanIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/admin': typeof AdminRoute
   '/alternatives-agence-seo': typeof AlternativesAgenceSeoRoute
   '/confidentialite': typeof ConfidentialiteRoute
   '/geo-vs-seo': typeof GeoVsSeoRoute
@@ -85,7 +78,6 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/admin': typeof AdminRoute
   '/alternatives-agence-seo': typeof AlternativesAgenceSeoRoute
   '/confidentialite': typeof ConfidentialiteRoute
   '/geo-vs-seo': typeof GeoVsSeoRoute
@@ -98,7 +90,6 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/admin': typeof AdminRoute
   '/alternatives-agence-seo': typeof AlternativesAgenceSeoRoute
   '/confidentialite': typeof ConfidentialiteRoute
   '/geo-vs-seo': typeof GeoVsSeoRoute
@@ -112,7 +103,6 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/admin'
     | '/alternatives-agence-seo'
     | '/confidentialite'
     | '/geo-vs-seo'
@@ -124,7 +114,6 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/admin'
     | '/alternatives-agence-seo'
     | '/confidentialite'
     | '/geo-vs-seo'
@@ -136,7 +125,6 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
-    | '/admin'
     | '/alternatives-agence-seo'
     | '/confidentialite'
     | '/geo-vs-seo'
@@ -149,7 +137,6 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AdminRoute: typeof AdminRoute
   AlternativesAgenceSeoRoute: typeof AlternativesAgenceSeoRoute
   ConfidentialiteRoute: typeof ConfidentialiteRoute
   GeoVsSeoRoute: typeof GeoVsSeoRoute
@@ -167,13 +154,6 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin': {
-      id: '/admin'
-      path: '/admin'
-      fullPath: '/admin'
-      preLoaderRoute: typeof AdminRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/alternatives-agence-seo': {
@@ -237,7 +217,6 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AdminRoute: AdminRoute,
   AlternativesAgenceSeoRoute: AlternativesAgenceSeoRoute,
   ConfidentialiteRoute: ConfidentialiteRoute,
   GeoVsSeoRoute: GeoVsSeoRoute,

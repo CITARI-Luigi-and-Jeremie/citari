@@ -131,9 +131,9 @@ function RootComponent() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
   // L'écran de scan et le rapport se lisent sans distraction : ni logo
-  // flottant, ni contact. L'admin non plus, ce n'est pas une page publique.
-  const sansChrome =
-    pathname.startsWith("/scan") || pathname.startsWith("/rapport") || pathname.startsWith("/admin");
+  // flottant, ni contact. (La route /admin du site a été supprimée le
+  // 14/08/2026 avant la mise en ligne : le seul back-office est apps/admin.)
+  const sansChrome = pathname.startsWith("/scan") || pathname.startsWith("/rapport");
 
   return (
     <QueryClientProvider client={queryClient}>

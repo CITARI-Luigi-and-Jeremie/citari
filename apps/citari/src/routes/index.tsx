@@ -47,7 +47,9 @@ function Accueil() {
         <Quadrillage variante="clair" />
         <CursorHalo />
         <WaveField />
-        <div className="relative z-10 mx-auto max-w-6xl px-5 pb-14 pt-12 sm:px-8 sm:pb-20 sm:pt-16">
+        {/* pt-24 mobile : la marque flottante (fixed top-5) rognait la première
+            ligne du titre avec le pt-12 de la maquette. */}
+        <div className="relative z-10 mx-auto max-w-6xl px-5 pb-14 pt-24 sm:px-8 sm:pb-20 sm:pt-16">
           <div className="grid items-center gap-10 lg:grid-cols-[1.15fr_1fr] lg:gap-14">
             <div>
               <Reveal delay={90}>

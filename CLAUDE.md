@@ -11,22 +11,15 @@ ont tourné contre la vraie base. 180 tests passent.
 
 **Ce qui empêche de vendre n'est pas du code.**
 
-1. **Il y a deux back-offices**, et l'un doit disparaître avant la mise en
-   ligne. `apps/admin` (Next, port 3001) est celui qu'on utilise, et il
-   fonctionne : `ADMIN_PASSWORD` est renseigné dans le `.env` de la racine, le
-   fichier que son `next.config.ts` charge. La route `/admin` du site en est un
-   second, qui lit son propre `ADMIN_PASSWORD` dans `apps/citari/.env.local`, et
-   qui sert les emails de `leads`. Leurs listes de statuts divergent et
-   `leads.status` n'a aucune contrainte. Détail dans `SETUP.md`.
-
-   Correction du 09/08/2026 : ce fichier a longtemps affirmé que ce second mot
-   de passe était « bidon, publié en clair dans ce dépôt ». C'est faux, vérifié.
-   Aucun `ADMIN_PASSWORD` n'est passé dans l'historique git ; le seul `.env`
-   jamais versionné (commit `e05c946`, depuis retiré du suivi) ne contenait
-   qu'une clé Supabase **publiable** d'un projet Lovable étranger ; et les deux
-   mots de passe actuels diffèrent et n'ont rien de factices. Le problème reste
-   entier — deux back-offices pour une seule base — mais ce n'est pas une fuite,
-   et le traiter comme telle ferait perdre du temps au mauvais endroit.
+1. **RÉGLÉ le 14/08/2026 : il n'y a plus qu'un back-office.** La route
+   `/admin` du site (et `admin.functions.ts`) a été supprimée avant la mise en
+   ligne : elle servait les emails de `leads` derrière un second
+   `ADMIN_PASSWORD` jamais configuré, avec une liste de statuts divergente.
+   Le seul back-office est `apps/admin` (Next, port 3001), dont le mot de
+   passe vit dans le `.env` de la racine. Note historique : ce fichier a
+   longtemps affirmé que le second mot de passe avait fuité dans le dépôt ;
+   c'était faux (vérifié le 09/08 dans l'historique git), le problème était
+   la duplication, pas une fuite.
 2. Resend et mise en ligne : voir `SETUP.md` et `docs/DEPLOIEMENT.md`. Le
    domaine est acheté, chez Hostinger. Le site part sur **Cloudflare Workers**,
    puis basculera sur le **VPS Hostinger** quand tout le reste sera fini.

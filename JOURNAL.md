@@ -5,6 +5,43 @@ d'une nouvelle session, après `CLAUDE.md`.
 
 ---
 
+## 2026-08-14 — La revue de lancement : tout le parcours, route par route
+
+Dernier balayage avant mise en ligne, demandé par Luigi (« revérifie tout,
+répare sans mon accord »). Les onze routes ont été servies et lues, les
+fonctionnalités pilotées une à une dans le navigateur.
+
+**Ce qui a été réparé :**
+
+- **La route `/admin` du site est supprimée** (avec `admin.functions.ts`).
+  C'était le second back-office documenté depuis des semaines comme « à faire
+  disparaître avant la mise en ligne » : il lisait les emails de `leads`
+  derrière son propre mot de passe, jamais configuré. Le seul back-office est
+  `apps/admin`. La route répond désormais 404 comme n'importe quelle adresse.
+- **Le badge CITARI flottant rognait le titre du héros sur mobile** : la
+  maquette posait `pt-12` sous une marque en `fixed top-5`. Passé à `pt-24`
+  en mobile, inchangé en desktop.
+
+**Ce qui a été vérifié fonctionnel, en pilotant réellement :**
+
+- les 7 pages publiques rendent en 200 avec leurs titres ; `/admin` et une
+  adresse au hasard rendent le 404 français ;
+- le calculateur : ses curseurs sont des `role="slider"` custom (pas des
+  `input range`, ne pas s'y tromper en le testant) ; pilotés au clavier, la
+  formule recalcule (8 clients × 38 % × 3 050 € = 9 272 €) ;
+- la FAQ : 5 questions affichées puis « voir plus » (+5), c'est le design v3
+  voulu — les 20 questions et leurs ancres sont toutes dans le DOM après
+  déroulé, et le JSON-LD `FAQPage` sert les 20 aux machines dès le premier
+  rendu. Ne pas « corriger » ce décalage : il est le produit ;
+- les liens du pied (7 pages + mailto), les 6 ancres de la barre latérale,
+  le favicon, la pulsation du champ, le 404, les groupes COMPRENDRE/L'OFFRE ;
+- séquence de rapport vérifiée en mobile (preuve d'abord, récit ensuite).
+
+Console : trois erreurs, toutes des artefacts de la vérification elle-même
+(WebSocket HMR d'un serveur tué, deux sondes 404 volontaires). Rien du site.
+
+---
+
 ## 2026-08-14 — Le second passage v3 : l'écran de scan et Calendly
 
 Luigi a revu le site et a eu raison de renvoyer au travail : « il manque plein
