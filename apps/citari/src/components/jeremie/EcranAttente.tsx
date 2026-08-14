@@ -30,29 +30,48 @@ const INK = "#17160F";
 const MUTED = "#7C7A72";
 const MONO = "'IBM Plex Mono', ui-monospace, monospace";
 
-/** Les 5 étapes affichées, alignées sur les phases réelles de l'orchestrateur. */
-const ETAPES: [string, string][] = [
-  [
-    "On lit votre site",
-    "Pour comprendre votre métier, vos services et votre ville, comme le ferait un nouveau client.",
-  ],
-  [
-    "On écrit les questions de vos acheteurs",
-    "Comparaisons, problèmes à résoudre, recherches locales, confiance. Sans jamais prononcer votre nom.",
-  ],
-  [
-    "On pose vos questions aux moteurs",
-    "En direct, par leurs API officielles. Chaque réponse est enregistrée telle quelle.",
-  ],
-  [
-    "On lit chaque réponse",
-    "On cherche votre nom. Et on note qui est cité quand vous ne l'êtes pas.",
-  ],
-  [
-    "On calcule votre score",
-    "Présence, rang, recommandation, tonalité : la formule est publiée sur la page méthode.",
-  ],
-];
+/**
+ * Les 5 étapes affichées, alignées sur les phases réelles de l'orchestrateur.
+ *
+ * Réécrites le 14/08/2026 (demande Luigi : « plus pertinent, plus
+ * impressionnant ») : chaque sous-partie est une PREUVE, pas une promesse —
+ * le domaine réel du prospect, le compteur de questions qui monte, les noms
+ * des moteurs, la formule chiffrée. Construites au rendu parce qu'elles
+ * s'appuient sur l'état réel ; aucune valeur inventée.
+ */
+function construireEtapes(etat: EtatScan | null): [string, string][] {
+  const domaine = etat?.domaine ?? null;
+  const nbQuestions = etat?.questions.length ?? 0;
+  const moteurs = etat?.moteurs ?? [];
+  const nomsMoteurs =
+    moteurs.length === 2 ? `${moteurs[0]} et ${moteurs[1]}` : `les ${moteurs.length || 6} moteurs`;
+  const total = etat?.total ?? 0;
+
+  return [
+    [
+      "On lit votre site",
+      `${domaine ?? "Votre site"} est lu comme le ferait un nouveau client : votre métier, vos services, votre zone. C'est lui qui dicte les questions.`,
+    ],
+    [
+      "On écrit les questions de vos acheteurs",
+      nbQuestions > 0
+        ? `${nbQuestions} questions d'intention d'achat, scellées pour être rejouées à l'identique dans 90 jours. Votre nom n'y figure jamais.`
+        : "Comparaisons, douleurs d'avant-achat, recherches locales, confiance. Votre nom n'y figure jamais : on mesure si les IA le sortent d'elles-mêmes.",
+    ],
+    [
+      "On pose vos questions aux moteurs",
+      `Chaque question part vers ${nomsMoteurs}, par leurs API officielles. Chaque réponse est enregistrée telle quelle, mot pour mot.`,
+    ],
+    [
+      "On lit chaque réponse",
+      `${total > 0 ? `${total} réponses` : "Chaque réponse"} relues une à une : quelles marques sortent, à quelle place, lesquelles sont recommandées. Votre nom est cherché partout, jamais soufflé.`,
+    ],
+    [
+      "On calcule votre score",
+      "Présence 50 %, rang 20 %, recommandation 20 %, tonalité 10 %. La formule est publiée : vous pourrez recalculer chaque point à la main.",
+    ],
+  ];
+}
 
 const CSS = `
 @keyframes citRise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
@@ -230,7 +249,7 @@ export function EcranAttente({ etat, scelle = false, instable }: Props) {
               </p>
 
               <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
-                {ETAPES.map(([libelle, description], i) => {
+                {construireEtapes(etat).map(([libelle, description], i) => {
                   const statut = i < etape ? "faite" : i === etape ? "active" : "attente";
                   const active = statut === "active";
                   return (
@@ -356,15 +375,41 @@ export function EcranAttente({ etat, scelle = false, instable }: Props) {
                 ) : null}
               </div>
 
-              <div style={{ marginTop: 40, minHeight: 40, overflow: "hidden" }}>
+              <div style={{ marginTop: 40, minHeight: 56, overflow: "hidden" }}>
                 {scelle ? (
                   <span className="cit-fade" style={{ display: "block", fontFamily: MONO, fontSize: 12, color: "#C0371D", lineHeight: 1.5 }}>
                     Mesure scellée · ouverture de votre rapport…
                   </span>
                 ) : derniere ? (
-                  <span key={collectees} className="cit-ticker" style={{ display: "block", fontFamily: MONO, fontSize: 12, color: "#F2F0EA", opacity: 0.7, lineHeight: 1.5 }}>
-                    {derniere.moteur} ·{" "}
-                    {derniere.erreur ? "indisponible sur cette question" : formaterLatence(derniere.latence)}
+                  <span key={collectees} className="cit-ticker" style={{ display: "block" }}>
+                    <span style={{ display: "block", fontFamily: MONO, fontSize: 12, color: "#F2F0EA", opacity: 0.7, lineHeight: 1.5 }}>
+                      {derniere.moteur} ·{" "}
+                      {derniere.erreur ? "indisponible sur cette question" : formaterLatence(derniere.latence)}
+                    </span>
+                    {(() => {
+                      const q = questions.find((x) => x.id === derniere.queryId);
+                      if (!q) return null;
+                      const texte = q.text.length > 96 ? `${q.text.slice(0, 95)}…` : q.text;
+                      return (
+                        <span style={{ display: "block", fontFamily: MONO, fontSize: 11, color: "#F2F0EA", opacity: 0.42, lineHeight: 1.5, marginTop: 3 }}>
+                          « {texte} »
+                        </span>
+                      );
+                    })()}
+                  </span>
+                ) : questions.length > 0 ? (
+                  // Les questions RÉELLES, montrées au moment où elles
+                  // s'écrivent en base : la preuve vivante que l'échantillon
+                  // parle du métier du prospect. Aucun texte inventé.
+                  <span
+                    key={questions.length}
+                    className="cit-ticker"
+                    style={{ display: "block", fontFamily: MONO, fontSize: 12, color: "#F2F0EA", opacity: 0.8, lineHeight: 1.55 }}
+                  >
+                    <span style={{ color: "#C0371D" }}>
+                      Q{String(questions.length).padStart(2, "0")}
+                    </span>{" "}
+                    · « {questions[questions.length - 1]!.text} »
                   </span>
                 ) : (
                   <span className="cit-fade" style={{ display: "block", fontFamily: MONO, fontSize: 12, color: "#F2F0EA", opacity: 0.4 }}>
