@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 
+import { fondSombreAuPoint } from "@/lib/fond-sombre";
+
 /**
  * Barre latérale de sections, fixée à gauche de la landing.
  *
@@ -34,21 +36,7 @@ export function SectionSidebar() {
     // Détecte si le fond derrière la sidebar est sombre, pour choisir des
     // repères clairs ou encre plutôt qu'un mélange peu lisible.
     const updateFond = () => {
-      const cible = document.elementFromPoint(30, Math.round(window.innerHeight / 2));
-      let el: Element | null = cible;
-      while (el) {
-        const bg = getComputedStyle(el).backgroundColor;
-        const m = bg.match(/rgba?\(([^)]+)\)/);
-        if (m) {
-          const [r = 255, g = 255, b = 255, a = 1] = m[1]!.split(",").map((v) => parseFloat(v));
-          if (a > 0.5) {
-            setSurFondSombre(0.299 * r + 0.587 * g + 0.114 * b < 128);
-            return;
-          }
-        }
-        el = el.parentElement;
-      }
-      setSurFondSombre(false);
+      setSurFondSombre(fondSombreAuPoint(30, Math.round(window.innerHeight / 2)));
     };
 
     // Section active : celle dont le haut est le plus proche du haut du

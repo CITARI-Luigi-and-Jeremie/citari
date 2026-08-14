@@ -143,7 +143,9 @@ function RootComponent() {
         <ClickSpark />
         {!sansChrome ? (
           <>
-            <SiteMark className="fixed left-5 top-5 z-50 rounded-[4px] border border-rule/40 bg-paper/95 px-2.5 py-1.5 backdrop-blur-sm sm:left-8 sm:top-7" />
+            {/* Sans cartouche, en absolu : le logo appartient au haut de la
+                page et défile avec elle, il ne suit pas le lecteur. */}
+            <SiteMark className="absolute left-5 top-5 z-50 sm:left-8 sm:top-7" />
             <SiteFloatingContact />
           </>
         ) : null}

@@ -40,6 +40,18 @@ fonctionnalités pilotées une à une dans le navigateur.
 Console : trois erreurs, toutes des artefacts de la vérification elle-même
 (WebSocket HMR d'un serveur tué, deux sondes 404 volontaires). Rien du site.
 
+**Et le logo a perdu son cartouche** (même jour, décision Luigi) : la pastille
+papier autour de la marque lisait comme « un fond blanc » — le PNG est
+transparent, il se pose maintenant nu sur la page. Et il passe de `fixed` à
+`absolute` : il appartient au haut de la page et défile avec elle, toujours
+encre sur clair, jamais au-dessus d'une section sombre. Au passage, un vrai
+bug attrapé PUIS devenu sans objet pour le logo mais corrigé pour la barre
+latérale : la détection de fond sombre remontait les ancêtres en lisant
+`backgroundColor`, or les sections sombres sont peintes par un ENFANT absolu
+(`.quad-sombre`, en `pointer-events: none`, invisible d'`elementFromPoint`).
+`lib/fond-sombre.ts` inspecte désormais aussi les quadrillages directs de
+chaque ancêtre ; la barre latérale s'en sert.
+
 ---
 
 ## 2026-08-14 — Le second passage v3 : l'écran de scan et Calendly
