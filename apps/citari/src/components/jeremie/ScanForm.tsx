@@ -88,6 +88,14 @@ export function ScanForm({ centered = false }: { centered?: boolean }) {
         return;
       }
 
+      // La modale Calendly du rapport préremplit l'email du lead : on le garde
+      // dans la session du navigateur, jamais dans l'URL du rapport.
+      try {
+        sessionStorage.setItem("citari:email", email.trim());
+      } catch {
+        /* stockage indisponible : la réservation reste possible sans préremplissage. */
+      }
+
       navigate({ to: "/scan/$id", params: { id: reponse.id } });
     } catch (e) {
       setEtat("erreur");

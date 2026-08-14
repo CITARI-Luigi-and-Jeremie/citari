@@ -21,6 +21,8 @@ export const LIBELLES_PHASE: Record<string, string> = {
 export const ETAPES_ANALYSE = [
   "DÉTECTION DES MARQUES",
   "CLASSIFICATION DES RECOMMANDATIONS",
+  "CALCUL DES PARTS DE VOIX",
+  "ASSEMBLAGE DU SCORE",
 ] as const;
 
 /** Rappels de méthode, montrés seulement quand l'attente dépasse deux minutes. */

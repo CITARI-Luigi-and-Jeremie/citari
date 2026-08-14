@@ -91,6 +91,7 @@ function RapportDApercu() {
   const { scan, questions, reponses, mentions } = Route.useLoaderData();
   const [reservation, setReservation] = useState(false);
   const [large, setLarge] = useState(false);
+  const [email, setEmail] = useState<string | null>(null);
 
   useEffect(() => {
     const mq = window.matchMedia("(min-width: 1100px)");
@@ -98,6 +99,16 @@ function RapportDApercu() {
     onChange();
     mq.addEventListener("change", onChange);
     return () => mq.removeEventListener("change", onChange);
+  }, []);
+
+  // L'email saisi au formulaire, si cette session de navigateur l'a gardé :
+  // Calendly le préremplit. Un rapport rouvert ailleurs s'en passe simplement.
+  useEffect(() => {
+    try {
+      setEmail(sessionStorage.getItem("citari:email"));
+    } catch {
+      setEmail(null);
+    }
   }, []);
 
   const donnees = useMemo(
@@ -139,7 +150,12 @@ function RapportDApercu() {
 
       <SequenceResultat data={donnees} wide={large} onBook={() => setReservation(true)} />
 
-      <BookingModal open={reservation} onClose={() => setReservation(false)} marque={donnees.marque} />
+      <BookingModal
+        open={reservation}
+        onClose={() => setReservation(false)}
+        marque={donnees.marque}
+        email={email}
+      />
     </div>
   );
 }

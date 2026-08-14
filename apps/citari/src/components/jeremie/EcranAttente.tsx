@@ -15,21 +15,26 @@ import {
  * L'écran d'attente : trois actes.
  *
  * Porté du projet Lovable de Jérémie (`components/scan-loading/LoadingScreen`)
- * le 08/08/2026, rebranché sur NOTRE `etatScan`.
+ * le 08/08/2026, remis au niveau de sa v3 le 14/08/2026, rebranché sur NOTRE
+ * `etatScan`.
  *
  *   Acte 1 — les questions tombent une à une, telles qu'elles s'écrivent en base.
  *   Acte 2 — une carte perforée se remplit, une case par paire question × moteur.
- *   Acte 3 — la grille se fige pendant l'analyse.
+ *            Un moteur qui vient de répondre porte une pastille qui respire ;
+ *            les trois dernières réponses défilent en liste sous la grille.
+ *   Acte 3 — la grille se fige, les étapes d'analyse s'allument une à une,
+ *            chacune avec sa petite barre.
  *
  * Rien n'est simulé. Chaque case noircie correspond à une ligne réellement
- * écrite dans `responses` ; le chronomètre part de `started_at` ; la barre
- * suit `progression`. C'est la contrepartie de ce que la page vend : si on
- * animait un faux compteur ici, la mesure derrière ne vaudrait pas plus.
+ * écrite dans `responses` ; la pastille « actif » se déduit de l'instant
+ * d'écriture ; le chronomètre part de `started_at` ; la barre suit
+ * `progression`. C'est la contrepartie de ce que la page vend : si on animait
+ * un faux compteur ici, la mesure derrière ne vaudrait pas plus.
  */
 
 type Props = { etat: EtatScan; instable: boolean };
 
-/** Chronomètre du temps réellement écoulé depuis le début de la mesure. */
+/** Chronomètre du temps réellement écoulé, rafraîchi à 100 ms pour être fluide. */
 function useChrono(demarreA: string | null) {
   const depart = useMemo(() => {
     const valeur = demarreA ? new Date(demarreA).getTime() : NaN;
@@ -38,7 +43,7 @@ function useChrono(demarreA: string | null) {
   const [maintenant, setMaintenant] = useState(() => Date.now());
 
   useEffect(() => {
-    const id = window.setInterval(() => setMaintenant(Date.now()), 1000);
+    const id = window.setInterval(() => setMaintenant(Date.now()), 100);
     return () => window.clearInterval(id);
   }, []);
 
@@ -65,6 +70,18 @@ export function EcranAttente({ etat, instable }: Props) {
 
   const defilant = useMemo(() => cellules.slice(-3).reverse(), [cellules]);
 
+  // Moteurs encore actifs : au moins une réponse dans les 4 dernières secondes.
+  // `ecoule` change dix fois par seconde et rafraîchit ce calcul avec lui.
+  const moteursActifs = useMemo(() => {
+    const seuil = Date.now() - 4000;
+    const set = new Set<string>();
+    for (const c of cellules) {
+      if (c.creeA && new Date(c.creeA).getTime() > seuil) set.add(c.moteur);
+    }
+    return set;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cellules, ecoule]);
+
   // Titre d'onglet : le compteur réel, pour l'onglet laissé en arrière-plan.
   useEffect(() => {
     if (avantQuestions || total === 0) return;
@@ -80,8 +97,13 @@ export function EcranAttente({ etat, instable }: Props) {
   useEffect(() => {
     if (!analyse) return;
     setEtapeAnalyse(0);
-    const id = window.setTimeout(() => setEtapeAnalyse(1), 1200);
-    return () => window.clearTimeout(id);
+    const minuteries: number[] = [];
+    for (let i = 1; i < ETAPES_ANALYSE.length; i++) {
+      minuteries.push(window.setTimeout(() => setEtapeAnalyse(i), i * 700));
+    }
+    return () => {
+      for (const id of minuteries) window.clearTimeout(id);
+    };
   }, [analyse]);
 
   // Au-delà de deux minutes : rotation lente des rappels de méthode.
@@ -122,16 +144,18 @@ export function EcranAttente({ etat, instable }: Props) {
           <CascadeQuestions questions={questions} />
         ) : (
           <>
-            <div className="mono mt-12 flex flex-wrap items-baseline justify-between gap-3 text-[12px] tracking-[0.10em] text-ink-2">
+            <div className="mono mt-14 flex flex-wrap items-baseline justify-between gap-3 text-[12px] tracking-[0.10em] text-ink-2">
               <span>
                 RÉPONSES COLLECTÉES {collectees}/{total}
               </span>
               <span>{formaterDuree(ecoule)}</span>
             </div>
 
-            <div className="progress-rail mt-3" aria-hidden>
+            <div className="progress-rail mt-4" aria-hidden>
               <span className="progress-fill" style={{ width: `${progression}%` }} />
-              <span className="progress-shimmer" />
+              {progression > 0 && progression < 100 ? (
+                <span className="progress-shimmer" />
+              ) : null}
             </div>
 
             <CartePerforee
@@ -141,40 +165,49 @@ export function EcranAttente({ etat, instable }: Props) {
               remplies={remplies}
               enErreur={enErreur}
               figee={analyse}
+              moteursActifs={moteursActifs}
             />
 
             {verrouilles.length > 0 ? (
-              <p className="mono mt-4 text-[12px] tracking-[0.10em] text-ink-2">
+              <p className="mono mt-5 text-[12px] tracking-[0.10em] text-ink-2">
                 ▢ {verrouilles.length} MOTEURS VERROUILLÉS — DIAGNOSTIC COMPLET
               </p>
             ) : null}
 
             {analyse ? (
-              <div className="mono mt-6 space-y-2 text-[12px] tracking-[0.10em]">
+              <div className="mono mt-8 space-y-3 text-[12px] tracking-[0.10em]">
                 {ETAPES_ANALYSE.map((libelle, i) => (
-                  <p key={libelle} className={i <= etapeAnalyse ? "text-ink" : "text-ink-2 opacity-40"}>
-                    {libelle}
-                  </p>
+                  <div key={libelle}>
+                    <p className={i <= etapeAnalyse ? "text-ink" : "text-ink-2 opacity-40"}>
+                      {libelle}
+                    </p>
+                    <div className="progress-rail mt-1.5 h-[2px]" aria-hidden>
+                      <span
+                        className="progress-fill"
+                        style={{
+                          width: i < etapeAnalyse ? "100%" : i === etapeAnalyse ? "60%" : "0%",
+                        }}
+                      />
+                    </div>
+                  </div>
                 ))}
               </div>
             ) : (
-              <p className="mono mt-6 truncate text-[12px] tracking-[0.10em] text-ink-2">
-                {defilant.length === 0
-                  ? "—"
-                  : defilant
-                      .map((c) =>
-                        c.erreur
-                          ? `${c.moteur.toUpperCase()} · INDISPONIBLE`
-                          : `${c.moteur.toUpperCase()} · ${formaterLatence(c.latence)}`,
-                      )
-                      .join("   /   ")}
-              </p>
+              <div className="mono mt-8 space-y-2 text-[12px] tracking-[0.10em] text-ink-2">
+                {defilant.length === 0 ? (
+                  <p>—</p>
+                ) : (
+                  defilant.map((c) => (
+                    <LigneTicker key={`${c.queryId}|${c.moteur}`} cellule={c} />
+                  ))
+                )}
+              </div>
             )}
           </>
         )}
 
         {longue ? (
-          <p key={pointIndex} className="measure anim-step mt-12 text-ink-2">
+          <p key={pointIndex} className="measure anim-step mt-14 text-ink-2">
             {POINTS_METHODE[pointIndex]}
           </p>
         ) : null}
@@ -186,6 +219,31 @@ export function EcranAttente({ etat, instable }: Props) {
         ) : null}
       </div>
     </section>
+  );
+}
+
+type Cellule = EtatScan["cellules"][number];
+
+/**
+ * Une ligne du ticker : pastille qui respire, moteur, latence réelle.
+ * Une panne ne fait pas semblant d'être une réponse : pastille éteinte,
+ * mention INDISPONIBLE.
+ */
+function LigneTicker({ cellule }: { cellule: Cellule }) {
+  return (
+    <p className="anim-ticker flex items-center gap-2">
+      <span
+        className={
+          cellule.erreur
+            ? "inline-block size-1.5 rounded-full bg-rule-strong"
+            : "anim-engine-pulse inline-block size-1.5 rounded-full bg-signal"
+        }
+      />
+      <span>
+        {cellule.moteur.toUpperCase()} ·{" "}
+        {cellule.erreur ? "INDISPONIBLE" : formaterLatence(cellule.latence)}
+      </span>
+    </p>
   );
 }
 
@@ -206,14 +264,14 @@ function CascadeQuestions({ questions }: { questions: Question[] }) {
 
   if (questions.length === 0) {
     return (
-      <p className="mono mt-12 text-[13px] text-ink-2">
+      <p className="mono mt-14 text-[13px] text-ink-2">
         Les questions de vos acheteurs s'écrivent…
       </p>
     );
   }
 
   return (
-    <ul className="mt-12 border-t border-rule">
+    <ul className="mt-14 border-t border-rule">
       {questions.map((q) => {
         const index = nouvelles.indexOf(q.id);
         const neuve = index !== -1;
@@ -240,6 +298,7 @@ function CartePerforee({
   remplies,
   enErreur,
   figee,
+  moteursActifs,
 }: {
   questions: Question[];
   moteurs: string[];
@@ -247,6 +306,7 @@ function CartePerforee({
   remplies: Set<string>;
   enErreur: Set<string>;
   figee: boolean;
+  moteursActifs: Set<string>;
 }) {
   if (questions.length === 0) return null;
 
@@ -254,23 +314,26 @@ function CartePerforee({
     ...moteurs.map((clef) => ({ clef, verrouille: false })),
     ...verrouilles.map((clef) => ({ clef, verrouille: true })),
   ];
-  const gabarit = `3rem repeat(${colonnes.length}, minmax(0,1fr))`;
+  const gabarit = `3.5rem repeat(${colonnes.length}, minmax(0,1fr))`;
 
   return (
-    <div className={figee ? "relative mt-6 text-ink-2" : "relative mt-6"}>
+    <div className={figee ? "relative mt-8 text-ink-2" : "relative mt-8"}>
       <div
-        className="grid items-end gap-y-1 border-b border-rule pb-2"
+        className="grid items-end gap-y-2 border-b border-rule pb-3"
         style={{ gridTemplateColumns: gabarit }}
       >
         <span />
         {colonnes.map((c) => (
           <span
             key={c.clef}
-            className={`col-moteur mono text-[9px] leading-none tracking-[0.10em] text-ink-2 sm:text-[10px]${
+            className={`col-moteur mono flex items-center gap-1 text-[9px] leading-none tracking-[0.10em] text-ink-2 sm:text-[10px]${
               c.verrouille ? " locked-col" : ""
             }`}
           >
-            {c.clef.toUpperCase()}
+            {!c.verrouille && moteursActifs.has(c.clef) ? (
+              <span className="anim-engine-pulse inline-block size-1 rounded-full bg-signal" />
+            ) : null}
+            <span>{c.clef.toUpperCase()}</span>
             {c.verrouille ? " ▢" : ""}
           </span>
         ))}
@@ -279,16 +342,16 @@ function CartePerforee({
       {questions.map((q) => (
         <div
           key={q.id}
-          className="grid items-center border-b border-rule py-1.5"
+          className="grid items-center border-b border-rule py-2"
           style={{ gridTemplateColumns: gabarit }}
         >
           <span className="mono text-[11px] text-ink-2">{libelleQuestion(q.rank)}</span>
-          {colonnes.map((c) => {
+          {colonnes.map((c, indexColonne) => {
             if (c.verrouille) {
               return (
                 <span key={c.clef} className="locked-col flex">
                   <span
-                    className="block h-px w-[11px]"
+                    className="block h-px w-3 rounded-full"
                     style={{ backgroundColor: "var(--rule-strong)" }}
                   />
                 </span>
@@ -309,8 +372,11 @@ function CartePerforee({
               return (
                 <span key={c.clef} className="flex">
                   <span
-                    className="anim-cell block size-[11px]"
-                    style={{ backgroundColor: figee ? "var(--ink-2)" : "var(--ink)" }}
+                    className="anim-cell block size-[12px] rounded-[3px] sm:size-[14px]"
+                    style={{
+                      animationDelay: `${(indexColonne % 5) * 60}ms`,
+                      backgroundColor: figee ? "var(--ink-2)" : "var(--ink)",
+                    }}
                   />
                 </span>
               );
@@ -321,7 +387,7 @@ function CartePerforee({
                   <span className="mono text-[11px] leading-none text-ink-2">–</span>
                 ) : (
                   <span
-                    className="block size-[11px] border"
+                    className="block size-[12px] rounded-[3px] border sm:size-[14px]"
                     style={{ borderColor: "var(--rule-strong)" }}
                   />
                 )}

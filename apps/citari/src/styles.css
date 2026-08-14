@@ -337,11 +337,11 @@
 @keyframes citari-cell {
   from {
     opacity: 0;
-    transform: scale(0.6);
+    transform: scale(0.55) translateY(4px);
   }
   to {
     opacity: 1;
-    transform: scale(1);
+    transform: scale(1) translateY(0);
   }
 }
 
@@ -350,12 +350,44 @@
   to { top: 100%; opacity: 0; }
 }
 
+/* Ligne du ticker : chaque réponse fraîche monte d'un cran. */
+@keyframes citari-ticker {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Pastille d'un moteur qui vient de répondre : respiration lente. */
+@keyframes citari-engine-pulse {
+  0%, 100% {
+    opacity: 0.35;
+    transform: scale(0.85);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
 @utility anim-blink {
   animation: citari-blink 1s steps(1, end) infinite;
 }
 
 @utility anim-cell {
-  animation: citari-cell 180ms cubic-bezier(0.16, 0.8, 0.3, 1) both;
+  animation: citari-cell 260ms cubic-bezier(0.16, 0.8, 0.3, 1) both;
+}
+
+@utility anim-ticker {
+  animation: citari-ticker 320ms cubic-bezier(0.16, 0.8, 0.3, 1) both;
+}
+
+@utility anim-engine-pulse {
+  animation: citari-engine-pulse 1.6s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
 @utility anim-sweep {

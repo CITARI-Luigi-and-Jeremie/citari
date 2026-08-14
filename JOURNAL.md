@@ -5,6 +5,54 @@ d'une nouvelle session, après `CLAUDE.md`.
 
 ---
 
+## 2026-08-14 — Le second passage v3 : l'écran de scan et Calendly
+
+Luigi a revu le site et a eu raison de renvoyer au travail : « il manque plein
+de choses, par exemple quand je lance le scan ». Le premier passage v3 avait
+couvert la landing et le rapport, pas l'écran d'attente ni la réservation. Un
+balayage systématique de TOUS ses fichiers actuels a fermé l'écart.
+
+**L'écran de scan remis au niveau v3** (le sien avait été retravaillé) :
+
+- chronomètre rafraîchi à 100 ms, fluide au lieu de sautiller à la seconde ;
+- un moteur qui a répondu dans les 4 dernières secondes porte une pastille
+  signal qui respire, dans l'en-tête de sa colonne — il a fallu ajouter
+  l'instant d'écriture (`creeA`) aux cellules d'`etatScan`, l'état ne portait
+  que le fait, pas le moment ;
+- le ticker devient une liste de trois lignes animées (pastille + moteur +
+  latence réelle) ; une panne garde sa ligne, pastille éteinte,
+  « INDISPONIBLE » — elle ne fait pas semblant d'être une réponse ;
+- l'analyse compte **quatre** étapes (parts de voix et assemblage du score
+  manquaient), allumées une à une, chacune avec sa mini-barre ;
+- cases arrondies qui tombent en cascade (délai par colonne), en-têtes
+  verticaux sur mobile, espacements v3.
+
+Gardé contre sa maquette : les « × » d'erreur dans la grille (chez lui une
+panne est invisible), nos libellés (« DIAGNOSTIC COMPLET »), notre rotation
+des en-têtes verticaux (la sienne colle le nom sur la colonne voisine).
+
+**La réservation est réelle et préremplie.** Jérémie a créé l'événement
+Calendly collectif (Round Robin, lui + Luigi) : l'URL vivait déjà dans notre
+`site.ts`, mais sa v3 préremplit l'email du lead. Porté : le formulaire garde
+l'email en `sessionStorage` à la soumission (jamais dans l'URL du rapport), la
+page de rapport le relit, la modale Calendly arrive remplie — email, marque,
+nos couleurs. Un rapport rouvert sur une autre machine s'en passe, simplement.
+
+**Vérifié par un scan réel payé** (~0,14 €) : compta-clementine.fr, lancé au
+formulaire, écran v3 observé en direct (cascade, pastilles, ticker avec
+14 404 MS de vraie latence Gemini, deux pannes marquées ×), redirection vers
+la séquence, Calendly préremplie contrôlée dans l'iframe. Le lead de test
+(contact@citari.fr) est passé `converti` sitôt le test fini : ce statut est
+refusé par `envoyer`, notre propre boîte ne recevra jamais une relance.
+
+Le reste du balayage n'a rien trouvé d'autre à porter : formulaire, Reveal,
+vague, étincelles, fond de page, barre de lecture, focus pulsé du champ,
+`brandFromDomain` — tous déjà au niveau. Ses `RotatingText`/`ScrollFloat`
+restent inutilisés chez lui aussi ; son `SELF_SCORE = 61` reste refusé (aucun
+scan enregistré ne le soutient).
+
+---
+
 ## 2026-08-14 — Front v3 : la séquence remplace la page longue
 
 Jérémie a retravaillé son Lovable en profondeur et Luigi a demandé le report

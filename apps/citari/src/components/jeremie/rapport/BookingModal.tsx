@@ -5,10 +5,13 @@ export function BookingModal({
   open,
   onClose,
   marque,
+  email = null,
 }: {
   open: boolean;
   onClose: () => void;
   marque: string;
+  /** Email du lead, si la session du navigateur le connaît : Calendly le préremplit. */
+  email?: string | null;
 }) {
   if (!open) return null;
   return (
@@ -30,7 +33,7 @@ export function BookingModal({
         </button>
         <iframe
           title="Réserver le diagnostic complet"
-          src={bookingUrl({ name: marque })}
+          src={bookingUrl({ email, name: marque })}
           className="block h-full w-full border-0"
         />
       </div>

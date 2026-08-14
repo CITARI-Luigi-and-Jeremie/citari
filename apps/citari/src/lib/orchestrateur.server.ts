@@ -451,7 +451,10 @@ export async function etatScan(id: string) {
     // paire de chaque réponse écrite, pas seulement leur nombre. Ces lignes
     // sont minuscules (deux identifiants et une latence) et plafonnent à 144.
     // Le texte des réponses, lui, ne quitte pas le serveur avant le rapport.
-    supabaseAdmin.from("responses").select("query_id, engine, latency_ms, error").eq("scan_id", id),
+    supabaseAdmin
+      .from("responses")
+      .select("query_id, engine, latency_ms, error, created_at")
+      .eq("scan_id", id),
     supabaseAdmin.from("cost_log").select("cost_eur").eq("scan_id", id),
   ]);
   const moteurs = moteursDuMode((scan.mode as ModeScan) ?? "complet");
@@ -483,6 +486,9 @@ export async function etatScan(id: string) {
       moteur: c.engine as string,
       latence: (c.latency_ms ?? null) as number | null,
       erreur: Boolean(c.error),
+      // L'écran d'attente marque « actif » un moteur qui a répondu dans les
+      // dernières secondes : il lui faut l'instant d'écriture, pas juste le fait.
+      creeA: c.created_at as string,
     })),
     collectees,
     total,
