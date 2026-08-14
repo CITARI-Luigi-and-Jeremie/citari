@@ -7,8 +7,10 @@ import { GrilleFond } from "./GrilleFond";
 import { CarteDiagnostic } from "./etapes/CarteDiagnostic";
 import { CarteReservation } from "./etapes/CarteReservation";
 import { CarteConcurrent } from "./etapes/CarteConcurrent";
+import { CarteMiroir } from "./etapes/CarteMiroir";
 import { CartePartDeVoix } from "./etapes/CartePartDeVoix";
 import { CarteScore } from "./etapes/CarteScore";
+import { CarteTechnique } from "./etapes/CarteTechnique";
 import { CarteVerbatim } from "./etapes/CarteVerbatim";
 import { INK, ON_DEEP, ON_DEEP_HAIR, ON_DEEP_MUTED, ORANGE, ORANGE_HOVER, PAPER, SANS } from "./theme";
 
@@ -50,7 +52,22 @@ export function SequenceResultat({
       ? [{ clef: "verbatim", titre: "La phrase exacte", preuve: "", cta: "Voir la part de voix" }]
       : []),
     ...(data.voix.length > 0
-      ? [{ clef: "voix", titre: "La part de voix", preuve: "Les réponses par nom", cta: "Ce que cet aperçu ne peut pas dire" }]
+      ? [{ clef: "voix", titre: "La part de voix", preuve: "Les réponses par nom", cta: "Voir ce qu'une IA dit de vous" }]
+      : []),
+    // Le miroir puis la cause technique : après le constat (score, rival,
+    // phrase, part de voix), on montre au prospect sa fiche d'identité dans
+    // l'IA, puis la porte d'entrée de son site. Les deux données existaient
+    // déjà en base et n'étaient montrées nulle part.
+    ...(data.miroir
+      ? [{ clef: "miroir", titre: "Ce qu'une IA dit de vous", preuve: "La réponse, mot pour mot", cta: "Voir si les IA peuvent vous lire" }]
+      : []),
+    ...(data.technique
+      ? [{
+          clef: "technique",
+          titre: data.technique.bloques.length > 0 ? "La porte est fermée" : "L'accès à votre site",
+          preuve: "Les robots d'IA testés",
+          cta: "Ce que cet aperçu ne peut pas dire",
+        }]
       : []),
     // La modale « ce que vous apprenez » a été supprimée le 14/08/2026 : la
     // séquence portait deux comparatifs qui se répétaient. Son tableau vit
@@ -142,6 +159,29 @@ export function SequenceResultat({
             date={data.date}
             numero={index + 1}
             total={etapes.length}
+            wide={wide}
+            part={part}
+          />
+        );
+      case "miroir":
+        return (
+          <CarteMiroir
+            marque={data.marque}
+            moteur={data.miroir!.moteur}
+            texte={data.miroir!.texte}
+            date={data.date}
+            totalQuestions={data.totalQuestions}
+            wide={wide}
+            part={part}
+          />
+        );
+      case "technique":
+        return (
+          <CarteTechnique
+            bloques={data.technique!.bloques}
+            autorises={data.technique!.autorises}
+            llmstxt={data.technique!.llmstxt}
+            domaine={data.domaine}
             wide={wide}
             part={part}
           />

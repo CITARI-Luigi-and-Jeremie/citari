@@ -59,6 +59,8 @@ function sequenceDe(entree: {
   classes?: Record<string, string>;
   marque?: string;
   score?: number;
+  miroir?: unknown;
+  audit?: unknown;
 }) {
   return construireSequence({
     marque: entree.marque ?? "Cible",
@@ -71,6 +73,8 @@ function sequenceDe(entree: {
     mentions: entree.mentions,
     classes: entree.classes ?? {},
     alias: {},
+    miroir: entree.miroir,
+    audit: entree.audit,
   });
 }
 
@@ -226,5 +230,55 @@ describe("adversaire — jamais un outil ni une institution", () => {
       mentions: [mention(r.id, q.id, "Cible", { is_target: true })],
     });
     expect(seq.adversaire).toBeNull();
+  });
+});
+
+describe("miroir et audit — les données payées par le gratuit sont montrées", () => {
+  function base() {
+    const q = question(1, "comparative");
+    const r = reponse(q.id);
+    return {
+      questions: [q],
+      reponses: [r],
+      mentions: [mention(r.id, q.id, "Cible", { is_target: true })],
+    };
+  }
+
+  it("le miroir apparaît quand la réponse existe", () => {
+    const seq = sequenceDe({
+      ...base(),
+      miroir: [{ moteur: "ChatGPT", texte: "x".repeat(120) }],
+    });
+    expect(seq.miroir?.moteur).toBe("ChatGPT");
+  });
+
+  it("un miroir vide ou trop court ne fabrique pas de carte", () => {
+    expect(sequenceDe({ ...base(), miroir: [] }).miroir).toBeNull();
+    expect(sequenceDe({ ...base(), miroir: [{ texte: "trop court" }] }).miroir).toBeNull();
+    expect(sequenceDe(base()).miroir).toBeNull();
+  });
+
+  it("l'audit sépare robots bloqués et autorisés", () => {
+    const seq = sequenceDe({
+      ...base(),
+      audit: {
+        ok: true,
+        bots: {
+          GPTBot: "bloque",
+          ClaudeBot: "autorise",
+          PerplexityBot: "bloque",
+          "Google-Extended": "autorise",
+        },
+        llmstxt: true,
+      },
+    });
+    expect(seq.technique?.bloques).toEqual(["GPTBot", "PerplexityBot"]);
+    expect(seq.technique?.autorises).toEqual(["ClaudeBot", "Google-Extended"]);
+    expect(seq.technique?.llmstxt).toBe(true);
+  });
+
+  it("un audit qui a échoué n'annonce jamais de portes ouvertes", () => {
+    const seq = sequenceDe({ ...base(), audit: { ok: false, bots: {}, llmstxt: false } });
+    expect(seq.technique).toBeNull();
   });
 });

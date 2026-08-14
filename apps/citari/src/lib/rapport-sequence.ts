@@ -47,6 +47,21 @@ export interface DonneesSequence {
     reponsesPerdues: number;
     termeSecteur: string;
   };
+  /**
+   * La question miroir : ce qu'une IA répond quand on lui donne le nom de la
+   * marque. Hors méthodologie et assumée comme telle (c'est la seule question
+   * qui prononce le nom), mais c'est la pièce la plus personnelle du scan.
+   */
+  miroir: { moteur: string; texte: string } | null;
+  /**
+   * L'audit flash : les robots d'IA peuvent-ils seulement lire le site ? Il
+   * tourne déjà pendant le scan gratuit, et son résultat dormait en base.
+   */
+  technique: {
+    bloques: string[];
+    autorises: string[];
+    llmstxt: boolean;
+  } | null;
 }
 
 /** « Cabinet comptable » → « cabinet » : le mot qu'on glisse dans une phrase. */
@@ -96,6 +111,9 @@ export function carteConcurrent(
   };
 }
 
+/** Les robots d'IA testés par l'audit flash, dans l'ordre d'affichage. */
+const ROBOTS = ["GPTBot", "ClaudeBot", "PerplexityBot", "Google-Extended"] as const;
+
 export function construireSequence(entree: {
   marque: string;
   domaine: string | null;
@@ -107,6 +125,10 @@ export function construireSequence(entree: {
   mentions: LigneMention[];
   classes: Record<string, string>;
   alias: Record<string, string>;
+  /** `scans.miroir` : tableau de { moteur, texte }. */
+  miroir?: unknown;
+  /** `scans.audit` : { ok, bots: { GPTBot: "autorise"|"bloque", … }, llmstxt }. */
+  audit?: unknown;
 }): DonneesSequence {
   const { marque, questions, reponses, mentions, classes, alias } = entree;
 
@@ -229,6 +251,34 @@ export function construireSequence(entree: {
     mentions.map((m) => (m.is_target ? marque : (alias[m.brand] ?? m.brand))),
   ).size;
 
+  // Le miroir : première entrée exploitable. Une réponse en erreur n'est pas
+  // écrite en base (`finaliser` les filtre), mais on reste prudent.
+  const miroirBrut = Array.isArray(entree.miroir) ? entree.miroir : [];
+  const premierMiroir = miroirBrut.find(
+    (m): m is { moteur?: string; texte: string } =>
+      Boolean(m) && typeof (m as { texte?: unknown }).texte === "string" &&
+      ((m as { texte: string }).texte.trim().length > 80),
+  );
+  const miroir = premierMiroir
+    ? { moteur: premierMiroir.moteur ?? "ChatGPT", texte: premierMiroir.texte.trim() }
+    : null;
+
+  // L'audit flash. `ok: false` signifie que le robots.txt n'a pas pu être lu :
+  // on n'affiche alors rien plutôt que d'annoncer des portes ouvertes qu'on
+  // n'a pas vérifiées.
+  const auditBrut = entree.audit as
+    | { ok?: boolean; bots?: Record<string, string>; llmstxt?: boolean }
+    | null
+    | undefined;
+  const bots = auditBrut?.ok && auditBrut.bots ? auditBrut.bots : null;
+  const technique = bots
+    ? {
+        bloques: ROBOTS.filter((r) => bots[r] === "bloque"),
+        autorises: ROBOTS.filter((r) => bots[r] === "autorise"),
+        llmstxt: Boolean(auditBrut?.llmstxt),
+      }
+    : null;
+
   return {
     marque,
     domaine: entree.domaine ?? marque,
@@ -240,6 +290,8 @@ export function construireSequence(entree: {
     vosReponses,
     laPlusDure,
     voix,
+    miroir,
+    technique,
     voixMeta: {
       questions: questions.length,
       moteurs,

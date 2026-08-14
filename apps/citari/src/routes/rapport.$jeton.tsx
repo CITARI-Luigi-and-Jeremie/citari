@@ -126,6 +126,10 @@ function RapportDApercu() {
         mentions: mentions as unknown as LigneMention[],
         classes: (scan.concurrent_classes ?? {}) as Record<string, string>,
         alias: (scan.brand_aliases ?? {}) as Record<string, string>,
+        // Payés par le scan gratuit, invisibles jusqu'au 14/08/2026 : la
+        // question miroir et l'audit des robots d'IA.
+        miroir: scan.miroir,
+        audit: scan.audit,
       }),
     [scan, questions, reponses, mentions],
   );
