@@ -5,6 +5,38 @@ d'une nouvelle session, après `CLAUDE.md`.
 
 ---
 
+## 2026-08-14 — « Trop d'erreurs » : la couche de présentation gagne ses invariants
+
+Scan Airbnb de Luigi : « Abritel est nommé plus souvent que vous » au-dessus
+de barres qui montraient 5 contre 14, et la carte 02 comptait 14 là où la
+carte 04 comptait 13. Son constat, juste : « à chaque nouvelle recherche je
+découvre une erreur, on doit faire quelque chose ».
+
+Le diagnostic de fond : le MOTEUR a ses 216 tests, mais la couche qui
+PRÉSENTE la mesure (titres, sélections, comptages du rapport) n'en avait
+AUCUN. Chaque profil de scan nouveau — absent, derrière, à égalité, leader,
+mono-moteur — trouvait donc son trou, et c'était Luigi qui le trouvait.
+
+**Les correctifs** : `carteConcurrent` devient une fonction pure à trois
+régimes (derrière / à égalité / devant) — le leader lit « Vous menez.
+Abritel reste dans la conversation », le kicker passe à « qui vise votre
+place », les barres se réordonnent, le récit parle d'érosion et non d'une
+absence fictive. Et `partDeVoix` (couche d'affichage) regroupe toutes les
+graphies de la marque cible sous un seul nom : 14 = 14 partout. Attention :
+il existe DEUX `partDeVoix` à dessein — celui de `score.ts` est l'artefact
+de mesure figé (citations, `share_of_voice`), ne jamais le « corriger ».
+
+**La réponse systémique** : `tests/rapport-sequence.test.ts`, 14 invariants
+de cohérence qui rejouent chaque bug du jour et chaque profil : le titre ne
+contredit jamais ses propres chiffres, la pièce du verbatim est crédible ou
+n'existe pas (le cas GeoComply est un test nommé), jamais un outil ou une
+institution en adversaire, les cartes 02 et 04 comptent la même chose, la
+ligne « Vous » est unique. 230 tests. La règle léguée : **quand un écran du
+rapport ment ou se contredit, on écrit l'invariant AVANT le correctif** —
+c'est la machine qui doit trouver ces erreurs, pas Luigi.
+
+---
+
 ## 2026-08-14 — Le rapport apprend la pertinence : verbatim à deux étages, un seul comparatif
 
 Luigi, trois captures à l'appui : la « phrase exacte » montrait GeoComply (un
