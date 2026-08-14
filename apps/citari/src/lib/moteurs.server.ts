@@ -400,12 +400,57 @@ export async function classerConcurrents(
 }
 
 /** Génération de l'échantillon : 24 questions d'intention d'achat, figées ensuite. */
+/**
+ * La matière du site : titre, description et premiers textes de la page
+ * d'accueil, pour que la génération de questions parte du MÉTIER RÉEL.
+ *
+ * Ajoutée le 14/08/2026 après le scan Unibet : secteur « Autre », ville
+ * Paris, et le générateur — qui ne recevait que ces deux mots — a inventé
+ * un métier (des questions sur les logiciels SIRH, pour un site de poker).
+ * Le score 0 qui en sortait était un artefact présenté comme une mesure.
+ * L'écran d'attente promet « On lit votre site pour comprendre votre
+ * métier » : c'est ici que cette promesse devient vraie.
+ *
+ * Tolérante par construction : site injoignable ou vide → chaîne vide, la
+ * génération retombe sur le secteur déclaré, comme avant.
+ */
+export async function matiereDuSite(url: string | null): Promise<string> {
+  if (!url) return "";
+  const adresse = /^https?:\/\//i.test(url) ? url : `https://${url}`;
+  try {
+    const res = await fetch(adresse, {
+      signal: AbortSignal.timeout(6000),
+      headers: { "User-Agent": "CitariScan/1.0 (+https://citari.fr)" },
+      redirect: "follow",
+    });
+    if (!res.ok) return "";
+    const html = (await res.text()).slice(0, 300_000);
+    const prendre = (motif: RegExp) => (html.match(motif)?.[1] ?? "").trim();
+    const titre = prendre(/<title[^>]*>([\s\S]*?)<\/title>/i);
+    const description = prendre(
+      /<meta[^>]+name=["']description["'][^>]+content=["']([^"']*)["']/i,
+    );
+    const texte = html
+      .replace(/<script[\s\S]*?<\/script>/gi, " ")
+      .replace(/<style[\s\S]*?<\/style>/gi, " ")
+      .replace(/<[^>]+>/g, " ")
+      .replace(/&[a-z#0-9]+;/gi, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+    return [titre, description, texte].filter(Boolean).join(" · ").slice(0, 1200);
+  } catch {
+    return "";
+  }
+}
+
 export async function genererQuestions(input: {
   marque: string;
   secteur: string;
   ville?: string | null;
   langue: string;
   nombre?: 20 | 24;
+  /** Extrait de la page d'accueil : la source de vérité du métier. */
+  matiereSite?: string;
 }): Promise<{ text: string; intent: string }[]> {
   if (!process.env.GOOGLE_AI_API_KEY) throw new Error("GOOGLE_AI_API_KEY absente");
   const nombre = input.nombre ?? 24;
@@ -419,8 +464,14 @@ export async function genererQuestions(input: {
       "Tu génères un échantillon de questions réellement posées à une IA par un décideur en phase d'achat. " +
         'Renvoie UNIQUEMENT du JSON : {"queries":[{"text":"","intent":"comparative|probleme|locale|confiance"}]}. ' +
         mix +
-        " Jamais le nom de la marque suivie dans la question : on mesure si l'IA la cite spontanément.",
-      `Secteur : ${input.secteur}. Zone : ${input.ville ?? "France"}. Langue des questions : ${input.langue}.`,
+        " Jamais le nom de la marque suivie dans la question : on mesure si l'IA la cite spontanément." +
+        " Le MÉTIER de l'entreprise se déduit D'ABORD de l'extrait de son site quand il est fourni :" +
+        " le libellé de secteur peut être générique (« Autre ») et ne doit JAMAIS être remplacé par un" +
+        " métier inventé. Sans extrait ni secteur précis, pose des questions du secteur déclaré, sans broder.",
+      `Secteur déclaré : ${input.secteur}. Zone : ${input.ville ?? "France"}. Langue des questions : ${input.langue}.` +
+        (input.matiereSite
+          ? `\nExtrait de la page d'accueil du site (source de vérité du métier) : """${input.matiereSite}"""`
+          : ""),
       { maxTokens: 4096 },
     );
     const match = raw.match(/\{[\s\S]*\}/);

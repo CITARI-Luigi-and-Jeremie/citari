@@ -1,6 +1,13 @@
 import { createHash } from "node:crypto";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
-import { interroger, analyser, genererQuestions, questionMiroir, classerConcurrents } from "@/lib/moteurs.server";
+import {
+  interroger,
+  analyser,
+  genererQuestions,
+  matiereDuSite,
+  questionMiroir,
+  classerConcurrents,
+} from "@/lib/moteurs.server";
 import { calculerScore, partDeVoix, regrouperMarques, type LigneMention } from "@/lib/score";
 import { MOTEURS, MOTEURS_APERCU, MOTEURS_CONTROLE, type ModeScan, type Moteur } from "@/lib/typo";
 
@@ -391,12 +398,18 @@ async function preparerQuestions(scan: ScanRow): Promise<EtatQuestions> {
     lignes = (data ?? []).map((q) => ({ text: q.text, intent: q.intent }));
   }
   if (!lignes.length) {
+    // « On lit votre site » : la page d'accueil est lue AVANT d'écrire les
+    // questions, pour partir du métier réel et non du seul libellé de
+    // secteur — « Autre » avait fait générer des questions SIRH à un site
+    // de poker (scan Unibet du 14/08/2026, score 0 artefactuel).
+    const matiere = await matiereDuSite(scan.website_url);
     lignes = await genererQuestions({
       marque: scan.brand_name,
       secteur: scan.sector,
       ville: scan.city,
       langue: scan.language,
       nombre: scan.mode === "apercu" ? 20 : 24,
+      matiereSite: matiere,
     });
   }
   if (!lignes.length) throw new Error("Échantillon de questions vide");

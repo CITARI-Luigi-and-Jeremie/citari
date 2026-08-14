@@ -5,6 +5,43 @@ d'une nouvelle session, après `CLAUDE.md`.
 
 ---
 
+## 2026-08-14 — La génération lit enfin le site : l'affaire Unibet
+
+Luigi, crédit Google rechargé, relance un scan : « résultat en 2 secondes,
+complètement faux ». Les deux moitiés s'expliquent, et la seconde est le bug
+le plus grave attrapé avant lancement.
+
+**Le « résultat en 2 s »** était le cache de 3 jours : son scan Unibet de
+17 h 05 (réel, 87 s, 40 réponses, zéro erreur — passé quelques minutes avant
+la mort du crédit Google) était resservi tel quel au re-scan du même domaine.
+Comportement voulu et documenté, mais désorientant en phase de test.
+
+**Le « complètement faux »** était vrai : Unibet, secteur « Autre », ville
+Paris — et les vingt questions générées parlaient de LOGICIELS SIRH ET DE
+PAIE. Le générateur ne recevait que `Secteur : Autre. Zone : Paris.` et le
+modèle a brodé un métier. Le 0/100 qui en sortait était un artefact présenté
+comme une mesure — l'exact contraire du produit.
+
+La correction : `matiereDuSite(url)` lit la page d'accueil (titre,
+description, texte, 1 200 caractères, 6 s de délai, tolérante) AVANT la
+génération, et le prompt reçoit l'extrait comme « source de vérité du
+métier », avec l'interdiction explicite d'inventer au-delà. Le domaine étant
+obligatoire au formulaire, la matière existe pour tous les scans. L'étape
+« On lit votre site » de l'écran d'attente devient enfin vraie.
+
+Vérifié en réel sur le même cas : re-scan d'unibet.fr/poker, secteur
+« Autre » — les questions parlent d'applications de poker agréées, de
+Winamax, de rakeback ; score 50/100, plausible pour cet acteur. Les deux
+scans empoisonnés (Unibet-SIRH, Exco-429) sont supprimés de la base, leurs
+leads passés `converti`.
+
+Leçon de doctrine : un scan dont l'échantillon rate le métier ne mesure
+rien, et il coûte plus qu'un échec — il fabrique un chiffre faux sous nos
+couleurs. La matière du site n'est pas un raffinement, elle est la condition
+de validité de l'échantillon.
+
+---
+
 ## 2026-08-14 — Vingt secondes de vide, un piège de refs, et Gemini à sec
 
 Luigi, à juste titre furieux : l'écran « Analyse Citari » n'apparaissait que
