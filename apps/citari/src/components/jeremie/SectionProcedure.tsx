@@ -36,12 +36,14 @@ type Etape = {
   imageHeight: number;
   imageAspect: string;
   /**
-   * `contain` pour une carte dont le texte est bien plus haut que large :
-   * en `cover`, la cellule d'image très verticale n'affichait qu'une tranche
-   * de ~27 % de l'illustration (retour Luigi, 15/08/2026 : « trop zoomé »).
-   * Le fond posé derrière est celui de l'illustration elle-même (#FCFEF3).
+   * Le blanc des BORDS de l'illustration, moyenné au pixel sur la bande
+   * réellement visible (canvas, 15/08/2026). La colonne le reprend, sinon
+   * le crème de l'image contre celui de la carte (#FBFAF7) fait une
+   * frontière que l'œil accroche — Luigi l'a vue du premier coup. Les trois
+   * fichiers n'ont pas le même blanc et leur fond a du grain : d'où une
+   * valeur par étape, et un écart résiduel mesuré à 1,3/255 au pire.
    */
-  imageFit?: "contain";
+  imageFond: string;
   alt: string;
 };
 
@@ -74,10 +76,12 @@ const ETAPES: Etape[] = [
         </p>
       </div>
     ),
+    // Dimensions relevées dans le fichier : les trois font 1408×768.
     image: "/img/etape-scan.png",
-    imageWidth: 1024,
-    imageHeight: 640,
+    imageWidth: 1408,
+    imageHeight: 768,
     imageAspect: "aspect-[2/1]",
+    imageFond: "#FBFAF3",
     alt: "Une loupe posée sur des lignes de texte, illustration abstraite du scan.",
   },
   {
@@ -127,7 +131,7 @@ const ETAPES: Etape[] = [
     imageWidth: 1408,
     imageHeight: 768,
     imageAspect: "aspect-[2/1]",
-    imageFit: "contain",
+    imageFond: "#FAFAF2",
     alt: "Un guillemet au-dessus de quatre filets, dont un surligné en rouge.",
   },
   {
@@ -156,9 +160,10 @@ const ETAPES: Etape[] = [
     ),
     labelCout: "CE QUE ÇA VOUS DEMANDE",
     image: "/img/etape-diagnostic.png",
-    imageWidth: 1024,
-    imageHeight: 640,
+    imageWidth: 1408,
+    imageHeight: 768,
     imageAspect: "aspect-[2/1]",
+    imageFond: "#FAFAF3",
     alt: "Un cadran de mesure avec une aiguille rouge, illustration du sprint de trente jours.",
   },
 ];
@@ -217,17 +222,30 @@ export function SectionProcedure() {
               <Reveal delay={i * 120} className="block">
                 <div>
                   <div className="card-lift group grid gap-0 overflow-hidden border border-rule bg-paper shadow-[0_32px_70px_-36px_rgba(251,250,247,0.18)] hover:border-signal sm:grid-cols-[2fr_3fr]">
-                    <img
-                      src={etape.image}
-                      alt={etape.alt}
-                      loading="lazy"
-                      width={etape.imageWidth}
-                      height={etape.imageHeight}
-                      style={etape.imageFit === "contain" ? { backgroundColor: "#FCFEF3" } : undefined}
-                      className={`${etape.imageAspect} w-full border-b border-rule object-cover sm:aspect-auto sm:h-full sm:border-b-0 sm:border-r ${
-                        etape.imageFit === "contain" ? "sm:object-contain" : ""
-                      }`}
-                    />
+                    {/* La bordure et le fond vivent sur le CONTENEUR, pas sur
+                        l'image : celle-ci est plafonnée en hauteur, et sans
+                        conteneur le filet vertical s'arrêtait avec elle.
+
+                        Pourquoi un plafond : les trois cartes n'ont pas la
+                        même quantité de texte, donc pas la même hauteur (507,
+                        664 et 524px). En `object-cover` pleine hauteur, la
+                        carte 02 ne montrait que 31 % de son illustration
+                        contre 41 % pour les autres — d'où le « trop zoomé »
+                        de Luigi (15/08/2026). Un cadre commun rend le
+                        recadrage identique partout. */}
+                    <div
+                      style={{ backgroundColor: etape.imageFond }}
+                      className="flex items-center border-b border-rule sm:border-b-0 sm:border-r"
+                    >
+                      <img
+                        src={etape.image}
+                        alt={etape.alt}
+                        loading="lazy"
+                        width={etape.imageWidth}
+                        height={etape.imageHeight}
+                        className={`${etape.imageAspect} w-full object-cover sm:aspect-auto sm:h-full sm:max-h-[510px]`}
+                      />
+                    </div>
 
                     <div className="flex flex-col p-6 sm:p-7">
                       <div className="flex items-start justify-between gap-4">

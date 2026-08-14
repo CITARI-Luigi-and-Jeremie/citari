@@ -58,11 +58,33 @@ Aussi : la fausse affirmation « les réponses vous attendent en bas de cette
 page » (carte verbatim) est morte avec l'annexe qu'elle décrivait ; on nomme
 l'étape de destination, jamais sa distance (elle bouge quand une carte sort).
 
-**L'image de l'étape 2 des trois étapes de la landing** était déclarée
-900×1400 portrait ; le fichier est un paysage de 1408×768. Le cadre mobile
-9/14 n'en montrait qu'une tranche, la cellule desktop très haute recadrait à
-~27 %. Dimensions corrigées, et `object-contain` sur fond assorti (#FCFEF3,
-la couleur de l'illustration) pour cette carte-là seulement.
+**L'image de l'étape 2 des trois étapes de la landing**, en deux passes.
+Elle était déclarée 900×1400 portrait ; les trois fichiers sont en réalité
+des paysages de 1408×768. Le cadre mobile 9/14 n'en montrait qu'une tranche.
+
+Premier essai raté, et instructif : `object-contain` sur fond assorti. Luigi
+a immédiatement vu les deux défauts que ça crée — l'image devient minuscule
+(383×209 au milieu d'une colonne de 664) et son crème tranche avec celui de
+la carte.
+
+La mesure a donné la vraie cause : **les trois cartes n'ont pas la même
+hauteur** (507, 664, 524px) parce qu'elles n'ont pas la même quantité de
+texte. En `object-cover` pleine hauteur, la carte 02 ne montrait donc que
+31 % de son illustration contre 41 % pour les deux autres. Correction : un
+plafond commun (`sm:max-h-[510px]`) rend le cadre identique partout, donc le
+recadrage aussi — 41 % sur les trois, vérifié.
+
+Deux détails qui vont avec, et qu'il ne faut pas défaire : la bordure et le
+fond vivent sur un CONTENEUR, plus sur l'image (plafonnée, elle laissait le
+filet vertical s'arrêter en route) ; et le fond de chaque colonne est le
+blanc des bords de SON illustration, moyenné au canvas — les trois fichiers
+ont des blancs différents, avec du grain, et aucun n'est celui de la carte.
+Écart résiduel : 1,3/255 au pire, invisible.
+
+Reste, assumé : la carte 02 garde 154px de colonne au-dessus et au-dessous
+de son illustration, centrée. C'est le prix de son texte plus long. La seule
+façon de l'éviter serait de remplir toute la hauteur, ce qui ramènerait
+exactement le sur-zoom de départ.
 
 Piège d'outillage à retenir : la capture d'écran du panneau d'aperçu s'est
 gelée en cours de session (compositeur), alors que le DOM, la géométrie et
