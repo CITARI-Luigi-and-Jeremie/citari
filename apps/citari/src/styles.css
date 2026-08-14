@@ -1233,3 +1233,17 @@
   color: var(--ink);
   font-family: var(--font-sans);
 }
+
+/* Étape « Les N questions » de la séquence de rapport : l'affordance de clic.
+   Le survol et la rotation du chevron dépendent de l'état [open] du <details>,
+   hors de portée des styles en ligne du composant. */
+.carteq-ligne:hover {
+  background: #f2f0e9;
+}
+.carteq-chevron {
+  display: inline-block;
+  transition: transform 160ms ease;
+}
+details[open] > .carteq-ligne .carteq-chevron {
+  transform: rotate(90deg);
+}

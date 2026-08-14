@@ -44,19 +44,18 @@ export function CarteSplit({
         background: CARD,
         border: `1px solid ${HAIR}`,
         borderRadius: 4,
-        maxHeight: wide ? "calc(100vh - 190px)" : "calc(100vh - 140px)",
+        maxHeight: wide ? "calc(100vh - 200px)" : "calc(100vh - 150px)",
         overflowY: "auto",
         opacity: visible ? 1 : 0,
         transform: visible ? "translateY(0)" : "translateY(-10px)",
         transition: `opacity 320ms ${ease}, transform 320ms ${ease}`,
       }}
     >
-      {/* en-tête */}
+      {/* en-tête. Pas de `position: sticky` : chaque carte tient en un écran
+          (règle du 15/08/2026), et le sticky gonflait le scrollHeight de 8px,
+          donc chaque carte défilait de 8px pour rien. */}
       <div
         style={{
-          position: "sticky",
-          top: 0,
-          zIndex: 3,
           background: CARD,
           display: "flex",
           alignItems: "center",

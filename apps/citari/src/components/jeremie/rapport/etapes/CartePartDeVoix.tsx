@@ -10,12 +10,11 @@ type Props = {
     questions: number;
     moteurs: number;
     marquesTotal: number;
+    reponsesLues: number;
     reponsesPerdues: number;
     termeSecteur: string;
   };
   date: string;
-  numero: number;
-  total: number;
   wide: boolean;
   part: "recit" | "preuve";
 };
@@ -24,8 +23,13 @@ type Props = {
  * 04 — Part de voix, barres qui se remplissent à l'apparition.
  * Comptée en RÉPONSES, l'unité de tout le parcours : sa maquette disait
  * « mentions », ce qui aurait contredit les cartes précédentes.
+ *
+ * Le titre parlait « questions » et « réponses » dans la même phrase (« Sur
+ * 20 questions, 18 réponses… ») : les deux chiffres étaient justes, la
+ * phrase les rendait contradictoires (retour de Luigi, 15/08/2026). Une
+ * seule unité désormais, et son dénominateur : la réponse lue.
  */
-export function CartePartDeVoix({ voix, meta, date, numero, total, wide, part }: Props) {
+export function CartePartDeVoix({ voix, meta, date, wide, part }: Props) {
   const [on, setOn] = useState(false);
   const max = Math.max(...voix.map((v) => v.reponses), 1);
   const douleur = meta.reponsesPerdues > 0;
@@ -40,26 +44,33 @@ export function CartePartDeVoix({ voix, meta, date, numero, total, wide, part }:
     return (
       <>
         <span style={{ ...labelStyle, letterSpacing: "0.08em", color: "var(--signal)" }}>
-          PIÈCE {String(numero).padStart(2, "0")} / {String(total).padStart(2, "0")}
+          LA PART DE VOIX
         </span>
         <p
           style={{
             fontSize: wide ? 30 : 23,
-            fontWeight: 700,
-            letterSpacing: "-0.03em",
-            lineHeight: 1.2,
+            fontWeight: 800,
+            letterSpacing: "-0.035em",
+            lineHeight: 1.15,
             margin: 0,
             color: "var(--ink)",
           }}
         >
           {douleur
-            ? `Sur ${meta.questions} questions, ${meta.reponsesPerdues} réponses donnent un nom sans donner le vôtre.`
-            : `Voici qui occupe les réponses à vos questions.`}
+            ? `Sur ${meta.reponsesLues} réponses lues, ${meta.reponsesPerdues} citent un concurrent. Pas vous.`
+            : `Voici qui occupe les réponses de votre marché.`}
         </p>
         <p style={{ fontSize: wide ? 17 : 15.5, color: BODY, lineHeight: 1.55, margin: 0 }}>
-          {douleur
-            ? `Dans ces ${meta.reponsesPerdues} réponses, l'utilisateur repart avec un ${meta.termeSecteur} identifié. Pas le vôtre. C'est ce que la mesure montre, sans extrapolation.`
-            : `${meta.marquesTotal} marques apparaissent dans les réponses aux ${meta.questions} questions. La répartition est donnée telle quelle, sans pondération.`}
+          {douleur ? (
+            <>
+              À chaque fois, l'utilisateur repart avec le nom d'un {meta.termeSecteur}.{" "}
+              <strong style={{ color: "var(--ink)", fontWeight: 700 }}>
+                Voici les noms qui reviennent le plus. Le vôtre est en rouge.
+              </strong>
+            </>
+          ) : (
+            `${meta.marquesTotal} marques apparaissent dans les réponses. Voici les plus citées, la vôtre en rouge.`
+          )}
         </p>
       </>
     );

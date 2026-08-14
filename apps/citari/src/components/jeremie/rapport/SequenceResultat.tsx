@@ -24,6 +24,12 @@ import { INK, ON_DEEP, ON_DEEP_HAIR, ON_DEEP_MUTED, ORANGE, ORANGE_HOVER, PAPER,
  * Les étapes dont la donnée n'existe pas (pas d'adversaire, pas de verbatim)
  * sont simplement retirées de la séquence : jamais de carte vide.
  */
+/**
+ * « Ce qu'une IA dit de vous » → « ce qu'une IA dit de vous » : seule la
+ * première lettre baisse. `toLowerCase()` entier écrasait le sigle IA.
+ */
+const minuscule = (titre: string) => titre.charAt(0).toLowerCase() + titre.slice(1);
+
 export function SequenceResultat({
   data,
   questions,
@@ -48,51 +54,47 @@ export function SequenceResultat({
   sautVersQuestions?: number;
 }) {
   /**
-   * `annonce` est la façon d'INVITER à cette étape : le bouton d'une carte
-   * reprend l'annonce de celle qui la suit réellement. Les libellés étaient
-   * écrits en dur sur chaque carte, ce qui promettait une étape absente dès
-   * qu'une donnée manquait (pas de miroir, pas d'audit) et se décalait à
-   * chaque insertion. Le bouton dit maintenant toujours où il mène.
+   * Le bouton principal dit « Suivant : {titre de l'étape suivante} » : le
+   * mot que tout le monde connaît d'abord, la destination ensuite. Les
+   * libellés inventifs (« Voir qui prend ma place ») se lisaient comme des
+   * actions optionnelles, pas comme LE chemin — le père de Luigi n'a pas
+   * compris comment avancer (15/08/2026). Et comme le bouton reprend le
+   * titre de l'étape qui suit RÉELLEMENT, il ne promet jamais une carte
+   * absente quand une donnée manque.
    */
   type Etape = {
     clef: string;
     titre: string;
     preuve: string;
-    annonce: string;
   };
 
   const etapes: Etape[] = [
-    { clef: "score", titre: "Votre score", preuve: "Le chiffre mesuré", annonce: "Voir mon score" },
+    { clef: "score", titre: "Votre score", preuve: "Le chiffre mesuré" },
     ...(data.adversaire
       ? [{
           clef: "concurrent",
           titre: data.vosReponses >= data.adversaire.reponses ? "Qui vise votre place" : "Qui prend votre place",
           preuve: "Les réponses comptées",
-          annonce:
-            data.vosReponses >= data.adversaire.reponses
-              ? "Voir qui vise ma place"
-              : "Voir qui prend ma place",
         }]
       : []),
     ...(data.laPlusDure
-      ? [{ clef: "verbatim", titre: "La phrase exacte", preuve: "", annonce: "Lire ce que l'IA répond" }]
+      ? [{ clef: "verbatim", titre: "La phrase exacte", preuve: "" }]
       : []),
     ...(data.voix.length > 0
-      ? [{ clef: "voix", titre: "La part de voix", preuve: "Les réponses par nom", annonce: "Voir la part de voix" }]
+      ? [{ clef: "voix", titre: "La part de voix", preuve: "Les réponses par nom" }]
       : []),
     // Le miroir puis la cause technique : après le constat (score, rival,
     // phrase, part de voix), on montre au prospect sa fiche d'identité dans
     // l'IA, puis la porte d'entrée de son site. Les deux données existaient
     // déjà en base et n'étaient montrées nulle part.
     ...(data.miroir
-      ? [{ clef: "miroir", titre: "Ce qu'une IA dit de vous", preuve: "La réponse, mot pour mot", annonce: "Voir ce qu'une IA dit de vous" }]
+      ? [{ clef: "miroir", titre: "Ce qu'une IA dit de vous", preuve: "La réponse, mot pour mot" }]
       : []),
     ...(data.technique
       ? [{
           clef: "technique",
           titre: data.technique.bloques.length > 0 ? "La porte est fermée" : "L'accès à votre site",
           preuve: "Les robots d'IA testés",
-          annonce: "Voir si les IA peuvent vous lire",
         }]
       : []),
     // L'échantillon complet, remonté de l'annexe le 14/08/2026 : dernière
@@ -101,13 +103,12 @@ export function SequenceResultat({
       clef: "questions",
       titre: `Les ${data.totalQuestions} questions`,
       preuve: "Où vous apparaissez",
-      annonce: `Ouvrir les ${data.totalQuestions} questions`,
     },
     // La modale « ce que vous apprenez » a été supprimée le 14/08/2026 : la
     // séquence portait deux comparatifs qui se répétaient. Son tableau vit
     // désormais DANS la carte diagnostic, et le CTA avance simplement.
-    { clef: "diagnostic", titre: "Le diagnostic complet", preuve: "", annonce: "Ce que cet aperçu ne peut pas dire" },
-    { clef: "reservation", titre: "Réserver", preuve: "Le cadre de l'appel", annonce: "Voir le cadre de l'appel" },
+    { clef: "diagnostic", titre: "Le diagnostic complet", preuve: "" },
+    { clef: "reservation", titre: "Réserver", preuve: "Le cadre de l'appel" },
   ];
 
   const [index, setIndex] = useState(0);
@@ -208,8 +209,6 @@ export function SequenceResultat({
             voix={data.voix}
             meta={data.voixMeta}
             date={data.date}
-            numero={index + 1}
-            total={etapes.length}
             wide={wide}
             part={part}
           />
@@ -273,7 +272,7 @@ export function SequenceResultat({
           width: wide ? "fit-content" : "100%",
         }}
       >
-        {suivante.annonce} →
+        Suivant : {minuscule(suivante.titre)} →
       </button>
       <button
         type="button"
@@ -326,14 +325,17 @@ export function SequenceResultat({
     <div
       style={{
         position: "relative",
-        minHeight: wide ? "calc(100vh - 70px)" : "calc(100vh - 62px)",
+        // `flex: 1` remplace un `minHeight: calc(100vh - 70px)` : la barre
+        // haute fait 79px, pas 70, et la page défilait donc de 9px sous
+        // chaque carte. Le parent est déjà `flex min-h-screen flex-col`.
+        flex: "1 0 auto",
         background: "var(--ink)",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
-        padding: wide ? "44px 32px" : "20px 14px 26px",
-        gap: 20,
+        padding: wide ? "34px 32px" : "18px 14px 22px",
+        gap: 16,
       }}
     >
       <GrilleFond />

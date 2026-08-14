@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { carteConcurrent, construireSequence } from "@/lib/rapport-sequence";
+import { carteConcurrent, construireSequence, extraitVerbatim } from "@/lib/rapport-sequence";
 import { partDeVoix, type LigneMention, type LigneQuestion, type LigneReponse } from "@/lib/rapport-apercu";
 
 /**
@@ -304,5 +304,57 @@ describe("miroir et audit — les données payées par le gratuit sont montrées
   it("un audit qui a échoué n'annonce jamais de portes ouvertes", () => {
     const seq = sequenceDe({ ...base(), audit: { ok: false, bots: {}, llmstxt: false } });
     expect(seq.technique).toBeNull();
+  });
+});
+
+describe("part de voix — une seule unité dans la phrase, la réponse lue", () => {
+  // Le retour du 15/08/2026 : « Sur 20 questions, 18 réponses… » mélangeait
+  // deux unités et se lisait comme une contradiction du « 11 / 20 questions »
+  // de l'étape suivante. Le dénominateur affiché doit être en réponses.
+  it("expose le dénominateur en réponses lues, celui du score", () => {
+    const q1 = question(1, "comparative");
+    const q2 = question(2, "probleme");
+    const r1 = reponse(q1.id);
+    const r2 = reponse(q2.id);
+    const enPanne: LigneReponse = { id: id("r"), query_id: q2.id, engine: "ChatGPT", raw_text: null, error: "429" };
+    const seq = sequenceDe({
+      questions: [q1, q2],
+      reponses: [r1, r2, enPanne],
+      mentions: [mention(r1.id, q1.id, "Rival", { verbatim: VERBATIM })],
+    });
+    // 2 réponses lues (la panne ne compte pas), 1 perdue (Rival sans la cible).
+    expect(seq.voixMeta.reponsesLues).toBe(2);
+    expect(seq.voixMeta.reponsesPerdues).toBe(1);
+    expect(seq.voixMeta.reponsesPerdues).toBeLessThanOrEqual(seq.voixMeta.reponsesLues);
+  });
+});
+
+describe("extraitVerbatim — la coupe d'écran ne ment pas", () => {
+  it("un texte court passe intact, sans annonce de coupe", () => {
+    const r = extraitVerbatim("Une réponse brève avec *Rival* dedans.");
+    expect(r.coupe).toBe(false);
+    expect(r.texte).toBe("Une réponse brève avec *Rival* dedans.");
+  });
+
+  it("une coupe garde toujours le concurrent marqué visible", () => {
+    const long = `${"Du contexte préliminaire assez bavard. ".repeat(20)}Ici *RivalTrèsImportant* est recommandé.`;
+    const r = extraitVerbatim(long, 200);
+    expect(r.coupe).toBe(true);
+    expect(r.texte).toContain("*RivalTrèsImportant*");
+    // Jamais d'astérisque orpheline : le rendu de `marked` en dépend.
+    expect((r.texte.match(/\*/g) ?? []).length % 2).toBe(0);
+  });
+
+  it("une coupe en fin de fenêtre n'ampute jamais le marqueur", () => {
+    const texte = `${"a".repeat(190)} *Rival* ${"b".repeat(300)}`;
+    const r = extraitVerbatim(texte, 200);
+    expect(r.texte).toContain("*Rival*");
+    expect((r.texte.match(/\*/g) ?? []).length % 2).toBe(0);
+  });
+
+  it("annonce la coupe par une ellipse", () => {
+    const r = extraitVerbatim("mot ".repeat(200), 150);
+    expect(r.coupe).toBe(true);
+    expect(r.texte.endsWith("…")).toBe(true);
   });
 });

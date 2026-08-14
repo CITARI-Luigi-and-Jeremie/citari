@@ -32,7 +32,12 @@ export function CarteMiroir({
   part: "recit" | "preuve";
 }) {
   if (part === "preuve") {
-    const extrait = texte.length > 900 ? `${texte.slice(0, 880).trimEnd()}…` : texte;
+    // 480 caractères : la réponse entière faisait déborder la carte de
+    // l'écran, et l'essentiel d'une fiche d'identité se joue dans ses
+    // premières lignes. La coupe est visible (…) ET nommée dans le pied :
+    // « mot pour mot » sous un texte tronqué se lirait comme un mensonge.
+    const coupe = texte.length > 480;
+    const extrait = coupe ? `${texte.slice(0, 460).trimEnd()}…` : texte;
     return (
       <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
         <span style={{ fontFamily: MONO, fontSize: 11, letterSpacing: "0.1em", color: MUTED }}>
@@ -74,7 +79,8 @@ export function CarteMiroir({
             paddingTop: 10,
           }}
         >
-          {moteur} · {date} · réponse conservée mot pour mot
+          {moteur} · {date} ·{" "}
+          {coupe ? "début de la réponse, conservée en entier" : "réponse conservée mot pour mot"}
         </span>
       </div>
     );
@@ -82,7 +88,7 @@ export function CarteMiroir({
 
   return (
     <>
-      <span style={{ ...labelStyle, color: RED }}>VOTRE FICHE D'IDENTITÉ DANS L'IA</span>
+      <span style={{ ...labelStyle, color: RED }}>LA RÉPONSE À VOTRE NOM</span>
 
       <p
         style={{
@@ -93,21 +99,21 @@ export function CarteMiroir({
           margin: 0,
         }}
       >
-        Voilà ce qu'une IA répond quand on lui donne votre nom.
+        On a demandé à une IA qui vous êtes. Voilà sa réponse.
       </p>
 
+      {/* Réécrit le 15/08/2026 : l'ancien paragraphe (« Ce texte ne s'affiche
+          nulle part et vous ne pouvez pas le corriger… ») était l'exemple
+          type, cité par Luigi, du copywriting trop compliqué. Deux phrases,
+          un fait, une invitation. */}
       <p style={{ fontSize: wide ? 17 : 15.5, color: BODY, lineHeight: 1.55, margin: 0 }}>
-        Ce texte ne s'affiche nulle part et vous ne pouvez pas le corriger. Il se répète pourtant,
-        à l'identique, à chaque personne qui pose la question à votre sujet : un prospect, un
-        candidat, un banquier.{" "}
-        <strong style={{ color: INK, fontWeight: 800 }}>
-          C'est la réponse la plus lue sur vous, et personne ne vous l'a jamais montrée.
-        </strong>
+        Un prospect qui tape votre nom dans une IA obtient ce texte.{" "}
+        <strong style={{ color: INK, fontWeight: 800 }}>Lisez-le comme il le lira.</strong>
       </p>
 
       <p style={{ fontFamily: MONO, fontSize: 12, lineHeight: 1.5, color: MUTED, margin: 0 }}>
-        C'est la seule question du scan qui prononce votre nom. Les {totalQuestions} autres ne le
-        prononcent jamais : on y mesure si les IA vous citent d'elles-mêmes.
+        C'est la seule question du scan qui prononce votre nom. Les {totalQuestions} autres
+        mesurent si les IA vous citent d'elles-mêmes.
       </p>
     </>
   );

@@ -97,9 +97,13 @@ la phrase exacte, part de voix, ce qu'une IA dit de vous, accès des robots,
 **les 20 questions**, diagnostic, réservation. L'assemblage des données vit
 dans `lib/rapport-sequence.ts`, les cartes dans `components/jeremie/rapport/`.
 Une étape sans donnée (pas d'adversaire, pas de verbatim) sort de la
-séquence : jamais de carte vide, jamais de texte inventé. Le bouton d'une
-carte reprend l'`annonce` de l'étape qui suit RÉELLEMENT ; l'écrire en dur
-promettait une carte absente dès qu'une donnée manquait.
+séquence : jamais de carte vide, jamais de texte inventé. Le bouton principal
+dit « Suivant : {titre de l'étape qui suit RÉELLEMENT} » — un libellé
+inventif se lisait comme une action optionnelle (le père de Luigi n'a pas su
+avancer, 15/08/2026), et un libellé en dur promettait une carte absente dès
+qu'une donnée manquait. **Chaque carte tient en un écran** : les longs
+contenus sont des extraits, coupe toujours annoncée, texte intégral à
+l'étape « questions ».
 
 **L'échantillon est une étape, plus une annexe** (14/08/2026). Les 20
 questions et leurs réponses vivaient sous la séquence, derrière deux liens et

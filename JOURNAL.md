@@ -5,6 +5,73 @@ d'une nouvelle session, après `CLAUDE.md`.
 
 ---
 
+## 2026-08-15 — Le test du père : chaque carte tient en un écran, et « Suivant » redevient un mot
+
+Le père de Luigi a essayé le scan et n'a pas compris comment avancer. C'est
+le retour le plus précieux reçu à ce jour : les libellés inventifs des
+boutons (« Voir qui prend ma place ») se lisaient comme des actions
+optionnelles, pas comme LE chemin. Le bouton principal dit désormais
+**« Suivant : {titre de l'étape suivante} → »** — le mot que tout le monde
+connaît d'abord, la destination ensuite. Seule la première lettre du titre
+passe en minuscule : `toLowerCase()` entier écrasait le sigle IA.
+
+**Trois règles posées par Luigi, appliquées aux neuf cartes :**
+
+1. **Chaque carte tient en un écran**, la page ne défile jamais (vérifié en
+   mesurant `scrollHeight` sur les neuf étapes du rapport Agoravox). Deux
+   causes structurelles corrigées : le conteneur réservait 70px pour une
+   barre haute qui en fait 79 (la page défilait de 9px partout) → `flex: 1`
+   à la place du calc ; et l'en-tête sticky de la carte gonflait le
+   scrollHeight de 8px → l'en-tête est redevenu statique, le sticky ne
+   servait plus à rien une fois la règle de l'écran unique en place. Les
+   longs contenus sont des EXTRAITS, coupe toujours annoncée à l'écran :
+   verbatim recentré sur le concurrent marqué (`extraitVerbatim`, testé),
+   miroir coupé à 480 avec un pied qui dit « début de la réponse » au lieu
+   de « mot pour mot » quand il y a coupe. Sur mobile, les deux volets
+   empilés défilent DANS la carte : c'est assumé.
+
+2. **Copywriting : simple, concret, une idée par phrase.** Référence : la
+   carte technique (« C'est une ligne de texte à changer sur votre
+   serveur »). Réécrits : le verbatim (« Une IA recommande Mediapart. Vous
+   n'êtes pas dans la réponse. »), le miroir (« On a demandé à une IA qui
+   vous êtes. Voilà sa réponse. » — l'ancien paragraphe était l'exemple
+   type cité par Luigi), le diagnostic (« Il reste 104 réponses à lire, et
+   la cause de chaque absence », tableau ramené à six lignes courtes, la
+   ligne miroir retirée car la carte 5 vient de MONTRER le miroir).
+
+3. **Le faux « bug » de la part de voix était une phrase, pas un calcul.**
+   « Sur 20 questions, 18 réponses donnent un nom sans donner le vôtre »
+   mélangeait deux unités ; vérifié en SQL sur Agoravox : 39 réponses lues,
+   18 avec la marque, 18 avec un concurrent seul, 3 sans marque — les deux
+   chiffres étaient justes, la phrase les rendait contradictoires. Titre
+   corrigé : « Sur 39 réponses lues, 18 citent un concurrent. Pas vous. »
+   `voixMeta.reponsesLues` expose le dénominateur, test à l'appui.
+
+**La carte des questions est devenue équipée pour être crue ET comprise** :
+chaque question est une rangée-bouton (bordure, chevron qui pivote, fond au
+survol), une consigne rouge dit « CLIQUEZ SUR UNE QUESTION POUR LIRE LES
+RÉPONSES », un voile en bas signale la suite de la liste, et **les cases de
+la grille ouvrent la question correspondante** (saut instantané : le
+`behavior: "smooth"` se faisait annuler par le reflow de l'ouverture).
+
+Aussi : la fausse affirmation « les réponses vous attendent en bas de cette
+page » (carte verbatim) est morte avec l'annexe qu'elle décrivait ; on nomme
+l'étape de destination, jamais sa distance (elle bouge quand une carte sort).
+
+**L'image de l'étape 2 des trois étapes de la landing** était déclarée
+900×1400 portrait ; le fichier est un paysage de 1408×768. Le cadre mobile
+9/14 n'en montrait qu'une tranche, la cellule desktop très haute recadrait à
+~27 %. Dimensions corrigées, et `object-contain` sur fond assorti (#FCFEF3,
+la couleur de l'illustration) pour cette carte-là seulement.
+
+Piège d'outillage à retenir : la capture d'écran du panneau d'aperçu s'est
+gelée en cours de session (compositeur), alors que le DOM, la géométrie et
+les mesures restaient justes. Vérifier au `getBoundingClientRect` quand les
+pixels mentent, et méfiance : mes clics scriptés pendant les HMR ont produit
+un faux « bug » de navigation qui n'existait pas.
+
+---
+
 ## 2026-08-14 — L'échantillon devient une étape, et deux cartes sont réécrites
 
 Luigi, sur les 20 questions posées en annexe sous la séquence : « c'est trop

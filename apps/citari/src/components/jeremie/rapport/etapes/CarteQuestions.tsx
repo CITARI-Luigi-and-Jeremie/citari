@@ -2,23 +2,23 @@ import { MoteurLogo } from "@/components/moteur-logo";
 import { TexteMoteur, type Mention, type Question, type Reponse } from "@/components/rapport";
 import { MOTEURS } from "@/lib/typo";
 
-import { BODY, HAIR, INK, MONO, MUTED, RED, TEXT, labelStyle } from "../theme";
+import { BODY, CARD, HAIR, INK, MONO, MUTED, PANEL, RED, TEXT, labelStyle } from "../theme";
 
 /**
  * L'échantillon complet, DANS la séquence.
  *
- * Il vivait jusqu'ici en annexe sous la séquence, avec deux liens pour y
- * descendre. Un contenu qu'il faut aller chercher sous un écran plein n'est
- * pas lu : c'était pourtant la pièce qui prouve toute la mesure, celle qu'un
- * dirigeant sceptique ouvre pour vérifier qu'on n'invente rien. Elle est
- * devenue une étape, entre la cause technique et l'offre : on ne peut plus
- * la manquer, et l'annexe du bas a été supprimée avec ses deux liens
- * (jamais deux fois la même pièce, la séquence a déjà payé ce piège avec
- * ses deux comparatifs).
+ * Il vivait en annexe sous la séquence, avec deux liens pour y descendre :
+ * personne ne descendait, c'était pourtant la pièce qui prouve la mesure.
+ * Étape depuis le 14/08/2026, l'annexe est supprimée. Ne jamais la rétablir :
+ * la même pièce à deux endroits est le piège déjà payé avec les deux
+ * comparatifs.
  *
- * La grille de la colonne preuve est la donnée elle-même : une case par
- * question, rouge quand la marque n'apparaît dans aucune réponse. L'ampleur
- * de l'absence se lit d'un coup d'œil, sans qu'on ait besoin de l'écrire.
+ * Restylée le 15/08/2026 sur retour de Luigi (« on ne comprend même pas que
+ * les questions sont cliquables ») : chaque question est une RANGÉE-BOUTON
+ * (bordure, chevron, libellé « lire »), une consigne dit le geste en toutes
+ * lettres, et les cases de la grille OUVRENT la question correspondante.
+ * `<details>` natif : l'ouverture marche sans JavaScript, le saut depuis la
+ * grille est un plus, pas une condition.
  */
 export function CarteQuestions({
   questions,
@@ -52,6 +52,21 @@ export function CarteQuestions({
 
   const citees = lignes.filter((l) => l.citee).length;
 
+  /**
+   * Ouvre une question depuis la grille. Les deux colonnes de la carte sont
+   * deux instances du composant : pas d'état partagé possible, on passe par
+   * le DOM, ce que `<details>` permet proprement.
+   */
+  const ouvrir = (rank: number) => {
+    const d = document.getElementById(`carteq-${rank}`);
+    if (d instanceof HTMLDetailsElement) {
+      d.open = true;
+      // Défilement instantané : le `behavior: "smooth"` se faisait annuler
+      // par le reflow de l'ouverture et la liste ne bougeait pas.
+      d.scrollIntoView({ block: "nearest" });
+    }
+  };
+
   if (part === "preuve") {
     return (
       <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
@@ -75,11 +90,14 @@ export function CarteQuestions({
           </p>
         </div>
 
-        {/* Une case par question : la donnée fait le graphique. */}
+        {/* Une case par question : la donnée fait le graphique, et chaque
+            case ouvre sa question dans la colonne d'à côté. */}
         <div style={{ display: "flex", flexWrap: "wrap", gap: 5 }}>
           {lignes.map((l) => (
-            <span
+            <button
               key={l.q.id}
+              type="button"
+              onClick={() => ouvrir(l.q.rank)}
               title={`${String(l.q.rank).padStart(2, "0")} · ${l.q.text} — ${
                 l.citee ? `cité par ${l.moteursCitants.join(", ")}` : "absent partout"
               }`}
@@ -91,13 +109,15 @@ export function CarteQuestions({
                 justifyContent: "center",
                 background: l.citee ? INK : RED,
                 color: "#FFFDF9",
+                border: "none",
+                cursor: "pointer",
                 fontFamily: MONO,
                 fontSize: 10.5,
                 fontVariantNumeric: "tabular-nums",
               }}
             >
               {String(l.q.rank).padStart(2, "0")}
-            </span>
+            </button>
           ))}
         </div>
 
@@ -117,8 +137,7 @@ export function CarteQuestions({
             paddingTop: 12,
           }}
         >
-          {lignes.length} questions · {valides.length} réponses conservées ·{" "}
-          {moteursPresents.join(", ")}
+          {valides.length} réponses lues · {moteursPresents.join(", ")}
         </p>
       </div>
     );
@@ -130,125 +149,177 @@ export function CarteQuestions({
 
       <p
         style={{
-          fontSize: wide ? 30 : 23,
+          fontSize: wide ? 28 : 22,
           fontWeight: 800,
           letterSpacing: "-0.035em",
           lineHeight: 1.15,
           margin: 0,
         }}
       >
-        Voici les {lignes.length} questions. Ouvrez celle que vous voulez.
+        Les {lignes.length} questions, et ce que chaque IA a répondu.
       </p>
 
-      <p style={{ fontSize: wide ? 16 : 15, color: BODY, lineHeight: 1.55, margin: 0 }}>
-        Ce ne sont pas des exemples : ce sont les questions réellement posées, et les réponses
-        telles que les moteurs les ont écrites, sans coupe ni résumé.{" "}
-        <strong style={{ color: INK, fontWeight: 700 }}>
-          Aucune ne contient votre nom
-        </strong>
-        , volontairement : on mesure si les IA vous citent d'elles-mêmes.
+      <p style={{ fontSize: wide ? 15.5 : 14.5, color: BODY, lineHeight: 1.5, margin: 0 }}>
+        Aucune ne contient votre nom, volontairement : on mesure si les IA vous citent
+        d'elles-mêmes.
       </p>
 
-      {/* La liste défile dans la carte : la séquence garde sa hauteur, et le
-          filet du haut dit qu'il y a de la matière en dessous. */}
-      <div
+      {/* La consigne, en toutes lettres : l'affordance seule ne suffisait pas. */}
+      <p
         style={{
-          maxHeight: wide ? 340 : 280,
-          overflowY: "auto",
-          borderTop: `1px solid ${HAIR}`,
-          borderBottom: `1px solid ${HAIR}`,
+          fontFamily: MONO,
+          fontSize: 11.5,
+          letterSpacing: "0.08em",
+          color: RED,
+          margin: 0,
         }}
       >
-        {lignes.map((l) => (
-          <details key={l.q.id} style={{ borderBottom: `1px solid ${HAIR}` }}>
-            <summary
-              className="list-none"
+        ▸ CLIQUEZ SUR UNE QUESTION POUR LIRE LES RÉPONSES
+      </p>
+
+      {/* La liste défile dans la carte ; le voile en bas dit qu'il y a une
+          suite sans qu'on ait à l'écrire. */}
+      <div style={{ position: "relative" }}>
+        <div
+          style={{
+            maxHeight: wide ? 244 : 224,
+            overflowY: "auto",
+            display: "flex",
+            flexDirection: "column",
+            gap: 6,
+            paddingBottom: 18,
+          }}
+        >
+          {lignes.map((l) => (
+            <details
+              key={l.q.id}
+              id={`carteq-${l.q.rank}`}
               style={{
-                cursor: "pointer",
-                display: "flex",
-                alignItems: "baseline",
-                gap: 10,
-                padding: "10px 4px",
+                border: `1px solid ${HAIR}`,
+                borderRadius: 3,
+                background: CARD,
+                flex: "none",
               }}
             >
-              <span
+              <summary
+                className="list-none carteq-ligne"
                 style={{
-                  fontFamily: MONO,
-                  fontSize: 10.5,
-                  color: MUTED,
-                  flex: "none",
-                  fontVariantNumeric: "tabular-nums",
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "baseline",
+                  gap: 10,
+                  padding: wide ? "10px 12px" : "9px 10px",
                 }}
               >
-                {String(l.q.rank).padStart(2, "0")}
-              </span>
-              <span style={{ flex: 1, fontSize: wide ? 14 : 13.5, lineHeight: 1.4, color: TEXT }}>
-                {l.q.text}
-              </span>
-              <span
-                style={{
-                  fontFamily: MONO,
-                  fontSize: 10.5,
-                  flex: "none",
-                  color: l.citee ? MUTED : RED,
-                }}
-              >
-                {l.citee ? "cité" : "absent"}
-              </span>
-            </summary>
+                <span
+                  aria-hidden
+                  className="carteq-chevron"
+                  style={{ fontFamily: MONO, fontSize: 11, color: RED, flex: "none" }}
+                >
+                  ▸
+                </span>
+                <span
+                  style={{
+                    fontFamily: MONO,
+                    fontSize: 10.5,
+                    color: MUTED,
+                    flex: "none",
+                    fontVariantNumeric: "tabular-nums",
+                  }}
+                >
+                  {String(l.q.rank).padStart(2, "0")}
+                </span>
+                <span style={{ flex: 1, fontSize: wide ? 13.5 : 13, lineHeight: 1.4, color: TEXT }}>
+                  {l.q.text}
+                </span>
+                <span
+                  style={{
+                    fontFamily: MONO,
+                    fontSize: 10.5,
+                    flex: "none",
+                    color: l.citee ? MUTED : RED,
+                  }}
+                >
+                  {l.citee ? "cité" : "absent"}
+                </span>
+              </summary>
 
-            <div style={{ display: "flex", flexDirection: "column", gap: 14, padding: "2px 4px 16px 26px" }}>
-              {moteursPresents.map((m) => {
-                const rep = l.desReponses.find((r) => r.engine === m);
-                if (!rep) return null;
-                const citations = mentions.filter((x) => x.response_id === rep.id);
-                const cible = citations.find((x) => x.is_target);
-                const concurrents = citations.filter((x) => !x.is_target).map((x) => x.brand);
-                return (
-                  <div key={m}>
-                    <p
-                      style={{
-                        fontFamily: MONO,
-                        fontSize: 10.5,
-                        color: MUTED,
-                        display: "flex",
-                        flexWrap: "wrap",
-                        alignItems: "baseline",
-                        gap: "2px 10px",
-                        margin: 0,
-                      }}
-                    >
-                      <span style={{ color: INK, display: "inline-flex", alignItems: "center", gap: 5 }}>
-                        <MoteurLogo moteur={m} className="text-[12px]" />
-                        {m}
-                      </span>
-                      {cible ? (
-                        <span>
-                          {marque} en position {cible.position ?? "?"}
-                          {cible.recommended ? " · recommandé" : ""}
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 14,
+                  padding: wide ? "4px 12px 14px 33px" : "2px 10px 12px 29px",
+                  borderTop: `1px solid ${HAIR}`,
+                  background: PANEL,
+                }}
+              >
+                {moteursPresents.map((m) => {
+                  const rep = l.desReponses.find((r) => r.engine === m);
+                  if (!rep) return null;
+                  const citations = mentions.filter((x) => x.response_id === rep.id);
+                  const cible = citations.find((x) => x.is_target);
+                  const concurrents = citations.filter((x) => !x.is_target).map((x) => x.brand);
+                  return (
+                    <div key={m} style={{ paddingTop: 10 }}>
+                      <p
+                        style={{
+                          fontFamily: MONO,
+                          fontSize: 10.5,
+                          color: MUTED,
+                          display: "flex",
+                          flexWrap: "wrap",
+                          alignItems: "baseline",
+                          gap: "2px 10px",
+                          margin: 0,
+                        }}
+                      >
+                        <span style={{ color: INK, display: "inline-flex", alignItems: "center", gap: 5 }}>
+                          <MoteurLogo moteur={m} className="text-[12px]" />
+                          {m}
                         </span>
-                      ) : (
-                        <span style={{ color: RED }}>{marque} absent</span>
-                      )}
-                      {concurrents.length ? <span>cités : {concurrents.join(", ")}</span> : null}
-                    </p>
-                    <p
-                      style={{
-                        fontSize: 13,
-                        lineHeight: 1.6,
-                        color: BODY,
-                        whiteSpace: "pre-line",
-                        margin: "6px 0 0",
-                      }}
-                    >
-                      <TexteMoteur texte={rep.raw_text ?? ""} />
-                    </p>
-                  </div>
-                );
-              })}
-            </div>
-          </details>
-        ))}
+                        {cible ? (
+                          <span>
+                            {marque} en position {cible.position ?? "?"}
+                            {cible.recommended ? " · recommandé" : ""}
+                          </span>
+                        ) : (
+                          <span style={{ color: RED }}>{marque} absent</span>
+                        )}
+                        {concurrents.length ? <span>cités : {concurrents.join(", ")}</span> : null}
+                      </p>
+                      <p
+                        style={{
+                          fontSize: 12.5,
+                          lineHeight: 1.55,
+                          color: BODY,
+                          whiteSpace: "pre-line",
+                          margin: "6px 0 0",
+                        }}
+                      >
+                        <TexteMoteur texte={rep.raw_text ?? ""} />
+                      </p>
+                    </div>
+                  );
+                })}
+              </div>
+            </details>
+          ))}
+        </div>
+
+        {/* Voile de défilement : signale la suite de la liste. */}
+        <div
+          aria-hidden
+          style={{
+            position: "absolute",
+            left: 0,
+            right: 0,
+            bottom: 0,
+            height: 26,
+            background: `linear-gradient(to bottom, transparent, ${CARD})`,
+            pointerEvents: "none",
+          }}
+        />
       </div>
     </>
   );

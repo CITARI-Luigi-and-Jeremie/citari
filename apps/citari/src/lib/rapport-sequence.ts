@@ -44,6 +44,16 @@ export interface DonneesSequence {
     questions: number;
     moteurs: number;
     marquesTotal: number;
+    /**
+     * Le dénominateur des `reponsesPerdues`, en RÉPONSES lues. La carte
+     * titrait « Sur 20 questions, 18 réponses… » : deux unités dans la même
+     * phrase, et un lecteur qui venait de voir « 11 / 20 questions » à
+     * l'étape suivante y lisait une contradiction. Les deux chiffres étaient
+     * justes ; la phrase mélangeait leurs unités (retour de Luigi,
+     * 15/08/2026, vérifié en SQL sur le scan Agoravox : 39 réponses lues,
+     * 18 avec la marque, 18 avec un concurrent seul, 3 sans aucune marque).
+     */
+    reponsesLues: number;
     reponsesPerdues: number;
     termeSecteur: string;
   };
@@ -348,9 +358,62 @@ export function construireSequence(entree: {
       questions: questions.length,
       moteurs,
       marquesTotal,
+      reponsesLues: retenues,
       reponsesPerdues,
       termeSecteur: termeSecteur(entree.secteur),
     },
+  };
+}
+
+/**
+ * Extrait affichable d'un verbatim marqué, centré sur le `*concurrent*`.
+ *
+ * La carte « phrase exacte » affichait le verbatim entier : certains font
+ * plusieurs paragraphes et la carte débordait de l'écran (règle de Luigi,
+ * 15/08/2026 : chaque carte tient en un écran). On coupe pour l'affichage,
+ * JAMAIS pour la mesure : le texte intégral reste lisible à l'étape « Les N
+ * questions », et la coupe est annoncée à l'écran quand elle a eu lieu.
+ *
+ * Deux précautions, sinon la coupe ment :
+ * - si le nom marqué tombe après la fenêtre, on recentre la fenêtre sur lui
+ *   (un extrait de cette carte SANS le concurrent ne prouve rien) ;
+ * - on ne coupe jamais au milieu du marqueur `*...*`, sinon l'astérisque
+ *   orpheline casse le rendu de `marked`.
+ */
+export function extraitVerbatim(
+  texte: string,
+  max = 380,
+): { texte: string; coupe: boolean } {
+  if (texte.length <= max) return { texte, coupe: false };
+
+  const debutMarqueur = texte.indexOf("*");
+  const finMarqueur = debutMarqueur === -1 ? -1 : texte.indexOf("*", debutMarqueur + 1);
+
+  // Fenêtre par défaut : le début du texte. Si le marqueur complet existe et
+  // dépasse la fenêtre, on la recentre pour qu'il y figure en entier.
+  let debut = 0;
+  if (finMarqueur !== -1 && finMarqueur + 1 > max) {
+    debut = Math.max(0, debutMarqueur - Math.floor(max / 3));
+    // Jamais commencer entre les deux astérisques.
+    if (debut > debutMarqueur) debut = debutMarqueur;
+  }
+  let fin = Math.min(texte.length, debut + max);
+  if (debutMarqueur !== -1 && fin > debutMarqueur && finMarqueur !== -1 && fin <= finMarqueur) {
+    fin = Math.min(texte.length, finMarqueur + 1);
+  }
+
+  // Couper sur un espace pour ne pas trancher un mot.
+  let morceau = texte.slice(debut, fin);
+  if (fin < texte.length) {
+    const dernierEspace = morceau.lastIndexOf(" ");
+    if (dernierEspace > finMarqueur - debut && dernierEspace > max * 0.6) {
+      morceau = morceau.slice(0, dernierEspace);
+    }
+  }
+
+  return {
+    texte: `${debut > 0 ? "… " : ""}${morceau.trim()}${debut + morceau.length < texte.length ? " …" : ""}`,
+    coupe: true,
   };
 }
 

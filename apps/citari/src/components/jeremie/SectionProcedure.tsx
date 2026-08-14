@@ -35,6 +35,13 @@ type Etape = {
   imageWidth: number;
   imageHeight: number;
   imageAspect: string;
+  /**
+   * `contain` pour une carte dont le texte est bien plus haut que large :
+   * en `cover`, la cellule d'image très verticale n'affichait qu'une tranche
+   * de ~27 % de l'illustration (retour Luigi, 15/08/2026 : « trop zoomé »).
+   * Le fond posé derrière est celui de l'illustration elle-même (#FCFEF3).
+   */
+  imageFit?: "contain";
   alt: string;
 };
 
@@ -114,10 +121,13 @@ const ETAPES: Etape[] = [
         </p>
       </div>
     ),
+    // Le fichier est un PAYSAGE de 1408×768 : il était déclaré 900×1400
+    // portrait, et le cadre mobile 9/14 n'en montrait qu'une tranche.
     image: "/img/etape-citations.png",
-    imageWidth: 900,
-    imageHeight: 1400,
-    imageAspect: "aspect-[9/14]",
+    imageWidth: 1408,
+    imageHeight: 768,
+    imageAspect: "aspect-[2/1]",
+    imageFit: "contain",
     alt: "Un guillemet au-dessus de quatre filets, dont un surligné en rouge.",
   },
   {
@@ -213,7 +223,10 @@ export function SectionProcedure() {
                       loading="lazy"
                       width={etape.imageWidth}
                       height={etape.imageHeight}
-                      className={`${etape.imageAspect} w-full border-b border-rule object-cover sm:aspect-auto sm:h-full sm:border-b-0 sm:border-r`}
+                      style={etape.imageFit === "contain" ? { backgroundColor: "#FCFEF3" } : undefined}
+                      className={`${etape.imageAspect} w-full border-b border-rule object-cover sm:aspect-auto sm:h-full sm:border-b-0 sm:border-r ${
+                        etape.imageFit === "contain" ? "sm:object-contain" : ""
+                      }`}
                     />
 
                     <div className="flex flex-col p-6 sm:p-7">
