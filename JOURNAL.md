@@ -5,6 +5,31 @@ d'une nouvelle session, après `CLAUDE.md`.
 
 ---
 
+## 2026-08-14 — Le formulaire perd une étape, le secteur devient libre
+
+Deux décisions de Luigi sur le formulaire, appliquées ensemble.
+
+**L'étape « concurrents » est retirée** (4 étapes → 3 : site → secteur et
+ville → email). La mesure découvre les concurrents elle-même — les noms tapés
+n'étaient JAMAIS soufflés aux moteurs, ils n'alimentaient que l'accroche
+d'email « Vous nous avez cité X. Les IA aussi. » et le bloc du rapport
+complet. Ces deux consommateurs sont conditionnels et se taisent sans
+donnée ; la colonne `scans.competitors` reste, les scans historiques gardent
+la leur. Ce qu'on perd, en conscience : la meilleure accroche de la série
+d'emails pour les futurs leads du site (les prospects du toolkit n'en ont de
+toute façon jamais eu).
+
+**Le secteur se tape librement**, nos verticales en suggestions filtrées.
+« Poker en ligne » vaut mieux que le « Autre » de l'ancien menu : le texte
+libre nourrit la génération (troisième filet derrière le site et la marque),
+la question miroir et le classement des concurrents. Le serveur acceptait
+déjà n'importe quel texte — seul le composant l'interdisait. La liste
+`SECTORS` reste la taxonomie de NOS segments (baromètre, corrections par
+secteur, gabarits) : les scans par lot la posent programmatiquement, le
+texte libre des prospects ne la fragmente pas.
+
+---
+
 ## 2026-08-14 — Booking classé « géant »… pour Airbnb : la relativité du classement était un vœu
 
 Luigi : « pourquoi ça parle d'Abritel alors que Booking est bien plus sérieux

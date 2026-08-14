@@ -41,10 +41,11 @@ export const SELF_SCORE: number | null = null;
 export const SELF_SCORE_DATE = "";
 
 /**
- * Secteurs proposés au formulaire.
- *
- * Ils servent à générer les questions posées aux moteurs : un libellé trop
- * vague produit des questions trop larges, et donc une mesure moins juste.
+ * Verticales SUGGÉRÉES au formulaire — le champ est libre depuis le
+ * 14/08/2026, le prospect écrit son métier dans ses mots. La liste reste la
+ * taxonomie de NOS segments (baromètre, corrections de concurrents par
+ * secteur, gabarits d'emails) : nos propres scans par lot la posent
+ * programmatiquement.
  */
 export const SECTORS = [
   "Cabinet comptable",

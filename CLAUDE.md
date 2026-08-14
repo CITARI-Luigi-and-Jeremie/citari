@@ -104,7 +104,7 @@ rendre cet aiguillage configurable.
 **Le parcours a trois écrans, pas quatre.** Landing → `/scan/$id` (l'attente,
 carte perforée) → `/rapport/$jeton`. L'aguiche qui vivait sur l'écran de scan a
 été retirée le 09/08/2026 : elle servait de péage à l'email, or l'adresse est
-demandée à la quatrième étape du formulaire, AVANT le lancement. Elle rejouait
+demandée à la dernière étape du formulaire, AVANT le lancement. Elle rejouait
 donc le score, la part de voix et le verbatim que le rapport rouvrait aussitôt,
 avec des dénominateurs différents. La mesure finie, on redirige (en `replace`,
 sinon le bouton « retour » enferme le prospect) vers le rapport, seule adresse
