@@ -1,9 +1,9 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { EcranAttente } from "@/components/jeremie/EcranAttente";
-import { suivreScan } from "@/lib/scan.functions";
+import { lireScan, suivreScan } from "@/lib/scan.functions";
 import type { EtatScan } from "@/lib/orchestrateur.server";
 
 /**
@@ -53,35 +53,66 @@ function Attente() {
   const { id } = Route.useParams();
   const navigate = useNavigate();
   const avancer = useServerFn(suivreScan);
+  const lire = useServerFn(lireScan);
   const [etat, setEtat] = useState<EtatScan | null>(null);
   const [abandon, setAbandon] = useState(false);
   const echecs = useRef(0);
 
+  // `useServerFn` rend une identité NOUVELLE à chaque rendu, et la boucle de
+  // lecture provoque un rendu par seconde. Si les effets dépendaient de ces
+  // identités, le pilotage se démonterait et se relancerait chaque seconde —
+  // un `avancerScan` de plus en vol à chaque battement, exactement la
+  // facturée-double documentée plus bas, en pire. Les refs ancrent les
+  // fonctions ; les effets ne dépendent que de l'identifiant du scan.
+  const avancerRef = useRef(avancer);
+  avancerRef.current = avancer;
+  const lireRef = useRef(lire);
+  lireRef.current = lire;
+
+  // Deux réponses en vol peuvent revenir dans le désordre : une lecture
+  // partie tôt et arrivée tard ne doit jamais écraser un état plus frais.
+  // L'avancement réel est monotone (des lignes s'ajoutent, un statut se
+  // termine), on n'accepte donc qu'un état au moins aussi avancé.
+  const appliquerEtat = useCallback((res: EtatScan | null) => {
+    if (!res) return;
+    setEtat((courant) => {
+      if (!courant) return res;
+      if (res.status === "done" || res.status === "error") return res;
+      if (courant.status === "done" || courant.status === "error") return courant;
+      if (res.collectees < courant.collectees) return courant;
+      if (res.collectees === courant.collectees && res.questions.length < courant.questions.length)
+        return courant;
+      return res;
+    });
+  }, []);
+
+  // BOUCLE DE PILOTAGE — fait avancer la machine, marche après marche.
+  //
+  // `actif` est une variable LOCALE à cette exécution de l'effet, et surtout
+  // pas un `useRef` partagé. C'est ce partage qui doublait la facture.
+  //
+  // Le scénario : l'effet se relance (identité de `avancer` changée), son
+  // nettoyage passe le drapeau partagé à false, puis la nouvelle exécution le
+  // remet aussitôt à true. La requête encore en vol de l'ANCIENNE boucle
+  // reprend alors la main, lit un drapeau redevenu true, se croit vivante et
+  // replanifie son propre minuteur — inscrit dans une fermeture dont le
+  // nettoyage est déjà passé, donc plus annulable par personne. Deux boucles
+  // sondaient dès lors le même scan en parallèle.
+  //
+  // Mesuré, pas supposé : 80 appels de moteur facturés pour 40 réponses
+  // conservées, exactement le double, sur un scan aperçu ordinaire.
+  // Avec une variable locale, chaque boucle possède son propre drapeau et
+  // meurt pour de bon quand son nettoyage passe.
   useEffect(() => {
-    // `actif` est une variable LOCALE à cette exécution de l'effet, et surtout
-    // pas un `useRef` partagé. C'est ce partage qui doublait la facture.
-    //
-    // Le scénario : l'effet se relance (identité de `avancer` changée), son
-    // nettoyage passe le drapeau partagé à false, puis la nouvelle exécution le
-    // remet aussitôt à true. La requête encore en vol de l'ANCIENNE boucle
-    // reprend alors la main, lit un drapeau redevenu true, se croit vivante et
-    // replanifie son propre minuteur — inscrit dans une fermeture dont le
-    // nettoyage est déjà passé, donc plus annulable par personne. Deux boucles
-    // sondaient dès lors le même scan en parallèle.
-    //
-    // Mesuré, pas supposé : 80 appels de moteur facturés pour 40 réponses
-    // conservées, exactement le double, sur un scan aperçu ordinaire.
-    // Avec une variable locale, chaque boucle possède son propre drapeau et
-    // meurt pour de bon quand son nettoyage passe.
     let actif = true;
     let timer: ReturnType<typeof setTimeout>;
 
     const boucle = async () => {
       try {
-        const res = (await avancer({ data: { id } })) as EtatScan | null;
+        const res = (await avancerRef.current({ data: { id } })) as EtatScan | null;
         echecs.current = 0;
         if (!actif) return;
-        setEtat(res);
+        appliquerEtat(res);
         if (res && (res.status === "done" || res.status === "error")) return;
       } catch {
         echecs.current += 1;
@@ -100,18 +131,51 @@ function Attente() {
       actif = false;
       clearTimeout(timer);
     };
-  }, [avancer, id]);
+  }, [id, appliquerEtat]);
 
-  // Un temps d'arrêt sur la grille scellée, puis le rapport. La navigation
-  // REMPLACE l'entrée d'historique : sans cela, le bouton « retour » ramènerait
-  // sur un scan terminé qui redirigerait aussitôt, et le prospect serait
-  // prisonnier de sa propre page de résultat.
+  // BOUCLE DE LECTURE — nourrit l'écran, sans rien faire avancer.
+  //
+  // La première marche du pilotage (génération des questions) bloque une
+  // vingtaine de secondes : sans cette boucle-ci, la page restait vide tout
+  // ce temps. Elle lit l'état à la seconde, pour trois SELECT, et s'arrête
+  // d'elle-même quand le scan se termine. Une lecture qui échoue réessaie au
+  // battement suivant, sans compter dans `echecs` : c'est le pilotage qui
+  // décide d'un abandon, pas la lecture.
+  useEffect(() => {
+    let actif = true;
+    let timer: ReturnType<typeof setTimeout>;
+
+    const boucle = async () => {
+      try {
+        const res = (await lireRef.current({ data: { id } })) as EtatScan | null;
+        if (!actif) return;
+        appliquerEtat(res);
+        if (res && (res.status === "done" || res.status === "error")) return;
+      } catch {
+        /* la prochaine lecture réessaie */
+      }
+      if (!actif) return;
+      timer = setTimeout(boucle, 1000);
+    };
+
+    void boucle();
+    return () => {
+      actif = false;
+      clearTimeout(timer);
+    };
+  }, [id, appliquerEtat]);
+
+  // La mesure finie, l'écran reste affiché, scellé à 100 %, le temps que la
+  // progression s'achève sous les yeux du prospect ; puis le rapport. La
+  // navigation REMPLACE l'entrée d'historique : sans cela, le bouton
+  // « retour » ramènerait sur un scan terminé qui redirigerait aussitôt, et
+  // le prospect serait prisonnier de sa propre page de résultat.
   const jeton = etat?.status === "done" ? etat.reportToken : null;
   useEffect(() => {
     if (!jeton) return;
     const t = setTimeout(() => {
       void navigate({ to: "/rapport/$jeton", params: { jeton }, replace: true });
-    }, 900);
+    }, 1700);
     return () => clearTimeout(t);
   }, [jeton, navigate]);
 
@@ -126,33 +190,9 @@ function Attente() {
     );
   }
 
-  if (jeton) {
-    return (
-      <section>
-        <div className="mx-auto max-w-5xl px-5 py-24 sm:px-8 sm:py-32">
-          <p className="mono text-[12px] tracking-[0.12em] text-ink-2">
-            MESURE SCELLÉE · OUVERTURE DE VOTRE RAPPORT
-            <span className="anim-blink ml-2 inline-block align-middle">▮</span>
-          </p>
-        </div>
-      </section>
-    );
-  }
-
-  if (!etat) {
-    return (
-      <section>
-        <div className="mx-auto max-w-5xl px-5 py-24 sm:px-8 sm:py-32">
-          <p className="mono text-[12px] tracking-[0.12em] text-ink-2">
-            OUVERTURE DU DOSSIER
-            <span className="anim-blink ml-2 inline-block align-middle">▮</span>
-          </p>
-        </div>
-      </section>
-    );
-  }
-
-  return <EcranAttente etat={etat} instable={echecs.current > 0} />;
+  // Avant le premier battement, l'écran s'affiche déjà en coquille : cadre,
+  // étapes, flux en initialisation. Jamais une page vide.
+  return <EcranAttente etat={etat} scelle={Boolean(jeton)} instable={echecs.current > 0} />;
 }
 
 function Interruption({ message }: { message: string }) {

@@ -5,6 +5,44 @@ d'une nouvelle session, après `CLAUDE.md`.
 
 ---
 
+## 2026-08-14 — Vingt secondes de vide, un piège de refs, et Gemini à sec
+
+Luigi, à juste titre furieux : l'écran « Analyse Citari » n'apparaissait que
+20 secondes après le lancement. Trois causes emboîtées, découvertes dans
+l'ordre inverse de leur gravité.
+
+**1. L'écran ne se nourrissait qu'à la boucle de pilotage.** `suivreScan`
+fait avancer la machine PUIS renvoie l'état ; sa première marche est la
+génération des questions, ~20 s d'IA, pendant lesquelles la page n'avait
+rien. Corrigé par une séparation lecture/pilotage : `lireScan` (lecture pure,
+trois SELECT) nourrit l'écran à la seconde ; `suivreScan` pilote en
+parallèle, inchangé. L'écran apparaît en coquille AVANT même le premier
+battement (jamais de page vide), et mesuré à 1,5 s après le clic au lieu de
+20. En prime, la fin est scellée À L'ÉCRAN : 100 %, cinq étapes faites,
+« Mesure scellée · ouverture de votre rapport… », puis la redirection.
+
+**2. Le piège `useServerFn`, déjà documenté, retendu par moi.** Cette
+fonction rend une identité NOUVELLE à chaque rendu — c'est écrit noir sur
+blanc dans le commentaire de la boucle, qui avait coûté une facturation
+double. Ma boucle de lecture provoquant un rendu par seconde, l'effet de
+pilotage (qui dépendait de l'identité) se démontait et se relançait chaque
+seconde : un `avancerScan` de plus en vol à chaque battement, conflits de
+verrou, huit échecs, « MESURE INTERROMPUE ». Règle apprise : **tout effet de
+boucle ancre ses fonctions serveur dans des refs et ne dépend que de
+l'identifiant.** Un garde de monotonie protège aussi contre deux réponses
+revenues dans le désordre.
+
+**3. Et sous tout ça : le crédit Google est épuisé.** `Google [429] « Your
+prepayment credits are depleted »` sur la génération. La panne exacte
+d'Anthropic du 06/08, côté Google : gemini-3.1-flash-lite (génération et
+analyse) ET le moteur Gemini de l'aperçu sont morts tant que le compte
+AI Studio n'est pas rechargé. Les scans du matin passaient encore ; les deux
+« × » Gemini sur compta-clementine étaient sans doute l'agonie du solde. Le
+prospect voit le message neutre, le 429 reste en base : ce garde-fou-là a
+fonctionné. À recharger par Luigi sur AI Studio avant tout scan.
+
+---
+
 ## 2026-08-14 — L'écran de scan que Luigi attendait était l'autre
 
 Luigi, capture à l'appui : « tu as carrément pas mis ça sur le screen ».

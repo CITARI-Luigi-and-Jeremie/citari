@@ -18,7 +18,13 @@ import { cleCellule, formaterDuree, formaterLatence } from "@/lib/scan-attente";
  * un reflet qui balaie, pas une fausse fraction.
  */
 
-type Props = { etat: EtatScan; instable: boolean };
+type Props = {
+  /** Nul avant le premier battement du serveur : l'écran s'affiche en coquille. */
+  etat: EtatScan | null;
+  /** Mesure terminée : tout passe à 100 %, le rapport s'ouvre juste après. */
+  scelle?: boolean;
+  instable: boolean;
+};
 
 const INK = "#17160F";
 const MUTED = "#7C7A72";
@@ -137,15 +143,20 @@ function usePourcentLisse(cible: number, duree = 900): number {
   return valeur;
 }
 
-export function EcranAttente({ etat, instable }: Props) {
-  const { questions, cellules, moteurs, verrouilles, collectees, total, progression } = etat;
-  const ecoule = useChrono(etat.demarreA);
-  const pourcent = usePourcentLisse(progression);
+export function EcranAttente({ etat, scelle = false, instable }: Props) {
+  const questions = etat?.questions ?? [];
+  const cellules = etat?.cellules ?? [];
+  const moteurs = etat?.moteurs ?? [];
+  const verrouilles = etat?.verrouilles ?? [];
+  const collectees = etat?.collectees ?? 0;
+  const total = etat?.total ?? 0;
+  const ecoule = useChrono(etat?.demarreA ?? null);
+  const pourcent = usePourcentLisse(scelle ? 100 : (etat?.progression ?? 0));
 
   // Étape réelle : la phase du serveur décide, l'analyse se déroule en deux
   // temps d'affichage (lecture puis score) après un court délai.
   const [finAnalyse, setFinAnalyse] = useState(false);
-  const analyse = etat.phase === "analyse";
+  const analyse = etat?.phase === "analyse";
   useEffect(() => {
     if (!analyse) {
       setFinAnalyse(false);
@@ -155,8 +166,9 @@ export function EcranAttente({ etat, instable }: Props) {
     return () => window.clearTimeout(id);
   }, [analyse]);
 
-  const etape =
-    etat.phase === "init" ? 0
+  const etape = scelle
+    ? 5
+    : !etat || etat.phase === "init" ? 0
     : etat.phase === "questions" ? 1
     : etat.phase === "interrogation" ? 2
     : finAnalyse ? 4
@@ -205,7 +217,7 @@ export function EcranAttente({ etat, instable }: Props) {
               <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 40 }}>
                 <span className="cit-live" aria-hidden="true" />
                 <span style={{ fontFamily: MONO, fontSize: 11, letterSpacing: "0.18em", color: MUTED, textTransform: "uppercase" }}>
-                  Scan en cours
+                  {scelle ? "Mesure scellée" : "Scan en cours"}
                 </span>
               </div>
               <h1 style={{ fontSize: "clamp(38px,5vw,56px)", fontWeight: 800, letterSpacing: "-0.04em", lineHeight: 0.95, margin: 0, marginBottom: 12 }}>
@@ -214,8 +226,7 @@ export function EcranAttente({ etat, instable }: Props) {
                 Citari
               </h1>
               <p style={{ fontFamily: MONO, fontSize: 12, color: MUTED, margin: "0 0 36px" }}>
-                {etat.brand}
-                {etat.domaine ? ` · ${etat.domaine}` : ""}
+                {etat ? `${etat.brand}${etat.domaine ? ` · ${etat.domaine}` : ""}` : " "}
               </p>
 
               <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
@@ -346,14 +357,18 @@ export function EcranAttente({ etat, instable }: Props) {
               </div>
 
               <div style={{ marginTop: 40, minHeight: 40, overflow: "hidden" }}>
-                {derniere ? (
+                {scelle ? (
+                  <span className="cit-fade" style={{ display: "block", fontFamily: MONO, fontSize: 12, color: "#C0371D", lineHeight: 1.5 }}>
+                    Mesure scellée · ouverture de votre rapport…
+                  </span>
+                ) : derniere ? (
                   <span key={collectees} className="cit-ticker" style={{ display: "block", fontFamily: MONO, fontSize: 12, color: "#F2F0EA", opacity: 0.7, lineHeight: 1.5 }}>
                     {derniere.moteur} ·{" "}
                     {derniere.erreur ? "indisponible sur cette question" : formaterLatence(derniere.latence)}
                   </span>
                 ) : (
                   <span className="cit-fade" style={{ display: "block", fontFamily: MONO, fontSize: 12, color: "#F2F0EA", opacity: 0.4 }}>
-                    {etat.phase === "questions"
+                    {etat?.phase === "questions"
                       ? "Les questions de vos acheteurs s'écrivent…"
                       : "Initialisation du flux de mesure…"}
                   </span>
@@ -374,7 +389,7 @@ export function EcranAttente({ etat, instable }: Props) {
             </div>
 
             <div style={{ position: "absolute", bottom: 24, right: 24, fontSize: 13, color: "#F2F0EA", opacity: 0.08, fontWeight: 800, letterSpacing: "-0.02em", userSelect: "none" }}>
-              {etat.domaine ?? etat.brand}
+              {etat?.domaine ?? etat?.brand ?? ""}
             </div>
           </div>
         </div>

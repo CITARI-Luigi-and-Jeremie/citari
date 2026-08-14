@@ -100,6 +100,23 @@ export const suivreScan = createServerFn({ method: "POST" })
     return await etatScan(data.id);
   });
 
+/**
+ * Lecture PURE de l'état, sans faire avancer la machine.
+ *
+ * `suivreScan` bloque le temps de sa marche — la première (génération des
+ * questions) dure vingt secondes, pendant lesquelles l'écran n'avait rien à
+ * afficher. L'écran se nourrit donc ici, à cadence rapide et coût minuscule
+ * (trois SELECT), pendant que `suivreScan` pilote en parallèle. Lecture
+ * seule : appelable depuis n'importe quel navigateur sans autre effet que
+ * de lire un scan dont il faut déjà connaître l'identifiant.
+ */
+export const lireScan = createServerFn({ method: "POST" })
+  .inputValidator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
+  .handler(async ({ data }) => {
+    const { etatScan } = await import("@/lib/orchestrateur.server");
+    return await etatScan(data.id);
+  });
+
 export const chargerRapport = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => z.object({ jeton: z.string().min(10).max(80) }).parse(d))
   .handler(async ({ data }) => {
