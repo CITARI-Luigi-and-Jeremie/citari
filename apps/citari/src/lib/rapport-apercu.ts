@@ -94,15 +94,21 @@ export type LignePdv = { nom: string; reponses: number; cible: boolean };
  * feraient deux barres. La ligne du client est garantie présente, même hors
  * du haut de tableau : sans elle, un client classé onzième apparaissait à
  * zéro.
+ *
+ * `marqueCible` regroupe TOUTES les mentions de la marque suivie sous un
+ * seul nom : les moteurs l'écrivent parfois de plusieurs façons, et deux
+ * lignes « cible » faisaient diverger ce comptage de celui de la carte
+ * concurrent (14 d'un côté, 13 de l'autre, scan Airbnb du 14/08/2026).
  */
 export function partDeVoix(
   mentions: LigneMention[],
   alias: Record<string, string> = {},
   max = 5,
+  marqueCible?: string,
 ): LignePdv[] {
   const parNom = new Map<string, { reponses: Set<string>; cible: boolean }>();
   for (const m of mentions) {
-    const nom = m.is_target ? m.brand : (alias[m.brand] ?? m.brand);
+    const nom = m.is_target ? (marqueCible ?? m.brand) : (alias[m.brand] ?? m.brand);
     const entree = parNom.get(nom) ?? { reponses: new Set<string>(), cible: m.is_target };
     entree.reponses.add(m.response_id);
     entree.cible = entree.cible || m.is_target;

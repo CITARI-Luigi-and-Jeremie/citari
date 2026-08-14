@@ -62,6 +62,40 @@ export function termeSecteur(secteur: string | null): string {
 const ordinal = (n: number) =>
   n === 1 ? "citée en premier" : n === 2 ? "citée en deuxième" : `citée en position ${n}`;
 
+/**
+ * Le titre et l'accroche de la carte « concurrent », en fonction du rapport
+ * de forces RÉEL. Fonction pure, testée : la première version n'avait pas de
+ * branche « vous menez » et titrait « Abritel est nommé plus souvent que
+ * vous » au-dessus de barres qui montraient 5 contre 14 (scan Airbnb du
+ * 14/08/2026). Un titre qui contredit ses propres chiffres coûte toute la
+ * crédibilité de la mesure.
+ */
+export function carteConcurrent(
+  nom: string,
+  reponsesAdversaire: number,
+  vosReponses: number,
+): { kicker: string; titre: string; regime: "jamais" | "derriere" | "egal" | "devant" } {
+  if (vosReponses === 0) {
+    return { kicker: "QUI PREND VOTRE PLACE", titre: `${nom} est nommé. Vous, jamais.`, regime: "jamais" };
+  }
+  if (reponsesAdversaire > vosReponses) {
+    const multiple = reponsesAdversaire / vosReponses;
+    const titre =
+      multiple >= 2
+        ? `${nom} est nommé ${Math.floor(multiple) === 2 ? "deux" : Math.floor(multiple) === 3 ? "trois" : Math.floor(multiple)} fois plus souvent que vous.`
+        : `${nom} est nommé plus souvent que vous.`;
+    return { kicker: "QUI PREND VOTRE PLACE", titre, regime: "derriere" };
+  }
+  if (reponsesAdversaire === vosReponses) {
+    return { kicker: "QUI VISE VOTRE PLACE", titre: `${nom} fait jeu égal avec vous.`, regime: "egal" };
+  }
+  return {
+    kicker: "QUI VISE VOTRE PLACE",
+    titre: `Vous menez. ${nom} reste dans la conversation.`,
+    regime: "devant",
+  };
+}
+
 export function construireSequence(entree: {
   marque: string;
   domaine: string | null;
@@ -172,7 +206,7 @@ export function construireSequence(entree: {
         }
       : null;
 
-  const voix = partDeVoix(mentions, alias).map((l) => ({
+  const voix = partDeVoix(mentions, alias, 5, marque).map((l) => ({
     nom: l.nom,
     reponses: l.reponses,
     vous: l.cible,

@@ -39,7 +39,12 @@ export function SequenceResultat({
   const etapes: Etape[] = [
     { clef: "score", titre: "Votre score", preuve: "Le chiffre mesuré", cta: "Voir qui prend ma place" },
     ...(data.adversaire
-      ? [{ clef: "concurrent", titre: "Qui prend votre place", preuve: "Les réponses comptées", cta: "Lire ce que l'IA répond" }]
+      ? [{
+          clef: "concurrent",
+          titre: data.vosReponses >= data.adversaire.reponses ? "Qui vise votre place" : "Qui prend votre place",
+          preuve: "Les réponses comptées",
+          cta: "Lire ce que l'IA répond",
+        }]
       : []),
     ...(data.laPlusDure
       ? [{ clef: "verbatim", titre: "La phrase exacte", preuve: "", cta: "Voir la part de voix" }]
