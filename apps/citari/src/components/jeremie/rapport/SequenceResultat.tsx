@@ -4,7 +4,6 @@ import type { DonneesSequence } from "@/lib/rapport-sequence";
 
 import { CarteSplit } from "./CarteSplit";
 import { GrilleFond } from "./GrilleFond";
-import { ModalePoints } from "./ModalePoints";
 import { CarteDiagnostic } from "./etapes/CarteDiagnostic";
 import { CarteReservation } from "./etapes/CarteReservation";
 import { CarteConcurrent } from "./etapes/CarteConcurrent";
@@ -48,12 +47,14 @@ export function SequenceResultat({
     ...(data.voix.length > 0
       ? [{ clef: "voix", titre: "La part de voix", preuve: "Les réponses par nom", cta: "Ce que cet aperçu ne peut pas dire" }]
       : []),
-    { clef: "diagnostic", titre: "Le diagnostic complet", preuve: "Aperçu contre complet", cta: "Voir ce que le diagnostic ouvre" },
+    // La modale « ce que vous apprenez » a été supprimée le 14/08/2026 : la
+    // séquence portait deux comparatifs qui se répétaient. Son tableau vit
+    // désormais DANS la carte diagnostic, et le CTA avance simplement.
+    { clef: "diagnostic", titre: "Le diagnostic complet", preuve: "", cta: "Voir le cadre de l'appel" },
     { clef: "reservation", titre: "Réserver", preuve: "Le cadre de l'appel", cta: null },
   ];
 
   const [index, setIndex] = useState(0);
-  const [pointsOpen, setPointsOpen] = useState(false);
   const [vues, setVues] = useState(0);
   const [visible, setVisible] = useState(true);
   const timer = useRef<number | null>(null);
@@ -89,7 +90,6 @@ export function SequenceResultat({
   }, [aller, index]);
 
   const etape = etapes[index]!;
-  const estDiagnostic = etape.clef === "diagnostic";
 
   const rendu = (part: "recit" | "preuve") => {
     switch (etape.clef) {
@@ -142,7 +142,7 @@ export function SequenceResultat({
           />
         );
       case "diagnostic":
-        return <CarteDiagnostic wide={wide} part={part} />;
+        return <CarteDiagnostic wide={wide} part={part} score={data.score} />;
       default:
         return <CarteReservation wide={wide} part={part} />;
     }
@@ -152,7 +152,7 @@ export function SequenceResultat({
     <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 4 }}>
       <button
         type="button"
-        onClick={() => (estDiagnostic ? setPointsOpen(true) : aller(index + 1))}
+        onClick={() => aller(index + 1)}
         style={{
           background: INK,
           color: PAPER,
@@ -230,20 +230,6 @@ export function SequenceResultat({
       }}
     >
       <GrilleFond />
-
-      <ModalePoints
-        open={pointsOpen}
-        wide={wide}
-        onClose={() => {
-          setPointsOpen(false);
-          aller(etapes.length - 1);
-        }}
-        onBook={() => {
-          setPointsOpen(false);
-          aller(etapes.length - 1);
-          onBook();
-        }}
-      />
 
       <CarteSplit
         key={index}

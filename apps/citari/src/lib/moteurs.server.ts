@@ -496,6 +496,10 @@ export async function genererQuestions(input: {
         'Renvoie UNIQUEMENT du JSON : {"queries":[{"text":"","intent":"comparative|probleme|locale|confiance"}]}. ' +
         mix +
         " Le nom de la marque suivie ne doit JAMAIS apparaître dans une question : on mesure si l'IA la cite spontanément." +
+        " Toutes les questions sont des questions d'AVANT-achat : quelqu'un qui CHOISIT un prestataire ou un service." +
+        " Les questions « probleme » sont des douleurs qui précèdent le choix (se méfier, comparer, éviter un piège," +
+        " ne pas se tromper) — JAMAIS du support ou du dépannage d'un produit déjà utilisé : une IA qui répond à une" +
+        " question de SAV ne fait perdre de client à personne." +
         " Le MÉTIER de l'entreprise se déduit dans cet ordre : 1) l'extrait du site s'il est fourni ;" +
         " 2) ce que tu sais toi-même de la marque suivie si elle t'est connue ;" +
         " 3) le secteur déclaré s'il est précis. Le libellé « Autre » n'est PAS un métier :" +

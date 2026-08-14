@@ -85,17 +85,73 @@ export function construireSequence(entree: {
     ? { nom: adversaireBrut.nom, reponses: adversaireBrut.reponses, total: adversaireBrut.total }
     : null;
 
-  // La réponse la plus dure : un concurrent recommandé (ou le mieux placé)
-  // sur une question où la marque n'apparaît sur aucun moteur — la même
-  // sélection que l'aguiche par email, pour que tous les écrans racontent la
-  // même histoire. On garde ici la question d'origine et le rang exact.
+  // La réponse la plus dure, en deux étages, parce que la douleur n'a pas la
+  // même forme selon le score. La première sélection prenait « le concurrent
+  // le mieux placé sur une question sans la marque », point — et sortait
+  // GeoComply (un éditeur B2B de géolocalisation, non classé donc réputé
+  // rival) sur une question de dépannage : une pièce exacte, zéro douleur
+  // commerciale.
+  //
+  //   Étage 1 — L'ABSENCE : un concurrent crédible cité sur une question où
+  //   la marque n'apparaît pas. Crédible = classé rival ou géant ; un
+  //   concurrent NON CLASSÉ n'est retenu que sur une question d'achat
+  //   (comparative, locale) — c'est le garde-fou anti-GeoComply.
+  //
+  //   Étage 2 — LE DÉPASSEMENT, pour les marques bien citées qui n'ont
+  //   presque aucune question d'absence : la phrase où un RIVAL est cité
+  //   DEVANT la marque dans la même réponse. « PokerStars cité en premier ·
+  //   vous : en position 3 » est la vraie brèche d'un score à 85.
+  //
+  //   Aucun étage ne fournit ? La carte sort de la séquence, comme toujours :
+  //   jamais de pièce tiède présentée comme une douleur.
   const questionsCitees = new Set(mentions.filter((m) => m.is_target).map((m) => m.query_id));
-  const candidates = mentions
-    .filter(
-      (m) => !m.is_target && m.verbatim && m.verbatim.length > 60 && !questionsCitees.has(m.query_id),
-    )
-    .sort((a, b) => Number(b.recommended) - Number(a.recommended) || (a.position ?? 99) - (b.position ?? 99));
-  const dure = candidates[0] ?? null;
+  const classeDe = (marqueMention: string): string | null =>
+    classes[alias[marqueMention] ?? marqueMention] ?? null;
+  const intentDe = new Map(questions.map((q) => [q.id, q.intent]));
+  const intentAchat = (queryId: string) =>
+    ["comparative", "locale"].includes(intentDe.get(queryId) ?? "");
+  const POIDS_CLASSE: Record<string, number> = { rival: 40, geant: 10 };
+  const POIDS_INTENT: Record<string, number> = { comparative: 12, locale: 9, confiance: 5, probleme: 0 };
+  const interet = (m: LigneMention) =>
+    (POIDS_CLASSE[classeDe(m.brand) ?? "rival"] ?? 0) +
+    (POIDS_INTENT[intentDe.get(m.query_id) ?? ""] ?? 0) +
+    (adversaire && m.brand === adversaire.nom ? 20 : 0) +
+    (m.recommended ? 6 : 0) +
+    (m.position === 1 ? 2 : 0);
+  const credible = (m: LigneMention) => {
+    const classe = classeDe(m.brand);
+    if (classe === "rival" || classe === "geant") return true;
+    return classe === null && intentAchat(m.query_id);
+  };
+
+  const exploitable = (m: LigneMention) => !m.is_target && m.verbatim && m.verbatim.length > 60;
+
+  // Étage 1 — l'absence.
+  const absences = mentions
+    .filter((m) => exploitable(m) && !questionsCitees.has(m.query_id) && credible(m))
+    .sort((a, b) => interet(b) - interet(a) || (a.position ?? 99) - (b.position ?? 99));
+
+  // Étage 2 — le dépassement : position de la marque par réponse, puis les
+  // rivaux crédibles placés strictement devant elle.
+  const positionCible = new Map<string, number>();
+  for (const m of mentions) {
+    if (m.is_target && typeof m.position === "number") {
+      const connue = positionCible.get(m.response_id);
+      if (connue === undefined || m.position < connue) positionCible.set(m.response_id, m.position);
+    }
+  }
+  const depassements = mentions
+    .filter((m) => {
+      if (!exploitable(m) || !credible(m)) return false;
+      const cible = positionCible.get(m.response_id);
+      return (
+        typeof cible === "number" && typeof m.position === "number" && m.position < cible
+      );
+    })
+    .sort((a, b) => interet(b) - interet(a) || (a.position ?? 99) - (b.position ?? 99));
+
+  const dure = absences[0] ?? depassements[0] ?? null;
+  const enAbsence = Boolean(absences[0]);
   const questionDure = dure ? questions.find((q) => q.id === dure.query_id) : null;
 
   const laPlusDure =
@@ -110,7 +166,9 @@ export function construireSequence(entree: {
           texte: marquerConcurrent(dure.verbatim as string, dure.brand),
           concurrent: dure.brand,
           rangConcurrent: typeof dure.position === "number" ? ordinal(dure.position) : null,
-          votreStatut: `${marque} : absent de cette réponse`,
+          votreStatut: enAbsence
+            ? `${marque} : absent de cette réponse`
+            : `${marque} : cité en position ${positionCible.get(dure.response_id)} de cette réponse`,
         }
       : null;
 

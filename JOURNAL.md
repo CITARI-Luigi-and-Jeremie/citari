@@ -5,6 +5,53 @@ d'une nouvelle session, après `CLAUDE.md`.
 
 ---
 
+## 2026-08-14 — Le rapport apprend la pertinence : verbatim à deux étages, un seul comparatif
+
+Luigi, trois captures à l'appui : la « phrase exacte » montrait GeoComply (un
+éditeur B2B de géolocalisation) sur une question de dépannage ; le comparatif
+de la carte diagnostic était maigre ; et la modale « ce que vous apprenez »
+répétait un second comparatif par-dessus le premier.
+
+**Le verbatim se choisit désormais en deux étages.** L'ancienne règle — « le
+concurrent le mieux placé sur une question sans la marque » — était exacte et
+creuse : aucune douleur commerciale. Nouvelle sélection :
+
+- étage 1, L'ABSENCE : un concurrent CRÉDIBLE (classé rival ou géant ; un
+  non-classé n'est accepté que sur une question d'ACHAT — le garde-fou
+  anti-GeoComply, qui n'était pas classé et passait par le défaut « rival »)
+  cité là où la marque n'apparaît pas, questions comparatives et locales
+  d'abord, l'adversaire de la carte 02 favorisé pour que les cartes racontent
+  une seule histoire ;
+- étage 2, LE DÉPASSEMENT, pour les marques bien citées qui n'ont presque
+  aucune question d'absence : la phrase où un rival est cité DEVANT la marque
+  dans la même réponse (« Betclic cité en premier · Winamax : cité en
+  position 2 »). La vraie brèche d'un 85/100 ;
+- aucun étage ne fournit → la carte sort de la séquence. Jamais de pièce
+  tiède présentée comme une douleur.
+
+Vérifié sur les deux profils réels : Fiducial (31) montre une absence sur
+« quels critères pour choisir entre un grand cabinet national et un cabinet
+indépendant » ; Winamax (85) montre Betclic devant sur la réglementation des
+bookmakers.
+
+**Un seul comparatif, le plus vendeur.** La modale est supprimée ; son
+tableau « ce que vous apprenez » (96 réponses des quatre moteurs fermés,
+recherche web, sites exacts, miroir sur 6 moteurs, corrections vous/dev)
+devient LA preuve de la carte 05, et sa réassurance (« si votre score est
+bon, on ne vous vend rien ») rejoint le récit. Le CTA avance simplement vers
+la réservation. Et le titre de la carte s'adapte au score : dire « vous
+n'êtes pas cité » à un 85/100 était faux — au-dessus de 50, il devient
+« vous savez maintenant OÙ vous êtes cité, pas encore comment tenir la
+place ».
+
+**Et la génération interdit le SAV.** Les questions « problème » sont
+désormais cadrées comme des douleurs d'AVANT-achat (se méfier, comparer,
+éviter un piège) : une IA qui répond à une question de dépannage ne fait
+perdre de client à personne, elle n'a rien à faire dans un échantillon qui
+mesure la découverte.
+
+---
+
 ## 2026-08-14 — Winamax : la redirection qui boucle, et OpenAI à sec à son tour
 
 Le scan Winamax de Luigi, POSTÉRIEUR au correctif Unibet, sortait encore des
