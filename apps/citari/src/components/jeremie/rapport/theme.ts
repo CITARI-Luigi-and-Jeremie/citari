@@ -1,25 +1,33 @@
 /**
  * Jetons visuels de la séquence de résultat.
  *
- * Sa maquette codait sa palette en dur (#1A1A18, #D6301F, un orange #E8601F
- * hors charte). Ici tout référence NOS variables CSS : les styles en ligne de
- * React acceptent `var(...)`, et le site ne porte qu'une seule palette.
- * L'orange de ses boutons devient le signal, comme partout ailleurs.
+ * Les couleurs d'identité (encre, papier, signal) référencent NOS variables
+ * CSS : une seule charte sur le site, l'orange hors charte de sa maquette
+ * (#E8601F) devient le signal.
+ *
+ * Les NEUTRES, en revanche, reprennent ses valeurs exactes (14/08/2026) :
+ * le premier port les faisait passer par nos jetons hérités (--surface
+ * blanc pur, --ink-3 plus pâle, filets translucides) et l'ensemble rendait
+ * plus froid et moins contrasté que sa maquette. Une carte blanc chaud sur
+ * fond sombre, des filets chauds pleins, des libellés profonds : c'est ce
+ * qui fait tenir le design, pas un choix de charte.
  */
 import type { CSSProperties } from "react";
 
 export const INK = "var(--ink)";
 export const PAPER = "var(--paper)";
-export const CARD = "var(--surface)";
-export const PANEL = "var(--paper-2)";
-export const HAIR = "var(--rule-strong)";
-export const MUTED = "var(--ink-3)";
-export const SUFFIX = "var(--ink-3)";
-export const BODY = "var(--ink-2)";
-export const TEXT = "var(--ink)";
 export const RED = "var(--signal)";
 export const ORANGE = "var(--signal)";
 export const ORANGE_HOVER = "color-mix(in srgb, var(--signal) 85%, black)";
+
+/* Neutres de sa maquette, posés en dur : voir l'en-tête. */
+export const CARD = "#FFFDF9";
+export const PANEL = "#F2F0E9";
+export const HAIR = "#E4E1D9";
+export const MUTED = "#6B665D";
+export const SUFFIX = "#8F897C";
+export const BODY = "#55514A";
+export const TEXT = "#3A3733";
 
 /* Décor sombre repris de l'écran de scan. */
 export const DEEP = "var(--ink)";

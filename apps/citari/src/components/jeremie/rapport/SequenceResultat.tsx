@@ -220,6 +220,7 @@ export function SequenceResultat({
       style={{
         position: "relative",
         minHeight: wide ? "calc(100vh - 70px)" : "calc(100vh - 62px)",
+        background: "var(--ink)",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",

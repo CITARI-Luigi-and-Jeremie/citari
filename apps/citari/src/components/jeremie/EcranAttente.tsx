@@ -1,405 +1,384 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import type { EtatScan } from "@/lib/orchestrateur.server";
-import {
-  ETAPES_ANALYSE,
-  LIBELLES_PHASE,
-  POINTS_METHODE,
-  cleCellule,
-  formaterDuree,
-  formaterLatence,
-  libelleQuestion,
-} from "@/lib/scan-attente";
+import { LogoMoteur } from "@/components/jeremie/LogosMoteurs";
+import { cleCellule, formaterDuree, formaterLatence } from "@/lib/scan-attente";
 
 /**
- * L'écran d'attente : trois actes.
+ * L'écran d'attente : le split-screen « Analyse Citari / Flux de données »
+ * de Jérémie (`CitariScanScreen`), porté le 14/08/2026 à la demande de Luigi.
  *
- * Porté du projet Lovable de Jérémie (`components/scan-loading/LoadingScreen`)
- * le 08/08/2026, remis au niveau de sa v3 le 14/08/2026, rebranché sur NOTRE
- * `etatScan`.
- *
- *   Acte 1 — les questions tombent une à une, telles qu'elles s'écrivent en base.
- *   Acte 2 — une carte perforée se remplit, une case par paire question × moteur.
- *            Un moteur qui vient de répondre porte une pastille qui respire ;
- *            les trois dernières réponses défilent en liste sous la grille.
- *   Acte 3 — la grille se fige, les étapes d'analyse s'allument une à une,
- *            chacune avec sa petite barre.
- *
- * Rien n'est simulé. Chaque case noircie correspond à une ligne réellement
- * écrite dans `responses` ; la pastille « actif » se déduit de l'instant
- * d'écriture ; le chronomètre part de `started_at` ; la barre suit
- * `progression`. C'est la contrepartie de ce que la page vend : si on animait
- * un faux compteur ici, la mesure derrière ne vaudrait pas plus.
+ * Sa version tournait sur une horloge simulée (compte à rebours inventé,
+ * verdicts tirés d'un modulo) : c'est la partie restée bannie. Ici, TOUT est
+ * réel : les étapes suivent `etat.phase`, les compteurs par moteur comptent
+ * les lignes écrites dans `responses`, le ticker affiche la latence mesurée
+ * de la dernière réponse (ou « indisponible » si elle a échoué), le temps est
+ * le temps ÉCOULÉ depuis `started_at` (jamais un « temps restant » deviné) et
+ * la progression est celle du serveur. Une étape sans mesure interne montre
+ * un reflet qui balaie, pas une fausse fraction.
  */
 
 type Props = { etat: EtatScan; instable: boolean };
 
-/** Chronomètre du temps réellement écoulé, rafraîchi à 100 ms pour être fluide. */
+const INK = "#17160F";
+const MUTED = "#7C7A72";
+const MONO = "'IBM Plex Mono', ui-monospace, monospace";
+
+/** Les 5 étapes affichées, alignées sur les phases réelles de l'orchestrateur. */
+const ETAPES: [string, string][] = [
+  [
+    "On lit votre site",
+    "Pour comprendre votre métier, vos services et votre ville, comme le ferait un nouveau client.",
+  ],
+  [
+    "On écrit les questions de vos acheteurs",
+    "Comparaisons, problèmes à résoudre, recherches locales, confiance. Sans jamais prononcer votre nom.",
+  ],
+  [
+    "On pose vos questions aux moteurs",
+    "En direct, par leurs API officielles. Chaque réponse est enregistrée telle quelle.",
+  ],
+  [
+    "On lit chaque réponse",
+    "On cherche votre nom. Et on note qui est cité quand vous ne l'êtes pas.",
+  ],
+  [
+    "On calcule votre score",
+    "Présence, rang, recommandation, tonalité : la formule est publiée sur la page méthode.",
+  ],
+];
+
+const CSS = `
+@keyframes citRise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@keyframes citFade{from{opacity:0}to{opacity:1}}
+@keyframes citPulse{0%,100%{opacity:1}50%{opacity:.45}}
+@keyframes citBarShimmer{0%{transform:translateX(-100%)}100%{transform:translateX(400%)}}
+@keyframes citTicker{0%{transform:translateY(8px);opacity:0}100%{transform:translateY(0);opacity:1}}
+@keyframes citLive{0%{box-shadow:0 0 0 0 rgba(192,55,29,.35)}70%{box-shadow:0 0 0 8px rgba(192,55,29,0)}100%{box-shadow:0 0 0 0 rgba(192,55,29,0)}}
+@keyframes citGrid{0%{transform:translateY(0)}100%{transform:translateY(40px)}}
+
+.cit-viewport{position:fixed;inset:0;z-index:50;overflow-y:auto;-webkit-overflow-scrolling:touch;display:flex;background:#F2F0EA}
+.cit-frame{width:100%;min-height:100%;margin:0 auto;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;box-sizing:border-box}
+@media (min-width:600px){.cit-frame{padding:32px}}
+@media (min-width:1024px){.cit-frame{padding:48px}}
+
+.cit-card{width:100%;max-width:1200px;background:#FBFAF7;border:1px solid rgba(23,22,15,0.05);box-shadow:0 40px 100px -20px rgba(23,22,15,0.15);display:flex;flex-direction:column;overflow:hidden;min-height:640px}
+@media (min-width:900px){.cit-card{flex-direction:row;min-height:680px}}
+
+.cit-left{padding:32px;display:flex;flex-direction:column;justify-content:space-between;border-bottom:1px solid rgba(23,22,15,0.08)}
+@media (min-width:900px){.cit-left{width:40%;padding:48px;border-bottom:none;border-right:1px solid rgba(23,22,15,0.08)}}
+@media (min-width:1200px){.cit-left{padding:64px}}
+
+.cit-right{flex:1;background:#17160F;position:relative;overflow:hidden;padding:32px;display:flex;flex-direction:column;justify-content:center;align-items:center;min-height:360px}
+@media (min-width:900px){.cit-right{padding:48px;min-height:auto}}
+@media (min-width:1200px){.cit-right{padding:64px}}
+
+.cit-grid{position:absolute;inset:0;pointer-events:none;opacity:0.08;background-image:linear-gradient(#F2F0EA 1px, transparent 1px), linear-gradient(90deg, #F2F0EA 1px, transparent 1px);background-size:40px 40px;animation:citGrid 1.5s linear infinite}
+
+.cit-step{display:flex;align-items:flex-start;gap:12px;transition:opacity 240ms ease-out}
+.cit-step-num{font-family:${MONO};font-size:11px;min-width:20px;margin-top:2px}
+
+.cit-progress-track{position:relative;height:2px;background:rgba(23,22,15,0.08);overflow:hidden;border-radius:1px}
+.cit-progress-fill{position:absolute;inset:0;background:#C0371D;transition:width 900ms cubic-bezier(0.22,1,0.36,1)}
+.cit-progress-sheen{position:absolute;top:0;bottom:0;width:30%;background:#C0371D;opacity:.8;animation:citBarShimmer 1.6s cubic-bezier(0.4,0,0.2,1) infinite}
+
+.cit-right-track{position:relative;height:2px;background:rgba(242,240,234,0.12);overflow:hidden;border-radius:1px}
+.cit-right-fill{position:absolute;inset:0;background:#C0371D;transition:width 900ms cubic-bezier(0.22,1,0.36,1)}
+.cit-right-knob{position:absolute;top:50%;width:8px;height:8px;border-radius:50%;background:#C0371D;transform:translate(-50%,-50%);box-shadow:0 0 12px rgba(192,55,29,0.6);transition:left 900ms cubic-bezier(0.22,1,0.36,1)}
+
+.cit-log-line{display:flex;align-items:center;gap:12px;height:48px;padding:0 16px;border:1px solid rgba(242,240,234,0.1);background:rgba(242,240,234,0.05);overflow:hidden}
+.cit-log-bars{display:flex;gap:3px;align-items:flex-end;height:18px}
+.cit-log-bar{width:3px;border-radius:1px;background:#F2F0EA}
+
+.cit-rise{animation:citRise 360ms cubic-bezier(0.22,1,0.36,1) both}
+.cit-fade{animation:citFade 280ms cubic-bezier(0.22,1,0.36,1) both}
+.cit-ticker{animation:citTicker 320ms cubic-bezier(0.22,1,0.36,1) both}
+.cit-live{width:8px;height:8px;border-radius:50%;background:#C0371D;animation:citLive 1.8s ease-out infinite}
+
+@media (prefers-reduced-motion:reduce){
+  .cit-rise,.cit-fade,.cit-ticker,.cit-live{animation:none}
+  .cit-grid{animation:none}
+  .cit-progress-sheen{animation:none;width:100%;opacity:.35}
+}
+`;
+
+/** Chronomètre réel depuis started_at. */
 function useChrono(demarreA: string | null) {
   const depart = useMemo(() => {
     const valeur = demarreA ? new Date(demarreA).getTime() : NaN;
     return Number.isNaN(valeur) ? Date.now() : valeur;
   }, [demarreA]);
   const [maintenant, setMaintenant] = useState(() => Date.now());
-
   useEffect(() => {
-    const id = window.setInterval(() => setMaintenant(Date.now()), 100);
+    const id = window.setInterval(() => setMaintenant(Date.now()), 500);
     return () => window.clearInterval(id);
   }, []);
-
   return Math.max(0, maintenant - depart);
+}
+
+/** Lisse l'affichage du pourcentage réel, sans jamais dépasser la cible. */
+function usePourcentLisse(cible: number, duree = 900): number {
+  const [valeur, setValeur] = useState(cible);
+  const depart = useRef({ valeur: cible, cible, temps: 0 });
+  useEffect(() => {
+    if (valeur === cible) return;
+    depart.current = { valeur, cible, temps: performance.now() };
+    let raf = 0;
+    const ease = (t: number) => t * (2 - t);
+    const tick = (now: number) => {
+      const t = Math.min(1, (now - depart.current.temps) / duree);
+      setValeur(Math.round(depart.current.valeur + (depart.current.cible - depart.current.valeur) * ease(t)));
+      if (t < 1) raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cible, duree]);
+  return valeur;
 }
 
 export function EcranAttente({ etat, instable }: Props) {
   const { questions, cellules, moteurs, verrouilles, collectees, total, progression } = etat;
   const ecoule = useChrono(etat.demarreA);
+  const pourcent = usePourcentLisse(progression);
+
+  // Étape réelle : la phase du serveur décide, l'analyse se déroule en deux
+  // temps d'affichage (lecture puis score) après un court délai.
+  const [finAnalyse, setFinAnalyse] = useState(false);
   const analyse = etat.phase === "analyse";
-  const avantQuestions = questions.length === 0 || etat.phase === "init" || etat.phase === "questions";
+  useEffect(() => {
+    if (!analyse) {
+      setFinAnalyse(false);
+      return;
+    }
+    const id = window.setTimeout(() => setFinAnalyse(true), 1600);
+    return () => window.clearTimeout(id);
+  }, [analyse]);
 
-  const remplies = useMemo(() => {
-    const set = new Set<string>();
-    for (const c of cellules) set.add(cleCellule(c.queryId, c.moteur));
-    return set;
+  const etape =
+    etat.phase === "init" ? 0
+    : etat.phase === "questions" ? 1
+    : etat.phase === "interrogation" ? 2
+    : finAnalyse ? 4
+    : 3;
+
+  // Compteurs par moteur, comptés sur les lignes réellement écrites.
+  const parMoteur = questions.length || Math.ceil(total / Math.max(1, moteurs.length));
+  const recusParMoteur = useMemo(() => {
+    const m = new Map<string, number>();
+    for (const c of cellules) m.set(c.moteur, (m.get(c.moteur) ?? 0) + 1);
+    return m;
   }, [cellules]);
 
-  const enErreur = useMemo(() => {
-    const set = new Set<string>();
-    for (const c of cellules) if (c.erreur) set.add(cleCellule(c.queryId, c.moteur));
-    return set;
-  }, [cellules]);
-
-  const defilant = useMemo(() => cellules.slice(-3).reverse(), [cellules]);
-
-  // Moteurs encore actifs : au moins une réponse dans les 4 dernières secondes.
-  // `ecoule` change dix fois par seconde et rafraîchit ce calcul avec lui.
+  // Moteurs qui ont répondu dans les 4 dernières secondes : leur égaliseur pulse.
   const moteursActifs = useMemo(() => {
     const seuil = Date.now() - 4000;
-    const set = new Set<string>();
-    for (const c of cellules) {
-      if (c.creeA && new Date(c.creeA).getTime() > seuil) set.add(c.moteur);
-    }
-    return set;
+    const s = new Set<string>();
+    for (const c of cellules) if (c.creeA && new Date(c.creeA).getTime() > seuil) s.add(c.moteur);
+    return s;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cellules, ecoule]);
 
+  const derniere = cellules.length > 0 ? cellules[cellules.length - 1]! : null;
+
   // Titre d'onglet : le compteur réel, pour l'onglet laissé en arrière-plan.
   useEffect(() => {
-    if (avantQuestions || total === 0) return;
+    if (total === 0 || collectees === 0) return;
     const precedent = document.title;
     document.title = `${collectees}/${total} — Citari`;
     return () => {
       document.title = precedent;
     };
-  }, [collectees, total, avantQuestions]);
+  }, [collectees, total]);
 
-  // Acte 3 : les libellés d'analyse s'allument successivement.
-  const [etapeAnalyse, setEtapeAnalyse] = useState(0);
-  useEffect(() => {
-    if (!analyse) return;
-    setEtapeAnalyse(0);
-    const minuteries: number[] = [];
-    for (let i = 1; i < ETAPES_ANALYSE.length; i++) {
-      minuteries.push(window.setTimeout(() => setEtapeAnalyse(i), i * 700));
-    }
-    return () => {
-      for (const id of minuteries) window.clearTimeout(id);
-    };
-  }, [analyse]);
-
-  // Au-delà de deux minutes : rotation lente des rappels de méthode.
-  const longue = ecoule > 120_000;
-  const [pointIndex, setPointIndex] = useState(0);
-  useEffect(() => {
-    if (!longue) return;
-    const id = window.setInterval(
-      () => setPointIndex((i) => (i + 1) % POINTS_METHODE.length),
-      8000,
-    );
-    return () => window.clearInterval(id);
-  }, [longue]);
-
-  const phase = analyse
-    ? LIBELLES_PHASE.analyse
-    : avantQuestions
-      ? (LIBELLES_PHASE[etat.phase] ?? LIBELLES_PHASE.questions)
-      : `INTERROGATION DES MOTEURS — ${moteurs.length} INTERROGÉ${moteurs.length > 1 ? "S" : ""}`;
+  // Fraction réelle de l'étape en cours quand elle se mesure ; sinon reflet.
+  const fractionInterrogation = total > 0 ? collectees / total : 0;
 
   return (
-    <section>
-      <div className="mx-auto max-w-5xl px-5 py-16 sm:px-8 sm:py-24">
-        <p className="mono text-[12px] tracking-[0.12em] text-ink-2">
-          {phase}
-          {avantQuestions ? (
-            <span className="anim-blink ml-2 inline-block align-middle">▮</span>
-          ) : null}
-        </p>
-
-        <h1 className="measure mt-5 text-[26px] sm:text-[34px]">Constitution de votre dossier.</h1>
-        <p className="mono mt-4 text-[13px] text-ink-2">
-          {etat.brand}
-          {etat.domaine ? ` · ${etat.domaine}` : ""}
-        </p>
-
-        {avantQuestions ? (
-          <CascadeQuestions questions={questions} />
-        ) : (
-          <>
-            <div className="mono mt-14 flex flex-wrap items-baseline justify-between gap-3 text-[12px] tracking-[0.10em] text-ink-2">
-              <span>
-                RÉPONSES COLLECTÉES {collectees}/{total}
-              </span>
-              <span>{formaterDuree(ecoule)}</span>
-            </div>
-
-            <div className="progress-rail mt-4" aria-hidden>
-              <span className="progress-fill" style={{ width: `${progression}%` }} />
-              {progression > 0 && progression < 100 ? (
-                <span className="progress-shimmer" />
-              ) : null}
-            </div>
-
-            <CartePerforee
-              questions={questions}
-              moteurs={moteurs}
-              verrouilles={verrouilles}
-              remplies={remplies}
-              enErreur={enErreur}
-              figee={analyse}
-              moteursActifs={moteursActifs}
-            />
-
-            {verrouilles.length > 0 ? (
-              <p className="mono mt-5 text-[12px] tracking-[0.10em] text-ink-2">
-                ▢ {verrouilles.length} MOTEURS VERROUILLÉS — DIAGNOSTIC COMPLET
+    <div className="cit-viewport">
+      <div className="cit-frame">
+        <style>{CSS}</style>
+        <div className="cit-card">
+          {/* ------------------------------------------------ panneau clair */}
+          <div className="cit-left">
+            <div>
+              <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 40 }}>
+                <span className="cit-live" aria-hidden="true" />
+                <span style={{ fontFamily: MONO, fontSize: 11, letterSpacing: "0.18em", color: MUTED, textTransform: "uppercase" }}>
+                  Scan en cours
+                </span>
+              </div>
+              <h1 style={{ fontSize: "clamp(38px,5vw,56px)", fontWeight: 800, letterSpacing: "-0.04em", lineHeight: 0.95, margin: 0, marginBottom: 12 }}>
+                Analyse
+                <br />
+                Citari
+              </h1>
+              <p style={{ fontFamily: MONO, fontSize: 12, color: MUTED, margin: "0 0 36px" }}>
+                {etat.brand}
+                {etat.domaine ? ` · ${etat.domaine}` : ""}
               </p>
-            ) : null}
 
-            {analyse ? (
-              <div className="mono mt-8 space-y-3 text-[12px] tracking-[0.10em]">
-                {ETAPES_ANALYSE.map((libelle, i) => (
-                  <div key={libelle}>
-                    <p className={i <= etapeAnalyse ? "text-ink" : "text-ink-2 opacity-40"}>
-                      {libelle}
-                    </p>
-                    <div className="progress-rail mt-1.5 h-[2px]" aria-hidden>
-                      <span
-                        className="progress-fill"
-                        style={{
-                          width: i < etapeAnalyse ? "100%" : i === etapeAnalyse ? "60%" : "0%",
-                        }}
-                      />
+              <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
+                {ETAPES.map(([libelle, description], i) => {
+                  const statut = i < etape ? "faite" : i === etape ? "active" : "attente";
+                  const active = statut === "active";
+                  return (
+                    <div key={libelle} className="cit-step" style={{ opacity: statut === "attente" ? 0.35 : 1 }}>
+                      <span className="cit-step-num" style={{ color: active ? "#C0371D" : statut === "faite" ? INK : MUTED }}>
+                        {String(i + 1).padStart(2, "0")}
+                      </span>
+                      <div style={{ flex: 1 }}>
+                        <div
+                          className={active ? "cit-rise" : undefined}
+                          style={{ fontSize: 15.5, fontWeight: active ? 600 : 500, letterSpacing: "-0.01em", color: active ? "#C0371D" : INK, lineHeight: 1.35 }}
+                        >
+                          {libelle}
+                        </div>
+                        {active ? (
+                          <div className="cit-fade" style={{ marginTop: 6 }}>
+                            <div className="cit-progress-track">
+                              {i === 2 ? (
+                                <span className="cit-progress-fill" style={{ width: `${Math.round(fractionInterrogation * 100)}%` }} />
+                              ) : (
+                                /* Pas de mesure interne pour cette étape : un
+                                   reflet balaie, aucune fraction inventée. */
+                                <span className="cit-progress-sheen" />
+                              )}
+                            </div>
+                            <p style={{ fontSize: 12.5, color: MUTED, marginTop: 6, lineHeight: 1.4 }}>{description}</p>
+                          </div>
+                        ) : null}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", fontFamily: MONO, fontSize: 11, letterSpacing: "0.12em", color: MUTED, marginTop: 40 }}>
+              <div>
+                <div style={{ textTransform: "uppercase", opacity: 0.6, marginBottom: 4 }}>Temps écoulé</div>
+                <div style={{ fontSize: 18, color: INK, letterSpacing: "-0.02em" }}>{formaterDuree(ecoule)}</div>
+              </div>
+              <div style={{ textAlign: "right" }}>
+                <div style={{ textTransform: "uppercase", opacity: 0.6, marginBottom: 4 }}>Progression</div>
+                <div style={{ fontSize: 18, color: INK, letterSpacing: "-0.02em" }}>
+                  {pourcent}
+                  <span style={{ opacity: 0.5 }}>%</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* ------------------------------------------------ panneau sombre */}
+          <div className="cit-right">
+            <div className="cit-grid" aria-hidden="true" />
+            <div style={{ position: "relative", zIndex: 1, width: "100%", maxWidth: 440 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 32, fontFamily: MONO, fontSize: 10, letterSpacing: "0.2em", textTransform: "uppercase" }}>
+                <span style={{ color: "#F2F0EA", opacity: 0.4 }}>Flux de données</span>
+                <span style={{ color: "#C0371D" }}>Lien actif</span>
+              </div>
+
+              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                {moteurs.map((moteur) => {
+                  const recus = recusParMoteur.get(moteur) ?? 0;
+                  const statut =
+                    recus >= parMoteur && parMoteur > 0
+                      ? "fini"
+                      : moteursActifs.has(moteur)
+                        ? "encours"
+                        : recus > 0
+                          ? "calme"
+                          : "attente";
+                  const opacite = statut === "attente" ? 0.25 : statut === "encours" ? 1 : 0.55;
+                  return (
+                    <div key={moteur} className="cit-log-line" style={{ opacity: opacite }}>
+                      <div className="cit-log-bars">
+                        {statut === "encours" ? (
+                          <>
+                            <span className="cit-log-bar" style={{ height: 14, background: "#C0371D", animation: "citPulse 1.2s ease-in-out infinite" }} />
+                            <span className="cit-log-bar" style={{ height: 10, opacity: 0.5, animation: "citPulse 1.2s ease-in-out 0.2s infinite" }} />
+                            <span className="cit-log-bar" style={{ height: 6, opacity: 0.25, animation: "citPulse 1.2s ease-in-out 0.4s infinite" }} />
+                          </>
+                        ) : statut === "fini" ? (
+                          <>
+                            <span className="cit-log-bar" style={{ height: 12, opacity: 0.8 }} />
+                            <span className="cit-log-bar" style={{ height: 12, opacity: 0.8 }} />
+                            <span className="cit-log-bar" style={{ height: 12, opacity: 0.8 }} />
+                          </>
+                        ) : (
+                          <>
+                            <span className="cit-log-bar" style={{ height: 4, opacity: 0.2 }} />
+                            <span className="cit-log-bar" style={{ height: 4, opacity: 0.2 }} />
+                          </>
+                        )}
+                      </div>
+                      <LogoMoteur nom={moteur} size={16} />
+                      <span style={{ fontFamily: MONO, fontSize: 11, color: "#F2F0EA", opacity: 0.85, textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                        {moteur}
+                      </span>
+                      <span style={{ marginLeft: "auto", fontFamily: MONO, fontSize: 10, color: statut === "encours" ? "#C0371D" : "#F2F0EA", opacity: 0.7 }}>
+                        {statut === "fini" ? `${recus}/${parMoteur} OK` : statut === "attente" ? "en attente" : `${recus}/${parMoteur}`}
+                      </span>
+                    </div>
+                  );
+                })}
+
+                {verrouilles.length > 0 ? (
+                  <div style={{ marginTop: 20, paddingTop: 16, borderTop: "1px solid rgba(242,240,234,0.12)" }}>
+                    <div style={{ fontFamily: MONO, fontSize: 10, letterSpacing: "0.16em", textTransform: "uppercase", color: "#F2F0EA", opacity: 0.35, marginBottom: 12 }}>
+                      Réservé au diagnostic complet
+                    </div>
+                    <div style={{ display: "flex", alignItems: "center", gap: 16, flexWrap: "wrap" }}>
+                      {verrouilles.map((moteur) => (
+                        <div key={moteur} style={{ display: "flex", alignItems: "center", gap: 6, opacity: 0.32 }}>
+                          <span style={{ display: "flex", filter: "grayscale(1)" }}>
+                            <LogoMoteur nom={moteur} size={15} />
+                          </span>
+                          <span style={{ fontFamily: MONO, fontSize: 10, color: "#F2F0EA", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                            {moteur}
+                          </span>
+                        </div>
+                      ))}
                     </div>
                   </div>
-                ))}
+                ) : null}
               </div>
-            ) : (
-              <div className="mono mt-8 space-y-2 text-[12px] tracking-[0.10em] text-ink-2">
-                {defilant.length === 0 ? (
-                  <p>—</p>
+
+              <div style={{ marginTop: 40, minHeight: 40, overflow: "hidden" }}>
+                {derniere ? (
+                  <span key={collectees} className="cit-ticker" style={{ display: "block", fontFamily: MONO, fontSize: 12, color: "#F2F0EA", opacity: 0.7, lineHeight: 1.5 }}>
+                    {derniere.moteur} ·{" "}
+                    {derniere.erreur ? "indisponible sur cette question" : formaterLatence(derniere.latence)}
+                  </span>
                 ) : (
-                  defilant.map((c) => (
-                    <LigneTicker key={`${c.queryId}|${c.moteur}`} cellule={c} />
-                  ))
+                  <span className="cit-fade" style={{ display: "block", fontFamily: MONO, fontSize: 12, color: "#F2F0EA", opacity: 0.4 }}>
+                    {etat.phase === "questions"
+                      ? "Les questions de vos acheteurs s'écrivent…"
+                      : "Initialisation du flux de mesure…"}
+                  </span>
                 )}
+                {instable ? (
+                  <span style={{ display: "block", marginTop: 6, fontFamily: MONO, fontSize: 11, color: "#F2F0EA", opacity: 0.4 }}>
+                    connexion instable — nouvelle tentative
+                  </span>
+                ) : null}
               </div>
-            )}
-          </>
-        )}
 
-        {longue ? (
-          <p key={pointIndex} className="measure anim-step mt-14 text-ink-2">
-            {POINTS_METHODE[pointIndex]}
-          </p>
-        ) : null}
+              <div style={{ marginTop: 24 }}>
+                <div className="cit-right-track">
+                  <span className="cit-right-fill" style={{ width: `${pourcent}%` }} />
+                  <span className="cit-right-knob" style={{ left: `${pourcent}%` }} />
+                </div>
+              </div>
+            </div>
 
-        {instable ? (
-          <p className="mono mt-10 text-[12px] tracking-[0.10em] text-ink-2">
-            connexion instable — nouvelle tentative
-          </p>
-        ) : null}
-      </div>
-    </section>
-  );
-}
-
-type Cellule = EtatScan["cellules"][number];
-
-/**
- * Une ligne du ticker : pastille qui respire, moteur, latence réelle.
- * Une panne ne fait pas semblant d'être une réponse : pastille éteinte,
- * mention INDISPONIBLE.
- */
-function LigneTicker({ cellule }: { cellule: Cellule }) {
-  return (
-    <p className="anim-ticker flex items-center gap-2">
-      <span
-        className={
-          cellule.erreur
-            ? "inline-block size-1.5 rounded-full bg-rule-strong"
-            : "anim-engine-pulse inline-block size-1.5 rounded-full bg-signal"
-        }
-      />
-      <span>
-        {cellule.moteur.toUpperCase()} ·{" "}
-        {cellule.erreur ? "INDISPONIBLE" : formaterLatence(cellule.latence)}
-      </span>
-    </p>
-  );
-}
-
-type Question = { id: string; rank: number; text: string; intent: string };
-
-/**
- * ACTE 1 — cascade des vraies questions.
- * Une question déjà affichée ne re-anime jamais : seules les nouvelles tombent.
- */
-function CascadeQuestions({ questions }: { questions: Question[] }) {
-  const vues = useRef<Set<string>>(new Set());
-  const nouvelles: string[] = [];
-  for (const q of questions) if (!vues.current.has(q.id)) nouvelles.push(q.id);
-
-  useEffect(() => {
-    for (const q of questions) vues.current.add(q.id);
-  }, [questions]);
-
-  if (questions.length === 0) {
-    return (
-      <p className="mono mt-14 text-[13px] text-ink-2">
-        Les questions de vos acheteurs s'écrivent…
-      </p>
-    );
-  }
-
-  return (
-    <ul className="mt-14 border-t border-rule">
-      {questions.map((q) => {
-        const index = nouvelles.indexOf(q.id);
-        const neuve = index !== -1;
-        return (
-          <li
-            key={q.id}
-            className={`flex items-baseline gap-4 border-b border-rule py-3${neuve ? " anim-step" : ""}`}
-            style={neuve ? { animationDelay: `${index * 110}ms` } : undefined}
-          >
-            <span className="mono shrink-0 text-[12px] text-ink-2">{libelleQuestion(q.rank)}</span>
-            <span className="measure">{q.text}</span>
-          </li>
-        );
-      })}
-    </ul>
-  );
-}
-
-/** ACTE 2 / 3 — une ligne par question, une colonne par moteur. */
-function CartePerforee({
-  questions,
-  moteurs,
-  verrouilles,
-  remplies,
-  enErreur,
-  figee,
-  moteursActifs,
-}: {
-  questions: Question[];
-  moteurs: string[];
-  verrouilles: string[];
-  remplies: Set<string>;
-  enErreur: Set<string>;
-  figee: boolean;
-  moteursActifs: Set<string>;
-}) {
-  if (questions.length === 0) return null;
-
-  const colonnes = [
-    ...moteurs.map((clef) => ({ clef, verrouille: false })),
-    ...verrouilles.map((clef) => ({ clef, verrouille: true })),
-  ];
-  const gabarit = `3.5rem repeat(${colonnes.length}, minmax(0,1fr))`;
-
-  return (
-    <div className={figee ? "relative mt-8 text-ink-2" : "relative mt-8"}>
-      <div
-        className="grid items-end gap-y-2 border-b border-rule pb-3"
-        style={{ gridTemplateColumns: gabarit }}
-      >
-        <span />
-        {colonnes.map((c) => (
-          <span
-            key={c.clef}
-            className={`col-moteur mono flex items-center gap-1 text-[9px] leading-none tracking-[0.10em] text-ink-2 sm:text-[10px]${
-              c.verrouille ? " locked-col" : ""
-            }`}
-          >
-            {!c.verrouille && moteursActifs.has(c.clef) ? (
-              <span className="anim-engine-pulse inline-block size-1 rounded-full bg-signal" />
-            ) : null}
-            <span>{c.clef.toUpperCase()}</span>
-            {c.verrouille ? " ▢" : ""}
-          </span>
-        ))}
-      </div>
-
-      {questions.map((q) => (
-        <div
-          key={q.id}
-          className="grid items-center border-b border-rule py-2"
-          style={{ gridTemplateColumns: gabarit }}
-        >
-          <span className="mono text-[11px] text-ink-2">{libelleQuestion(q.rank)}</span>
-          {colonnes.map((c, indexColonne) => {
-            if (c.verrouille) {
-              return (
-                <span key={c.clef} className="locked-col flex">
-                  <span
-                    className="block h-px w-3 rounded-full"
-                    style={{ backgroundColor: "var(--rule-strong)" }}
-                  />
-                </span>
-              );
-            }
-            const clef = cleCellule(q.id, c.clef);
-            if (enErreur.has(clef)) {
-              // Une réponse en panne est marquée, jamais comptée comme une
-              // absence : elle sort du dénominateur du score, et l'écran ne
-              // doit pas la faire passer pour une réponse obtenue.
-              return (
-                <span key={c.clef} className="flex" title="Moteur indisponible sur cette question">
-                  <span className="mono text-[11px] leading-none text-ink-2">×</span>
-                </span>
-              );
-            }
-            if (remplies.has(clef)) {
-              return (
-                <span key={c.clef} className="flex">
-                  <span
-                    className="anim-cell block size-[12px] rounded-[3px] sm:size-[14px]"
-                    style={{
-                      animationDelay: `${(indexColonne % 5) * 60}ms`,
-                      backgroundColor: figee ? "var(--ink-2)" : "var(--ink)",
-                    }}
-                  />
-                </span>
-              );
-            }
-            return (
-              <span key={c.clef} className="flex">
-                {figee ? (
-                  <span className="mono text-[11px] leading-none text-ink-2">–</span>
-                ) : (
-                  <span
-                    className="block size-[12px] rounded-[3px] border sm:size-[14px]"
-                    style={{ borderColor: "var(--rule-strong)" }}
-                  />
-                )}
-              </span>
-            );
-          })}
+            <div style={{ position: "absolute", bottom: 24, right: 24, fontSize: 13, color: "#F2F0EA", opacity: 0.08, fontWeight: 800, letterSpacing: "-0.02em", userSelect: "none" }}>
+              {etat.domaine ?? etat.brand}
+            </div>
+          </div>
         </div>
-      ))}
-
-      {figee ? (
-        <span className="anim-sweep pointer-events-none absolute inset-x-0 top-0 h-px" />
-      ) : null}
+      </div>
     </div>
   );
 }

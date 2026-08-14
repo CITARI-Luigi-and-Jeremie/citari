@@ -5,6 +5,44 @@ d'une nouvelle session, après `CLAUDE.md`.
 
 ---
 
+## 2026-08-14 — L'écran de scan que Luigi attendait était l'autre
+
+Luigi, capture à l'appui : « tu as carrément pas mis ça sur le screen ».
+Jérémie a DEUX écrans de scan dans son projet, et le port avait pris le
+mauvais des deux. La carte perforée (`scan-loading/LoadingScreen`) est celle
+que SA route réelle utilise ; mais le split-screen « Analyse Citari / Flux de
+données » (`CitariScanScreen`), écarté parce que sa version tourne sur une
+horloge simulée, est celui que Luigi voyait sur le Lovable et voulait. La
+leçon : **bannir une simulation n'oblige pas à bannir son design** — son
+composant acceptait d'ailleurs une progression réelle en prop.
+
+Porté en le branchant sur `etatScan`, avec les gardes d'honnêteté :
+
+- les 5 étapes affichées suivent la phase réelle (lecture du site, écriture
+  des questions, interrogation, lecture, score) — libellés réécrits pour
+  correspondre à NOTRE pipeline, pas au sien ;
+- « TEMPS ÉCOULÉ » réel remplace son « TEMPS RESTANT » deviné ;
+- le ticker montre la latence mesurée de la dernière réponse (« Gemini ·
+  18 515 MS ») ou « indisponible », jamais ses verdicts tirés d'un modulo ;
+- une étape sans mesure interne montre un reflet qui balaie, pas une fausse
+  fraction ; l'interrogation, elle, a sa vraie fraction (réponses/total) ;
+- compteurs par moteur comptés sur les lignes de `responses`, verrouillés
+  affichés seulement en aperçu.
+
+Vérifié par un scan réel (cerfrance.fr) : le plafond de 2 scans/IP a d'abord
+refusé — il a fallu le passer à 3 LOCALEMENT le temps du test, remis à 2
+aussitôt. Les deux leads de test (contact@citari.fr) sont passés `converti`.
+
+**Et les cartes du rapport retrouvent les teintes exactes de sa maquette.**
+Le port faisait passer les neutres par nos jetons hérités : carte en blanc
+PUR (--surface) au lieu de son blanc chaud #FFFDF9, libellés plus pâles,
+filets translucides plus froids. Multiplié par six cartes, c'est ce que Luigi
+voyait comme « moins beau, des erreurs d'esthétique ». Les neutres reprennent
+ses valeurs en dur (documenté dans `rapport/theme.ts`) ; encre, papier et
+signal restent NOTRE charte.
+
+---
+
 ## 2026-08-14 — La revue de lancement : tout le parcours, route par route
 
 Dernier balayage avant mise en ligne, demandé par Luigi (« revérifie tout,

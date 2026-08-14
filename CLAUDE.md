@@ -116,9 +116,14 @@ tête de comptage est exact et décourageant : annoncer KPMG à un cabinet de
 quinze personnes écrase au lieu d'indiquer une action. `concurrent_classes` vide
 signifie « tout est rival », et les institutions sont exclues du classement.
 
-**Sa branche de scan démo ne doit jamais être portée** : `CitariScanScreen` et
-la route `/scan?domaine=` de son projet tournent sur une horloge simulée, des
-verdicts tirés d'un modulo et un bouton « SKIP → RÉSULTAT (temporaire) ».
+**Le DESIGN de son écran de scan est porté, sa SIMULATION reste bannie**
+(14/08/2026). Le split-screen « Analyse Citari / Flux de données » de
+`CitariScanScreen` est devenu notre `EcranAttente`, branché sur `etatScan` :
+étapes pilotées par la phase réelle, compteurs par moteur comptés sur
+`responses`, latences mesurées dans le ticker, temps ÉCOULÉ (jamais un
+« temps restant » deviné), reflet qui balaie quand une étape n'a pas de
+mesure interne. Ce qui reste interdit : l'horloge simulée, les verdicts au
+modulo, le bouton « SKIP », et sa route démo `/scan?domaine=`.
 
 **Sa couche données a été intégralement jetée, et ne doit jamais revenir.** Son
 projet visait une AUTRE base Supabase (`vbxgwqutyzmnasjyladg`) avec un autre
