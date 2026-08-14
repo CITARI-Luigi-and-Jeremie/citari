@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import type { DonneesSequence } from "@/lib/rapport-sequence";
+import type { Mention, Question, Reponse } from "@/components/rapport";
 
 import { CarteSplit } from "./CarteSplit";
 import { GrilleFond } from "./GrilleFond";
@@ -8,6 +9,7 @@ import { CarteDiagnostic } from "./etapes/CarteDiagnostic";
 import { CarteReservation } from "./etapes/CarteReservation";
 import { CarteConcurrent } from "./etapes/CarteConcurrent";
 import { CarteMiroir } from "./etapes/CarteMiroir";
+import { CarteQuestions } from "./etapes/CarteQuestions";
 import { CartePartDeVoix } from "./etapes/CartePartDeVoix";
 import { CarteScore } from "./etapes/CarteScore";
 import { CarteTechnique } from "./etapes/CarteTechnique";
@@ -24,56 +26,88 @@ import { INK, ON_DEEP, ON_DEEP_HAIR, ON_DEEP_MUTED, ORANGE, ORANGE_HOVER, PAPER,
  */
 export function SequenceResultat({
   data,
+  questions,
+  reponses,
+  mentions,
   wide,
   onBook,
+  sautVersQuestions = 0,
 }: {
   data: DonneesSequence;
+  /** Les lignes brutes : l'étape « questions » les rend mot pour mot. */
+  questions: Question[];
+  reponses: Reponse[];
+  mentions: Mention[];
   wide: boolean;
   onBook: () => void;
+  /**
+   * Compteur d'appels du lien « les N questions » de la barre haute. Il
+   * change de valeur à chaque clic, ce qui suffit à rejouer le saut même
+   * quand on est déjà passé par l'étape.
+   */
+  sautVersQuestions?: number;
 }) {
+  /**
+   * `annonce` est la façon d'INVITER à cette étape : le bouton d'une carte
+   * reprend l'annonce de celle qui la suit réellement. Les libellés étaient
+   * écrits en dur sur chaque carte, ce qui promettait une étape absente dès
+   * qu'une donnée manquait (pas de miroir, pas d'audit) et se décalait à
+   * chaque insertion. Le bouton dit maintenant toujours où il mène.
+   */
   type Etape = {
     clef: string;
     titre: string;
     preuve: string;
-    cta: string | null;
+    annonce: string;
   };
 
   const etapes: Etape[] = [
-    { clef: "score", titre: "Votre score", preuve: "Le chiffre mesuré", cta: "Voir qui prend ma place" },
+    { clef: "score", titre: "Votre score", preuve: "Le chiffre mesuré", annonce: "Voir mon score" },
     ...(data.adversaire
       ? [{
           clef: "concurrent",
           titre: data.vosReponses >= data.adversaire.reponses ? "Qui vise votre place" : "Qui prend votre place",
           preuve: "Les réponses comptées",
-          cta: "Lire ce que l'IA répond",
+          annonce:
+            data.vosReponses >= data.adversaire.reponses
+              ? "Voir qui vise ma place"
+              : "Voir qui prend ma place",
         }]
       : []),
     ...(data.laPlusDure
-      ? [{ clef: "verbatim", titre: "La phrase exacte", preuve: "", cta: "Voir la part de voix" }]
+      ? [{ clef: "verbatim", titre: "La phrase exacte", preuve: "", annonce: "Lire ce que l'IA répond" }]
       : []),
     ...(data.voix.length > 0
-      ? [{ clef: "voix", titre: "La part de voix", preuve: "Les réponses par nom", cta: "Voir ce qu'une IA dit de vous" }]
+      ? [{ clef: "voix", titre: "La part de voix", preuve: "Les réponses par nom", annonce: "Voir la part de voix" }]
       : []),
     // Le miroir puis la cause technique : après le constat (score, rival,
     // phrase, part de voix), on montre au prospect sa fiche d'identité dans
     // l'IA, puis la porte d'entrée de son site. Les deux données existaient
     // déjà en base et n'étaient montrées nulle part.
     ...(data.miroir
-      ? [{ clef: "miroir", titre: "Ce qu'une IA dit de vous", preuve: "La réponse, mot pour mot", cta: "Voir si les IA peuvent vous lire" }]
+      ? [{ clef: "miroir", titre: "Ce qu'une IA dit de vous", preuve: "La réponse, mot pour mot", annonce: "Voir ce qu'une IA dit de vous" }]
       : []),
     ...(data.technique
       ? [{
           clef: "technique",
           titre: data.technique.bloques.length > 0 ? "La porte est fermée" : "L'accès à votre site",
           preuve: "Les robots d'IA testés",
-          cta: "Ce que cet aperçu ne peut pas dire",
+          annonce: "Voir si les IA peuvent vous lire",
         }]
       : []),
+    // L'échantillon complet, remonté de l'annexe le 14/08/2026 : dernière
+    // preuve avant l'offre, et impossible à manquer.
+    {
+      clef: "questions",
+      titre: `Les ${data.totalQuestions} questions`,
+      preuve: "Où vous apparaissez",
+      annonce: `Ouvrir les ${data.totalQuestions} questions`,
+    },
     // La modale « ce que vous apprenez » a été supprimée le 14/08/2026 : la
     // séquence portait deux comparatifs qui se répétaient. Son tableau vit
     // désormais DANS la carte diagnostic, et le CTA avance simplement.
-    { clef: "diagnostic", titre: "Le diagnostic complet", preuve: "", cta: "Voir le cadre de l'appel" },
-    { clef: "reservation", titre: "Réserver", preuve: "Le cadre de l'appel", cta: null },
+    { clef: "diagnostic", titre: "Le diagnostic complet", preuve: "", annonce: "Ce que cet aperçu ne peut pas dire" },
+    { clef: "reservation", titre: "Réserver", preuve: "Le cadre de l'appel", annonce: "Voir le cadre de l'appel" },
   ];
 
   const [index, setIndex] = useState(0);
@@ -111,7 +145,23 @@ export function SequenceResultat({
     return () => window.removeEventListener("keydown", onKey);
   }, [aller, index]);
 
+  /**
+   * Le lien « les N questions » de la barre haute mène à l'étape, plus à une
+   * annexe. L'effet se garde sur une ref plutôt que sur un tableau de
+   * dépendances : `aller` et `etapes` changent d'identité à chaque rendu, et
+   * les lister ferait rejouer le saut en boucle.
+   */
+  const dernierSaut = useRef(0);
+  useEffect(() => {
+    if (sautVersQuestions === dernierSaut.current) return;
+    dernierSaut.current = sautVersQuestions;
+    if (!sautVersQuestions) return;
+    const cible = etapes.findIndex((e) => e.clef === "questions");
+    if (cible >= 0) aller(cible);
+  });
+
   const etape = etapes[index]!;
+  const suivante = etapes[index + 1] ?? null;
 
   const rendu = (part: "recit" | "preuve") => {
     switch (etape.clef) {
@@ -187,6 +237,17 @@ export function SequenceResultat({
             part={part}
           />
         );
+      case "questions":
+        return (
+          <CarteQuestions
+            questions={questions}
+            reponses={reponses}
+            mentions={mentions}
+            marque={data.marque}
+            wide={wide}
+            part={part}
+          />
+        );
       case "diagnostic":
         return <CarteDiagnostic wide={wide} part={part} score={data.score} />;
       default:
@@ -194,7 +255,7 @@ export function SequenceResultat({
     }
   };
 
-  const pied = etape.cta ? (
+  const pied = suivante ? (
     <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 4 }}>
       <button
         type="button"
@@ -212,7 +273,7 @@ export function SequenceResultat({
           width: wide ? "fit-content" : "100%",
         }}
       >
-        {etape.cta} →
+        {suivante.annonce} →
       </button>
       <button
         type="button"

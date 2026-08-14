@@ -162,22 +162,33 @@ export function CarteDiagnostic({
         }}
       >
         {score < 50
-          ? "Vous savez maintenant que vous n'êtes pas cité. Pas encore pourquoi."
-          : "Vous savez maintenant où vous êtes cité. Pas encore pourquoi, ni comment tenir la place."}
+          ? "Vous avez le constat. Il vous manque la cause."
+          : "Vous avez le constat. Il vous manque la cause, et de quoi tenir la place."}
+      </p>
+
+      {/* Le texte disait « deux moteurs qui ont répondu de mémoire » : exact,
+          et illisible pour un dirigeant. On nomme la limite en français
+          ordinaire, puis on dit ce que le diagnostic RAPPORTE, pas ce que
+          l'aperçu n'a pas fait. */}
+      <p style={{ fontSize: wide ? 17 : 15.5, color: BODY, lineHeight: 1.55, margin: 0 }}>
+        Cet aperçu a interrogé deux IA sans les laisser consulter Internet : vous venez de lire ce
+        qu'elles savaient déjà de votre marché. Le diagnostic pose 24 questions aux{" "}
+        <strong style={{ fontWeight: 700 }}>six IA, recherche web activée</strong>, exactement dans
+        les conditions où vos clients les utilisent.
       </p>
 
       <p style={{ fontSize: wide ? 17 : 15.5, color: BODY, lineHeight: 1.55, margin: 0 }}>
-        Tout ce que vous venez de lire vient de deux moteurs qui ont répondu{" "}
-        <strong style={{ fontWeight: 700 }}>de mémoire</strong>, sans aller sur le web. Le
-        diagnostic rejoue la mesure sur les six, recherche web activée, et remonte les sites
-        exacts que les IA ouvrent avant de prononcer un nom.
+        On voit alors les pages que les IA ouvrent avant de citer un nom : celles qui font
+        aujourd'hui recommander vos concurrents.{" "}
+        <strong style={{ fontWeight: 700 }}>
+          C'est la liste exacte des endroits où il faut apparaître
+        </strong>
+        , et le point de départ de tout le travail.
       </p>
 
       <p style={{ fontSize: wide ? 16 : 15, color: BODY, lineHeight: 1.55, margin: 0 }}>
-        Il est offert.{" "}
-        <strong style={{ fontWeight: 700 }}>Nous le lançons dès votre réservation</strong> : les
-        144 réponses sont collectées avant l'appel, et nous les lisons ensemble en visio, 30
-        minutes.
+        Il est offert, et nous le lançons dès votre réservation : les 144 réponses sont collectées
+        avant l'appel. Nous les lisons ensemble, 30 minutes en visio.
       </p>
 
       <p style={{ fontFamily: MONO, fontSize: 12, lineHeight: 1.5, color: MUTED, margin: 0 }}>

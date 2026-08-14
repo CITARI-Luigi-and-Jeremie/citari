@@ -5,6 +5,52 @@ d'une nouvelle session, après `CLAUDE.md`.
 
 ---
 
+## 2026-08-14 — L'échantillon devient une étape, et deux cartes sont réécrites
+
+Luigi, sur les 20 questions posées en annexe sous la séquence : « c'est trop
+facile de les skip alors que c'est très intéressant ». Elles avaient déjà été
+dépliées par défaut le matin, et deux liens menaient vers elles. Rien n'y
+faisait, et pour une raison structurelle : **un écran plein les précédait**.
+Personne ne soupçonne qu'il y a du contenu sous une page qui ne dit pas
+qu'elle défile.
+
+Elles sont donc devenues **l'étape 7 sur 9**, entre l'accès des robots et
+l'offre. On ne peut plus les manquer, et l'annexe a été supprimée avec ses
+deux liens : la page d'aperçu ne se scrolle plus du tout. Ne pas la
+rétablir — la même pièce à deux endroits est exactement le piège payé le
+matin même avec les deux comparatifs.
+
+**La colonne preuve de cette carte est la donnée elle-même** : une case par
+question, noire si la marque est citée, rouge signal sinon. Sur Agoravox,
+« 11 / 20 » et huit cases rouges d'affilée disent l'ampleur du trou sans
+qu'on ait à l'écrire. Rien n'est dramatisé : une marque citée partout donne
+une grille entièrement noire.
+
+**Effet de bord réparé au passage.** Le libellé du bouton de chaque carte
+était écrit en dur (« Voir la part de voix »), donc il promettait une étape
+qui pouvait être absente : pas de miroir, pas d'audit, et le bouton mentait.
+Chaque étape porte désormais son `annonce`, et le bouton reprend celle de
+l'étape qui la suit RÉELLEMENT.
+
+**Deux cartes réécrites**, sur la même critique de Luigi : « c'est très mal
+dit, pas clair ».
+
+- *Le diagnostic complet* expliquait que l'aperçu venait « de deux moteurs
+  qui ont répondu de mémoire ». Exact, et illisible pour un dirigeant. Il dit
+  maintenant la limite en français ordinaire (« deux IA sans les laisser
+  consulter Internet »), puis ce que le diagnostic RAPPORTE plutôt que ce qui
+  manque : les pages que les IA ouvrent avant de citer un nom, « la liste
+  exacte des endroits où il faut apparaître ». Vérifié avant de l'écrire :
+  Gemini, ChatGPT, Perplexity et Grok remontent bien leurs URL quand la
+  recherche web est active.
+- *Réserver* portait un titre de trois lignes en 30px et un bloc gris de deux
+  paragraphes : « trop gros et compact ». Titre ramené à une phrase, et
+  « l'épreuve du direct » (rejouer une question en visio) retirée sur
+  demande. Elle est vraie, mais c'est un détail de déroulé sur l'écran où le
+  prospect doit décider.
+
+---
+
 ## 2026-08-14 — Le formulaire tombe à deux champs : on lit au lieu de demander
 
 Luigi, sur le secteur et la ville : « si ça change rien de le demander, autant

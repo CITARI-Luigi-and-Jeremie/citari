@@ -380,7 +380,7 @@ export function LimiteMethodologique() {
  * gras deviennent des gras, les titres et puces perdent leurs marqueurs, le
  * texte reste mot pour mot.
  */
-function TexteMoteur({ texte }: { texte: string }) {
+export function TexteMoteur({ texte }: { texte: string }) {
   const propre = texte
     .replace(/^#{1,6}\s*/gm, "")
     .replace(/^\s*[-*•]\s+/gm, "· ")

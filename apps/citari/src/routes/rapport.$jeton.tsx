@@ -98,6 +98,9 @@ function RapportDApercu() {
   const [reservation, setReservation] = useState(false);
   const [large, setLarge] = useState(false);
   const [email, setEmail] = useState<string | null>(null);
+  // Compteur, pas booléen : le lien de la barre haute doit pouvoir ramener à
+  // l'étape des questions autant de fois qu'on clique dessus.
+  const [sautQuestions, setSautQuestions] = useState(0);
 
   useEffect(() => {
     const mq = window.matchMedia("(min-width: 1100px)");
@@ -149,15 +152,16 @@ function RapportDApercu() {
 
         <div className="flex items-center gap-2.5 sm:gap-5">
           <span className="mono hidden text-[13px] text-ink-2 lg:inline">{donnees.domaine}</span>
-          {/* L'accès aux questions vit dans la barre HAUTE, visible dès la
-              première carte : en bas de page, l'annexe restait introuvable
-              pour qui ne fait pas défiler jusqu'au pied. */}
-          <a
-            href="#toutes-les-reponses"
+          {/* L'accès direct aux questions, depuis la première carte. Il menait
+              à une annexe sous la séquence ; il mène désormais à l'étape qui
+              les porte, seule surface où elles vivent encore. */}
+          <button
+            type="button"
+            onClick={() => setSautQuestions((n) => n + 1)}
             className="mono whitespace-nowrap text-[13px] text-ink-2 underline underline-offset-4 transition-colors hover:text-ink sm:text-[14px]"
           >
-            Les {donnees.totalQuestions} questions ↓
-          </a>
+            Les {donnees.totalQuestions} questions
+          </button>
           <button
             type="button"
             onClick={() => setReservation(true)}
@@ -168,61 +172,22 @@ function RapportDApercu() {
         </div>
       </div>
 
-      <SequenceResultat data={donnees} wide={large} onBook={() => setReservation(true)} />
-
-      {/* Un second appel, juste sous la séquence : le prospect qui vient de
-          finir les cartes tombe dessus sans avoir à chercher. */}
-      <div className="flex justify-center border-t border-rule-strong bg-ink px-5 pb-10 sm:pb-14">
-        <a
-          href="#toutes-les-reponses"
-          className="mono inline-flex items-center gap-2 rounded-[4px] border border-[color-mix(in_srgb,var(--paper)_35%,transparent)] px-5 py-3 text-[13px] text-paper transition-colors hover:bg-[color-mix(in_srgb,var(--paper)_10%,transparent)]"
-        >
-          Lire les {donnees.totalQuestions} questions et leurs réponses
-          <span aria-hidden>↓</span>
-        </a>
-      </div>
-
-      {/* L'annexe : les 20 questions et leurs 40 réponses, sous la séquence.
-          Repliée par défaut — le tunnel de conversion reste intact — mais
-          disponible : nous avons posé ces questions, les cacher au prospect
-          qui veut vérifier serait contraire à tout ce que le site promet.
-          Ce qui reste au diagnostic est ailleurs : quatre moteurs de plus,
-          la recherche web, les sources, la cause de chaque absence. */}
-      {/* Annexe OUVERTE par défaut depuis le 14/08/2026 : repliée, elle
-          passait pour un pied de page et le prospect ne la voyait pas. C'est
-          pourtant la pièce qui prouve toute la mesure. */}
-      <section id="toutes-les-reponses" className="scroll-mt-16 border-t-2 border-ink bg-paper-2">
-        <div className="mx-auto max-w-5xl px-5 py-12 sm:px-8 sm:py-16">
-          <details className="group" open>
-            <summary className="flex cursor-pointer list-none items-baseline justify-between gap-4 border-b border-rule-strong pb-3">
-              <span className="text-[19px] font-semibold tracking-[-0.02em] sm:text-[22px]">
-                Les {donnees.totalQuestions} questions, réponse par réponse
-              </span>
-              <span className="mono shrink-0 text-[12px] text-ink-2 group-open:hidden">
-                déplier ↓
-              </span>
-              <span className="mono hidden shrink-0 text-[12px] text-ink-2 group-open:inline">
-                replier ↑
-              </span>
-            </summary>
-            <p className="measure mt-5 text-[15px] text-ink-2">
-              <strong className="font-semibold text-ink">
-                Cliquez sur une question pour lire les réponses en entier.
-              </strong>{" "}
-              Rien n'est résumé : chaque réponse est conservée telle que le moteur l'a produite, et
-              sera rejouée à l'identique dans 90 jours.
-            </p>
-            <div className="mt-6">
-              <ToutesLesReponses
-                questions={questions as Question[]}
-                reponses={reponses as unknown as Reponse[]}
-                mentions={mentions as unknown as Mention[]}
-                marque={donnees.marque}
-              />
-            </div>
-          </details>
-        </div>
-      </section>
+      {/* L'annexe des questions vivait ICI, sous la séquence, avec deux liens
+          pour y descendre. Un écran plein la précédait : personne ne
+          soupçonnait qu'il y avait quelque chose en dessous, et c'était la
+          pièce qui prouve toute la mesure. Elle est devenue l'étape
+          « questions » de la séquence (14/08/2026). Ne pas la rétablir ici :
+          la même pièce à deux endroits est le piège déjà payé avec les deux
+          comparatifs, et la page d'aperçu ne se scrolle plus du tout. */}
+      <SequenceResultat
+        data={donnees}
+        questions={questions as Question[]}
+        reponses={reponses as unknown as Reponse[]}
+        mentions={mentions as unknown as Mention[]}
+        wide={large}
+        onBook={() => setReservation(true)}
+        sautVersQuestions={sautQuestions}
+      />
 
       <BookingModal
         open={reservation}

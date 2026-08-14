@@ -1,4 +1,4 @@
-import { BODY, HAIR, INK, MONO, MUTED, PANEL, RED, labelStyle } from "../theme";
+import { BODY, HAIR, INK, MONO, MUTED, RED, labelStyle } from "../theme";
 
 /**
  * La dernière carte : la réservation.
@@ -94,10 +94,9 @@ export function CarteReservation({ wide, part }: { wide: boolean; part: "recit" 
               les actions. Environ 300.
               (« Nous en tenons 3 par semaine » avait été coupé plus tôt le
               même jour : aucun compteur n'enregistrait cette rareté.) */}
-          Pourquoi c'est offert : un diagnostic complet déclenche près de 300 appels payants chez
-          six éditeurs d'IA, recherche web activée, chaque réponse étant ensuite relue par un
-          modèle. Neuf minutes de calcul. Nous le prenons à notre charge, parce qu'il n'y a pas de
-          conversation utile sans mesure.
+          Pourquoi c'est offert : la mesure complète déclenche près de 300 appels payants chez six
+          éditeurs d'IA et neuf minutes de calcul. Nous le prenons à notre charge, parce qu'il n'y
+          a pas de conversation utile sans mesure.
         </p>
       </div>
     );
@@ -107,6 +106,11 @@ export function CarteReservation({ wide, part }: { wide: boolean; part: "recit" 
     <>
       <span style={labelStyle}>RÉSERVER LE DIAGNOSTIC</span>
 
+      {/* Titre ramené sur deux lignes le 14/08/2026 : en trois lignes de 30px
+          il écrasait la carte, qui portait en plus un bloc gris de deux
+          paragraphes. « L'épreuve du direct » (rejouer une question en visio)
+          a été retirée avec lui : vraie, mais c'est un détail de déroulé, et
+          il chargeait l'écran où il faut décider. */}
       <p
         style={{
           fontSize: wide ? 30 : 23,
@@ -116,36 +120,22 @@ export function CarteReservation({ wide, part }: { wide: boolean; part: "recit" 
           margin: 0,
         }}
       >
-        Réservez, et la mesure complète part aussitôt. Nous la lisons ensemble.
+        La mesure complète part dès que vous réservez.
       </p>
 
       <p style={{ fontSize: wide ? 17 : 15.5, color: BODY, lineHeight: 1.55, margin: 0 }}>
         Ce n'est pas un appel de découverte : les 144 réponses sont déjà collectées quand nous nous
-        parlons.{" "}
-        <strong style={{ color: INK, fontWeight: 800 }}>
-          Vous repartez avec le rapport complet et le plan, que vous travailliez avec nous ou non.
-        </strong>
+        parlons, et l'appel sert à les ouvrir ensemble.
       </p>
 
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          gap: 10,
-          background: PANEL,
-          padding: wide ? "14px 16px" : "12px 14px",
-        }}
-      >
-        <p style={{ fontSize: wide ? 16 : 15, color: BODY, lineHeight: 1.55, margin: 0 }}>
-          <strong style={{ color: INK }}>L'épreuve du direct.</strong> Vous choisissez une question
-          et nous la reposons devant vous, en visio. Rien n'est précuit, et vous voyez la mesure se
-          faire.
-        </p>
-        <p style={{ fontSize: wide ? 16 : 15, color: BODY, lineHeight: 1.55, margin: 0 }}>
-          Et si votre visibilité est déjà bonne, nous vous le disons : nous n'avons rien à vendre à
-          une entreprise que les IA citent déjà.
-        </p>
-      </div>
+      <p style={{ fontSize: wide ? 17 : 15.5, color: INK, lineHeight: 1.55, margin: 0, fontWeight: 700 }}>
+        Vous repartez avec le rapport complet et le plan, que vous travailliez avec nous ou non.
+      </p>
+
+      <p style={{ fontSize: wide ? 15 : 14.5, color: BODY, lineHeight: 1.5, margin: 0 }}>
+        Si votre visibilité est déjà bonne, nous vous le disons : nous n'avons rien à vendre à une
+        entreprise que les IA citent déjà.
+      </p>
     </>
   );
 }

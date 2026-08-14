@@ -91,12 +91,22 @@ Ce que le premier passage avait manqué, et qui a été rattrapé :
 - les pages de contenu avaient **deux** en-têtes, le leur et celui de la racine.
 
 **`/rapport/$jeton` sert deux artefacts, et c'est le mode du scan qui tranche.**
-En `apercu`, c'est la séquence de conversion de Jérémie (v3, 14/08/2026) : six
-pop-ups, une carte à la fois — score, « qui prend votre place », la phrase
-exacte, part de voix, diagnostic, réservation. L'assemblage des données vit
+En `apercu`, c'est la séquence de conversion de Jérémie (v3, 14/08/2026) :
+jusqu'à neuf pop-ups, une carte à la fois — score, « qui prend votre place »,
+la phrase exacte, part de voix, ce qu'une IA dit de vous, accès des robots,
+**les 20 questions**, diagnostic, réservation. L'assemblage des données vit
 dans `lib/rapport-sequence.ts`, les cartes dans `components/jeremie/rapport/`.
 Une étape sans donnée (pas d'adversaire, pas de verbatim) sort de la
-séquence : jamais de carte vide, jamais de texte inventé. En `complet` ou
+séquence : jamais de carte vide, jamais de texte inventé. Le bouton d'une
+carte reprend l'`annonce` de l'étape qui suit RÉELLEMENT ; l'écrire en dur
+promettait une carte absente dès qu'une donnée manquait.
+
+**L'échantillon est une étape, plus une annexe** (14/08/2026). Les 20
+questions et leurs réponses vivaient sous la séquence, derrière deux liens et
+un écran plein : personne ne soupçonnait qu'il y avait quelque chose en
+dessous. C'est pourtant la pièce qui prouve toute la mesure. La page d'aperçu
+ne se scrolle donc plus du tout. Ne pas rétablir l'annexe : la même pièce à
+deux endroits est le piège déjà payé avec les deux comparatifs. En `complet` ou
 `controle`, c'est le document de mesure. Présenter comme « verrouillé » un
 moteur qu'on vient d'interroger et de facturer serait un mensonge : ne jamais
 rendre cet aiguillage configurable.
