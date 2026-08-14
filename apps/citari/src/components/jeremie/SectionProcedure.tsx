@@ -76,30 +76,40 @@ const ETAPES: Etape[] = [
   {
     num: "02",
     label: "LE DIAGNOSTIC",
-    titre: "Vous repartez avec le plan, que vous travailliez avec nous ou non",
-    cout: "30 minutes. Rien d'autre.",
+    titre: "Cette fois, les six moteurs répondent. Le plan qui en sort est à vous.",
+    cout: "30 minutes en visio. Ni carte bancaire, ni engagement.",
     labelCout: "CE QUE ÇA VOUS COÛTE",
     duree: "Gratuit · 30 minutes",
     labelObtenu: "CE QUE VOUS RECEVEZ",
     obtenu: (
       <div className="space-y-3">
         <p>
-          Dès que vous réservez, nous lançons l'analyse complète : 24 questions, 6 moteurs, 144
-          réponses.{" "}
-          <strong className="font-semibold text-ink">
-            Ce travail est facturé plusieurs centaines d'euros ailleurs.
-          </strong>
+          Dès que vous réservez, nous lançons la mesure complète : 24 questions, les six moteurs,
+          144 réponses au lieu de 40. Cette fois{" "}
+          <strong className="font-semibold text-ink">la recherche web est activée</strong> : les IA
+          vont lire le web avant de répondre, exactement comme elles le font devant vos clients.
         </p>
         <p>Lors de notre visio vous saurez :</p>
         <ul className="list-disc space-y-1.5 pl-4">
-          <li>les sources exactes sur lesquelles les IA s'appuient pour citer vos concurrents ;</li>
-          <li>ce qui bloque techniquement sur votre site ;</li>
-          <li>l'ordre des corrections, et lesquelles vous pouvez faire seul.</li>
+          <li>votre note moteur par moteur, car elles ne se ressemblent pas ;</li>
+          <li>les sites exacts que les IA ouvrent avant de citer vos concurrents ;</li>
+          <li>ce que chaque moteur récite sur vous quand on lui donne votre nom ;</li>
+          <li>l'ordre des corrections, et lesquelles vous pouvez faire sans nous.</li>
         </ul>
-        <p>Vous repartez avec ce plan. Il est à vous.</p>
         <p>
+          Vous repartez avec ce plan, et avec{" "}
           <strong className="font-semibold text-ink">
-            Si votre score est bon, on vous le dit et on ne vous vend rien.
+            une mesure de départ scellée, rejouable à l'identique dans 90 jours
+          </strong>{" "}
+          : c'est la seule façon de prouver qu'on a bougé.
+        </p>
+        <p>
+          {/* La phrase la plus forte du site reste ici, où le scepticisme est
+              maximal, mais reformulée : le contrôle du 14/08 l'a relevée
+              quatre fois à l'identique dans le parcours. */}
+          <strong className="font-semibold text-ink">
+            Nous n'avons rien à vendre à une entreprise déjà bien citée : dans ce cas, on vous le
+            dit et l'affaire s'arrête là.
           </strong>
         </p>
       </div>
@@ -139,7 +149,7 @@ const ETAPES: Etape[] = [
     imageWidth: 1024,
     imageHeight: 640,
     imageAspect: "aspect-[2/1]",
-    alt: "Un cadran de mesure avec une aiguille rouge, illustration du diagnostic.",
+    alt: "Un cadran de mesure avec une aiguille rouge, illustration du sprint de trente jours.",
   },
 ];
 

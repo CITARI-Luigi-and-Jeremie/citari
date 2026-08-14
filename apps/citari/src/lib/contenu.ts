@@ -23,16 +23,22 @@ export const SPECIMEN = {
     { nom: "Concurrent B", valeur: 12, part: 63, vous: false },
     { nom: "Vous", valeur: 2, part: 10, vous: true },
   ],
-  pointsLabel: "LE DIAGNOSTIC VÉRIFIE",
+  // « OFFERT » : le diagnostic complet est à 0 €, la landing ne le disait
+  // qu'en bas de page. Un mot, et la promesse change de nature.
+  pointsLabel: "LE DIAGNOSTIC OFFERT VÉRIFIE",
   points: [
     {
-      label: "Que répondent les 6 moteurs quand un client cherche votre métier ?",
+      label: "Sur quelles questions d'achat votre nom ne sort-il pas ?",
       valeur: "144 réponses",
     },
-    { label: "Où vont-ils chercher avant de prononcer un nom ?", valeur: "sources listées" },
-    { label: "Peuvent-ils seulement entrer sur votre site ?", valeur: "4 robots contrôlés" },
-    { label: "Que racontent-ils sur vous quand on leur donne votre nom ?", valeur: "6 moteurs" },
-    { label: "Par quoi commencer ?", valeur: "3 corrections" },
+    { label: "Où les IA vont-elles chercher avant de citer un nom ?", valeur: "les sites exacts" },
+    { label: "Le robot de ChatGPT peut-il seulement entrer sur votre site ?", valeur: "4 robots testés" },
+    // « une par moteur » et non « 6 moteurs » : un moteur en panne est exclu
+    // du miroir comme du score, promettre un nombre fixe serait faux.
+    { label: "Quelle fiche les IA récitent-elles sur vous ?", valeur: "une par moteur" },
+    // Le générateur produit DIX actions classées (moteurs.server.ts), pas
+    // trois : le spécimen sous-vendait ce qui est réellement livré.
+    { label: "Par quoi commencer, et que pouvez-vous faire sans nous ?", valeur: "10 actions classées" },
   ],
   mentionLegale: "Exemple illustratif : entreprise et concurrents fictifs, aucune mesure réelle.",
 } as const;

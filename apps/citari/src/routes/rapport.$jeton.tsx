@@ -450,7 +450,7 @@ function Restitution({ marque }: { marque: string }) {
       <h2 className="measure text-[26px] sm:text-[34px]">Le rapport se lit mieux à deux.</h2>
       <p className="measure mt-6 text-ink-2">
         {fr(
-          "Trente minutes en visio : les questions une par une, les sources sur lesquelles les moteurs s’appuient pour recommander vos concurrents, et vos trois corrections prioritaires. Vous repartez avec le diagnostic, qu’on travaille ensemble ou non.",
+          "Trente minutes en visio : les questions une par une, les sources sur lesquelles les moteurs s’appuient pour recommander vos concurrents, et vos actions prioritaires, classées. Vous repartez avec le diagnostic, qu’on travaille ensemble ou non.",
         )}
       </p>
       <div className="mt-8">

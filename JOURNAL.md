@@ -5,6 +5,60 @@ d'une nouvelle session, après `CLAUDE.md`.
 
 ---
 
+## 2026-08-14 — L'audit des huit agents : ce qui dormait, ce qui mentait
+
+Luigi voulait deux choses : mieux vendre le diagnostic sur ses trois surfaces,
+et sortir du gratuit ce qu'on avait déjà payé. Un workflow de huit agents a
+inventorié la machine (aperçu, complet, sprint), relevé les trois surfaces
+mot pour mot, écrit le copy, et un dernier agent a contrôlé chaque promesse
+contre le code. 36 verdicts : 25 vrais, 11 à corriger, 1 faux.
+
+**Ce que le contrôle a sauvé.** Les deux inventaires classaient en tête un
+argument imparable — « Fiducial, que vous nous avez cité, apparaît 42 fois,
+vous 25 » — adossé à `scans.concurrents_suivis`. Or le formulaire envoie
+`concurrents: []` depuis le passage à trois étapes le matin même : la colonne
+est vide pour tout nouveau scan. Un site entier de promesses aurait été bâti
+sur une donnée morte. Deuxième prise : « 739 sources » est un relevé UNIQUE
+et non une moyenne, à ne jamais afficher comme constante.
+
+**Une violation de doctrine, coupée.** « Nous en tenons 3 par semaine »
+(carte réservation) : aucun compteur n'enregistre cette rareté. C'était la
+seule affirmation invérifiable du parcours.
+
+**Une promesse rompue par mon propre commit, réparée.** Depuis que le rapport
+GRATUIT affiche le miroir et l'audit des robots, le rapport COMPLET — qui les
+promet dans son tableau — ne les rendait NULLE PART. Un rapport payant qui
+tient moins que l'aperçu qu'il prolonge : sections `miroir` et `technique`
+ajoutées au document de mesure.
+
+**Ce qui sort du sommeil dans le gratuit.** Les quatre composantes du score
+(présence 50 %, rang 20 %, recommandation 20 %, tonalité 10 %) étaient
+calculées et enregistrées à chaque scan sans jamais être montrées : elles
+transforment un chiffre opaque en diagnostic lisible sans rien livrer du
+rendez-vous. Avec le dénominateur réel, pannes exclues — la règle la plus
+chèrement apprise du projet devient un argument de vente.
+
+**La ligne gratuit/premium, telle que le contrôle la trace.** Deux murs sont
+posés par le code et ne bougeront pas : l'aperçu ne peut pas produire de
+sources (recherche web coupée) ni servir de point zéro au J+90 (`rescan`
+refuse un aperçu). Tout le reste est un choix d'affichage. Ce qui reste
+DEHORS, volontairement : les dix actions en clair — les afficher viderait le
+rendez-vous, c'est le contenu le plus proche de la livraison.
+
+**Et la vente, sur les trois surfaces.** Sept lignes au comparatif dont « une
+mesure de départ rejouable à l'identique dans 90 jours », le seul argument
+verrouillé par le code lui-même. Le récit requalifie ce que le prospect vient
+de lire : deux moteurs qui ont répondu DE MÉMOIRE. Le spécimen du héros
+annonce « LE DIAGNOSTIC OFFERT VÉRIFIE » (il est à 0 €, la landing ne le
+disait qu'en bas de page) et ses cinq lignes deviennent des questions de
+dirigeant. Corrections de justesse au passage : « 3 corrections » devient
+« 10 actions classées » (c'est ce que le générateur produit), « 6 moteurs »
+devient « une par moteur » (un moteur en panne sort du miroir), et
+« facturé plusieurs centaines d'euros ailleurs » est supprimé — une
+affirmation sur le marché qu'on ne peut pas prouver.
+
+---
+
 ## 2026-08-14 — Les 144 réponses étaient déjà dans la page, invisibles
 
 Luigi : « on vend 144 réponses et on n'en montre que quelques-unes ». Vérifié :
