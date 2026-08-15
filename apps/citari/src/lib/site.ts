@@ -14,7 +14,19 @@ export const BOOKING_URL =
 export function bookingUrl({
   email,
   name,
-}: { email?: string | null; name?: string | null } = {}): string {
+  embarque,
+}: {
+  email?: string | null;
+  name?: string | null;
+  /**
+   * Hôte de la page qui EMBARQUE le widget (iframe). Sans `embed_domain` et
+   * `embed_type`, Calendly n'émet AUCUN postMessage vers la page hôte :
+   * prouvé le 15/08/2026 par A/B (0 message en 12 s sans, 5 dès le
+   * chargement avec), après qu'une vraie réservation de test n'est jamais
+   * apparue sur /equipe. À passer pour toute iframe, jamais pour un lien.
+   */
+  embarque?: string | null;
+} = {}): string {
   const url = new URL(BOOKING_URL);
   url.searchParams.set("hide_gdpr_banner", "1");
   url.searchParams.set("background_color", "fbfaf7");
@@ -22,6 +34,10 @@ export function bookingUrl({
   url.searchParams.set("primary_color", "c0371d");
   if (email) url.searchParams.set("email", email);
   if (name) url.searchParams.set("name", name);
+  if (embarque) {
+    url.searchParams.set("embed_domain", embarque);
+    url.searchParams.set("embed_type", "Inline");
+  }
   return url.toString();
 }
 

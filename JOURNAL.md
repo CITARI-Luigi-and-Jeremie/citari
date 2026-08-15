@@ -5,6 +5,36 @@ d'une nouvelle session, après `CLAUDE.md`.
 
 ---
 
+## 2026-08-15 — Calendly ne parle qu'aux pages qui se déclarent
+
+La vraie réservation de test de Luigi n'est jamais apparue sur /equipe, et
+la table `reservations` était bel et bien vide : rien n'avait été capté. La
+cause n'était ni le filtre d'origine (déjà corrigé), ni l'écouteur : **le
+widget Calendly n'émet AUCUN postMessage vers la page hôte si l'URL
+embarquée ne porte pas `embed_domain` et `embed_type`**. Prouvé par A/B
+dans le navigateur : la même iframe reçoit zéro message en 12 secondes sans
+les paramètres, cinq dès le chargement avec (`calendly.event_type_viewed`,
+`calendly.page_height`).
+
+Moralité : le journal du même jour notait « la seule pièce restante
+qu'aucun test synthétique ne peut couvrir : une VRAIE réservation ». C'est
+exactement la pièce qui a cassé. Deux vérifications synthétiques (origine,
+écriture en base) encadraient un canal qui n'émettait tout simplement rien.
+
+Corrigé dans `bookingUrl()` (option `embarque`, qui pose
+`embed_domain=<hôte>` + `embed_type=Inline`) et `BookingModal` la passe
+avec `window.location.hostname` — sûr côté SSR, l'iframe ne rend qu'après
+le clic. Les LIENS directs (page /scan-complet, emails) ne la passent pas :
+un lien ouvre Calendly plein cadre, il n'y a pas de page hôte à prévenir,
+c'est le formulaire d'ajout manuel qui les rattrape. Revérifié dans la
+vraie modale : les événements arrivent, et une confirmation simulée
+(`calendly.event_scheduled` dispatché avec l'origine Calendly) a écrit la
+ligne Agoravox en base, effacée après coup. La réservation de test de Luigi
+reste perdue pour le tableau : la recoller via l'ajout manuel, ou refaire
+une réservation après déploiement — cette fois elle sera captée.
+
+---
+
 ## 2026-08-15 — « Scan complet », troisième et dernier baptême du jour
 
 Décision de Luigi en fin de soirée : « scan premium » devient « scan

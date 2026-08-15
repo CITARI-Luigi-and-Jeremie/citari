@@ -63,9 +63,12 @@ export function BookingModal({
         >
           ×
         </button>
+        {/* `embarque` est indispensable : sans embed_domain, Calendly reste
+            muet et la confirmation n'est jamais captée. Sûr côté SSR : ce
+            bloc ne rend qu'après `open`, qui n'arrive qu'au clic. */}
         <iframe
           title="Réserver le scan complet"
-          src={bookingUrl({ email, name: marque })}
+          src={bookingUrl({ email, name: marque, embarque: window.location.hostname })}
           className="block h-full w-full border-0"
         />
       </div>
