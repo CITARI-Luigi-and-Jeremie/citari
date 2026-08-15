@@ -5,6 +5,32 @@ d'une nouvelle session, après `CLAUDE.md`.
 
 ---
 
+## 2026-08-15 — Les trois étapes : le prix passe devant, les blocs deviennent des listes
+
+Quatrième passe, même critique. Deux défauts, dont un franchement gênant.
+
+**La mise en page contredisait le titre.** La section s'appelle « Trois
+étapes. Vous savez d'avance ce que chacune coûte » — et le coût était en bas
+de carte, en 13px, APRÈS 120 à 190 mots de texte. Le prix est remonté en
+tête, en gros, avec la durée : « 01 · LE SCAN · Gratuit · 90 secondes ». Les
+deux étapes offertes l'affichent en signal, celle qui se paie en encre : la
+nature de chaque étape se lit avant son contenu.
+
+**457 mots dans une section qui se parcourt.** L'étape 02 en pesait 192 à
+elle seule, en blocs de paragraphes. Tout est passé en listes à puces, une
+idée par ligne : 373 mots, et surtout des cartes enfin comparables (503,
+550, 531px de haut, contre 509, 666 et 526). Aucun fait n'a été retiré ;
+seules les redites l'ont été, et la phrase « nous n'avons rien à vendre à
+une entreprise déjà bien citée » n'a plus qu'un seul emplacement sur la
+landing.
+
+Effet de bord heureux, sur le défaut d'image signalé le matin : la carte 02
+raccourcie ramène le vide sous son illustration de 154px à 38. Les trois
+images montrent maintenant 41 à 42 % de leur surface, avec des cartes de
+hauteur voisine — c'était la cause racine, et elle est traitée.
+
+---
+
 ## 2026-08-15 — Le simulateur répond enfin à sa propre question
 
 Troisième passe de Luigi, même critique. Le défaut de fond était logique

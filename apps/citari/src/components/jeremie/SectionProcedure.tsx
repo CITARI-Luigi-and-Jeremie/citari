@@ -28,9 +28,21 @@ type Etape = {
   titre: string;
   cout: string;
   labelCout?: string;
+  /**
+   * Le prix et la durée, séparés et remontés EN TÊTE de carte le
+   * 15/08/2026. Le titre de la section promet « vous savez d'avance ce que
+   * chacune coûte », et le coût était en bas, en 13px, après 120 à 190 mots :
+   * la mise en page contredisait la promesse. Le repère « offert » distingue
+   * d'un coup d'œil les deux étapes gratuites de celle qui se paie.
+   */
+  prix: string;
+  offert: boolean;
   duree: string;
   labelObtenu?: string;
-  obtenu: ReactNode;
+  /** Les points de « ce que vous recevez », en liste plutôt qu'en blocs. */
+  recoit: ReactNode[];
+  /** La phrase qui conclut l'étape, sous la liste. */
+  chute: ReactNode;
   image: string;
   imageWidth: number;
   imageHeight: number;
@@ -54,27 +66,31 @@ const ETAPES: Etape[] = [
     titre: "Vous voyez enfin ce qu'on répond à votre place",
     cout: "Votre adresse professionnelle. Ni carte bancaire, ni rendez-vous, ni engagement.",
     labelCout: "CE QUE ÇA VOUS COÛTE",
-    duree: "Gratuit · 90 secondes",
+    prix: "Gratuit",
+    offert: true,
+    duree: "90 secondes",
     labelObtenu: "CE QUE VOUS RECEVEZ",
-    obtenu: (
-      <div className="space-y-3">
-        <p>
-          Nous posons à ChatGPT et Gemini les questions que vos acheteurs tapent vraiment. Pas des
-          simulations : 40 réponses réelles, sous vos yeux, en direct.
-        </p>
-        <p>
-          Vous découvrez qui est cité, combien de fois, et dans quel ordre. Toutes les marques qui
-          sortent, pas seulement celles que vous surveillez.
-        </p>
-        <p>
-          Et la phrase exacte. Mot pour mot. Celle où une IA recommande quelqu'un de votre secteur
-          à un client qui aurait pu être le vôtre.
-        </p>
-        <p>
-          Vous découvrirez peut-être un score que vous n'imaginiez pas.{" "}
-          <strong className="font-semibold text-ink">Dans les deux sens.</strong>
-        </p>
-      </div>
+    // Passé de quatre paragraphes à trois points : mêmes faits, mais une
+    // section « trois étapes » se parcourt, elle ne se lit pas.
+    recoit: [
+      <>
+        <strong className="font-semibold text-ink">40 réponses réelles</strong> de ChatGPT et
+        Gemini, aux questions que vos acheteurs tapent vraiment.
+      </>,
+      <>
+        Toutes les marques citées, combien de fois et dans quel ordre. Pas seulement celles que
+        vous surveillez.
+      </>,
+      <>
+        <strong className="font-semibold text-ink">La phrase exacte</strong>, mot pour mot, où une
+        IA recommande quelqu'un de votre secteur.
+      </>,
+    ],
+    chute: (
+      <>
+        Vous découvrirez peut-être un score que vous n'imaginiez pas.{" "}
+        <strong className="font-semibold text-ink">Dans les deux sens.</strong>
+      </>
     ),
     // Dimensions relevées dans le fichier : les trois font 1408×768.
     image: "/img/etape-scan.png",
@@ -90,40 +106,35 @@ const ETAPES: Etape[] = [
     titre: "Cette fois, les six moteurs répondent. Le plan qui en sort est à vous.",
     cout: "30 minutes en visio. Ni carte bancaire, ni engagement.",
     labelCout: "CE QUE ÇA VOUS COÛTE",
-    duree: "Gratuit · 30 minutes",
+    prix: "Gratuit",
+    offert: true,
+    duree: "30 minutes",
     labelObtenu: "CE QUE VOUS RECEVEZ",
-    obtenu: (
-      <div className="space-y-3">
-        <p>
-          Dès que vous réservez, nous lançons la mesure complète : 24 questions, les six moteurs,
-          144 réponses au lieu de 40. Cette fois{" "}
-          <strong className="font-semibold text-ink">la recherche web est activée</strong> : les IA
-          vont lire le web avant de répondre, exactement comme elles le font devant vos clients.
-        </p>
-        <p>Lors de notre visio vous saurez :</p>
-        <ul className="list-disc space-y-1.5 pl-4">
-          <li>votre note moteur par moteur, car elles ne se ressemblent pas ;</li>
-          <li>les sites exacts que les IA ouvrent avant de citer vos concurrents ;</li>
-          <li>ce que chaque moteur récite sur vous quand on lui donne votre nom ;</li>
-          <li>l'ordre des corrections, et lesquelles vous pouvez faire sans nous.</li>
-        </ul>
-        <p>
-          Vous repartez avec ce plan, et avec{" "}
-          <strong className="font-semibold text-ink">
-            une mesure de départ scellée, rejouable à l'identique dans 90 jours
-          </strong>{" "}
-          : c'est la seule façon de prouver qu'on a bougé.
-        </p>
-        <p>
-          {/* La phrase la plus forte du site reste ici, où le scepticisme est
-              maximal, mais reformulée : le contrôle du 14/08 l'a relevée
-              quatre fois à l'identique dans le parcours. */}
-          <strong className="font-semibold text-ink">
-            Nous n'avons rien à vendre à une entreprise déjà bien citée : dans ce cas, on vous le
-            dit et l'affaire s'arrête là.
-          </strong>
-        </p>
-      </div>
+    recoit: [
+      <>
+        <strong className="font-semibold text-ink">144 réponses au lieu de 40</strong> : 24
+        questions, les six moteurs, et cette fois la recherche web activée, comme devant vos
+        clients.
+      </>,
+      <>Votre note moteur par moteur, car elles ne se ressemblent pas.</>,
+      <>Les sites exacts que les IA ouvrent avant de citer vos concurrents.</>,
+      <>L'ordre des corrections, et lesquelles vous pouvez faire sans nous.</>,
+      <>
+        <strong className="font-semibold text-ink">
+          Une mesure de départ scellée, rejouable à l'identique dans 90 jours
+        </strong>{" "}
+        : la seule façon de prouver qu'on a bougé.
+      </>,
+    ],
+    // La phrase la plus forte du site reste ici, où le scepticisme est
+    // maximal. Le contrôle du 14/08 l'avait relevée quatre fois à
+    // l'identique dans le parcours : c'est désormais son seul emplacement
+    // sur la landing.
+    chute: (
+      <strong className="font-semibold text-ink">
+        Nous n'avons rien à vendre à une entreprise déjà bien citée : dans ce cas, on vous le dit et
+        l'affaire s'arrête là.
+      </strong>
     ),
     // Le fichier est un PAYSAGE de 1408×768 : il était déclaré 900×1400
     // portrait, et le cadre mobile 9/14 n'en montrait qu'une tranche.
@@ -139,24 +150,31 @@ const ETAPES: Etape[] = [
     label: "LE SPRINT GEO",
     titre: "Aujourd'hui, une IA n'a presque rien à lire sur vous. Dans trente jours, si.",
     cout: "2 900 € HT, une fois. 50 % à la commande, 50 % à la livraison. Aucun abonnement, aucune reconduction.",
+    prix: "2 900 € HT",
+    offert: false,
     duree: "30 jours",
     labelObtenu: "CE QUE NOUS FAISONS",
-    obtenu: (
-      <div className="space-y-3">
-        <p>Trois chantiers, menés en parallèle pendant un mois.</p>
-        <p>
-          Nous rendons votre site lisible par les IA, la plupart leur ferment la porte sans le
-          savoir. Nous écrivons ce qui manque sur les questions précises où votre nom n'est pas
-          sorti. Et nous allons vous faire exister sur les sources que les moteurs consultent avant
-          de répondre : c'est le chantier que personne ne fait, et c'est celui qui compte le plus.
-        </p>
-        <p>
-          Puis à J+90, le même relevé qu'aujourd'hui, mot pour mot.{" "}
-          <strong className="font-semibold text-ink">
-            C'est la seule chose que nous garantissons, et c'est la seule qui se vérifie.
-          </strong>
-        </p>
-      </div>
+    // Le paragraphe unique enchaînait les trois chantiers d'une traite ; en
+    // liste, on voit qu'ils sont trois et on les distingue.
+    recoit: [
+      <>
+        Nous rendons votre site <strong className="font-semibold text-ink">lisible par les IA</strong>{" "}
+        : la plupart leur ferment la porte sans le savoir.
+      </>,
+      <>Nous écrivons ce qui manque sur les questions précises où votre nom n'est pas sorti.</>,
+      <>
+        Nous vous faisons exister{" "}
+        <strong className="font-semibold text-ink">sur les sources que les moteurs consultent</strong>{" "}
+        : le chantier que personne ne fait, et celui qui compte le plus.
+      </>,
+    ],
+    chute: (
+      <>
+        Puis à J+90, le même relevé qu'aujourd'hui, mot pour mot.{" "}
+        <strong className="font-semibold text-ink">
+          C'est la seule chose que nous garantissons, et la seule qui se vérifie.
+        </strong>
+      </>
     ),
     labelCout: "CE QUE ÇA VOUS DEMANDE",
     image: "/img/etape-diagnostic.png",
@@ -248,7 +266,12 @@ export function SectionProcedure() {
                     </div>
 
                     <div className="flex flex-col p-6 sm:p-7">
-                      <div className="flex items-start justify-between gap-4">
+                      {/* Le bandeau de tête : numéro, nature de l'étape, et
+                          surtout PRIX et durée, lisibles avant tout le reste.
+                          La section promet qu'on sait d'avance ce que chacune
+                          coûte : elle le tient maintenant à la première
+                          seconde. */}
+                      <div className="flex items-start justify-between gap-4 border-b border-rule pb-4">
                         <div className="flex flex-col">
                           <span className="mono text-[40px] font-bold leading-[0.85] tracking-tighter text-ink sm:text-[48px]">
                             {etape.num}
@@ -259,25 +282,47 @@ export function SectionProcedure() {
                             </span>
                           ) : null}
                         </div>
-                        <span className="mono mt-2 text-[12px] tabular-nums text-ink-2">
-                          {etape.duree}
-                        </span>
-                      </div>
-
-                      <h3 className="mt-4 text-[22px] leading-[1.15] text-ink sm:mt-3 sm:text-[25px]">
-                        {etape.titre}
-                      </h3>
-
-                      <div className="mt-5 sm:mt-4">
-                        <p className="mono text-[11px] uppercase tracking-[0.12em] text-ink-2">
-                          {etape.labelObtenu ?? "vous obtenez"}
-                        </p>
-                        <div className="mt-2 text-[15px] leading-[1.55] text-ink-2">
-                          {etape.obtenu}
+                        <div className="flex flex-col items-end gap-1">
+                          <span
+                            className={`text-[20px] font-bold leading-none tracking-[-0.02em] sm:text-[23px] ${
+                              etape.offert ? "text-signal" : "text-ink"
+                            }`}
+                          >
+                            {etape.prix}
+                          </span>
+                          <span className="mono text-[12px] tabular-nums text-ink-2">
+                            {etape.duree}
+                          </span>
                         </div>
                       </div>
 
-                      <dl className="mono mt-5 border-l-2 border-rule pl-4 text-[13.5px] tabular-nums sm:mt-6 sm:border-l sm:pl-3">
+                      <h3 className="mt-4 text-[22px] leading-[1.15] text-ink sm:text-[25px]">
+                        {etape.titre}
+                      </h3>
+
+                      <div className="mt-4">
+                        <p className="mono text-[11px] uppercase tracking-[0.12em] text-ink-2">
+                          {etape.labelObtenu ?? "vous obtenez"}
+                        </p>
+                        <ul className="mt-2.5 flex flex-col gap-2">
+                          {etape.recoit.map((point, k) => (
+                            <li key={k} className="flex items-start gap-2.5">
+                              <span
+                                aria-hidden
+                                className="mono mt-[3px] flex-none text-[11px] text-signal"
+                              >
+                                →
+                              </span>
+                              <span className="flex-1 text-[14.5px] leading-[1.45] text-ink-2">
+                                {point}
+                              </span>
+                            </li>
+                          ))}
+                        </ul>
+                        <p className="mt-3 text-[14.5px] leading-[1.45] text-ink-2">{etape.chute}</p>
+                      </div>
+
+                      <dl className="mono mt-5 border-l-2 border-rule pl-4 text-[13.5px] tabular-nums sm:mt-auto sm:pt-5">
                         <dt className="text-[11px] uppercase tracking-[0.1em] text-ink-2">
                           {etape.labelCout ?? "coût"}
                         </dt>
