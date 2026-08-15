@@ -5,6 +5,35 @@ d'une nouvelle session, après `CLAUDE.md`.
 
 ---
 
+## 2026-08-15 — La capture Calendly aurait rejeté toutes les vraies réservations
+
+« Reverifie tout » de Luigi avant la mise en service, et la re-vérification
+a payé : le filtre d'origine des postMessage exigeait un domaine finissant
+par « .calendly.com » — or le widget émet depuis `https://calendly.com`,
+SANS sous-domaine. Le point de trop rejetait l'origine principale : la page
+/equipe aurait affiché « aucune réservation » pour toujours, avec une
+capture parfaitement silencieuse. Le test de bout en bout ne pouvait pas le
+voir : il simulait la ligne en base, pas l'événement Calendly.
+
+Corrigé dans `lib/calendly.ts` (`estOrigineCalendly` : https, hôte
+calendly.com ou sous-domaine — jamais un suffixe de chaîne, sinon
+`evil-calendly.com` passerait), avec quatre tests qui verrouillent les deux
+sens : accepter Calendly, n'accepter que lui.
+
+Ajouté dans la foulée, pour le « je dois pouvoir tout contrôler » : le
+formulaire d'ajout MANUEL sur /equipe. Une réservation prise hors du site
+(lien direct, email) arrive par la notification Calendly : on colle le lien
+du rapport du prospect, la ligne rejoint le tableau, le bouton Lancer fait
+le reste.
+
+Vérifié en PRODUCTION : porte (le mot de passe Hostinger est pris), liste,
+lancement réel (scan complet créé en prod, phase init, 0 réponse donc 0 €,
+secteur hérité de l'aperçu), puis nettoyage complet. La seule pièce
+restante qu'aucun test synthétique ne peut couvrir : une VRAIE réservation
+Calendly de bout en bout — à faire une fois, gratuite et annulable.
+
+---
+
 ## 2026-08-15 — /equipe : les réservations Calendly, et le bouton qui lance le premium
 
 Luigi voulait « un endroit où on voit tous ceux qui ont réservé, et un

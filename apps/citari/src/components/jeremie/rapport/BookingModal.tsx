@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { useServerFn } from "@tanstack/react-start";
 
 import { bookingUrl } from "@/lib/site";
+import { estOrigineCalendly } from "@/lib/calendly";
 import { enregistrerReservation } from "@/lib/equipe.functions";
 
 /**
@@ -33,7 +34,7 @@ export function BookingModal({
     if (!open || !jeton) return;
     const onMessage = (e: MessageEvent) => {
       // Seul Calendly est écouté, et seul l'événement de confirmation compte.
-      if (typeof e.origin !== "string" || !e.origin.endsWith(".calendly.com")) return;
+      if (typeof e.origin !== "string" || !estOrigineCalendly(e.origin)) return;
       const type = (e.data as { event?: string } | null)?.event;
       if (type !== "calendly.event_scheduled") return;
       // Tolérant : une capture ratée ne doit jamais gêner la réservation

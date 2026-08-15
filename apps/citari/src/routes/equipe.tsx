@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useCallback, useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 
-import { lancerPremium, listerReservations } from "@/lib/equipe.functions";
+import { enregistrerReservation, lancerPremium, listerReservations } from "@/lib/equipe.functions";
 import { dateFr } from "@/lib/typo";
 
 /**
@@ -51,6 +51,7 @@ type Ligne = {
 function PageEquipe() {
   const lister = useServerFn(listerReservations);
   const lancer = useServerFn(lancerPremium);
+  const enregistrer = useServerFn(enregistrerReservation);
 
   const [motDePasse, setMotDePasse] = useState("");
   const [saisie, setSaisie] = useState("");
@@ -58,6 +59,9 @@ function PageEquipe() {
   const [lignes, setLignes] = useState<Ligne[] | null>(null);
   const [enCours, setEnCours] = useState<string | null>(null);
   const [erreur, setErreur] = useState<string | null>(null);
+  const [lienAjout, setLienAjout] = useState("");
+  const [emailAjout, setEmailAjout] = useState("");
+  const [messageAjout, setMessageAjout] = useState<string | null>(null);
 
   const charger = useCallback(
     async (mdp: string) => {
@@ -102,6 +106,33 @@ function PageEquipe() {
       /* sans stockage, la session ne survivra pas au rechargement */
     }
     await charger(mdp);
+  };
+
+  /**
+   * Ajout manuel : les réservations prises HORS du site (lien Calendly
+   * direct, email) ne sont pas captées et arrivent par l'email de
+   * notification. On les rattrape ici en collant le lien du rapport du
+   * prospect — le contrôle reste complet depuis cette page.
+   */
+  const ajouterManuellement = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setMessageAjout(null);
+    const jeton = lienAjout.trim().split("/rapport/").pop()?.split(/[?#]/)[0]?.trim() ?? "";
+    if (jeton.length < 10) {
+      setMessageAjout("Collez le lien du rapport du prospect (ou son jeton).");
+      return;
+    }
+    const r = await enregistrer({
+      data: { jeton, email: emailAjout.trim() ? emailAjout.trim() : null },
+    });
+    if (!r.ok) {
+      setMessageAjout("Aucun scan ne correspond à ce lien.");
+      return;
+    }
+    setLienAjout("");
+    setEmailAjout("");
+    setMessageAjout("Réservation ajoutée.");
+    await charger(motDePasse);
   };
 
   const lancerScanPremium = async (reservationId: string) => {
@@ -275,6 +306,38 @@ function PageEquipe() {
       )}
 
       {erreur ? <p className="mono mt-6 text-[13px] text-signal">{erreur}</p> : null}
+
+      {/* Rattrapage des réservations prises hors du site. */}
+      <div className="mt-16 max-w-xl border-t border-rule-strong pt-6">
+        <p className="mono text-[12px] uppercase tracking-[0.12em] text-ink-2">
+          Ajouter une réservation à la main
+        </p>
+        <p className="measure mt-2 text-[14px] text-ink-2">
+          Pour un rendez-vous pris par lien Calendly direct (email, page scan premium) : collez le
+          lien du rapport du prospect, il arrive dans le tableau.
+        </p>
+        <form onSubmit={ajouterManuellement} className="mt-4 grid gap-3">
+          <input
+            className="field"
+            placeholder="citari.fr/rapport/… ou le jeton"
+            value={lienAjout}
+            onChange={(e) => setLienAjout(e.target.value)}
+          />
+          <input
+            className="field"
+            type="email"
+            placeholder="email du prospect (facultatif)"
+            value={emailAjout}
+            onChange={(e) => setEmailAjout(e.target.value)}
+          />
+          <button type="submit" className="cta w-fit px-5 py-2.5 text-[14px]">
+            Ajouter
+          </button>
+        </form>
+        {messageAjout ? (
+          <p className="mono mt-3 text-[13px] text-ink-2">{messageAjout}</p>
+        ) : null}
+      </div>
     </div>
   );
 }
