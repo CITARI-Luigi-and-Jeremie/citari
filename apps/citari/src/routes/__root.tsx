@@ -98,9 +98,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
             "Agence française de GEO (Generative Engine Optimization) : mesure et correction de la visibilité des marques dans ChatGPT, Claude, Gemini, Perplexity, Grok et Le Chat.",
           areaServed: "FR",
           knowsLanguage: ["fr", "it", "en"],
+          // Une seule offre publique depuis le 15/08/2026 : annoncer aux
+          // moteurs une offre que le site ne présente plus serait exactement
+          // le genre d'incohérence qu'on fait payer aux autres.
           makesOffer: [
             { "@type": "Offer", name: "Sprint GEO", price: "2900", priceCurrency: "EUR" },
-            { "@type": "Offer", name: "Sprint Domination", price: "4900", priceCurrency: "EUR" },
           ],
         }),
       },

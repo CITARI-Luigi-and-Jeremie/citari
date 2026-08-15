@@ -72,11 +72,20 @@ ajouté le pont problème/solution en `StrokeText` (texte SVG rempli par
 balayage : les « animations 3D » de Jérémie) et passé procédure, FAQ, CTA
 final et pied de page en sombre. Il a supprimé sa `/methode` ; la nôtre est
 CONSERVÉE, c'est l'engagement de vérifiabilité — et elle a **quatre points
-d'entrée** depuis le 15/08/2026 (barre latérale, section « Vérifiabilité » de
-la landing, FAQ sur le calcul du score, ligne sous le score du rapport). Elle
+d'entrée** depuis le 15/08/2026 (barre latérale, bouton-notice de la carte 01
+du parcours, FAQ sur le calcul du score, ligne sous le score du rapport). Elle
 n'était liée que du pied de page et personne ne la trouvait : la section des
 trois étapes s'appelait « Méthode » et occupait le mot. Elle s'appelle
-« Parcours » (`#parcours`), un nom pour une chose. Piège appris : ses composants
+« Parcours » (`#parcours`), un nom pour une chose.
+
+**Trois notices, trois rôles, jamais de recouvrement** (15/08/2026). Chaque
+carte du parcours porte SA notice en bouton : 01 → `/methode` (COMMENT on
+mesure, la règle du jeu commune aux deux scans), 02 → `/scan-premium` (ce que
+la mesure complète LIVRE, le déroulé de l'appel, pourquoi c'est offert),
+03 → `/sprint` (les 90 jours d'exécution). La section « Vérifiabilité » qui
+doublonnait les cartes a été supprimée le jour de sa création. Le dépliant
+sous les cartes a été écarté : le contenu replié n'est pas lu (piège payé
+deux fois). Piège appris : ses composants
 Lovable rendent côté client, chez nous ils s'hydratent après un rendu
 serveur — **aucun aléa dans le rendu** (`useId`, jamais `Math.random()` pour
 un id), sinon React marque l'arbre entier en erreur d'hydratation.
@@ -171,6 +180,11 @@ Grok et Le Chat.
 > réponses aux objections du toolkit. Les identifiants internes ne bougent
 > pas : modes `apercu`/`complet`/`controle` en base, `CarteDiagnostic`,
 > l'URL Calendly, et le vocabulaire opérateur des commandes CLI.
+>
+> **Une seule offre publique depuis le 15/08/2026** : le site, son JSON-LD et
+> la page /sprint ne présentent QUE le Sprint GEO à 2 900 € (décision Luigi,
+> « on fait que celui à 2 900 € »). `proposition.ts` sait toujours générer
+> Domination, mais aucune surface publique ne l'annonce.
 >
 > Le produit vendu s'appelle **Sprint GEO** (2 900 € HT : 5 contenus, 8 cibles
 > de citation), avec une option **Sprint Domination** (4 900 € HT : 10

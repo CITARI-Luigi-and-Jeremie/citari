@@ -81,28 +81,35 @@ const ETAPES: Etape[] = [
     offert: true,
     duree: "90 secondes",
     labelObtenu: "CE QUE VOUS RECEVEZ",
-    // Réécrites le 15/08/2026 (demande Luigi : « plus technique, plus
-    // pragmatique, meilleur vendeur ») : chaque point nomme le MÉCANISME
-    // réel — API officielles, extraction des marques, audit des robots.
-    // Tout est vérifiable dans l'orchestrateur, rien n'est enjolivé.
+    // Réécrites deux fois le 15/08/2026. La première passe listait les
+    // mécanismes ; verdict de Luigi : « ça ne donne pas envie, le scan est
+    // beaucoup plus impressionnant que ça ». Celle-ci raconte ce que le
+    // CLIENT vit — chaque phrase reste couverte par ce que l'orchestrateur
+    // fait réellement.
     recoit: [
       <>
-        <strong className="font-semibold text-ink">40 réponses réelles</strong> de ChatGPT et
-        Gemini, obtenues par leurs API officielles pendant que vous regardez. Rien de simulé,
-        rien de préenregistré.
+        <strong className="font-semibold text-ink">
+          Vous regardez ChatGPT et Gemini répondre en direct
+        </strong>{" "}
+        aux questions que vos acheteurs posent en ce moment même. 40 réponses réelles, obtenues
+        sous vos yeux par leurs API officielles.
       </>,
       <>
-        Chaque marque citée est <strong className="font-semibold text-ink">extraite, comptée et
-        positionnée</strong> : vous, et tous ceux qui sortent à votre place, même ceux que vous ne
-        surveilliez pas.
+        En 90 secondes, vous savez{" "}
+        <strong className="font-semibold text-ink">qui rafle les recommandations de votre
+        marché</strong> : chaque nom cité est repéré, compté, classé — y compris ceux que vous
+        n'attendiez pas.
       </>,
       <>
-        <strong className="font-semibold text-ink">La phrase exacte</strong> où une IA recommande
-        quelqu'un de votre secteur, mot pour mot, datée.
+        Vous lisez <strong className="font-semibold text-ink">la phrase qu'un acheteur a reçue à
+        votre place</strong>. Le nom que l'IA lui a soufflé, mot pour mot, daté.
       </>,
       <>
-        L'accès de votre site testé robot par robot : GPTBot, ClaudeBot, PerplexityBot. Beaucoup
-        de sites leur ferment la porte sans le savoir.
+        Et pendant ce temps, votre site est testé robot par robot : GPTBot, ClaudeBot,
+        PerplexityBot.{" "}
+        <strong className="font-semibold text-ink">
+          Beaucoup découvrent ici qu'ils leur ferment la porte.
+        </strong>
       </>,
     ],
     chute: (
@@ -132,26 +139,34 @@ const ETAPES: Etape[] = [
     labelObtenu: "CE QUE VOUS RECEVEZ",
     recoit: [
       <>
-        <strong className="font-semibold text-ink">144 réponses : 24 questions × 6 moteurs</strong>,
-        recherche web activée. Les conditions exactes dans lesquelles vos clients les utilisent.
+        La mesure passe à l'échelle réelle :{" "}
+        <strong className="font-semibold text-ink">
+          144 réponses, six moteurs, recherche web activée
+        </strong>{" "}
+        — exactement ce que vivent vos clients quand ils demandent.
       </>,
       <>
-        <strong className="font-semibold text-ink">Les URL que chaque moteur a réellement
-        ouvertes</strong> avant de citer un nom : la liste des endroits où il faut apparaître pour
-        être recommandé.
+        Vous obtenez{" "}
+        <strong className="font-semibold text-ink">
+          les adresses que chaque moteur a ouvertes avant de recommander vos concurrents
+        </strong>
+        . Plus une théorie : la liste des pages qui décident, une par une.
       </>,
       <>
-        Votre note moteur par moteur, et la fiche que chacun récite quand on lui donne votre nom.
+        Vous découvrez{" "}
+        <strong className="font-semibold text-ink">la fiche que chaque IA récite sur vous</strong>{" "}
+        — souvent périmée, parfois confondue avec un homonyme. Personne ne vous l'avait jamais
+        montrée.
       </>,
       <>
-        L'ordre des corrections : celles que votre développeur pose en une heure, celles qui
-        demandent un vrai chantier.
+        Vous repartez avec l'ordre exact des corrections : ce que votre développeur règle en une
+        heure, et ce qui mérite un vrai chantier.
       </>,
       <>
         <strong className="font-semibold text-ink">
-          Une mesure de départ scellée, rejouable à l'identique dans 90 jours
+          Votre point de départ est scellé, rejouable à l'identique dans 90 jours
         </strong>{" "}
-        : la seule façon de prouver qu'on a bougé.
+        : le progrès se mesurera, il ne se racontera pas.
       </>,
     ],
     // La phrase la plus forte du site reste ici, où le scepticisme est
@@ -164,12 +179,18 @@ const ETAPES: Etape[] = [
         l'affaire s'arrête là.
       </strong>
     ),
-    doc: { label: "Le protocole : 24 questions × 6 moteurs, déroulé", to: "/methode", hash: "protocole" },
-    // Le fichier est un PAYSAGE de 1408×768 : il était déclaré 900×1400
-    // portrait, et le cadre mobile 9/14 n'en montrait qu'une tranche.
+    // Sa propre page depuis le 15/08/2026 : les cartes 01 et 02 renvoyaient
+    // toutes deux vers /methode, ce que Luigi a relevé — deux étapes, deux
+    // documents.
+    doc: { label: "Le scan premium, déplié", to: "/scan-premium" },
+    // Canevas élargi à 1900×1036 le 15/08/2026 (script PIL : le grain du
+    // fichier lui-même, tuilé en miroir autour de l'original intact). Le
+    // motif de cette illustration remplissait son cadre bien plus que ceux
+    // des étapes 1 et 3, d'où un « trop zoomé » persistant quel que soit le
+    // recadrage CSS. Le dézoom est désormais DANS le fichier.
     image: "/img/etape-citations.png",
-    imageWidth: 1408,
-    imageHeight: 768,
+    imageWidth: 1900,
+    imageHeight: 1036,
     imageAspect: "aspect-[2/1]",
     imageFond: "#FAFAF2",
     alt: "Un guillemet au-dessus de quatre filets, dont un surligné en rouge.",
@@ -188,24 +209,29 @@ const ETAPES: Etape[] = [
     // argument de vente, et tout existe dans le toolkit.
     recoit: [
       <>
-        <strong className="font-semibold text-ink">Chantier technique</strong> : robots.txt,
-        llms.txt, balisage schema.org, fiche Wikidata. La porte s'ouvre, et les passages réels des
-        robots sont comptés dans vos logs pour le prouver.
+        <strong className="font-semibold text-ink">On ouvre votre site aux IA</strong> —
+        robots.txt, llms.txt, balisage schema.org, fiche Wikidata — puis on compte les robots
+        entrer dans vos logs. Passer de zéro à des dizaines de visites par semaine, c'est une
+        preuve, pas une impression.
       </>,
       <>
-        <strong className="font-semibold text-ink">Chantier contenu</strong> : 5 pages au format
-        que les moteurs citent, sur les questions classées les plus gagnables, indexées en heures
-        via IndexNow.
+        <strong className="font-semibold text-ink">
+          On écrit les 5 pages qui répondent aux questions où vous perdez
+        </strong>
+        , au format exact que les moteurs citent, et Bing les indexe en heures via IndexNow au
+        lieu d'attendre des semaines.
       </>,
       <>
-        <strong className="font-semibold text-ink">Chantier citations</strong> : inscriptions et
-        placements sur les sources que les moteurs ont réellement consultées pour recommander vos
-        concurrents.
+        <strong className="font-semibold text-ink">
+          On installe votre nom sur les sources qui font gagner vos concurrents
+        </strong>{" "}
+        — celles que les moteurs ont réellement consultées pendant votre mesure. À la main,
+        dossier par dossier, relance par relance.
       </>,
       <>
-        Puis <strong className="font-semibold text-ink">60 jours de suivi</strong> : relances,
-        contrôle interne à J+45, consolidation. La partie que les agences ne font pas, et celle
-        qui produit l'écart.
+        Puis <strong className="font-semibold text-ink">60 jours de suivi que personne d'autre ne
+        fait</strong> : relances, contrôle à J+45, consolidation. Les agences livrent au jour 30,
+        quand rien n'a encore bougé. L'écart se creuse après.
       </>,
     ],
     chute: (

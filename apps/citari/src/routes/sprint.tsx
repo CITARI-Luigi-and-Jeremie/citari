@@ -521,6 +521,12 @@ function SprintPage() {
               </Section>
 
               <Section id="prix" num="06" title="Le prix, et ce qu'il contient">
+                {/* Une seule offre depuis le 15/08/2026 (décision Luigi :
+                    « on fait que celui à 2 900 € »). Le Sprint Domination ne
+                    s'affiche plus sur le site ; `proposition.ts` sait
+                    toujours le générer si un cas s'y prête un jour. Chiffres
+                    alignés sur ce fichier, qui produit le document remis au
+                    client. */}
                 <CardGrid>
                   <MethodeCard eyebrow="Sprint GEO">
                     <p className="mb-3 font-sans text-[24px] font-extrabold tracking-[-0.02em] text-ink">
@@ -530,30 +536,22 @@ function SprintPage() {
                       rows={[
                         ["Contenus rédigés", "5"],
                         ["Cibles de citation", "8"],
-                        ["Langue", "1"],
+                        ["Jours de production", "30"],
+                        ["Jours de suivi", "90"],
+                        ["Re-scan à J+90", "inclus"],
                         ["Paiement", "50 % / 50 %"],
                       ]}
                     />
                   </MethodeCard>
-                  {/* Chiffres alignés sur `proposition.ts`, qui génère le
-                      document envoyé au client : 5/8 et 10/15. Le site et la
-                      proposition ne doivent jamais annoncer deux volumes
-                      différents. */}
-                  <MethodeCard eyebrow="Sprint Domination">
-                    <p className="mb-3 font-sans text-[24px] font-extrabold tracking-[-0.02em] text-ink">
-                      4 900 € HT
-                    </p>
-                    <DataRows
-                      rows={[
-                        ["Contenus rédigés", "10"],
-                        ["Cibles de citation", "15"],
-                        ["Langues ou segments", "2"],
-                        ["Paiement", "50 % / 50 %"],
-                      ]}
-                    />
-                    <p className="mt-3 text-[14.5px] leading-[1.5] text-ink-2">
-                      Plus une campagne presse approfondie, avec pitchs personnalisés et relances
-                      gérées, et une session stratégique de 90 minutes en fin de sprint.
+                  <MethodeCard eyebrow="Ce que ça exclut, volontairement">
+                    <p className="text-ink-2">
+                      Pas d'abonnement, pas de reconduction, pas d'option cachée découverte en
+                      cours de route.{" "}
+                      <strong className="font-semibold text-ink">
+                        Un prix, un programme, une mesure finale.
+                      </strong>{" "}
+                      Les seuls frais possibles hors sprint sont certains classements payants (100
+                      à 300 €), annoncés dans la proposition, jamais imposés.
                     </p>
                   </MethodeCard>
                 </CardGrid>

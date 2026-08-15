@@ -5,6 +5,41 @@ d'une nouvelle session, après `CLAUDE.md`.
 
 ---
 
+## 2026-08-15 — Le parcours vend enfin, et chaque notice a son rôle
+
+Retour de Luigi sur la passe précédente : les descriptions « ne donnent pas
+envie », le scan de 90 s « est beaucoup plus impressionnant que ça ». La
+première réécriture listait les mécanismes ; celle-ci raconte ce que le
+CLIENT vit : « vous regardez ChatGPT et Gemini répondre en direct », « vous
+lisez la phrase qu'un acheteur a reçue à votre place », « la fiche que
+chaque IA récite sur vous — souvent périmée, parfois confondue avec un
+homonyme », « on compte les robots entrer dans vos logs ». Chaque phrase
+reste couverte par ce que l'orchestrateur fait réellement : le spectaculaire
+vient du réel, pas de l'emphase.
+
+**Le scan premium a sa page** (`/scan-premium`), troisième notice du site,
+née d'un défaut relevé par Luigi : les cartes 01 et 02 renvoyaient toutes
+deux vers /methode. Et sa question suivante — « les deux documents se
+ressemblent, non ? » — a fixé la doctrine des notices, désormais écrite sur
+les deux pages : **/methode est la règle du jeu** (comment on mesure,
+commune aux deux scans), **/scan-premium et /sprint sont les fiches
+produit** (ce que chaque offre livre). Le CTA de /scan-premium est le
+Calendly directement : c'est une page de conversion, pas de méthodologie.
+
+**Une seule offre publique.** « On fait que celui à 2 900 € » : le Sprint
+Domination disparaît de /sprint ET du JSON-LD de la racine — annoncer aux
+moteurs une offre que le site ne présente plus serait l'incohérence qu'on
+fait payer aux autres. `proposition.ts` sait toujours le générer.
+
+**L'image de l'étape 2, réglée à la racine.** Le « trop zoomé » persistait
+parce que le MOTIF remplissait son canevas plus que ceux des étapes 1 et 3 :
+aucun recadrage CSS ne pouvait l'égaliser. Le fichier a été élargi à
+1900×1036 (PIL : le grain du fichier lui-même, tuilé en miroir autour de
+l'original intact — aucun raccord visible). Le dézoom est DANS le fichier ;
+sauvegarde de l'original hors de public/, qui est déployé tel quel.
+
+---
+
 ## 2026-08-15 — « Scan premium », et chaque étape porte sa notice
 
 Deux décisions de Luigi dans le même souffle.
