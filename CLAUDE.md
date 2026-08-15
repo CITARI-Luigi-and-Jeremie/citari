@@ -265,7 +265,11 @@ Trois choses ne doivent plus bouger, parce que la promesse vendue est une
 comparaison : « voici votre score, voici celui de J+90 ».
 
 1. **La formule du score** : présence 50 %, rang 20 %, recommandation explicite
-   20 %, tonalité 10 %.
+   20 %, tonalité 10 %. Et son unité est la RÉPONSE : une marque citée trois
+   fois dans une réponse compte UNE présence. Compter les lignes de mention a
+   produit un 123/100 sur Apple (15/08/2026, corrigé) : les grandes marques
+   sont multi-citées par réponse, et chaque ratio doit être borné à 1 par
+   construction, jamais par un écrêtage.
 2. **La liste des six moteurs.** Un scan antérieur à un changement de liste
    n'est plus comparable à son re-scan.
 3. **La version de chaque modèle interrogé.** Une version différente ne répond

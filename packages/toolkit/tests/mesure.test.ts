@@ -18,7 +18,10 @@ import { cleDomaine, memeMarque, normaliserNom, prioriteDuScore } from "@/lib/or
 
 const rep = (...moteurs: string[]) => moteurs.map((engine, i) => ({ id: `r${i}`, engine }));
 
+// `response_id` par défaut : la réponse du moteur dans `rep(...)` (r0 pour le
+// premier, r1 pour le deuxième). L'unité de tout comptage est la réponse.
 const mention = (o: Partial<LigneMention> = {}): LigneMention => ({
+  response_id: o.engine === "Gemini" ? "r1" : "r0",
   engine: "ChatGPT",
   brand: "Nous",
   is_target: true,
@@ -70,6 +73,43 @@ describe("la formule du score est figée", () => {
     );
     expect(score.mentionRate).toBe(1);
     expect(score.global).toBe(63);
+  });
+
+  it("une marque citée trois fois dans une réponse compte UNE présence", () => {
+    // Le bug Apple du 15/08/2026 : 54 mentions pour 39 réponses portaient la
+    // présence à 138 %, la recommandation à 126 %, le score global à 123.
+    const score = calculerScore(rep("ChatGPT"), [
+      mention({ position: 3, recommended: false }),
+      mention({ position: 1, recommended: true }),
+      mention({ position: 8, recommended: false }),
+    ]);
+    expect(score.mentionRate).toBe(1);
+    expect(score.recoRate).toBe(1);
+    // La position retenue est la MEILLEURE de la réponse.
+    expect(score.global).toBe(100);
+  });
+
+  it("ne dépasse jamais 100, quel que soit l'excès de mentions", () => {
+    const inondation = Array.from({ length: 40 }, (_, i) =>
+      mention({ position: (i % 5) + 1, engine: i % 2 ? "Gemini" : "ChatGPT" }),
+    );
+    const score = calculerScore(rep("ChatGPT", "Gemini"), inondation);
+    expect(score.global).toBeLessThanOrEqual(100);
+    expect(score.mentionRate).toBeLessThanOrEqual(1);
+    expect(score.recoRate).toBeLessThanOrEqual(1);
+    expect(score.parMoteur["ChatGPT"]).toBeLessThanOrEqual(100);
+    expect(score.parMoteur["Gemini"]).toBeLessThanOrEqual(100);
+  });
+
+  it("ignore une mention orpheline d'une réponse non mesurée", () => {
+    // Une réponse en erreur est exclue du dénominateur : une mention qui s'y
+    // rattacherait ne doit pas gonfler un numérateur qu'elle ne partage pas.
+    const score = calculerScore(rep("ChatGPT"), [
+      mention(),
+      mention({ response_id: "r-fantome" }),
+    ]);
+    expect(score.mentionRate).toBe(1);
+    expect(score.global).toBe(100);
   });
 
   it("laisse à null le score d'un moteur qui n'a rendu aucune réponse", () => {

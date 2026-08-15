@@ -12,7 +12,10 @@ import { partDeVoix, regrouperMarques, type LigneMention } from "@/lib/score";
 
 /** Fabrique n mentions d'une marque, pour peser sur le choix du nom retenu. */
 const fois = (brand: string, n: number, is_target = false): LigneMention[] =>
-  Array.from({ length: n }, () => ({
+  Array.from({ length: n }, (_, i) => ({
+    // Une réponse distincte par mention : ces tests pèsent des COMPTES de
+    // citations (part de voix, regroupement), pas le score.
+    response_id: `r-${brand}-${i}`,
     engine: "ChatGPT",
     brand,
     is_target,

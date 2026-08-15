@@ -5,6 +5,38 @@ d'une nouvelle session, après `CLAUDE.md`.
 
 ---
 
+## 2026-08-15 — Apple à 123/100 : la formule comptait des mentions, pas des réponses
+
+Luigi scanne Apple : score global 123, ChatGPT 133. Un score borné à 100 qui
+dépasse 100 n'est pas une valeur aberrante, c'est une unité fausse :
+`calculerScore` divisait un compte de LIGNES DE MENTION par un compte de
+RÉPONSES. Une marque de la taille d'Apple est citée plusieurs fois par
+réponse (54 mentions pour 39 réponses) : présence 138 %, recommandation
+126 %. Le bug dormait depuis l'origine parce que les PME testées jusqu'ici
+étaient mono-citées ; il a suffi d'une grande marque pour le réveiller.
+
+La règle d'unité du parcours (« on compte en réponses distinctes ») vaut
+désormais aussi dans la formule : les mentions de la cible sont regroupées
+par réponse avant tout ratio. Par réponse : la MEILLEURE position (celle que
+lit l'acheteur en premier), recommandé si au moins une citation l'est,
+tonalité moyenne de ses citations. Un garde-fou ignore en plus toute mention
+orpheline d'une réponse non mesurée : chaque ratio est borné à 1 PAR
+CONSTRUCTION. Pas d'écrêtage à 100 : un « min » aurait masqué ce bug au
+lieu de le corriger, et le prochain du même genre avec lui.
+
+La ligne d'Apple a été recalculée en base avec la règle corrigée (95/100,
+présence 100 %, position moyenne 1,97) : le scan était en cache trois jours,
+et quiconque rescannait apple.com se voyait servir le 123. Neuf autres
+scans de test portent un léger gonflement (1 à 4 mentions d'écart, scores
+restés sous 100) : aucun n'est contractuel, le cache les expire sous trois
+jours, ils sont laissés tels quels.
+
+Trois tests de régression gardent la porte : trois citations dans une
+réponse valent une présence (et la meilleure position), une inondation de
+mentions ne dépasse jamais 100, une mention orpheline est ignorée.
+
+---
+
 ## 2026-08-15 — Les animations rejouent, et la fiche premium retrouve son logo
 
 **Les animations d'entrée se réarment.** Reveal, StrokeText et les

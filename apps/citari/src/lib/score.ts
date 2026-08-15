@@ -4,6 +4,8 @@ import { MOTEURS } from "@/lib/typo";
 // mention 50 % · position 20 % · recommandation 20 % · sentiment 10 %
 
 export type LigneMention = {
+  /** La réponse d'où vient la mention : l'unité de TOUT comptage. */
+  response_id: string;
   engine: string;
   brand: string;
   is_target: boolean;
@@ -13,6 +15,41 @@ export type LigneMention = {
 };
 
 export const POIDS = { mention: 0.5, position: 0.2, reco: 0.2, sentiment: 0.1 } as const;
+
+type Presence = { position: number | null; recommended: boolean; sentiments: number[] };
+
+/**
+ * Regroupe les mentions de la marque par RÉPONSE : une réponse où elle
+ * apparaît, quel qu'en soit le nombre de citations, vaut UNE présence.
+ *
+ * C'est la correction du score 123/100 d'Apple (15/08/2026) : une grande
+ * marque est citée plusieurs fois par réponse (54 mentions pour 39
+ * réponses), et compter les lignes de mention portait la présence à 138 %
+ * et la recommandation à 126 %. La règle d'unité de tout le parcours vaut
+ * aussi pour la formule : le dénominateur est en réponses, le numérateur
+ * doit l'être.
+ *
+ * Par réponse : la MEILLEURE position (celle que lit l'acheteur en
+ * premier), recommandé si au moins une citation l'est, et la tonalité
+ * moyenne de ses citations.
+ */
+function presencesParReponse(cible: LigneMention[]): Presence[] {
+  const par = new Map<string, Presence>();
+  for (const m of cible) {
+    const p = par.get(m.response_id) ?? { position: null, recommended: false, sentiments: [] };
+    if (
+      typeof m.position === "number" &&
+      m.position >= 1 &&
+      (p.position === null || m.position < p.position)
+    ) {
+      p.position = m.position;
+    }
+    p.recommended = p.recommended || m.recommended;
+    p.sentiments.push(scoreSentiment(m.sentiment));
+    par.set(m.response_id, p);
+  }
+  return [...par.values()];
+}
 
 function scorePosition(position: number | null): number {
   if (!position || position < 1) return 0;
@@ -40,16 +77,23 @@ export function calculerScore(
   recoRate: number;
   sentiment: number;
 } {
-  const cible = mentions.filter((m) => m.is_target);
+  // Garde-fou d'unité : seule compte une mention rattachée à une réponse
+  // réellement mesurée. Une ligne orpheline (réponse en erreur, incohérence
+  // de base) ne peut plus gonfler un numérateur dont elle ne partage pas le
+  // dénominateur, et chaque ratio est borné à 1 par construction.
+  const idsMesures = new Set(reponses.map((r) => r.id));
+  const cible = mentions.filter((m) => m.is_target && idsMesures.has(m.response_id));
   const total = reponses.length || 1;
 
-  const mentionRate = cible.length / total;
-  const positions = cible.map((m) => m.position).filter((p): p is number => !!p);
+  const presences = presencesParReponse(cible);
+  const mentionRate = presences.length / total;
+  const positions = presences.map((p) => p.position).filter((p): p is number => p !== null);
   const avgPosition = positions.length ? positions.reduce((a, b) => a + b, 0) / positions.length : null;
-  const posScore = cible.length ? cible.reduce((a, m) => a + scorePosition(m.position), 0) / total : 0;
-  const recoRate = cible.filter((m) => m.recommended).length / total;
-  const sentiment = cible.length
-    ? cible.reduce((a, m) => a + scoreSentiment(m.sentiment), 0) / cible.length
+  const posScore = presences.reduce((a, p) => a + scorePosition(p.position), 0) / total;
+  const recoRate = presences.filter((p) => p.recommended).length / total;
+  const sentiment = presences.length
+    ? presences.reduce((a, p) => a + p.sentiments.reduce((x, y) => x + y, 0) / p.sentiments.length, 0) /
+      presences.length
     : 0.5;
 
   const global =
@@ -57,7 +101,7 @@ export function calculerScore(
     (POIDS.mention * mentionRate +
       POIDS.position * posScore +
       POIDS.reco * recoRate +
-      POIDS.sentiment * (cible.length ? sentiment : 0));
+      POIDS.sentiment * (presences.length ? sentiment : 0));
 
   const parMoteur: Record<string, number | null> = {};
   for (const moteur of MOTEURS) {
@@ -66,11 +110,15 @@ export function calculerScore(
       parMoteur[moteur] = null;
       continue;
     }
-    const m = cible.filter((x) => x.engine === moteur);
-    const mr = m.length / rep.length;
-    const ps = m.reduce((a, x) => a + scorePosition(x.position), 0) / rep.length;
-    const rr = m.filter((x) => x.recommended).length / rep.length;
-    const st = m.length ? m.reduce((a, x) => a + scoreSentiment(x.sentiment), 0) / m.length : 0;
+    const idsMoteur = new Set(rep.map((r) => r.id));
+    const pres = presencesParReponse(cible.filter((x) => idsMoteur.has(x.response_id)));
+    const mr = pres.length / rep.length;
+    const ps = pres.reduce((a, p) => a + scorePosition(p.position), 0) / rep.length;
+    const rr = pres.filter((p) => p.recommended).length / rep.length;
+    const st = pres.length
+      ? pres.reduce((a, p) => a + p.sentiments.reduce((x, y) => x + y, 0) / p.sentiments.length, 0) /
+        pres.length
+      : 0;
     parMoteur[moteur] = Math.round(
       100 * (POIDS.mention * mr + POIDS.position * ps + POIDS.reco * rr + POIDS.sentiment * st),
     );
