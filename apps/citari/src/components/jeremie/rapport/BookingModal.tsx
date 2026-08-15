@@ -32,7 +32,7 @@ export function BookingModal({
           ×
         </button>
         <iframe
-          title="Réserver le diagnostic complet"
+          title="Réserver le scan premium"
           src={bookingUrl({ email, name: marque })}
           className="block h-full w-full border-0"
         />

@@ -13,7 +13,7 @@
 
 export const SPECIMEN = {
   reference: "PAGE 1 / 9",
-  libelle: "EXEMPLE · RAPPORT DU DIAGNOSTIC",
+  libelle: "EXEMPLE · RAPPORT DU SCAN PREMIUM",
   score: 34,
   questions: 24,
   moteurs: 6,
@@ -25,7 +25,7 @@ export const SPECIMEN = {
   ],
   // « OFFERT » : le diagnostic complet est à 0 €, la landing ne le disait
   // qu'en bas de page. Un mot, et la promesse change de nature.
-  pointsLabel: "LE DIAGNOSTIC OFFERT VÉRIFIE",
+  pointsLabel: "LE SCAN PREMIUM OFFERT VÉRIFIE",
   points: [
     {
       label: "Sur quelles questions d'achat votre nom ne sort-il pas ?",

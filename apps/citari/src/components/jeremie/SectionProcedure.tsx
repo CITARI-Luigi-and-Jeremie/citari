@@ -44,6 +44,16 @@ type Etape = {
   recoit: ReactNode[];
   /** La phrase qui conclut l'étape, sous la liste. */
   chute: ReactNode;
+  /**
+   * La notice technique de l'étape, en bouton au pied de la carte
+   * (15/08/2026). La section « Vérifiabilité » qui suivait les trois étapes
+   * redisait ce que les cartes venaient de dire : c'était un doublon, et le
+   * Sprint n'y figurait même pas. Chaque étape porte désormais SON document
+   * — le détail vit sur les pages /methode et /sprint, jamais dans un
+   * dépliant caché sous la carte (le contenu replié n'est pas lu, piège
+   * déjà payé deux fois).
+   */
+  doc: { label: string; to: string; hash?: string };
   image: string;
   imageWidth: number;
   imageHeight: number;
@@ -71,20 +81,28 @@ const ETAPES: Etape[] = [
     offert: true,
     duree: "90 secondes",
     labelObtenu: "CE QUE VOUS RECEVEZ",
-    // Passé de quatre paragraphes à trois points : mêmes faits, mais une
-    // section « trois étapes » se parcourt, elle ne se lit pas.
+    // Réécrites le 15/08/2026 (demande Luigi : « plus technique, plus
+    // pragmatique, meilleur vendeur ») : chaque point nomme le MÉCANISME
+    // réel — API officielles, extraction des marques, audit des robots.
+    // Tout est vérifiable dans l'orchestrateur, rien n'est enjolivé.
     recoit: [
       <>
         <strong className="font-semibold text-ink">40 réponses réelles</strong> de ChatGPT et
-        Gemini, aux questions que vos acheteurs tapent vraiment.
+        Gemini, obtenues par leurs API officielles pendant que vous regardez. Rien de simulé,
+        rien de préenregistré.
       </>,
       <>
-        Toutes les marques citées, combien de fois et dans quel ordre. Pas seulement celles que
-        vous surveillez.
+        Chaque marque citée est <strong className="font-semibold text-ink">extraite, comptée et
+        positionnée</strong> : vous, et tous ceux qui sortent à votre place, même ceux que vous ne
+        surveilliez pas.
       </>,
       <>
-        <strong className="font-semibold text-ink">La phrase exacte</strong>, mot pour mot, où une
-        IA recommande quelqu'un de votre secteur.
+        <strong className="font-semibold text-ink">La phrase exacte</strong> où une IA recommande
+        quelqu'un de votre secteur, mot pour mot, datée.
+      </>,
+      <>
+        L'accès de votre site testé robot par robot : GPTBot, ClaudeBot, PerplexityBot. Beaucoup
+        de sites leur ferment la porte sans le savoir.
       </>,
     ],
     chute: (
@@ -93,6 +111,7 @@ const ETAPES: Etape[] = [
         <strong className="font-semibold text-ink">Dans les deux sens.</strong>
       </>
     ),
+    doc: { label: "La méthode de mesure, publiée en entier", to: "/methode" },
     // Dimensions relevées dans le fichier : les trois font 1408×768.
     image: "/img/etape-scan.png",
     imageWidth: 1408,
@@ -103,23 +122,31 @@ const ETAPES: Etape[] = [
   },
   {
     num: "02",
-    label: "LE DIAGNOSTIC",
+    label: "LE SCAN PREMIUM",
     titre: "Cette fois, les six moteurs répondent. Le plan qui en sort est à vous.",
     cout: "30 minutes en visio. Ni carte bancaire, ni engagement.",
     labelCout: "CE QUE ÇA VOUS COÛTE",
-    prix: "Gratuit",
+    prix: "Offert",
     offert: true,
     duree: "30 minutes",
     labelObtenu: "CE QUE VOUS RECEVEZ",
     recoit: [
       <>
-        <strong className="font-semibold text-ink">144 réponses au lieu de 40</strong> : 24
-        questions, les six moteurs, et cette fois la recherche web activée, comme devant vos
-        clients.
+        <strong className="font-semibold text-ink">144 réponses : 24 questions × 6 moteurs</strong>,
+        recherche web activée. Les conditions exactes dans lesquelles vos clients les utilisent.
       </>,
-      <>Votre note moteur par moteur, car elles ne se ressemblent pas.</>,
-      <>Les sites exacts que les IA ouvrent avant de citer vos concurrents.</>,
-      <>L'ordre des corrections, et lesquelles vous pouvez faire sans nous.</>,
+      <>
+        <strong className="font-semibold text-ink">Les URL que chaque moteur a réellement
+        ouvertes</strong> avant de citer un nom : la liste des endroits où il faut apparaître pour
+        être recommandé.
+      </>,
+      <>
+        Votre note moteur par moteur, et la fiche que chacun récite quand on lui donne votre nom.
+      </>,
+      <>
+        L'ordre des corrections : celles que votre développeur pose en une heure, celles qui
+        demandent un vrai chantier.
+      </>,
       <>
         <strong className="font-semibold text-ink">
           Une mesure de départ scellée, rejouable à l'identique dans 90 jours
@@ -137,6 +164,7 @@ const ETAPES: Etape[] = [
         l'affaire s'arrête là.
       </strong>
     ),
+    doc: { label: "Le protocole : 24 questions × 6 moteurs, déroulé", to: "/methode", hash: "protocole" },
     // Le fichier est un PAYSAGE de 1408×768 : il était déclaré 900×1400
     // portrait, et le cadre mobile 9/14 n'en montrait qu'une tranche.
     image: "/img/etape-citations.png",
@@ -155,32 +183,40 @@ const ETAPES: Etape[] = [
     offert: false,
     duree: "30 jours",
     labelObtenu: "CE QUE NOUS FAISONS",
-    // Le paragraphe unique enchaînait les trois chantiers d'une traite ; en
-    // liste, on voit qu'ils sont trois et on les distingue.
+    // Chaque chantier nomme ses mécanismes réels (robots.txt, llms.txt,
+    // schema.org, IndexNow, logs serveur) : le jargon exact est ici un
+    // argument de vente, et tout existe dans le toolkit.
     recoit: [
       <>
-        Nous rendons votre site <strong className="font-semibold text-ink">lisible par les IA</strong>{" "}
-        : la plupart leur ferment la porte sans le savoir.
+        <strong className="font-semibold text-ink">Chantier technique</strong> : robots.txt,
+        llms.txt, balisage schema.org, fiche Wikidata. La porte s'ouvre, et les passages réels des
+        robots sont comptés dans vos logs pour le prouver.
       </>,
-      <>Nous écrivons ce qui manque sur les questions précises où votre nom n'est pas sorti.</>,
       <>
-        Nous vous faisons exister{" "}
-        <strong className="font-semibold text-ink">sur les sources que les moteurs consultent</strong>{" "}
-        : le chantier que personne ne fait, et celui qui compte le plus.
+        <strong className="font-semibold text-ink">Chantier contenu</strong> : 5 pages au format
+        que les moteurs citent, sur les questions classées les plus gagnables, indexées en heures
+        via IndexNow.
+      </>,
+      <>
+        <strong className="font-semibold text-ink">Chantier citations</strong> : inscriptions et
+        placements sur les sources que les moteurs ont réellement consultées pour recommander vos
+        concurrents.
+      </>,
+      <>
+        Puis <strong className="font-semibold text-ink">60 jours de suivi</strong> : relances,
+        contrôle interne à J+45, consolidation. La partie que les agences ne font pas, et celle
+        qui produit l'écart.
       </>,
     ],
     chute: (
       <>
-        Puis à J+90, le même relevé qu'aujourd'hui, mot pour mot.{" "}
+        À J+90, le même relevé qu'aujourd'hui, mot pour mot.{" "}
         <strong className="font-semibold text-ink">
           C'est la seule chose que nous garantissons, et la seule qui se vérifie.
-        </strong>{" "}
-        <Link to="/sprint" className="link-underline text-ink">
-          Le programme des 90 jours, déplié
-        </Link>
-        .
+        </strong>
       </>
     ),
+    doc: { label: "Le programme des 90 jours, étape par étape", to: "/sprint" },
     labelCout: "CE QUE ÇA VOUS DEMANDE",
     image: "/img/etape-diagnostic.png",
     imageWidth: 1408,
@@ -196,7 +232,7 @@ export function SectionProcedure() {
 
   return (
     // « parcours » et non « methode » depuis le 15/08/2026 : cette section
-    // décrit le PARCOURS commercial (scan, diagnostic, sprint), pas la
+    // décrit le PARCOURS commercial (scan, scan premium, sprint), pas la
     // méthode de mesure. Elle occupait le mot « Méthode » dans la barre
     // latérale, et cannibalisait donc la page /methode — celle qui publie la
     // formule et le calcul complet, que Luigi n'a retrouvée qu'au fond du
@@ -339,6 +375,23 @@ export function SectionProcedure() {
                         </dt>
                         <dd className="mt-1.5 leading-snug text-ink">{etape.cout}</dd>
                       </dl>
+
+                      {/* La notice technique de l'étape : un bouton, pas un
+                          lien discret — la leçon du test du père vaut ici
+                          aussi. */}
+                      <Link
+                        to={etape.doc.to}
+                        hash={etape.doc.hash}
+                        className="group/doc mt-5 flex items-center justify-between gap-3 border border-ink px-4 py-3 text-[14px] font-semibold text-ink transition-colors duration-200 hover:bg-ink hover:text-paper"
+                      >
+                        <span>{etape.doc.label}</span>
+                        <span
+                          aria-hidden
+                          className="text-[16px] leading-none transition-transform duration-200 group-hover/doc:translate-x-1"
+                        >
+                          →
+                        </span>
+                      </Link>
                     </div>
                   </div>
                 </div>

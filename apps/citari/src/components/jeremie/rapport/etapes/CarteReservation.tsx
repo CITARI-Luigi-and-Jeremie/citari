@@ -104,7 +104,7 @@ export function CarteReservation({ wide, part }: { wide: boolean; part: "recit" 
 
   return (
     <>
-      <span style={labelStyle}>RÉSERVER LE DIAGNOSTIC</span>
+      <span style={labelStyle}>RÉSERVER LE SCAN PREMIUM</span>
 
       {/* Titre ramené sur deux lignes le 14/08/2026 : en trois lignes de 30px
           il écrasait la carte, qui portait en plus un bloc gris de deux

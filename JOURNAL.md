@@ -5,6 +5,41 @@ d'une nouvelle session, après `CLAUDE.md`.
 
 ---
 
+## 2026-08-15 — « Scan premium », et chaque étape porte sa notice
+
+Deux décisions de Luigi dans le même souffle.
+
+**Le diagnostic s'appelle « scan premium », partout.** Renommé dans les
+douze textes visibles du site (cartes du rapport, FAQ, écran d'attente,
+spécimen du héros, boutons de réservation) ET dans ce qui part chez les
+prospects par le toolkit : les gabarits d'emails et les huit réponses aux
+objections. Vérifié : plus une occurrence visible de « diagnostic » sur la
+landing ni sur le rapport. Ce qui ne bouge pas : les modes en base
+(`apercu`/`complet`/`controle`), les noms de composants, l'URL Calendly, le
+vocabulaire opérateur du CLI. Nuance de langue : la carte 02 affiche
+« Offert » plutôt que « Gratuit » — un scan premium gratuit se contredit,
+un scan premium offert se comprend.
+
+**La section « Vérifiabilité » est morte le jour de sa naissance**, et
+c'était la bonne critique : créée le matin même, elle redisait juste après
+les trois étapes ce que les cartes venaient de dire, et le Sprint n'y
+figurait pas. À la place, **chaque carte du parcours porte SA notice
+technique en bouton** au pied : 01 → /methode, 02 → /methode#protocole
+(saut profond vers le protocole), 03 → /sprint. La piste « dépliant smooth
+sous la carte » a été écartée : le contenu replié n'est pas lu — piège payé
+deux fois (l'annexe des questions, la FAQ paginée) — et les deux pages de
+détail existent déjà ; les dupliquer dans un accordéon recréerait le
+problème des deux comparatifs.
+
+Les descriptions des trois cartes nomment désormais leurs MÉCANISMES : API
+officielles, extraction et positionnement des marques, GPTBot/ClaudeBot/
+PerplexityBot, les URL réellement ouvertes par les moteurs, robots.txt,
+llms.txt, schema.org, Wikidata, IndexNow, le contrôle J+45. C'est le
+« exagère » de Luigi appliqué comme la veille : par la précision technique,
+jamais par la promesse.
+
+---
+
 ## 2026-08-15 — La page /sprint : vendre par le détail plutôt que par la promesse
 
 Demande de Luigi : une page dédiée au Sprint, sur le modèle de /methode,

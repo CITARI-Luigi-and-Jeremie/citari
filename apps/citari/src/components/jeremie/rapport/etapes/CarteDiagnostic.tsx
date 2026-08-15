@@ -89,7 +89,7 @@ export function CarteDiagnostic({
               padding: "4px 8px",
             }}
           >
-            DIAGNOSTIC
+            PREMIUM
           </span>
         </div>
         {LIGNES.map((l) => (
@@ -143,7 +143,7 @@ export function CarteDiagnostic({
 
   return (
     <>
-      <span style={{ ...labelStyle, color: MUTED }}>LE DIAGNOSTIC COMPLET</span>
+      <span style={{ ...labelStyle, color: MUTED }}>LE SCAN PREMIUM</span>
 
       {/* Resserré le 15/08/2026 : quatre paragraphes expliquaient, trois
           phrases suffisent. Le titre donne le manque concret (104 réponses),
@@ -162,7 +162,7 @@ export function CarteDiagnostic({
       </p>
 
       <p style={{ fontSize: wide ? 17 : 15.5, color: BODY, lineHeight: 1.55, margin: 0 }}>
-        Cet aperçu a interrogé 2 IA, sans Internet. Le diagnostic interroge les 6, recherche web
+        Cet aperçu a interrogé 2 IA, sans Internet. Le scan premium interroge les 6, recherche web
         activée : ce que vos clients utilisent vraiment.
       </p>
 

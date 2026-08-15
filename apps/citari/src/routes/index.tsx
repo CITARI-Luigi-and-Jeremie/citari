@@ -3,7 +3,6 @@ import { createFileRoute } from "@tanstack/react-router";
 import { ScanForm } from "@/components/jeremie/ScanForm";
 import { CostCalculator } from "@/components/jeremie/CostCalculator";
 import { SectionProcedure } from "@/components/jeremie/SectionProcedure";
-import { SectionVerifiabilite } from "@/components/jeremie/SectionVerifiabilite";
 import { SectionFAQ } from "@/components/jeremie/SectionFAQ";
 import { SectionFinalCTA, SiteFooter } from "@/components/jeremie/SectionFinalCTA";
 import { HeroSpecimen } from "@/components/jeremie/HeroSpecimen";
@@ -106,10 +105,12 @@ function Accueil() {
 
       <ProblemSolutionBridge />
       <CostCalculator />
+      {/* La section « Vérifiabilité » qui suivait a été supprimée le
+          15/08/2026 : elle redisait ce que les trois cartes venaient de dire
+          (doublon relevé par Luigi), et le Sprint n'y figurait pas. Chaque
+          carte du parcours porte désormais SA notice technique en bouton :
+          01 et 02 → /methode, 03 → /sprint. */}
       <SectionProcedure />
-      {/* Juste après le prix : c'est là que le lecteur se demande si tout
-          ceci est sérieux, et la méthode publiée est la seule réponse. */}
-      <SectionVerifiabilite />
       <SectionFAQ />
       <SectionFinalCTA />
       <SiteFooter />

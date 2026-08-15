@@ -165,6 +165,13 @@ moteur, ce qui s'est révélé faux.
 les marques clientes dans les réponses de ChatGPT, Claude, Gemini, Perplexity,
 Grok et Le Chat.
 
+> **Le mode `complet` s'appelle publiquement « scan premium »** depuis le
+> 15/08/2026 (ex-« diagnostic », décision de Luigi : « à utiliser partout
+> désormais »). Renommé sur tout le site ET dans les gabarits d'emails et
+> réponses aux objections du toolkit. Les identifiants internes ne bougent
+> pas : modes `apercu`/`complet`/`controle` en base, `CarteDiagnostic`,
+> l'URL Calendly, et le vocabulaire opérateur des commandes CLI.
+>
 > Le produit vendu s'appelle **Sprint GEO** (2 900 € HT : 5 contenus, 8 cibles
 > de citation), avec une option **Sprint Domination** (4 900 € HT : 10
 > contenus, **15** cibles, 2 langues ou segments, campagne presse approfondie,
