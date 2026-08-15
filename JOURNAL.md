@@ -5,6 +5,26 @@ d'une nouvelle session, après `CLAUDE.md`.
 
 ---
 
+## 2026-08-15 — Le tiret cadratin dégagé de tout ce qui s'affiche
+
+La doctrine l'interdisait depuis le début (« pas de tiret cadratin dans les
+textes français publiés », il signe le texte généré) et la journée en avait
+semé partout. Balayage complet : plus UN SEUL « — » rendu sur les quatre
+pages (vérifié sur le HTML servi, méta et titres compris). Les séparateurs
+de titres passent au point médian, déjà la ponctuation maison (« Le scan
+premium, déplié · Citari ») ; la prose est réécrite avec deux-points,
+virgules ou parenthèses. Restent les commentaires de code et les prompts
+serveur, qui ne s'affichent nulle part.
+
+La fiche /scan-premium a été musclée dans le même geste : le héros pose
+l'enjeu (« Celui qui tient cette liste sait exactement où son marché se
+décide »), la section 00 montre la machine au travail pendant l'attente du
+créneau (« chaque réponse obtenue par les API officielles, horodatée,
+conservée mot pour mot »), et le CTA ferme la boucle (« vous ouvrez vos 144
+réponses à l'heure dite »). Toujours zéro promesse de score.
+
+---
+
 ## 2026-08-15 — Le parcours vend enfin, et chaque notice a son rôle
 
 Retour de Luigi sur la passe précédente : les descriptions « ne donnent pas

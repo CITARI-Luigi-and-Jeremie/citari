@@ -24,7 +24,7 @@ import { CursorHalo, WaveField } from "@/components/jeremie/decor";
 const HERO_TITRE = "Vous perdez des clients que vous ne verrez jamais.";
 const HERO_MOTS = HERO_TITRE.split(" ");
 
-const TITLE = "Citari — scan de visibilité dans les réponses des IA";
+const TITLE = "Citari · scan de visibilité dans les réponses des IA";
 /**
  * La description annonçait « Six moteurs interrogés (…) en 90 secondes »
  * (corrigé le 15/08/2026). Les 90 secondes sont celles du scan gratuit, qui

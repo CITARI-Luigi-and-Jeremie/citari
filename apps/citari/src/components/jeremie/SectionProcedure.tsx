@@ -97,7 +97,7 @@ const ETAPES: Etape[] = [
       <>
         En 90 secondes, vous savez{" "}
         <strong className="font-semibold text-ink">qui rafle les recommandations de votre
-        marché</strong> : chaque nom cité est repéré, compté, classé — y compris ceux que vous
+        marché</strong> : chaque nom cité est repéré, compté, classé, y compris ceux que vous
         n'attendiez pas.
       </>,
       <>
@@ -142,8 +142,8 @@ const ETAPES: Etape[] = [
         La mesure passe à l'échelle réelle :{" "}
         <strong className="font-semibold text-ink">
           144 réponses, six moteurs, recherche web activée
-        </strong>{" "}
-        — exactement ce que vivent vos clients quand ils demandent.
+        </strong>
+        . Exactement ce que vivent vos clients quand ils demandent.
       </>,
       <>
         Vous obtenez{" "}
@@ -154,8 +154,8 @@ const ETAPES: Etape[] = [
       </>,
       <>
         Vous découvrez{" "}
-        <strong className="font-semibold text-ink">la fiche que chaque IA récite sur vous</strong>{" "}
-        — souvent périmée, parfois confondue avec un homonyme. Personne ne vous l'avait jamais
+        <strong className="font-semibold text-ink">la fiche que chaque IA récite sur vous</strong>,
+        souvent périmée, parfois confondue avec un homonyme. Personne ne vous l'avait jamais
         montrée.
       </>,
       <>
@@ -209,8 +209,8 @@ const ETAPES: Etape[] = [
     // argument de vente, et tout existe dans le toolkit.
     recoit: [
       <>
-        <strong className="font-semibold text-ink">On ouvre votre site aux IA</strong> —
-        robots.txt, llms.txt, balisage schema.org, fiche Wikidata — puis on compte les robots
+        <strong className="font-semibold text-ink">On ouvre votre site aux IA</strong> :
+        robots.txt, llms.txt, balisage schema.org, fiche Wikidata. Puis on compte les robots
         entrer dans vos logs. Passer de zéro à des dizaines de visites par semaine, c'est une
         preuve, pas une impression.
       </>,
@@ -224,8 +224,8 @@ const ETAPES: Etape[] = [
       <>
         <strong className="font-semibold text-ink">
           On installe votre nom sur les sources qui font gagner vos concurrents
-        </strong>{" "}
-        — celles que les moteurs ont réellement consultées pendant votre mesure. À la main,
+        </strong>
+        , celles que les moteurs ont réellement consultées pendant votre mesure. À la main,
         dossier par dossier, relance par relance.
       </>,
       <>

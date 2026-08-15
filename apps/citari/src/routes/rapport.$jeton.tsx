@@ -35,7 +35,7 @@ export const Route = createFileRoute("/rapport/$jeton")({
   },
   head: ({ loaderData }) => {
     const titre = loaderData
-      ? `Rapport de visibilité IA — ${loaderData.scan.brand_name}`
+      ? `Rapport de visibilité IA · ${loaderData.scan.brand_name}`
       : "Rapport indisponible";
     const desc =
       "Score de visibilité IA, part de voix et sources citées par ChatGPT, Claude, Gemini, Perplexity, Grok et Le Chat.";
@@ -261,7 +261,7 @@ function RapportComplet() {
         {precedent ? (
           <div className="mt-4">
             <Etiquette ton="signal">
-              mode comparaison — scan initial du {precedent.date ? dateFr(precedent.date) : "—"}
+              mode comparaison · scan initial du {precedent.date ? dateFr(precedent.date) : "—"}
             </Etiquette>
           </div>
         ) : null}

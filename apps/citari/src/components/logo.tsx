@@ -31,7 +31,7 @@ export function LogoLien({ className, hauteur }: { className?: string; hauteur?:
   return (
     <Link
       to="/"
-      aria-label="Citari — accueil"
+      aria-label="Citari, accueil"
       className={cn("group/logo relative inline-flex items-center justify-start", className)}
     >
       <Logo hauteur={hauteur} />

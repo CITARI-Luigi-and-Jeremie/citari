@@ -31,7 +31,7 @@ import type { EtatScan } from "@/lib/orchestrateur.server";
 export const Route = createFileRoute("/scan/$id")({
   head: () => ({
     meta: [
-      { title: "Mesure en cours — Citari" },
+      { title: "Mesure en cours · Citari" },
       {
         name: "description",
         // Volontairement sans chiffres : le nombre de questions et la liste des
@@ -39,7 +39,7 @@ export const Route = createFileRoute("/scan/$id")({
         content: "Interrogation des moteurs d’IA sur des questions d’intention d’achat.",
       },
       { name: "robots", content: "noindex" },
-      { property: "og:title", content: "Mesure en cours — Citari" },
+      { property: "og:title", content: "Mesure en cours · Citari" },
       {
         property: "og:description",
         content: "Votre score de visibilité IA est en cours de calcul.",

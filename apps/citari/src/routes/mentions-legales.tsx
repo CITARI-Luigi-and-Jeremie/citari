@@ -5,14 +5,14 @@ import { fr } from "@/lib/typo";
 export const Route = createFileRoute("/mentions-legales")({
   head: () => ({
     meta: [
-      { title: "Mentions légales — Citari" },
+      { title: "Mentions légales · Citari" },
       {
         name: "description",
         content:
           "Éditeur, directeur de la publication, hébergeur et conditions d’utilisation du site Citari, conformément à l’article 6 III de la LCEN.",
       },
       { name: "robots", content: "noindex" },
-      { property: "og:title", content: "Mentions légales — Citari" },
+      { property: "og:title", content: "Mentions légales · Citari" },
       { property: "og:description", content: "Informations légales de l’éditeur du site." },
     ],
   }),

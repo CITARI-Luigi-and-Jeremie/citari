@@ -224,7 +224,7 @@ export function EcranAttente({ etat, scelle = false, instable }: Props) {
   useEffect(() => {
     if (total === 0 || collectees === 0) return;
     const precedent = document.title;
-    document.title = `${collectees}/${total} — Citari`;
+    document.title = `${collectees}/${total} · Citari`;
     return () => {
       document.title = precedent;
     };
@@ -442,7 +442,7 @@ export function EcranAttente({ etat, scelle = false, instable }: Props) {
                 )}
                 {instable ? (
                   <span style={{ display: "block", marginTop: 6, fontFamily: MONO, fontSize: 11, color: "#F2F0EA", opacity: 0.4 }}>
-                    connexion instable — nouvelle tentative
+                    connexion instable, nouvelle tentative
                   </span>
                 ) : null}
               </div>

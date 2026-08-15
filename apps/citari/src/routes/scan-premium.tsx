@@ -22,7 +22,7 @@ import { bookingUrl } from "@/lib/site";
  * compte fixe de réponses par moteur.
  */
 
-const TITLE = "Le scan premium, déplié — Citari";
+const TITLE = "Le scan premium, déplié · Citari";
 const DESCRIPTION =
   "Ce que mesure le scan premium Citari : 24 questions posées aux six moteurs d'IA avec recherche web, les sources qu'ils consultent, votre note par moteur, et le cadre de l'appel de lecture. Offert, lancé dès la réservation.";
 
@@ -106,7 +106,7 @@ function MobileToc() {
   return (
     <details className="mb-14 border-y border-ink lg:hidden">
       <summary className={`${mono} cursor-pointer list-none py-3 uppercase text-ink`}>
-        Sommaire — {SECTIONS.length} sections
+        Sommaire · {SECTIONS.length} sections
       </summary>
       <ol className="pb-3">
         {SECTIONS.map((s) => (
@@ -223,10 +223,13 @@ function ScanPremiumPage() {
               Le scan premium, déplié.
             </h1>
             <p className="mt-6 font-sans text-[17px] leading-[1.6] text-ink sm:text-[19px]">
-              L'aperçu gratuit vous a montré la surface : deux moteurs, de mémoire. Le scan premium
-              rejoue la mesure en conditions réelles — six moteurs, recherche web activée — et
-              remonte ce qu'aucun aperçu ne peut voir : les sources exactes sur lesquelles les IA
-              s'appuient pour recommander quelqu'un d'autre.
+              L'aperçu vous a montré la surface : deux moteurs qui répondent de mémoire. Le scan
+              premium rejoue votre mesure en conditions réelles, sur les six moteurs, recherche web
+              activée, et remonte la seule pièce qu'aucun aperçu ne peut voir : les adresses
+              exactes que chaque IA consulte avant de recommander quelqu'un d'autre.{" "}
+              <strong className="font-semibold">
+                Celui qui tient cette liste sait exactement où son marché se décide.
+              </strong>
             </p>
 
             <dl className="mt-10 grid grid-cols-2 border-t border-ink sm:grid-cols-4">
@@ -256,9 +259,17 @@ function ScanPremiumPage() {
                   <strong className="font-semibold">
                     lancée dès que vous réservez votre créneau
                   </strong>
-                  . Quand nous nous parlons, les 144 réponses sont déjà collectées : l'appel n'est
-                  pas un rendez-vous de découverte, c'est la lecture de votre rapport, ensemble, en
-                  trente minutes.
+                  . Pendant que vous attendez votre créneau, la machine interroge les six moteurs,
+                  lit les 144 réponses et en extrait chaque marque citée, chaque position, chaque
+                  source. Rien n'est simulé : chaque réponse est obtenue par les API officielles
+                  des éditeurs, horodatée, conservée mot pour mot.
+                </p>
+                <p>
+                  Quand nous nous parlons, tout est prêt.{" "}
+                  <strong className="font-semibold">
+                    L'appel n'est pas un rendez-vous de découverte : c'est la lecture de votre
+                    rapport, ensemble, en trente minutes.
+                  </strong>
                 </p>
                 <p>
                   Vous repartez avec le rapport complet et le plan d'action,{" "}
@@ -272,7 +283,7 @@ function ScanPremiumPage() {
                   L'aperçu interroge deux moteurs qui répondent de mémoire. Le scan premium
                   interroge <strong className="font-semibold">les six, recherche web activée</strong> :
                   les moteurs vont lire le web au moment de répondre, exactement comme ils le font
-                  devant vos clients. C'est ce qui change tout — et c'est ce qui coûte.
+                  devant vos clients. C'est ce qui change tout, et c'est ce qui coûte.
                 </p>
                 <CardGrid>
                   <MethodeCard eyebrow="L'aperçu gratuit">
@@ -303,8 +314,8 @@ function ScanPremiumPage() {
                     /methode = COMMENT on mesure (commune aux deux scans) ;
                     cette page = ce que le scan premium LIVRE. */}
                 <p>
-                  Le <em>comment</em> — protocole, formule, barème, exemple recalculable à la main
-                  — vit sur une seule page,{" "}
+                  Le <em>comment</em> (protocole, formule, barème, exemple recalculable à la
+                  main) vit sur une seule page,{" "}
                   <Link to="/methode" className="link-underline text-ink">
                     la méthode
                   </Link>
@@ -315,8 +326,9 @@ function ScanPremiumPage() {
 
               <Section id="repartez" num="02" title="Ce que vous emportez">
                 <p>
-                  Six pièces, toutes issues de votre mesure — pas d'un gabarit. La première est
-                  celle qui vaut le déplacement : personne d'autre ne vous la donnera.
+                  Six pièces, toutes tirées de votre mesure, aucune d'un gabarit. La première
+                  vaut à elle seule le déplacement : personne d'autre ne vous la donnera, parce
+                  que personne d'autre ne l'a vue.
                 </p>
                 <Pieces lignes={PIECES} />
               </Section>
@@ -338,7 +350,7 @@ function ScanPremiumPage() {
                     },
                     {
                       quand: "À la fin",
-                      quoi: "Vos actions, classées de la plus prioritaire à la moins urgente — et celles que vous pouvez mener sans nous.",
+                      quoi: "Vos actions, classées de la plus prioritaire à la moins urgente, et celles que vous pouvez mener sans nous.",
                     },
                   ].map((t, i) => (
                     <li key={t.quand} className={`relative pl-6 sm:pl-9 ${i === 2 ? "pb-0" : "pb-10"}`}>
@@ -379,7 +391,9 @@ function ScanPremiumPage() {
                   La mesure part dès que vous réservez.
                 </h2>
                 <p className="mt-4 font-sans text-[16px] leading-[1.65] text-ink-2 sm:text-[17px]">
-                  Choisissez un créneau : les 144 réponses seront collectées avant l'appel.
+                  Choisissez un créneau : la machine se met au travail, et vous ouvrez vos 144
+                  réponses à l'heure dite. Trente minutes plus tard, vous savez où vous en êtes et
+                  par quoi commencer.
                 </p>
                 <div className="mt-7 flex flex-wrap items-center gap-5">
                   <a

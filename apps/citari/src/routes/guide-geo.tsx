@@ -20,13 +20,13 @@ const FAQ = [
 export const Route = createFileRoute("/guide-geo")({
   head: () => ({
     meta: [
-      { title: "Le GEO expliqué simplement — guide complet" },
+      { title: "Le GEO expliqué simplement · guide complet" },
       {
         name: "description",
         content:
           "Le GEO consiste à faire citer une marque par les IA génératives. Comment les moteurs choisissent, les trois chantiers, la méthode de mesure et les erreurs fréquentes.",
       },
-      { property: "og:title", content: "Le GEO expliqué simplement — guide complet" },
+      { property: "og:title", content: "Le GEO expliqué simplement · guide complet" },
       {
         property: "og:description",
         content: "Comment les IA choisissent les marques qu’elles citent, et comment y entrer.",

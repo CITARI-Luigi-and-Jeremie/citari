@@ -58,7 +58,7 @@ export function CarteConcurrent({
             Sur les {adversaire.total} réponses que nous venons de lire, son nom sort autant que le
             vôtre : {vosReponses} fois chacun.{" "}
             <strong style={{ color: INK, fontWeight: 800 }}>
-              La place se rejoue à chaque réponse — et ce qui le fait monter est lisible, donc
+              La place se rejoue à chaque réponse, et ce qui le fait monter est lisible, donc
               copiable.
             </strong>
           </p>

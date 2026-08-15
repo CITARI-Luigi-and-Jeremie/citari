@@ -23,7 +23,7 @@ import { SiteFooter } from "@/components/jeremie/SectionFinalCTA";
  * 20 %, tonalité 10 % — et sur la liste figée des six moteurs.
  */
 
-const TITLE = "La méthode, en entier — Citari";
+const TITLE = "La méthode, en entier · Citari";
 const DESCRIPTION =
   "Protocole, formule, barème et exemple de calcul complet du score de visibilité Citari sur les six moteurs d'IA. Recalculable à la main.";
 
@@ -138,7 +138,7 @@ function MobileToc() {
   return (
     <details className="mb-14 border-y border-ink lg:hidden">
       <summary className={`${mono} cursor-pointer list-none py-3 uppercase text-ink`}>
-        Sommaire — {SECTIONS.length} sections
+        Sommaire · {SECTIONS.length} sections
       </summary>
       <ol className="pb-3">
         {SECTIONS.map((s) => (
@@ -368,7 +368,7 @@ function MethodePage() {
                   protocole.
                 </p>
                 <figure className="my-8 rounded-[2px] border border-rule-strong bg-paper-2 p-5 sm:p-7">
-                  <p className={`${mono} uppercase text-ink-2`}>Exemple — données fictives</p>
+                  <p className={`${mono} uppercase text-ink-2`}>Exemple · données fictives</p>
                   <blockquote className="mt-4 font-quote text-[19px] italic leading-[1.55] text-ink sm:text-[22px]">
                     « Pour une PME à Lyon, je recommande plutôt Concurrent A, dont
                     l'accompagnement comptable est souvent cité comme le plus complet. »

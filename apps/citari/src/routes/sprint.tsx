@@ -28,7 +28,7 @@ import { useScanFormFocus } from "@/lib/scan-form-focus";
  * l'écart mesuré à J+90.
  */
 
-const TITLE = "Le Sprint GEO, déplié — Citari";
+const TITLE = "Le Sprint GEO, déplié · Citari";
 const DESCRIPTION =
   "Les trois chantiers, les huit phases et les 47 étapes d'un Sprint GEO Citari : ce que la machine exécute, ce que nous faisons à la main, et comment chaque action est vérifiée en ligne.";
 
@@ -115,7 +115,7 @@ function MobileToc() {
   return (
     <details className="mb-14 border-y border-ink lg:hidden">
       <summary className={`${mono} cursor-pointer list-none py-3 uppercase text-ink`}>
-        Sommaire — {SECTIONS.length} sections
+        Sommaire · {SECTIONS.length} sections
       </summary>
       <ol className="pb-3">
         {SECTIONS.map((s) => (
@@ -261,7 +261,7 @@ const PHASES = [
     titre: "Le re-scan, mot pour mot",
     fort: true,
     corps:
-      "Les mêmes 24 questions, les mêmes six moteurs, la même formule. Puis le comparatif avant/après, sans mise en scène, et un appel de restitution — y compris si le résultat est mauvais.",
+      "Les mêmes 24 questions, les mêmes six moteurs, la même formule. Puis le comparatif avant/après, sans mise en scène, et un appel de restitution, y compris si le résultat est mauvais.",
   },
 ];
 

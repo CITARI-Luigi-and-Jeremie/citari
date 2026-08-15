@@ -98,7 +98,7 @@ export function CarteQuestions({
               key={l.q.id}
               type="button"
               onClick={() => ouvrir(l.q.rank)}
-              title={`${String(l.q.rank).padStart(2, "0")} · ${l.q.text} — ${
+              title={`${String(l.q.rank).padStart(2, "0")} · ${l.q.text} · ${
                 l.citee ? `cité par ${l.moteursCitants.join(", ")}` : "absent partout"
               }`}
               style={{
