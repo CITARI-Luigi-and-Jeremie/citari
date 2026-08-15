@@ -55,7 +55,7 @@ export function LogosMoteurs({ centered = false }: { centered?: boolean }) {
         ))}
       </ul>
       <p className={`mono text-[12px] text-ink-2 ${centered ? "text-center" : ""}`}>
-        Interrogés par votre scan gratuit. Les quatre autres au scan premium.
+        Interrogés par votre scan gratuit. Les quatre autres au scan complet.
       </p>
     </div>
   );

@@ -7,7 +7,7 @@ import { dateFr } from "@/lib/typo";
 
 /**
  * /equipe : le suivi des réservations Calendly, et le lancement du scan
- * premium. Page INTERNE, sur le site parce que Luigi ne veut ni serveur ni
+ * complet. Page INTERNE, sur le site parce que Luigi ne veut ni serveur ni
  * domaine de plus (15/08/2026) : elle voyage avec citari.fr, se protège par
  * le mot de passe admin (le même que le back-office local), et n'existe
  * qu'ici — pas de doublon avec apps/admin, qui garde leads et clients.
@@ -210,7 +210,7 @@ function PageEquipe() {
           <p className="text-[17px]">Aucune réservation captée pour l'instant.</p>
           <p className="measure mt-2 text-[14px] text-ink-2">
             Les réservations faites dans la fenêtre Calendly du site apparaissent ici toutes
-            seules. Celles prises par un lien direct (email, page scan premium) arrivent par
+            seules. Celles prises par un lien direct (email, page scan complet) arrivent par
             l'email de notification Calendly : comparez en cas de doute.
           </p>
         </div>
@@ -223,7 +223,7 @@ function PageEquipe() {
                 <th className="py-3 pr-4 font-normal">Entreprise</th>
                 <th className="py-3 pr-4 font-normal">Email</th>
                 <th className="py-3 pr-4 font-normal">Scan gratuit</th>
-                <th className="py-3 pr-4 font-normal">Scan premium</th>
+                <th className="py-3 pr-4 font-normal">Scan complet</th>
                 <th className="py-3 font-normal" />
               </tr>
             </thead>
@@ -293,7 +293,7 @@ function PageEquipe() {
                           onClick={() => lancerScanPremium(l.id)}
                           className="cta whitespace-nowrap px-4 py-2 text-[14px] disabled:opacity-60"
                         >
-                          {enCours === l.id ? "Création…" : "Lancer le scan premium"}
+                          {enCours === l.id ? "Création…" : "Lancer le scan complet"}
                         </button>
                       ) : null}
                     </td>
@@ -313,7 +313,7 @@ function PageEquipe() {
           Ajouter une réservation à la main
         </p>
         <p className="measure mt-2 text-[14px] text-ink-2">
-          Pour un rendez-vous pris par lien Calendly direct (email, page scan premium) : collez le
+          Pour un rendez-vous pris par lien Calendly direct (email, page scan complet) : collez le
           lien du rapport du prospect, il arrive dans le tableau.
         </p>
         <form onSubmit={ajouterManuellement} className="mt-4 grid gap-3">

@@ -135,7 +135,7 @@ function RootComponent() {
   // L'écran de scan et le rapport se lisent sans distraction : ni logo
   // flottant, ni contact. (La route /admin du site a été supprimée le
   // 14/08/2026 avant la mise en ligne : le seul back-office est apps/admin.)
-  // « /scan/ » avec la barre : le préfixe nu attrapait /scan-premium depuis
+  // « /scan/ » avec la barre : le préfixe nu attrapait /scan-complet depuis
   // sa création (15/08/2026), et la fiche n'avait ni logo ni retour accueil.
   const sansChrome = pathname.startsWith("/scan/") || pathname.startsWith("/rapport/");
 

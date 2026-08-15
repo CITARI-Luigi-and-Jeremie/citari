@@ -17,7 +17,7 @@ import { Route as GeoVsSeoRouteImport } from './routes/geo-vs-seo'
 import { Route as GuideGeoRouteImport } from './routes/guide-geo'
 import { Route as MentionsLegalesRouteImport } from './routes/mentions-legales'
 import { Route as MethodeRouteImport } from './routes/methode'
-import { Route as ScanPremiumRouteImport } from './routes/scan-premium'
+import { Route as ScanCompletRouteImport } from './routes/scan-complet'
 import { Route as SprintRouteImport } from './routes/sprint'
 import { Route as RapportJetonRouteImport } from './routes/rapport.$jeton'
 import { Route as ScanIdRouteImport } from './routes/scan.$id'
@@ -62,9 +62,9 @@ const MethodeRoute = MethodeRouteImport.update({
   path: '/methode',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ScanPremiumRoute = ScanPremiumRouteImport.update({
-  id: '/scan-premium',
-  path: '/scan-premium',
+const ScanCompletRoute = ScanCompletRouteImport.update({
+  id: '/scan-complet',
+  path: '/scan-complet',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SprintRoute = SprintRouteImport.update({
@@ -92,7 +92,7 @@ export interface FileRoutesByFullPath {
   '/guide-geo': typeof GuideGeoRoute
   '/mentions-legales': typeof MentionsLegalesRoute
   '/methode': typeof MethodeRoute
-  '/scan-premium': typeof ScanPremiumRoute
+  '/scan-complet': typeof ScanCompletRoute
   '/sprint': typeof SprintRoute
   '/rapport/$jeton': typeof RapportJetonRoute
   '/scan/$id': typeof ScanIdRoute
@@ -106,7 +106,7 @@ export interface FileRoutesByTo {
   '/guide-geo': typeof GuideGeoRoute
   '/mentions-legales': typeof MentionsLegalesRoute
   '/methode': typeof MethodeRoute
-  '/scan-premium': typeof ScanPremiumRoute
+  '/scan-complet': typeof ScanCompletRoute
   '/sprint': typeof SprintRoute
   '/rapport/$jeton': typeof RapportJetonRoute
   '/scan/$id': typeof ScanIdRoute
@@ -121,7 +121,7 @@ export interface FileRoutesById {
   '/guide-geo': typeof GuideGeoRoute
   '/mentions-legales': typeof MentionsLegalesRoute
   '/methode': typeof MethodeRoute
-  '/scan-premium': typeof ScanPremiumRoute
+  '/scan-complet': typeof ScanCompletRoute
   '/sprint': typeof SprintRoute
   '/rapport/$jeton': typeof RapportJetonRoute
   '/scan/$id': typeof ScanIdRoute
@@ -137,7 +137,7 @@ export interface FileRouteTypes {
     | '/guide-geo'
     | '/mentions-legales'
     | '/methode'
-    | '/scan-premium'
+    | '/scan-complet'
     | '/sprint'
     | '/rapport/$jeton'
     | '/scan/$id'
@@ -151,7 +151,7 @@ export interface FileRouteTypes {
     | '/guide-geo'
     | '/mentions-legales'
     | '/methode'
-    | '/scan-premium'
+    | '/scan-complet'
     | '/sprint'
     | '/rapport/$jeton'
     | '/scan/$id'
@@ -165,7 +165,7 @@ export interface FileRouteTypes {
     | '/guide-geo'
     | '/mentions-legales'
     | '/methode'
-    | '/scan-premium'
+    | '/scan-complet'
     | '/sprint'
     | '/rapport/$jeton'
     | '/scan/$id'
@@ -180,7 +180,7 @@ export interface RootRouteChildren {
   GuideGeoRoute: typeof GuideGeoRoute
   MentionsLegalesRoute: typeof MentionsLegalesRoute
   MethodeRoute: typeof MethodeRoute
-  ScanPremiumRoute: typeof ScanPremiumRoute
+  ScanCompletRoute: typeof ScanCompletRoute
   SprintRoute: typeof SprintRoute
   RapportJetonRoute: typeof RapportJetonRoute
   ScanIdRoute: typeof ScanIdRoute
@@ -244,11 +244,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MethodeRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/scan-premium': {
-      id: '/scan-premium'
-      path: '/scan-premium'
-      fullPath: '/scan-premium'
-      preLoaderRoute: typeof ScanPremiumRouteImport
+    '/scan-complet': {
+      id: '/scan-complet'
+      path: '/scan-complet'
+      fullPath: '/scan-complet'
+      preLoaderRoute: typeof ScanCompletRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/sprint': {
@@ -284,7 +284,7 @@ const rootRouteChildren: RootRouteChildren = {
   GuideGeoRoute: GuideGeoRoute,
   MentionsLegalesRoute: MentionsLegalesRoute,
   MethodeRoute: MethodeRoute,
-  ScanPremiumRoute: ScanPremiumRoute,
+  ScanCompletRoute: ScanCompletRoute,
   SprintRoute: SprintRoute,
   RapportJetonRoute: RapportJetonRoute,
   ScanIdRoute: ScanIdRoute,

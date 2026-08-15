@@ -7,26 +7,26 @@ import { SiteFooter } from "@/components/jeremie/SectionFinalCTA";
 import { bookingUrl } from "@/lib/site";
 
 /**
- * Le scan premium, déplié.
+ * Le scan complet, déplié.
  *
  * Troisième notice technique du site (15/08/2026), née d'un défaut relevé
  * par Luigi : les cartes 01 et 02 du parcours renvoyaient toutes deux vers
  * /methode. Deux étapes, deux documents — celle-ci décrit ce que le scan
- * premium mesure, ce qu'on en repart, et le cadre de l'appel.
+ * complet mesure, ce qu'on en repart, et le cadre de l'appel.
  *
  * Sources de vérité : la carte de réservation du rapport (déroulé, ~300
- * appels payants), CarteDiagnostic (le comparatif aperçu/premium),
+ * appels payants), CarteDiagnostic (le comparatif aperçu/complet),
  * docs/LIVRAISON.md. Les règles de toujours : offert mais jamais « gratuit
  * et sans condition » — il se lit ENSEMBLE, en visio ; aucun score promis ;
  * un moteur en panne est exclu de la mesure, on ne promet donc jamais un
  * compte fixe de réponses par moteur.
  */
 
-const TITLE = "Le scan premium, déplié · Citari";
+const TITLE = "Le scan complet, déplié · Citari";
 const DESCRIPTION =
-  "Ce que mesure le scan premium Citari : 24 questions posées aux six moteurs d'IA avec recherche web, les sources qu'ils consultent, votre note par moteur, et le cadre de l'appel de lecture. Offert, lancé dès la réservation.";
+  "Ce que mesure le scan complet Citari : 24 questions posées aux six moteurs d'IA avec recherche web, les sources qu'ils consultent, votre note par moteur, et le cadre de l'appel de lecture. Offert, lancé dès la réservation.";
 
-export const Route = createFileRoute("/scan-premium")({
+export const Route = createFileRoute("/scan-complet")({
   head: () => ({
     meta: [
       { title: TITLE },
@@ -220,11 +220,11 @@ function ScanPremiumPage() {
           <div className="max-w-[68ch]">
             <p className={`${mono} uppercase text-ink-2`}>La mesure complète</p>
             <h1 className="mt-3 font-sans text-[38px] font-extrabold leading-[1.05] tracking-[-0.02em] text-ink sm:text-[56px]">
-              Le scan premium, déplié.
+              Le scan complet, déplié.
             </h1>
             <p className="mt-6 font-sans text-[17px] leading-[1.6] text-ink sm:text-[19px]">
               L'aperçu vous a montré la surface : deux moteurs qui répondent de mémoire. Le scan
-              premium rejoue votre mesure en conditions réelles, sur les six moteurs, recherche web
+              complet rejoue votre mesure en conditions réelles, sur les six moteurs, recherche web
               activée, et remonte la seule pièce qu'aucun aperçu ne peut voir : les adresses
               exactes que chaque IA consulte avant de recommander quelqu'un d'autre.{" "}
               <strong className="font-semibold">
@@ -280,7 +280,7 @@ function ScanPremiumPage() {
 
               <Section id="mesure" num="01" title="La mesure, à l'échelle réelle">
                 <p>
-                  L'aperçu interroge deux moteurs qui répondent de mémoire. Le scan premium
+                  L'aperçu interroge deux moteurs qui répondent de mémoire. Le scan complet
                   interroge <strong className="font-semibold">les six, recherche web activée</strong> :
                   les moteurs vont lire le web au moment de répondre, exactement comme ils le font
                   devant vos clients. C'est ce qui change tout, et c'est ce qui coûte.
@@ -297,7 +297,7 @@ function ScanPremiumPage() {
                       ]}
                     />
                   </MethodeCard>
-                  <MethodeCard eyebrow="Le scan premium">
+                  <MethodeCard eyebrow="Le scan complet">
                     <DataRows
                       rows={[
                         ["Questions", "24"],
@@ -312,7 +312,7 @@ function ScanPremiumPage() {
                 {/* La frontière entre les deux notices, dite explicitement :
                     Luigi a lui-même demandé si elles ne se ressemblaient pas.
                     /methode = COMMENT on mesure (commune aux deux scans) ;
-                    cette page = ce que le scan premium LIVRE. */}
+                    cette page = ce que le scan complet LIVRE. */}
                 <p>
                   Le <em>comment</em> (protocole, formule, barème, exemple recalculable à la
                   main) vit sur une seule page,{" "}
@@ -373,7 +373,7 @@ function ScanPremiumPage() {
 
               <Section id="offert" num="04" title="Pourquoi c'est offert">
                 <p>
-                  Un scan premium déclenche près de{" "}
+                  Un scan complet déclenche près de{" "}
                   <strong className="font-semibold">300 appels payants</strong> chez six éditeurs
                   d'IA, recherche web activée, chaque réponse étant ensuite relue par un modèle
                   d'analyse. Neuf minutes de calcul. Nous le prenons à notre charge, parce qu'il
@@ -400,7 +400,7 @@ function ScanPremiumPage() {
                     href={lienReservation}
                     className="cta cta-sweep group inline-flex items-center gap-3 rounded-[4px] px-6 py-3.5"
                   >
-                    <span>Réserver mon scan premium</span>
+                    <span>Réserver mon scan complet</span>
                     <span
                       aria-hidden
                       className="text-[18px] leading-none transition-transform duration-200 group-hover:translate-x-1"

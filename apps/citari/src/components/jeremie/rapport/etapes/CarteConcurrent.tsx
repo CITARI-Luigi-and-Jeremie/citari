@@ -69,7 +69,7 @@ export function CarteConcurrent({
             <strong style={{ color: INK, fontWeight: 800 }}>
               Une place de leader ne se perd pas d'un coup : elle s'érode réponse par réponse.
             </strong>{" "}
-            Le scan premium montre sur quelles questions il gagne du terrain, et pourquoi.
+            Le scan complet montre sur quelles questions il gagne du terrain, et pourquoi.
           </p>
         )}
       </>

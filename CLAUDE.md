@@ -174,12 +174,14 @@ moteur, ce qui s'est révélé faux.
 les marques clientes dans les réponses de ChatGPT, Claude, Gemini, Perplexity,
 Grok et Le Chat.
 
-> **Le mode `complet` s'appelle publiquement « scan premium »** depuis le
-> 15/08/2026 (ex-« diagnostic », décision de Luigi : « à utiliser partout
-> désormais »). Renommé sur tout le site ET dans les gabarits d'emails et
-> réponses aux objections du toolkit. Les identifiants internes ne bougent
-> pas : modes `apercu`/`complet`/`controle` en base, `CarteDiagnostic`,
-> l'URL Calendly, et le vocabulaire opérateur des commandes CLI.
+> **Le mode `complet` s'appelle publiquement « scan complet »** depuis le
+> 15/08/2026 au soir (décision de Luigi ; il s'était appelé « diagnostic »
+> puis, quelques heures, « scan premium »). Renommé sur tout le site, la
+> fiche `/scan-complet`, la page /equipe, ET dans les gabarits d'emails et
+> réponses aux objections du toolkit. Le nom public et le mode en base
+> coïncident enfin. Les identifiants internes ne bougent pas : modes
+> `apercu`/`complet`/`controle`, `CarteDiagnostic`, les colonnes
+> `reservations.premium_*`, l'URL Calendly, le vocabulaire CLI.
 >
 > **Une seule offre publique depuis le 15/08/2026** : le site, son JSON-LD et
 > la page /sprint ne présentent QUE le Sprint GEO à 2 900 € (décision Luigi,

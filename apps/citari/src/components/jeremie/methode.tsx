@@ -6,7 +6,7 @@ import { Reveal } from "@/components/jeremie/Reveal";
  * Briques de la notice technique.
  *
  * Portées du projet Lovable de Jérémie le 07/08/2026. Tous les chiffres
- * affichés ici décrivent le protocole RÉEL du scan premium (ex-diagnostic) — 24
+ * affichés ici décrivent le protocole RÉEL du scan complet (ex-diagnostic) — 24
  * questions, 6 moteurs, 144 réponses, formule 50/20/20/10 — et doivent rester
  * alignés sur `src/lib/score.ts` et `src/lib/typo.ts`. Cette page est
  * l'engagement le plus vérifiable du site : elle invite le lecteur à refaire
@@ -124,7 +124,7 @@ const TEMPS: Temps[] = [
       <>
         Des questions d'intention d'achat, écrites à partir de votre secteur et de votre zone,
         réparties comme le sont les questions réelles : comparaisons, problèmes à résoudre,
-        recherches locales, questions de confiance. Le scan premium en compte{" "}
+        recherches locales, questions de confiance. Le scan complet en compte{" "}
         <span className="font-mono text-[15px] tabular-nums">24</span>. Le scan gratuit utilise un
         échantillon réduit du même protocole.
       </>

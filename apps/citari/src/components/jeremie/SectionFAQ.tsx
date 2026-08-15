@@ -159,7 +159,7 @@ const ENTREES: Entree[] = [
     ancre: "scan-gratuit",
     q: "Que contient le scan gratuit ?",
     plain:
-      "Le scan pose à ChatGPT et Gemini, les deux moteurs les plus utilisés, les questions que vos acheteurs posent réellement, et compte qui est cité : vous, et toutes les marques qui sortent, y compris les concurrents que vous nommez. Vous voyez votre score, votre part de voix, et la phrase exacte où une IA recommande quelqu'un de votre secteur. Gratuit, sans compte, sans carte bancaire, résultat en 90 secondes. Les quatre autres moteurs sont couverts par le scan premium.",
+      "Le scan pose à ChatGPT et Gemini, les deux moteurs les plus utilisés, les questions que vos acheteurs posent réellement, et compte qui est cité : vous, et toutes les marques qui sortent, y compris les concurrents que vous nommez. Vous voyez votre score, votre part de voix, et la phrase exacte où une IA recommande quelqu'un de votre secteur. Gratuit, sans compte, sans carte bancaire, résultat en 90 secondes. Les quatre autres moteurs sont couverts par le scan complet.",
     r: (
       <>
         Le scan pose à <M>ChatGPT</M> et <M>Gemini</M>, les deux moteurs les plus utilisés, les
@@ -167,7 +167,7 @@ const ENTREES: Entree[] = [
         marques qui sortent, y compris les concurrents que vous nommez. Vous voyez votre score, votre
         part de voix, et la phrase exacte où une IA recommande quelqu'un de votre secteur. Gratuit,
         sans compte, sans carte bancaire, résultat en <M>90 secondes</M>. Les quatre autres moteurs
-        sont couverts par le scan premium.
+        sont couverts par le scan complet.
       </>
     ),
   },
@@ -176,10 +176,10 @@ const ENTREES: Entree[] = [
     ancre: "prix",
     q: "Combien coûte Citari ?",
     plain:
-      "Le scan gratuit et le scan premium en visio sont offerts. Le Sprint coûte 2 900 € HT, payés une seule fois : 30 jours de travail sur les trois chantiers, 50 % à la commande, 50 % à la livraison. Aucun abonnement, aucune reconduction, rien à résilier.",
+      "Le scan gratuit et le scan complet en visio sont offerts. Le Sprint coûte 2 900 € HT, payés une seule fois : 30 jours de travail sur les trois chantiers, 50 % à la commande, 50 % à la livraison. Aucun abonnement, aucune reconduction, rien à résilier.",
     r: (
       <>
-        Le scan gratuit et le scan premium en visio sont offerts. Le Sprint coûte <M>2 900 € HT</M>, payés une
+        Le scan gratuit et le scan complet en visio sont offerts. Le Sprint coûte <M>2 900 € HT</M>, payés une
         seule fois : <M>30 jours</M> de travail sur les trois chantiers, <M>50 %</M> à la commande,{" "}
         <M>50 %</M> à la livraison. Aucun abonnement, aucune reconduction, rien à résilier.
       </>

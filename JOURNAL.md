@@ -5,6 +5,22 @@ d'une nouvelle session, après `CLAUDE.md`.
 
 ---
 
+## 2026-08-15 — « Scan complet », troisième et dernier baptême du jour
+
+Décision de Luigi en fin de soirée : « scan premium » devient « scan
+complet ». C'est le meilleur des trois noms : il coïncide avec le mode
+`complet` en base, et il dit ce que le produit est. 49 occurrences
+renommées d'un balayage scripté (site, fiche produit, page /equipe, emails
+et réponses aux objections du toolkit), plus trois césures de ligne que le
+balayage ne pouvait pas voir (« scan\n premium ») et l'en-tête de colonne
+du comparatif (PREMIUM → COMPLET). La route `/scan-premium` devient
+`/scan-complet`, sans redirection : la page avait deux heures d'existence,
+noindex nulle part mais jamais indexée ni liée hors du site. Les colonnes
+`reservations.premium_scan_id` / `premium_launched_at` restent : ce sont
+des identifiants internes, la règle de toujours.
+
+---
+
 ## 2026-08-15 — La capture Calendly aurait rejeté toutes les vraies réservations
 
 « Reverifie tout » de Luigi avant la mise en service, et la re-vérification

@@ -167,7 +167,7 @@ function RapportDApercu() {
             onClick={() => setReservation(true)}
             className="cta cta-sweep whitespace-nowrap rounded-[4px] px-3 py-2 text-[13px] sm:px-4 sm:py-2.5 sm:text-[15px]"
           >
-            Réserver mon scan premium
+            Réserver mon scan complet
           </button>
         </div>
       </div>

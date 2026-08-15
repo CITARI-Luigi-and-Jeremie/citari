@@ -129,7 +129,7 @@ const ETAPES: Etape[] = [
   },
   {
     num: "02",
-    label: "LE SCAN PREMIUM",
+    label: "LE SCAN COMPLET",
     titre: "Cette fois, les six moteurs répondent. Le plan qui en sort est à vous.",
     cout: "30 minutes en visio. Ni carte bancaire, ni engagement.",
     labelCout: "CE QUE ÇA VOUS COÛTE",
@@ -182,7 +182,7 @@ const ETAPES: Etape[] = [
     // Sa propre page depuis le 15/08/2026 : les cartes 01 et 02 renvoyaient
     // toutes deux vers /methode, ce que Luigi a relevé — deux étapes, deux
     // documents.
-    doc: { label: "Le scan premium, déplié", to: "/scan-premium" },
+    doc: { label: "Le scan complet, déplié", to: "/scan-complet" },
     // Canevas élargi à 1900×1036 le 15/08/2026 (script PIL : le grain du
     // fichier lui-même, tuilé en miroir autour de l'original intact). Le
     // motif de cette illustration remplissait son cadre bien plus que ceux
@@ -258,7 +258,7 @@ export function SectionProcedure() {
 
   return (
     // « parcours » et non « methode » depuis le 15/08/2026 : cette section
-    // décrit le PARCOURS commercial (scan, scan premium, sprint), pas la
+    // décrit le PARCOURS commercial (scan, scan complet, sprint), pas la
     // méthode de mesure. Elle occupait le mot « Méthode » dans la barre
     // latérale, et cannibalisait donc la page /methode — celle qui publie la
     // formule et le calcul complet, que Luigi n'a retrouvée qu'au fond du

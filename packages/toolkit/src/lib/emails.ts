@@ -230,7 +230,7 @@ function protocoleBloc(i: ScanInsights): string {
  * coûte réellement de l'argent. Le rendez-vous n'est que la façon de le remettre.
  */
 function offreDiagnostic(): string {
-  return `Je vous offre le scan premium : les 6 moteurs, 24 questions, 144 réponses, l'audit technique de votre site, et les sources exactes sur lesquelles les IA s'appuient pour recommander vos concurrents.
+  return `Je vous offre le scan complet : les 6 moteurs, 24 questions, 144 réponses, l'audit technique de votre site, et les sources exactes sur lesquelles les IA s'appuient pour recommander vos concurrents.
 
 Il me faut trente minutes avec vous pour vous le présenter, parce qu'un tableau de chiffres sans lecture ne sert à rien.
 
@@ -503,7 +503,7 @@ export function enHtml(email: Email, i: ScanInsights): string {
       if (!t) return "";
       // Les URL seules deviennent un bouton, le reste un paragraphe.
       if (/^https?:\/\/\S+$/.test(t)) {
-        return `<p style="margin:26px 0;"><a href="${t}" style="display:inline-block;background:${ACCENT};color:#fff;text-decoration:none;padding:13px 26px;font-size:15px;">Réserver mon scan premium</a></p>`;
+        return `<p style="margin:26px 0;"><a href="${t}" style="display:inline-block;background:${ACCENT};color:#fff;text-decoration:none;padding:13px 26px;font-size:15px;">Réserver mon scan complet</a></p>`;
       }
       if (t.startsWith("--")) {
         return `<p style="margin:28px 0 0;padding-top:16px;border-top:1px solid ${TRAIT};font-size:12px;color:${DOUX};">${echapper(t.replace(/^--\s*/, "")).replace(/\n/g, "<br>")}</p>`;

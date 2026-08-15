@@ -181,10 +181,10 @@ function MethodePage() {
             </p>
             {/* La frontière avec les fiches produit, écrite noir sur blanc :
                 cette page est la RÈGLE DU JEU commune. Ce que chaque scan
-                livre vit sur /scan-premium et /sprint (15/08/2026). */}
+                livre vit sur /scan-complet et /sprint (15/08/2026). */}
             <p className="mt-4 font-mono text-[13px] leading-[1.6] text-ink-2">
               Une seule méthode pour les deux mesures : le scan gratuit l'applique en format
-              réduit (20 questions, 2 moteurs), le scan premium en entier (24 questions, 6
+              réduit (20 questions, 2 moteurs), le scan complet en entier (24 questions, 6
               moteurs, recherche web).
             </p>
 

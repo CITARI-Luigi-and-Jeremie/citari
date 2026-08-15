@@ -379,7 +379,7 @@ export function EcranAttente({ etat, scelle = false, instable }: Props) {
                 {verrouilles.length > 0 ? (
                   <div style={{ marginTop: 20, paddingTop: 16, borderTop: "1px solid rgba(242,240,234,0.12)" }}>
                     <div style={{ fontFamily: MONO, fontSize: 10, letterSpacing: "0.16em", textTransform: "uppercase", color: "#F2F0EA", opacity: 0.35, marginBottom: 12 }}>
-                      Réservé au scan premium
+                      Réservé au scan complet
                     </div>
                     <div style={{ display: "flex", alignItems: "center", gap: 16, flexWrap: "wrap" }}>
                       {verrouilles.map((moteur) => (

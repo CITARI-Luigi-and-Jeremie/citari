@@ -157,7 +157,7 @@ export function CarteTechnique({
             Ce qui vous manque n'est donc pas l'autorisation, c'est la matière.
           </strong>{" "}
           Ce qu'elles trouvent à lire sur vous ne suffit pas à vous citer, et c'est précisément ce
-          que le scan premium va chercher, source par source.
+          que le scan complet va chercher, source par source.
         </p>
       )}
 

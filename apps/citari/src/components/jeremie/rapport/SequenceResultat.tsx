@@ -107,7 +107,7 @@ export function SequenceResultat({
     // La modale « ce que vous apprenez » a été supprimée le 14/08/2026 : la
     // séquence portait deux comparatifs qui se répétaient. Son tableau vit
     // désormais DANS la carte diagnostic, et le CTA avance simplement.
-    { clef: "diagnostic", titre: "Le scan premium", preuve: "" },
+    { clef: "diagnostic", titre: "Le scan complet", preuve: "" },
     { clef: "reservation", titre: "Réserver", preuve: "Le cadre de l'appel" },
   ];
 
@@ -316,7 +316,7 @@ export function SequenceResultat({
         onMouseEnter={(e) => (e.currentTarget.style.background = ORANGE_HOVER)}
         onMouseLeave={(e) => (e.currentTarget.style.background = ORANGE)}
       >
-        Réserver mon scan premium
+        Réserver mon scan complet
       </button>
     </div>
   );

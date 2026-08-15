@@ -11,7 +11,7 @@ import { enregistrerReservation } from "@/lib/equipe.functions";
  * Depuis le 15/08/2026, la confirmation est CAPTÉE : le widget embarqué
  * émet un postMessage `calendly.event_scheduled` quand le prospect valide
  * son créneau, et on écrit alors la réservation en base, rattachée au scan.
- * C'est ce qui alimente la page /equipe, d'où se lance le scan premium.
+ * C'est ce qui alimente la page /equipe, d'où se lance le scan complet.
  */
 export function BookingModal({
   open,
@@ -64,7 +64,7 @@ export function BookingModal({
           ×
         </button>
         <iframe
-          title="Réserver le scan premium"
+          title="Réserver le scan complet"
           src={bookingUrl({ email, name: marque })}
           className="block h-full w-full border-0"
         />
