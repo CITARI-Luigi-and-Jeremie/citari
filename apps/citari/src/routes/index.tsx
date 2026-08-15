@@ -25,8 +25,16 @@ const HERO_TITRE = "Vous perdez des clients que vous ne verrez jamais.";
 const HERO_MOTS = HERO_TITRE.split(" ");
 
 const TITLE = "Citari — scan de visibilité dans les réponses des IA";
+/**
+ * La description annonçait « Six moteurs interrogés (…) en 90 secondes »
+ * (corrigé le 15/08/2026). Les 90 secondes sont celles du scan gratuit, qui
+ * en interroge DEUX : c'était le même mensonge que les six logos du héros et
+ * que le dernier appel, mais à l'endroit le plus exposé du site — le texte
+ * que Google affiche et que les IA reprennent quand elles citent Citari.
+ * Les six moteurs restent annoncés là où ils sont vrais : le diagnostic.
+ */
 const DESCRIPTION =
-  "Six moteurs interrogés en direct avec les vraies questions de vos acheteurs. Votre score sur 100 et les phrases exactes, en 90 secondes.";
+  "ChatGPT et Gemini interrogés en direct avec les vraies questions de vos acheteurs. Votre score sur 100 et les phrases exactes, en 90 secondes.";
 
 export const Route = createFileRoute("/")({
   head: () => ({
