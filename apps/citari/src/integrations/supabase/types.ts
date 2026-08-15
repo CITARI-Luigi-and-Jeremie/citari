@@ -560,6 +560,54 @@ export type Database = {
           },
         ]
       }
+      reservations: {
+        Row: {
+          brand: string
+          created_at: string
+          email: string | null
+          id: string
+          premium_launched_at: string | null
+          premium_scan_id: string | null
+          scan_id: string | null
+          website: string | null
+        }
+        Insert: {
+          brand: string
+          created_at?: string
+          email?: string | null
+          id?: string
+          premium_launched_at?: string | null
+          premium_scan_id?: string | null
+          scan_id?: string | null
+          website?: string | null
+        }
+        Update: {
+          brand?: string
+          created_at?: string
+          email?: string | null
+          id?: string
+          premium_launched_at?: string | null
+          premium_scan_id?: string | null
+          scan_id?: string | null
+          website?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reservations_premium_scan_id_fkey"
+            columns: ["premium_scan_id"]
+            isOneToOne: false
+            referencedRelation: "scans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reservations_scan_id_fkey"
+            columns: ["scan_id"]
+            isOneToOne: false
+            referencedRelation: "scans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       responses: {
         Row: {
           cost_eur: number | null

@@ -194,6 +194,7 @@ function RapportDApercu() {
         onClose={() => setReservation(false)}
         marque={donnees.marque}
         email={email}
+        jeton={scan.report_token}
       />
     </div>
   );

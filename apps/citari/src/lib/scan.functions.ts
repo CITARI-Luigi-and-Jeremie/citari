@@ -37,7 +37,12 @@ const CreerInput = z.object({
   ville: z.string().trim().max(80).optional().nullable(),
   concurrents: z.array(z.string().trim().max(80)).max(3).default([]),
   langue: z.enum(["fr", "it", "en"]).default("fr"),
-  mode: z.enum(["apercu", "complet"]).default("apercu"),
+  // Verrouillé le 15/08/2026 : le mode acceptait aussi « complet », que le
+  // formulaire n'envoie jamais — mais la fonction est publique, et un
+  // curieux lisant le JS pouvait déclencher des scans à 1,06 €. Le complet
+  // ne se lance plus que par les chemins internes (page /equipe, toolkit),
+  // qui appellent creerScan directement.
+  mode: z.literal("apercu").default("apercu"),
 });
 
 export const lancerScan = createServerFn({ method: "POST" })

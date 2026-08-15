@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AlternativesAgenceSeoRouteImport } from './routes/alternatives-agence-seo'
 import { Route as ConfidentialiteRouteImport } from './routes/confidentialite'
+import { Route as EquipeRouteImport } from './routes/equipe'
 import { Route as GeoVsSeoRouteImport } from './routes/geo-vs-seo'
 import { Route as GuideGeoRouteImport } from './routes/guide-geo'
 import { Route as MentionsLegalesRouteImport } from './routes/mentions-legales'
@@ -34,6 +35,11 @@ const AlternativesAgenceSeoRoute = AlternativesAgenceSeoRouteImport.update({
 const ConfidentialiteRoute = ConfidentialiteRouteImport.update({
   id: '/confidentialite',
   path: '/confidentialite',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EquipeRoute = EquipeRouteImport.update({
+  id: '/equipe',
+  path: '/equipe',
   getParentRoute: () => rootRouteImport,
 } as any)
 const GeoVsSeoRoute = GeoVsSeoRouteImport.update({
@@ -81,6 +87,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/alternatives-agence-seo': typeof AlternativesAgenceSeoRoute
   '/confidentialite': typeof ConfidentialiteRoute
+  '/equipe': typeof EquipeRoute
   '/geo-vs-seo': typeof GeoVsSeoRoute
   '/guide-geo': typeof GuideGeoRoute
   '/mentions-legales': typeof MentionsLegalesRoute
@@ -94,6 +101,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/alternatives-agence-seo': typeof AlternativesAgenceSeoRoute
   '/confidentialite': typeof ConfidentialiteRoute
+  '/equipe': typeof EquipeRoute
   '/geo-vs-seo': typeof GeoVsSeoRoute
   '/guide-geo': typeof GuideGeoRoute
   '/mentions-legales': typeof MentionsLegalesRoute
@@ -108,6 +116,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/alternatives-agence-seo': typeof AlternativesAgenceSeoRoute
   '/confidentialite': typeof ConfidentialiteRoute
+  '/equipe': typeof EquipeRoute
   '/geo-vs-seo': typeof GeoVsSeoRoute
   '/guide-geo': typeof GuideGeoRoute
   '/mentions-legales': typeof MentionsLegalesRoute
@@ -123,6 +132,7 @@ export interface FileRouteTypes {
     | '/'
     | '/alternatives-agence-seo'
     | '/confidentialite'
+    | '/equipe'
     | '/geo-vs-seo'
     | '/guide-geo'
     | '/mentions-legales'
@@ -136,6 +146,7 @@ export interface FileRouteTypes {
     | '/'
     | '/alternatives-agence-seo'
     | '/confidentialite'
+    | '/equipe'
     | '/geo-vs-seo'
     | '/guide-geo'
     | '/mentions-legales'
@@ -149,6 +160,7 @@ export interface FileRouteTypes {
     | '/'
     | '/alternatives-agence-seo'
     | '/confidentialite'
+    | '/equipe'
     | '/geo-vs-seo'
     | '/guide-geo'
     | '/mentions-legales'
@@ -163,6 +175,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AlternativesAgenceSeoRoute: typeof AlternativesAgenceSeoRoute
   ConfidentialiteRoute: typeof ConfidentialiteRoute
+  EquipeRoute: typeof EquipeRoute
   GeoVsSeoRoute: typeof GeoVsSeoRoute
   GuideGeoRoute: typeof GuideGeoRoute
   MentionsLegalesRoute: typeof MentionsLegalesRoute
@@ -194,6 +207,13 @@ declare module '@tanstack/react-router' {
       path: '/confidentialite'
       fullPath: '/confidentialite'
       preLoaderRoute: typeof ConfidentialiteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/equipe': {
+      id: '/equipe'
+      path: '/equipe'
+      fullPath: '/equipe'
+      preLoaderRoute: typeof EquipeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/geo-vs-seo': {
@@ -259,6 +279,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AlternativesAgenceSeoRoute: AlternativesAgenceSeoRoute,
   ConfidentialiteRoute: ConfidentialiteRoute,
+  EquipeRoute: EquipeRoute,
   GeoVsSeoRoute: GeoVsSeoRoute,
   GuideGeoRoute: GuideGeoRoute,
   MentionsLegalesRoute: MentionsLegalesRoute,

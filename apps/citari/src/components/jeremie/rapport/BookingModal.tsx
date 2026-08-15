@@ -1,18 +1,49 @@
-import { bookingUrl } from "@/lib/site";
+import { useEffect } from "react";
+import { useServerFn } from "@tanstack/react-start";
 
-/** Réservation Calendly en pop-up plein écran. Portée le 14/08/2026. */
+import { bookingUrl } from "@/lib/site";
+import { enregistrerReservation } from "@/lib/equipe.functions";
+
+/**
+ * Réservation Calendly en pop-up plein écran. Portée le 14/08/2026.
+ *
+ * Depuis le 15/08/2026, la confirmation est CAPTÉE : le widget embarqué
+ * émet un postMessage `calendly.event_scheduled` quand le prospect valide
+ * son créneau, et on écrit alors la réservation en base, rattachée au scan.
+ * C'est ce qui alimente la page /equipe, d'où se lance le scan premium.
+ */
 export function BookingModal({
   open,
   onClose,
   marque,
   email = null,
+  jeton = null,
 }: {
   open: boolean;
   onClose: () => void;
   marque: string;
   /** Email du lead, si la session du navigateur le connaît : Calendly le préremplit. */
   email?: string | null;
+  /** Jeton du rapport : rattache la réservation captée au scan d'origine. */
+  jeton?: string | null;
 }) {
+  const enregistrer = useServerFn(enregistrerReservation);
+
+  useEffect(() => {
+    if (!open || !jeton) return;
+    const onMessage = (e: MessageEvent) => {
+      // Seul Calendly est écouté, et seul l'événement de confirmation compte.
+      if (typeof e.origin !== "string" || !e.origin.endsWith(".calendly.com")) return;
+      const type = (e.data as { event?: string } | null)?.event;
+      if (type !== "calendly.event_scheduled") return;
+      // Tolérant : une capture ratée ne doit jamais gêner la réservation
+      // elle-même, qui est déjà confirmée chez Calendly.
+      void enregistrer({ data: { jeton, email: email ?? null } }).catch(() => undefined);
+    };
+    window.addEventListener("message", onMessage);
+    return () => window.removeEventListener("message", onMessage);
+  }, [open, jeton, email, enregistrer]);
+
   if (!open) return null;
   return (
     <div

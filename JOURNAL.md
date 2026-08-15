@@ -5,6 +5,51 @@ d'une nouvelle session, après `CLAUDE.md`.
 
 ---
 
+## 2026-08-15 — /equipe : les réservations Calendly, et le bouton qui lance le premium
+
+Luigi voulait « un endroit où on voit tous ceux qui ont réservé, et un
+bouton pour lancer le scan » — sans serveur ni domaine de plus. La page vit
+donc SUR le site : `citari.fr/equipe`, noindex, protégée par LE mot de passe
+admin (celui du back-office, une seule vérité ; le `.env.local` du site en
+portait un placeholder, aligné sur la racine). Le journal du 14/08 avait
+supprimé l'ancien /admin du site pour cause de duplication : ici pas de
+doublon, les réservations n'existent nulle part ailleurs, et apps/admin
+garde leads et clients.
+
+**La capture** : le widget Calendly embarqué émet `calendly.event_scheduled`
+à la confirmation ; le BookingModal appelle alors `enregistrerReservation`
+(jeton du rapport + email de session), qui écrit dans la nouvelle table
+`reservations` (RLS actif, zéro politique, comme les 16 autres). Anti-rejeu
+24 h par scan. Limite ASSUMÉE : une réservation prise hors du site (lien
+direct, email) n'est pas captée — elle arrive par l'email de notification
+Calendly. Le jour où ça compte, un jeton API Calendly comblera le trou.
+
+**Le lancement** : `lancerPremium` vérifie le mot de passe, crée le scan
+`complet` via creerScan (secteur/ville hérités de l'aperçu, jamais
+re-déduits), lie la réservation, et la page OUVRE `/scan/<id>` : l'écran de
+mesure existant pilote la mesure comme le ferait le navigateur d'un
+prospect. Un seul moteur, aucun pilote nouveau. Le bouton est idempotent
+(re-cliquer renvoie le scan existant), et un scan créé ne coûte RIEN tant
+que l'écran n'est pas ouvert.
+
+**Verrouillé au passage** : `lancerScan` public n'accepte plus que le mode
+`apercu` (z.literal). Le mode complet était accepté depuis n'importe quel
+navigateur — le formulaire ne l'envoyait jamais, mais un curieux lisant le
+JS pouvait déclencher des scans à 1,06 €. Le pilote du toolkit n'est pas
+concerné : il appelle l'orchestrateur en sous-processus, pas la fonction
+publique.
+
+Testé de bout en bout en local contre la vraie base : porte (vrai mot de
+passe requis), liste, lancement (scan complet créé en phase init, 0 réponse
+donc 0 €, secteur hérité vérifié), puis nettoyage complet du test. Piège
+d'outillage renoté : un input contrôlé React ignore `form_input`, passer
+par le setter natif + event input.
+
+**Pour la prod, UNE variable à ajouter sur Hostinger : `ADMIN_PASSWORD`**
+(la valeur de la racine). Sans elle, la page est fermée par défaut.
+
+---
+
 ## 2026-08-15 — Apple à 123/100 : la formule comptait des mentions, pas des réponses
 
 Luigi scanne Apple : score global 123, ChatGPT 133. Un score borné à 100 qui
