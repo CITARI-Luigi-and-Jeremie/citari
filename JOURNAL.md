@@ -5,6 +5,36 @@ d'une nouvelle session, après `CLAUDE.md`.
 
 ---
 
+## 2026-08-15 — Le simulateur répond enfin à sa propre question
+
+Troisième passe de Luigi, même critique. Le défaut de fond était logique
+avant d'être visuel : le titre demande « **combien de vos clients** passent
+par une IA avant de vous appeler ? » et la carte répondait par un montant en
+euros. Le chiffre demandé n'était affiché nulle part.
+
+La réponse vient donc d'abord en clients, et elle est MONTRÉE : une
+silhouette par nouveau client du mois, celles qui passent par une IA en
+signal. Le montant suit, comme conséquence, avec sa ligne de calcul intacte.
+
+Deux replis, tous deux pour ne pas mentir avec un dessin :
+
+- **au-delà de 24 clients**, les silhouettes deviendraient une bouillie : une
+  barre proportionnelle prend le relais ;
+- **en dessous de trois clients**, le décompte entier est faux. Un
+  `Math.max(1, …)` affichait « environ 1 de vos 1 », soit 100 % là où la
+  mesure dit 38 %. Sous ce seuil, on énonce la proportion (« près de 38 % de
+  vos nouveaux clients ») et la barre la montre exactement.
+
+Le décompte affiché est arrondi, le MONTANT reste calculé sur la valeur
+exacte (8 × 0,38 = 3,04) : arrondir avant de multiplier ferait diverger le
+chiffre annoncé de sa propre ligne de calcul, affichée juste en dessous.
+D'où le mot « environ », qui est la vérité et pas une précaution de style.
+
+Vérifié sur toute la plage du curseur (1, 2, 3, 8, 31, 60), accord du verbe
+compris (« passe » à un client concerné, « passent » au-delà).
+
+---
+
 ## 2026-08-15 — Les deux premiers écrans : comparer devient possible, et six logos arrêtent de promettre six moteurs
 
 Même critique de Luigi sur les deux premières sections : « bien, mais pas

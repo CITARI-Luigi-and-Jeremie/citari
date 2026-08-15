@@ -292,6 +292,53 @@ function StatCard({
   );
 }
 
+/**
+ * Les nouveaux clients du mois, un par un, ceux qui passent par une IA en
+ * rouge. Une silhouette par client tant que ça reste lisible ; au-delà de
+ * 24 le dessin deviendrait une bouillie de points, et une barre à la même
+ * échelle prend le relais plutôt qu'un pictogramme qui mentirait sur le
+ * compte.
+ */
+function Clients({
+  total,
+  touches,
+  compte,
+  part,
+}: {
+  total: number;
+  touches: number;
+  /** false quand le décompte entier serait trompeur (moins de 3 clients). */
+  compte: boolean;
+  part: number;
+}) {
+  if (!compte || total > 24) {
+    // Sous 3 clients la barre montre la PROPORTION exacte ; au-delà de 24,
+    // elle remplace des silhouettes devenues illisibles. Pas de légende
+    // chiffrée : la phrase juste en dessous la donne déjà, et l'avoir deux
+    // fois de suite se lisait comme un bégaiement.
+    const pct = compte ? (total > 0 ? (touches / total) * 100 : 0) : part;
+    return (
+      <div style={{ height: 14, background: "#26241F", borderRadius: 2, overflow: "hidden" }}>
+        <div style={{ width: `${pct}%`, height: "100%", background: RED }} />
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ display: "flex", flexWrap: "wrap", gap: 7 }} aria-hidden>
+      {Array.from({ length: total }, (_, i) => (
+        <svg key={i} width="17" height="21" viewBox="0 0 17 21" fill="none">
+          <circle cx="8.5" cy="5.5" r="4.5" fill={i < touches ? RED : "#3A3833"} />
+          <path
+            d="M0.5 20.5c0-4.4 3.6-8 8-8s8 3.6 8 8"
+            fill={i < touches ? RED : "#3A3833"}
+          />
+        </svg>
+      ))}
+    </div>
+  );
+}
+
 /* --------------------------------------------------------------- curseurs */
 
 function Slider({
@@ -439,6 +486,21 @@ export function CostCalculator({ sprintPrice = 2900 }: { sprintPrice?: number } 
     const m = Math.round(basket * ai);
     return { monthly: m, yearly: m * 12 };
   }, [basket, clients]);
+
+  /**
+   * Le nombre de clients concernés, arrondi pour l'affichage. Le MONTANT,
+   * lui, reste calculé sur la valeur exacte (8 × 0,38 = 3,04) : arrondir
+   * avant de multiplier ferait diverger le chiffre annoncé de sa propre
+   * ligne de calcul. D'où le « environ » dans la phrase, qui est la vérité.
+   *
+   * En dessous de trois clients, on renonce au décompte : un
+   * `Math.max(1, …)` affichait « environ 1 de vos 1 », soit 100 % là où la
+   * mesure dit 38 %. Sous ce seuil, la proportion est énoncée telle quelle
+   * et la barre la montre exactement — mieux vaut un chiffre juste qu'un
+   * décompte parlant qui ment.
+   */
+  const compte = clients >= 3;
+  const clientsIA = Math.round((clients * PART_IA) / 100);
 
   const isYear = period === "year";
   const result = isYear ? yearly : monthly;
@@ -713,36 +775,58 @@ export function CostCalculator({ sprintPrice = 2900 }: { sprintPrice?: number } 
                 </div>
               </div>
 
-              <div style={{ display: "flex", alignItems: "baseline", gap: 6 }}>
-                <span
-                  style={{
-                    fontFamily: MONO,
-                    fontSize: wide ? 46 : 40,
-                    fontWeight: 600,
-                    letterSpacing: "-0.04em",
-                    lineHeight: 0.92,
-                    fontVariantNumeric: "tabular-nums",
-                    color: RED,
-                  }}
-                >
-                  {fmt(result)}
-                </span>
-                <span style={{ fontFamily: MONO, fontSize: 22, fontWeight: 600, color: RED }}>€</span>
-              </div>
+              {/* La RÉPONSE à la question du titre, qui manquait : elle
+                  demande « combien de vos clients », la carte ne montrait
+                  qu'un montant en euros. On répond d'abord en clients, et on
+                  les montre un par un — c'est la seule façon de rendre 38 %
+                  immédiat. Le montant vient ensuite, comme conséquence. */}
+              <Clients total={clients} touches={clientsIA} compte={compte} part={PART_IA} />
 
-              <span style={{ fontSize: 16.5, fontWeight: 600, letterSpacing: "-0.02em", lineHeight: 1.32 }}>
-                d'affaires {isYear ? "par an" : "par mois"} se décident dans une conversation d'un
-                moteur IA dans lequel vous n'êtes peut-être pas.
+              <span style={{ fontSize: wide ? 17 : 16, fontWeight: 600, letterSpacing: "-0.02em", lineHeight: 1.3 }}>
+                {compte ? (
+                  <>
+                    Environ {fmt(clientsIA)} de vos {fmt(clients)} nouveaux clients par mois{" "}
+                    {clientsIA > 1 ? "passent" : "passe"} par une IA avant de vous appeler.
+                  </>
+                ) : (
+                  <>
+                    Près de {PART_IA} % de vos nouveaux clients passent par une IA avant de vous
+                    appeler.
+                  </>
+                )}
               </span>
+
+              <div style={{ borderTop: `1px solid ${LINE_INK}`, paddingTop: 12 }}>
+                <div style={{ display: "flex", alignItems: "baseline", gap: 6 }}>
+                  <span
+                    style={{
+                      fontFamily: MONO,
+                      fontSize: wide ? 44 : 38,
+                      fontWeight: 600,
+                      letterSpacing: "-0.04em",
+                      lineHeight: 0.92,
+                      fontVariantNumeric: "tabular-nums",
+                      color: RED,
+                    }}
+                  >
+                    {fmt(result)}
+                  </span>
+                  <span style={{ fontFamily: MONO, fontSize: 22, fontWeight: 600, color: RED }}>€</span>
+                  <span style={{ fontFamily: MONO, fontSize: 12, color: ON_INK_MUTED }}>
+                    / {isYear ? "an" : "mois"}
+                  </span>
+                </div>
+                <span style={{ display: "block", marginTop: 6, fontSize: 15, lineHeight: 1.4, color: ON_INK_BODY }}>
+                  d'affaires qui se jouent dans une réponse que vous n'avez jamais lue.
+                </span>
+              </div>
 
               <span
                 style={{
                   fontFamily: MONO,
                   fontSize: 11,
                   lineHeight: 1.5,
-                  color: ON_INK_BODY,
-                  borderTop: `1px solid ${LINE_INK}`,
-                  paddingTop: 11,
+                  color: ON_INK_MUTED,
                 }}
               >
                 {isYear ? fmt(clients * 12) : String(clients)} clients × {PART_IA} % (McKinsey) ×{" "}
