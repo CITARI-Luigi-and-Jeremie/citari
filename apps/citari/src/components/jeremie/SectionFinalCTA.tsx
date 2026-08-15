@@ -85,6 +85,7 @@ const LIENS = [
     items: [
       { label: "Lancer le scan", to: "/", focus: true },
       { label: "La méthode, en entier", to: "/methode" },
+      { label: "Le Sprint, déplié", to: "/sprint" },
     ],
   },
   {

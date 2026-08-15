@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { Link } from "@tanstack/react-router";
 
 import { useScanFormFocus } from "@/lib/scan-form-focus";
 import { Reveal } from "@/components/jeremie/Reveal";
@@ -173,7 +174,11 @@ const ETAPES: Etape[] = [
         Puis à J+90, le même relevé qu'aujourd'hui, mot pour mot.{" "}
         <strong className="font-semibold text-ink">
           C'est la seule chose que nous garantissons, et la seule qui se vérifie.
-        </strong>
+        </strong>{" "}
+        <Link to="/sprint" className="link-underline text-ink">
+          Le programme des 90 jours, déplié
+        </Link>
+        .
       </>
     ),
     labelCout: "CE QUE ÇA VOUS DEMANDE",

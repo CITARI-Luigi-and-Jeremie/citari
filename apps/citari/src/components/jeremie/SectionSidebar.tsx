@@ -35,6 +35,7 @@ const SECTIONS: Section[] = [
   { id: "cout", label: "Coût" },
   { id: "parcours", label: "Parcours" },
   { id: "methode-page", label: "Méthode", to: "/methode" },
+  { id: "sprint-page", label: "Sprint", to: "/sprint" },
   { id: "faq", label: "FAQ" },
   { id: "contact", label: "Contact" },
 ];

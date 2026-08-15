@@ -165,10 +165,15 @@ moteur, ce qui s'est révélé faux.
 les marques clientes dans les réponses de ChatGPT, Claude, Gemini, Perplexity,
 Grok et Le Chat.
 
-> Le produit vendu s'appelle **Sprint GEO** (2 900 € HT), avec une option
-> **Sprint Domination** (4 900 € HT) : dix contenus au lieu de cinq, seize
-> cibles de citation, deux langues. Le site l'affiche et `pnpm toolkit
-> proposition --offer domination` la génère. Ne pas confondre avec le nom de la
+> Le produit vendu s'appelle **Sprint GEO** (2 900 € HT : 5 contenus, 8 cibles
+> de citation), avec une option **Sprint Domination** (4 900 € HT : 10
+> contenus, **15** cibles, 2 langues ou segments, campagne presse approfondie,
+> session stratégique de 90 min). Ces volumes sont ceux de
+> `packages/toolkit/src/commands/proposition.ts`, qui génère le document remis
+> au client : c'est lui qui fait foi, et la page `/sprint` s'aligne dessus.
+> Ce fichier a annoncé « seize cibles » jusqu'au 15/08/2026, ce que le code
+> n'a jamais produit. Le site l'affiche et `pnpm toolkit proposition --offer
+> domination` la génère. Ne pas confondre avec le nom de la
 > société. « GEO Sprint » était l'ancien nom, il ne doit plus apparaître nulle
 > part.
 

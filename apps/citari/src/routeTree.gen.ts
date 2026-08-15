@@ -16,6 +16,7 @@ import { Route as GeoVsSeoRouteImport } from './routes/geo-vs-seo'
 import { Route as GuideGeoRouteImport } from './routes/guide-geo'
 import { Route as MentionsLegalesRouteImport } from './routes/mentions-legales'
 import { Route as MethodeRouteImport } from './routes/methode'
+import { Route as SprintRouteImport } from './routes/sprint'
 import { Route as RapportJetonRouteImport } from './routes/rapport.$jeton'
 import { Route as ScanIdRouteImport } from './routes/scan.$id'
 
@@ -54,6 +55,11 @@ const MethodeRoute = MethodeRouteImport.update({
   path: '/methode',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SprintRoute = SprintRouteImport.update({
+  id: '/sprint',
+  path: '/sprint',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const RapportJetonRoute = RapportJetonRouteImport.update({
   id: '/rapport/$jeton',
   path: '/rapport/$jeton',
@@ -73,6 +79,7 @@ export interface FileRoutesByFullPath {
   '/guide-geo': typeof GuideGeoRoute
   '/mentions-legales': typeof MentionsLegalesRoute
   '/methode': typeof MethodeRoute
+  '/sprint': typeof SprintRoute
   '/rapport/$jeton': typeof RapportJetonRoute
   '/scan/$id': typeof ScanIdRoute
 }
@@ -84,6 +91,7 @@ export interface FileRoutesByTo {
   '/guide-geo': typeof GuideGeoRoute
   '/mentions-legales': typeof MentionsLegalesRoute
   '/methode': typeof MethodeRoute
+  '/sprint': typeof SprintRoute
   '/rapport/$jeton': typeof RapportJetonRoute
   '/scan/$id': typeof ScanIdRoute
 }
@@ -96,6 +104,7 @@ export interface FileRoutesById {
   '/guide-geo': typeof GuideGeoRoute
   '/mentions-legales': typeof MentionsLegalesRoute
   '/methode': typeof MethodeRoute
+  '/sprint': typeof SprintRoute
   '/rapport/$jeton': typeof RapportJetonRoute
   '/scan/$id': typeof ScanIdRoute
 }
@@ -109,6 +118,7 @@ export interface FileRouteTypes {
     | '/guide-geo'
     | '/mentions-legales'
     | '/methode'
+    | '/sprint'
     | '/rapport/$jeton'
     | '/scan/$id'
   fileRoutesByTo: FileRoutesByTo
@@ -120,6 +130,7 @@ export interface FileRouteTypes {
     | '/guide-geo'
     | '/mentions-legales'
     | '/methode'
+    | '/sprint'
     | '/rapport/$jeton'
     | '/scan/$id'
   id:
@@ -131,6 +142,7 @@ export interface FileRouteTypes {
     | '/guide-geo'
     | '/mentions-legales'
     | '/methode'
+    | '/sprint'
     | '/rapport/$jeton'
     | '/scan/$id'
   fileRoutesById: FileRoutesById
@@ -143,6 +155,7 @@ export interface RootRouteChildren {
   GuideGeoRoute: typeof GuideGeoRoute
   MentionsLegalesRoute: typeof MentionsLegalesRoute
   MethodeRoute: typeof MethodeRoute
+  SprintRoute: typeof SprintRoute
   RapportJetonRoute: typeof RapportJetonRoute
   ScanIdRoute: typeof ScanIdRoute
 }
@@ -198,6 +211,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MethodeRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/sprint': {
+      id: '/sprint'
+      path: '/sprint'
+      fullPath: '/sprint'
+      preLoaderRoute: typeof SprintRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/rapport/$jeton': {
       id: '/rapport/$jeton'
       path: '/rapport/$jeton'
@@ -223,6 +243,7 @@ const rootRouteChildren: RootRouteChildren = {
   GuideGeoRoute: GuideGeoRoute,
   MentionsLegalesRoute: MentionsLegalesRoute,
   MethodeRoute: MethodeRoute,
+  SprintRoute: SprintRoute,
   RapportJetonRoute: RapportJetonRoute,
   ScanIdRoute: ScanIdRoute,
 }

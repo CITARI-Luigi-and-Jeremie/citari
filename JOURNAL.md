@@ -5,6 +5,39 @@ d'une nouvelle session, après `CLAUDE.md`.
 
 ---
 
+## 2026-08-15 — La page /sprint : vendre par le détail plutôt que par la promesse
+
+Demande de Luigi : une page dédiée au Sprint, sur le modèle de /methode,
+« qui montre qu'on crée une grosse valeur ajoutée, technique et pertinente,
+très vendeur, qui donne l'émotion qu'ils ont absolument besoin de nous », et
+l'autorisation d'« exagérer sur les explications ».
+
+Ce qui a été exagéré : le DÉTAIL. Pas les faits. Tout vient de
+`docs/LIVRAISON.md` — trois chantiers, huit phases, 47 étapes, les
+vérifications en ligne, les 739 sources mesurées, les délais réels de
+validation des annuaires. Le site n'a toujours ni client, ni témoignage, ni
+score promis, et la page se termine par « ce que nous ne promettons pas ».
+La démonstration de maîtrise vend mieux qu'une promesse, et elle ne se
+retourne jamais contre nous en rendez-vous.
+
+L'argument central est vrai et vérifiable : **les jours 31 à 90**. Une
+agence livre au jour 30, quand rien n'a encore bougé dans les moteurs — les
+pitchs sont sans réponse, les annuaires pas validés, les contenus à peine
+indexés. Les quatre phases de maturation portent le signal rouge dans la
+frise, les trois de production restent en encre.
+
+**Divergence trouvée et tranchée.** La page annonçait 16 cibles de citation
+pour Domination, d'après `CLAUDE.md` ; `proposition.ts` en produit **15**, et
+c'est ce fichier qui génère le document remis au client. Le site s'aligne sur
+le code, et CLAUDE.md a été corrigé : un site qui promet plus que la
+proposition signée fabrique un litige.
+
+Trois entrées : la barre latérale (« Sprint ↗ »), la chute de l'étape 03 sur
+la landing, et le pied de page. La page renvoie elle-même vers /methode pour
+la formule.
+
+---
+
 ## 2026-08-15 — La méthode était cannibalisée par son propre nom
 
 Luigi a « retrouvé tout en bas » la page `/methode` et l'a trouvée
