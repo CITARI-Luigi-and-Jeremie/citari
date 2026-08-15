@@ -5,6 +5,31 @@ d'une nouvelle session, après `CLAUDE.md`.
 
 ---
 
+## 2026-08-15 — La FAQ cachait son meilleur contenu, le pied de page publiait un gabarit
+
+Cinquième passe. Trois défauts, dont deux qui ne relèvent pas du goût.
+
+**La FAQ s'affichait cinq questions à la fois**, derrière un bouton « voir
+plus ». Deux conséquences, aucune voulue : le groupe « L'offre » n'apparaissait
+qu'au DEUXIÈME clic, donc un visiteur qui cherchait le prix ne le trouvait
+pas ; et les quinze questions masquées n'étaient pas dans la page — sur un
+site dont le métier est de se faire lire par des moteurs, cacher au robot
+son contenu le plus citable est un contresens. Les vingt sont désormais
+rendues, groupées, chacune repliée sur une ligne : 20 questions, 20 réponses
+et 20 ancres dans le DOM, vérifié.
+
+**Le pied de page publiait « Citari · [forme juridique à compléter] »**, en
+ligne, depuis la mise en production. La mention ne s'affiche maintenant que
+si elle est renseignée. À rétablir dès que la structure existe (SETUP.md) :
+c'est une obligation légale, pas une coquette.
+
+**Le dernier appel promettait « Six moteurs interrogés »** juste au-dessus du
+bouton du scan gratuit, qui en interroge deux. Même mensonge que les six
+logos du héros, corrigé le matin, et au même endroit du parcours : juste
+avant le clic. Il annonce désormais ChatGPT et Gemini.
+
+---
+
 ## 2026-08-15 — Les trois étapes : le prix passe devant, les blocs deviennent des listes
 
 Quatrième passe, même critique. Deux défauts, dont un franchement gênant.

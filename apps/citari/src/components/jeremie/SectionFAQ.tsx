@@ -400,10 +400,19 @@ function Entree({ entree, index }: { entree: Entree; index: number }) {
   );
 }
 
+/**
+ * Les vingt questions sont toutes rendues, groupées par famille.
+ *
+ * Elles s'affichaient cinq par cinq derrière un bouton « voir plus »
+ * (15/08/2026). Deux conséquences, aucune souhaitable : le groupe « L'offre »
+ * n'apparaissait qu'au deuxième clic, donc un visiteur qui cherchait le PRIX
+ * ne le trouvait pas ; et les quinze questions masquées n'existaient tout
+ * simplement pas dans la page — sur un site dont le métier est de se faire
+ * lire par des moteurs, cacher son meilleur contenu au robot est un
+ * contresens. Repliées, elles ne coûtent qu'une ligne chacune.
+ */
 export function SectionFAQ() {
-  const [visibles, setVisibles] = useState(5);
-  const liste = ENTREES.slice(0, visibles);
-  const reste = visibles < ENTREES.length;
+  const liste = ENTREES;
 
   return (
     <section id="faq" className="surface-hollow relative">
@@ -425,13 +434,20 @@ export function SectionFAQ() {
             return (
               <div key={e.ancre}>
                 {nouveauGroupe ? (
-                  <p
-                    className={`border-t border-ink pb-2 pt-4 font-mono text-[12px] uppercase tracking-[0.16em] text-ink-2 ${
+                  <div
+                    className={`flex items-baseline justify-between gap-4 border-t border-ink pb-2 pt-4 ${
                       i === 0 ? "" : "mt-10"
                     }`}
                   >
-                    {TITRES_GROUPE[e.groupe]}
-                  </p>
+                    <p className="font-mono text-[12px] uppercase tracking-[0.16em] text-ink">
+                      {TITRES_GROUPE[e.groupe]}
+                    </p>
+                    {/* Le compte oriente : on sait où l'on met les pieds, et
+                        combien il reste avant la famille suivante. */}
+                    <p className="font-mono text-[11px] tabular-nums text-ink-2">
+                      {ENTREES.filter((x) => x.groupe === e.groupe).length} questions
+                    </p>
+                  </div>
                 ) : null}
                 <Entree entree={e} index={i} />
               </div>
@@ -439,24 +455,7 @@ export function SectionFAQ() {
           })}
         </div>
 
-        {reste ? (
-          <div className="mt-8 flex justify-center">
-            <button
-              type="button"
-              onClick={() => setVisibles((n) => Math.min(n + 5, ENTREES.length))}
-              className="cta-sweep group inline-flex items-center justify-center gap-3 border border-ink bg-ink px-6 py-3 text-paper transition-colors duration-300 active:scale-[0.98]"
-            >
-              <span className="font-mono text-[12px] font-semibold uppercase tracking-[0.2em]">
-                voir plus
-              </span>
-              <span className="text-[18px] leading-none transition-transform duration-200 group-hover:translate-y-0.5">
-                ↓
-              </span>
-            </button>
-          </div>
-        ) : null}
-
-        <p className="mt-8 font-mono text-[12px] leading-[1.6] text-ink-2">
+        <p className="mt-10 font-mono text-[12px] leading-[1.6] text-ink-2">
           Une question qui n'est pas là ?{" "}
           <a href={`mailto:${CONTACT_EMAIL}`} className="link-underline text-ink">
             {CONTACT_EMAIL}

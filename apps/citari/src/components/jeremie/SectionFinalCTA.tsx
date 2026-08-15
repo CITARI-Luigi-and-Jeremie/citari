@@ -31,12 +31,16 @@ export function SectionFinalCTA() {
           </h2>
         </Reveal>
 
+        {/* Disait « Six moteurs interrogés » au-dessus du bouton du scan
+            GRATUIT, qui en interroge deux (15/08/2026). Même correction que
+            sous le formulaire du héros : on annonce ce que ce bouton
+            déclenche, et les six restent la promesse du diagnostic. */}
         <Reveal
           as="p"
           delay={90}
           className="mt-5 text-[color-mix(in_srgb,var(--paper)_72%,transparent)]"
         >
-          Six moteurs interrogés, sans inscription, sans engagement.
+          ChatGPT et Gemini interrogés en direct, sans inscription, sans engagement.
         </Reveal>
 
         <Reveal delay={160} className="mt-9">
@@ -138,8 +142,13 @@ export function SiteFooter() {
         </div>
 
         <div className="mt-12 border-t border-[color-mix(in_srgb,var(--paper)_14%,transparent)] pt-8">
+          {/* La forme juridique ne s'affiche que si elle est RENSEIGNÉE : le
+              pied de page publiait « Citari · [forme juridique à compléter] »
+              sur le site en ligne (15/08/2026). Un gabarit visible sur la
+              page qui vend l'exactitude coûte plus cher que la mention
+              manquante. À rétablir dès que la structure existe (SETUP.md). */}
           <p className="mono text-[13px] text-[color-mix(in_srgb,var(--paper)_60%,transparent)]">
-            Citari · {LEGAL_FORM} ·{" "}
+            Citari{LEGAL_FORM.includes("[") ? "" : ` · ${LEGAL_FORM}`} ·{" "}
             <a href={`mailto:${CONTACT_EMAIL}`} className="link-underline text-paper">
               {CONTACT_EMAIL}
             </a>
