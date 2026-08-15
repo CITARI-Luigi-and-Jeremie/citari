@@ -231,6 +231,18 @@ export function CarteScore({
             {composantes!.reponsesEnErreur > 0
               ? ` · ${composantes!.reponsesEnErreur} en panne, exclue${composantes!.reponsesEnErreur > 1 ? "s" : ""} du calcul`
               : ""}
+            {" · "}
+            {/* Le moment où la question se pose vraiment : le prospect
+                découvre son chiffre et veut savoir d'où il sort. La méthode
+                s'ouvre dans un onglet pour ne pas le sortir de sa séquence. */}
+            <a
+              href="/methode"
+              target="_blank"
+              rel="noopener"
+              style={{ color: INK, textDecoration: "underline", textUnderlineOffset: 2 }}
+            >
+              la formule
+            </a>
           </span>
         </div>
       ) : null}

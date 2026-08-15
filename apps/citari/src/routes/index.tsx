@@ -3,6 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { ScanForm } from "@/components/jeremie/ScanForm";
 import { CostCalculator } from "@/components/jeremie/CostCalculator";
 import { SectionProcedure } from "@/components/jeremie/SectionProcedure";
+import { SectionVerifiabilite } from "@/components/jeremie/SectionVerifiabilite";
 import { SectionFAQ } from "@/components/jeremie/SectionFAQ";
 import { SectionFinalCTA, SiteFooter } from "@/components/jeremie/SectionFinalCTA";
 import { HeroSpecimen } from "@/components/jeremie/HeroSpecimen";
@@ -106,6 +107,9 @@ function Accueil() {
       <ProblemSolutionBridge />
       <CostCalculator />
       <SectionProcedure />
+      {/* Juste après le prix : c'est là que le lecteur se demande si tout
+          ceci est sérieux, et la méthode publiée est la seule réponse. */}
+      <SectionVerifiabilite />
       <SectionFAQ />
       <SectionFinalCTA />
       <SiteFooter />

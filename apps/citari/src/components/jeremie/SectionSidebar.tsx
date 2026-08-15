@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "@tanstack/react-router";
 
 import { fondSombreAuPoint } from "@/lib/fond-sombre";
 
@@ -17,13 +18,23 @@ import { fondSombreAuPoint } from "@/lib/fond-sombre";
 type Section = {
   id: string;
   label: string;
+  /** Destination hors landing : la barre ouvre la page au lieu de défiler. */
+  to?: string;
 };
 
+/**
+ * « Méthode » désignait la section des trois étapes, qui décrit le parcours
+ * commercial. La page /methode — formule, barème, calcul complet, limites
+ * assumées — n'était atteignable que par le pied de page, et personne ne la
+ * trouvait (15/08/2026). Le repère « Méthode » lui revient, les trois étapes
+ * deviennent « Parcours ».
+ */
 const SECTIONS: Section[] = [
   { id: "scan", label: "Scan" },
   { id: "probleme", label: "Problème" },
   { id: "cout", label: "Coût" },
-  { id: "methode", label: "Méthode" },
+  { id: "parcours", label: "Parcours" },
+  { id: "methode-page", label: "Méthode", to: "/methode" },
   { id: "faq", label: "FAQ" },
   { id: "contact", label: "Contact" },
 ];
@@ -47,6 +58,7 @@ export function SectionSidebar() {
       let bestDistance = Infinity;
 
       for (const section of SECTIONS) {
+        if (section.to) continue; // pas une section de cette page
         const el = document.getElementById(section.id);
         if (!el) continue;
 
@@ -107,35 +119,56 @@ export function SectionSidebar() {
 
         {SECTIONS.map((section) => {
           const isActive = active === section.id;
-          return (
+          const repere = isActive ? (
+            <span className="h-2 w-2 shrink-0 rounded-full bg-signal transition-all duration-300" />
+          ) : section.to ? (
+            // Un repère PLEIN, pas un trait : ce point mène ailleurs, et la
+            // différence doit se voir avant le survol.
+            <span
+              className={`h-1.5 w-1.5 shrink-0 rounded-full transition-all duration-300 ${
+                surFondSombre
+                  ? "bg-paper/55 group-hover/sidebar:bg-ink/50"
+                  : "bg-ink/45 group-hover/button:bg-ink/70"
+              }`}
+            />
+          ) : (
+            <span
+              className={`h-px w-3 shrink-0 transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover/button:w-4 ${
+                surFondSombre
+                  ? "bg-paper/40 group-hover/sidebar:bg-ink/40"
+                  : "bg-ink/35 group-hover/button:bg-ink/60"
+              }`}
+            />
+          );
+
+          const label = (
+            <span
+              className={`mono pointer-events-none -translate-x-2 whitespace-nowrap text-[11px] uppercase tracking-[0.1em] opacity-0 transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover/sidebar:translate-x-0 group-hover/sidebar:opacity-75 ${
+                surFondSombre ? "text-paper group-hover/sidebar:text-ink" : "text-ink"
+              } ${isActive ? "group-hover/sidebar:opacity-100" : ""}`}
+            >
+              {section.label}
+              {section.to ? <span aria-hidden> ↗</span> : null}
+            </span>
+          );
+
+          const classe = "group/button relative flex w-full items-center gap-3 text-left";
+
+          return section.to ? (
+            <Link key={section.id} to={section.to} aria-label={section.label} className={classe}>
+              {repere}
+              {label}
+            </Link>
+          ) : (
             <button
               key={section.id}
               type="button"
               onClick={() => scrollTo(section.id)}
               aria-label={`Aller à ${section.label}`}
-              className="group/button relative flex w-full items-center gap-3 text-left"
+              className={classe}
             >
-              {/* Repère actif : signal rouge. */}
-              {isActive ? (
-                <span className="h-2 w-2 shrink-0 rounded-full bg-signal transition-all duration-300" />
-              ) : (
-                <span
-                  className={`h-px w-3 shrink-0 transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover/button:w-4 ${
-                    surFondSombre
-                      ? "bg-paper/40 group-hover/sidebar:bg-ink/40"
-                      : "bg-ink/35 group-hover/button:bg-ink/60"
-                  }`}
-                />
-              )}
-
-              {/* Label, révélé au survol de la sidebar. */}
-              <span
-                className={`mono pointer-events-none -translate-x-2 whitespace-nowrap text-[11px] uppercase tracking-[0.1em] opacity-0 transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover/sidebar:translate-x-0 group-hover/sidebar:opacity-75 ${
-                  surFondSombre ? "text-paper group-hover/sidebar:text-ink" : "text-ink"
-                } ${isActive ? "group-hover/sidebar:opacity-100" : ""}`}
-              >
-                {section.label}
-              </span>
+              {repere}
+              {label}
             </button>
           );
         })}

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "@tanstack/react-router";
 import { ChevronDown } from "lucide-react";
 
 import { CONTACT_EMAIL } from "@/lib/site";
@@ -128,7 +129,13 @@ const ENTREES: Entree[] = [
         marque est citée, pondérée par sa position dans la réponse, les recommandations explicites et
         le ton employé. Il va de <M>0 à 100</M> et se lit avec la part de voix : vos mentions
         rapportées à celles de vos concurrents. La méthode est strictement identique au scan initial
-        et à la remesure de <M>J+90</M>, sans quoi la comparaison ne vaudrait rien.
+        et à la remesure de <M>J+90</M>, sans quoi la comparaison ne vaudrait rien.{" "}
+        {/* La question où le lecteur veut le détail : c'est ici qu'il doit
+            trouver la page qui publie la formule et le calcul complet. */}
+        <Link to="/methode" className="link-underline text-ink">
+          La formule et un calcul complet sont publiés
+        </Link>
+        .
       </>
     ),
   },

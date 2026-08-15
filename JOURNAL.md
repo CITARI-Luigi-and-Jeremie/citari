@@ -5,6 +5,47 @@ d'une nouvelle session, après `CLAUDE.md`.
 
 ---
 
+## 2026-08-15 — La méthode était cannibalisée par son propre nom
+
+Luigi a « retrouvé tout en bas » la page `/methode` et l'a trouvée
+fantastique. Elle publie la formule, le barème, un calcul complet refaisable
+à la main, le rejeu à J+90, les limites assumées et ce que nous ne
+garantissons PAS. C'est la pièce qui rend crédible tout le reste du site, et
+elle n'était liée que depuis le pied de page.
+
+La cause n'était pas un lien manquant, mais **un conflit de nom**. La section
+des trois étapes portait `id="methode"`, le kicker « NOTRE MÉTHODE » et le
+repère « Méthode » de la barre latérale. Un visiteur qui cherchait la méthode
+cliquait dessus, atterrissait sur le parcours commercial, et n'apprenait
+jamais que le protocole existait. La section s'appelle désormais
+« Parcours » (`#parcours`) et rend le mot à la page qui le mérite.
+
+Quatre points d'entrée, placés là où la question se pose vraiment :
+
+- la **barre latérale**, avec un repère plein et une flèche ↗ (il mène hors
+  de la page, ça doit se voir avant le survol) ;
+- une **section « Vérifiabilité »** sur la landing, juste après le prix —
+  l'instant précis où le lecteur se demande si tout ceci est sérieux ;
+- la **FAQ**, dans la réponse « comment calculez-vous le score » ;
+- le **rapport**, sous le score : c'est là que le prospect découvre son
+  chiffre et veut savoir d'où il sort. Lien en nouvel onglet, pour ne pas le
+  sortir de sa séquence.
+
+La section de la landing n'annonce que ce que la page contient réellement
+(sections `formule`, `exemple`, `rejeu`, `garanties`) : promettre ici une
+pièce absente là-bas serait la faute que cette page existe pour éviter.
+
+**Piège d'outillage, enfin identifié.** Les captures « gelées » qui m'ont
+gêné toute la journée venaient d'un viewport du panneau d'aperçu tombé à
+0×0 : rien n'était peint, et les mesures prises dans cet état étaient
+fausses (une carte annoncée à 2565px de débordement alors qu'elle tient).
+Vérifier `window.innerHeight` avant de conclure quoi que ce soit d'un
+rendu. Sur la landing, la capture reste blanche même viewport réparé — le
+décor animé du héros bloque le compositeur ; `/methode`, sans décor, se
+capture normalement.
+
+---
+
 ## 2026-08-15 — La FAQ cachait son meilleur contenu, le pied de page publiait un gabarit
 
 Cinquième passe. Trois défauts, dont deux qui ne relèvent pas du goût.

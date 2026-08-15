@@ -71,7 +71,12 @@ contact, barre latérale de sections qui détecte la luminosité sous elle),
 ajouté le pont problème/solution en `StrokeText` (texte SVG rempli par
 balayage : les « animations 3D » de Jérémie) et passé procédure, FAQ, CTA
 final et pied de page en sombre. Il a supprimé sa `/methode` ; la nôtre est
-CONSERVÉE, c'est l'engagement de vérifiabilité. Piège appris : ses composants
+CONSERVÉE, c'est l'engagement de vérifiabilité — et elle a **quatre points
+d'entrée** depuis le 15/08/2026 (barre latérale, section « Vérifiabilité » de
+la landing, FAQ sur le calcul du score, ligne sous le score du rapport). Elle
+n'était liée que du pied de page et personne ne la trouvait : la section des
+trois étapes s'appelait « Méthode » et occupait le mot. Elle s'appelle
+« Parcours » (`#parcours`), un nom pour une chose. Piège appris : ses composants
 Lovable rendent côté client, chez nous ils s'hydratent après un rendu
 serveur — **aucun aléa dans le rendu** (`useId`, jamais `Math.random()` pour
 un id), sinon React marque l'arbre entier en erreur d'hydratation.

@@ -190,12 +190,18 @@ export function SectionProcedure() {
   const { focusAndScroll } = useScanFormFocus();
 
   return (
-    <section id="methode" className="relative scroll-mt-20 overflow-hidden bg-ink">
+    // « parcours » et non « methode » depuis le 15/08/2026 : cette section
+    // décrit le PARCOURS commercial (scan, diagnostic, sprint), pas la
+    // méthode de mesure. Elle occupait le mot « Méthode » dans la barre
+    // latérale, et cannibalisait donc la page /methode — celle qui publie la
+    // formule et le calcul complet, que Luigi n'a retrouvée qu'au fond du
+    // pied de page. Un nom, une chose.
+    <section id="parcours" className="relative scroll-mt-20 overflow-hidden bg-ink">
       <Quadrillage variante="sombre" />
       <div className="relative z-10 mx-auto max-w-5xl px-5 py-16 sm:px-8 sm:py-24">
         <Reveal>
           <p className="mono text-[12px] uppercase tracking-[0.12em] text-[color-mix(in_srgb,var(--paper)_55%,transparent)]">
-            NOTRE MÉTHODE
+            LE PARCOURS
           </p>
         </Reveal>
 
