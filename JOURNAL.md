@@ -5,6 +5,52 @@ d'une nouvelle session, après `CLAUDE.md`.
 
 ---
 
+## 2026-08-15 — Les deux premiers écrans : comparer devient possible, et six logos arrêtent de promettre six moteurs
+
+Même critique de Luigi sur les deux premières sections : « bien, mais pas
+assez intuitives, visuelles, claires, distinctes et pertinentes ». Deux
+passes, et une trouvaille de doctrine dans la seconde.
+
+**Les deux chiffres publics (section « ce qui a changé »).** Ils portaient
+DEUX langages visuels pour deux pourcentages : barrettes segmentées pour les
+38 % de McKinsey, barre pleine pour les 56,6 % de l'Arcom. Aucune comparaison
+possible d'un coup d'œil. Une seule jauge désormais, même échelle et même
+repère de mi-course — en fusion `difference`, sans quoi le repère disparaît
+dans le remplissage sombre (noir sur noir). Les deux cartes sont devenues
+strictement parallèles : ce que le chiffre MESURE, le chiffre, la jauge, ce
+que ça change pour le lecteur. Avant, l'une répétait en toutes lettres le
+pourcentage déjà géant au-dessus, l'autre s'y accrochait grammaticalement
+(« des Français utilisent… ») avant d'enchaîner une interprétation.
+
+Le récit qui les précédait disait quatre fois la même chose, dont un bloc de
+26px qui concurrençait le titre de 52. Une phrase suffit.
+
+Et un défaut que seule une vérification en petite largeur pouvait révéler :
+sous 1100px, les deux cartes étaient un carrousel horizontal SANS
+indicateur. La seconde était hors écran, et rien ne disait qu'elle existait.
+
+**Le héros.** Le spécimen de rapport faisait 661px contre 433 au bloc de
+gauche : il démarrait 114px plus haut que le titre et l'écrasait,
+l'accessoire dominant le message. Compacté (582px, écart ramené à 41), avec
+ses deux moitiés enfin distinctes — la mesure d'un côté, ce que le
+diagnostic vérifie de l'autre. L'écart de citations, qui est SON message et
+qu'il fallait déduire en comparant trois barres à l'œil, est maintenant dit
+en toutes lettres, et **dérivé des données** : l'écrire en dur aurait
+divergé au premier changement de spécimen. Titre à 62px au-delà de 1280.
+
+**La trouvaille, et c'est une correction de doctrine.** Les six logos de
+moteurs s'alignaient à l'identique sous le bouton « Lancer le scan
+gratuit ». Un visiteur en déduit que son scan offert interroge les six —
+alors qu'il en interroge DEUX, et que le rapport le lui dit ensuite noir sur
+blanc (« Claude, Perplexity, Grok, Le Chat : non »). Promettre six moteurs à
+la porte d'entrée pour en livrer deux est exactement ce que la maison
+s'interdit. ChatGPT et Gemini sont désormais pleins et NOMMÉS, les quatre
+autres atténués, sous une légende qui dit la vérité : « Interrogés par votre
+scan gratuit. Les quatre autres au diagnostic. » Effet de bord heureux : ça
+vend le diagnostic à l'endroit le plus lu du site.
+
+---
+
 ## 2026-08-15 — Le test du père : chaque carte tient en un écran, et « Suivant » redevient un mot
 
 Le père de Luigi a essayé le scan et n'a pas compris comment avancer. C'est

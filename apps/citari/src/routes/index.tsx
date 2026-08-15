@@ -53,7 +53,10 @@ function Accueil() {
           <div className="grid items-center gap-10 lg:grid-cols-[1.15fr_1fr] lg:gap-14">
             <div>
               <Reveal delay={90}>
-                <h1 className="max-w-[20ch] text-[34px] sm:text-[52px]">
+                {/* xl:62px depuis le 15/08/2026 : 52px pour toute largeur
+                    au-delà de 640px laissait le titre sous-dimensionné sur un
+                    écran de bureau, où le spécimen le dominait. */}
+                <h1 className="max-w-[20ch] text-[34px] sm:text-[52px] xl:text-[62px]">
                   {HERO_MOTS.map((mot, i) => (
                     <span
                       key={`${mot}-${i}`}
@@ -70,10 +73,13 @@ function Accueil() {
               <Reveal
                 as="p"
                 delay={180}
-                className="mt-6 max-w-[52ch] text-[18px] font-bold leading-relaxed text-ink-2 sm:text-[20px]"
+                className="mt-6 max-w-[46ch] text-[18px] leading-relaxed text-ink-2 sm:text-[20px]"
               >
-                Ils ont demandé à une IA. Elle a cité trois entreprises. Vous n'en faisiez pas
-                partie, et personne ne vous l'a dit.
+                {/* La scène a trois temps, et le troisième est la raison
+                    d'être du produit ; noyé dans un bloc gras uniformément
+                    gris, il passait inaperçu. */}
+                Ils ont demandé à une IA. Elle a cité trois entreprises, vous n'en faisiez pas
+                partie. <strong className="font-bold text-ink">Et personne ne vous l'a dit.</strong>
               </Reveal>
 
               <Reveal delay={260}>

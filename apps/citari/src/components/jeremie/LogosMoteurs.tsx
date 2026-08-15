@@ -10,37 +10,54 @@
  * un qu'on facture.
  */
 
-type Moteur = { nom: string; src: string };
+type Moteur = { nom: string; src: string; apercu: boolean };
 
+/**
+ * `apercu` marque les deux moteurs que le scan GRATUIT interroge réellement.
+ *
+ * Les six logos s'alignaient à l'identique sous le bouton « Lancer le scan
+ * gratuit » (15/08/2026) : un visiteur en déduisait que son scan offert
+ * interroge les six, alors qu'il en interroge deux — et le rapport le lui
+ * dit ensuite noir sur blanc (« Claude, Perplexity, Grok, Le Chat : non »).
+ * Promettre six moteurs à la porte d'entrée pour en livrer deux est
+ * exactement ce que la doctrine interdit. Les deux du gratuit sont donc
+ * pleins et nommés, les quatre autres atténués et annoncés comme la suite.
+ */
 const MOTEURS: Moteur[] = [
-  { nom: "ChatGPT", src: "/img/chatgpt.svg" },
-  { nom: "Claude", src: "/img/claude.png" },
-  { nom: "Gemini", src: "/img/gemini.png" },
-  { nom: "Perplexity", src: "/img/perplexity.webp" },
-  { nom: "Grok", src: "/img/grok.png" },
-  { nom: "Le Chat", src: "/img/lechat.png" },
+  { nom: "ChatGPT", src: "/img/chatgpt.svg", apercu: true },
+  { nom: "Gemini", src: "/img/gemini.png", apercu: true },
+  { nom: "Claude", src: "/img/claude.png", apercu: false },
+  { nom: "Perplexity", src: "/img/perplexity.webp", apercu: false },
+  { nom: "Grok", src: "/img/grok.png", apercu: false },
+  { nom: "Le Chat", src: "/img/lechat.png", apercu: false },
 ];
 
 export function LogosMoteurs({ centered = false }: { centered?: boolean }) {
   return (
-    <ul
-      className={`mt-3 flex flex-wrap items-center gap-x-6 gap-y-4 ${
-        centered ? "justify-center" : ""
-      }`}
-    >
-      {MOTEURS.map((m) => (
-        <li key={m.nom} className="flex items-center" title={m.nom}>
-          <img
-            src={m.src}
-            alt={`Logo ${m.nom}`}
-            width={26}
-            height={26}
-            loading="lazy"
-            className="h-[26px] w-[26px] shrink-0 object-contain"
-          />
-        </li>
-      ))}
-    </ul>
+    <div className={`mt-4 flex flex-col gap-2 ${centered ? "items-center" : "items-start"}`}>
+      <ul className={`flex flex-wrap items-center gap-x-5 gap-y-3 ${centered ? "justify-center" : ""}`}>
+        {MOTEURS.map((m, i) => (
+          <li key={m.nom} className="flex items-center gap-2" title={m.nom}>
+            <img
+              src={m.src}
+              alt={`Logo ${m.nom}`}
+              width={26}
+              height={26}
+              loading="lazy"
+              className={`h-[26px] w-[26px] shrink-0 object-contain ${m.apercu ? "" : "opacity-40"}`}
+            />
+            {m.apercu ? (
+              <span className="mono text-[13px] font-semibold text-ink">{m.nom}</span>
+            ) : null}
+            {/* le séparateur tombe après le dernier moteur du gratuit */}
+            {i === 1 ? <span aria-hidden className="ml-1 h-4 w-px bg-rule-strong" /> : null}
+          </li>
+        ))}
+      </ul>
+      <p className={`mono text-[12px] text-ink-2 ${centered ? "text-center" : ""}`}>
+        Interrogés par votre scan gratuit. Les quatre autres au diagnostic.
+      </p>
+    </div>
   );
 }
 
