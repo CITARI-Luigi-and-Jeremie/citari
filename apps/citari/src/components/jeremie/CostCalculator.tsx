@@ -29,7 +29,6 @@ const FAINT = "#A8A296";
 const BODY = "#55514A";
 const BODY_STRONG = "#3A3733";
 const RED = "#C0371D";
-const RED_DARK = "#9E2C17";
 const ON_INK_MUTED = "#8B857A";
 const ON_INK_BODY = "#C9C4B8";
 
@@ -119,24 +118,102 @@ function CountUp({ value, style }: { value: string; style?: CSSProperties }) {
   );
 }
 
+/**
+ * La jauge des deux chiffres publics.
+ *
+ * UNE SEULE forme pour les deux cartes, à la même échelle 0-100 et avec le
+ * même repère à mi-course : ils portaient jusqu'au 15/08/2026 deux langages
+ * différents (barrettes segmentées d'un côté, barre pleine de l'autre), donc
+ * deux pourcentages qu'on ne pouvait pas comparer d'un coup d'œil. Le repère
+ * à 50 % fait le travail tout seul : un chiffre le dépasse, l'autre non.
+ */
+function Jauge({ pct, couleur, wide }: { pct: number; couleur: string; wide: boolean }) {
+  const [on, setOn] = useState(false);
+  const ref = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      setOn(true);
+      return;
+    }
+    const io = new IntersectionObserver(
+      (e) => {
+        if (!e[0]?.isIntersecting) return;
+        io.disconnect();
+        setOn(true);
+      },
+      { threshold: 0.6 },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+
+  return (
+    <div ref={ref} style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+      <div style={{ position: "relative", height: wide ? 12 : 10, background: TRACK, borderRadius: 2 }}>
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            width: on ? `${pct}%` : "0%",
+            background: couleur,
+            borderRadius: 2,
+            transition: "width 1100ms cubic-bezier(0.22,1,0.36,1)",
+          }}
+        />
+        {/* Le repère de mi-course, en fusion « difference » : il ressort
+            clair sur le remplissage sombre et sombre sur le rail clair. En
+            encre pleine, il disparaissait purement et simplement dans la
+            jauge des 56,6 % (noir sur noir). */}
+        <div
+          style={{
+            position: "absolute",
+            left: "50%",
+            top: -3,
+            bottom: -3,
+            width: 2,
+            background: "#FFFFFF",
+            mixBlendMode: "difference",
+          }}
+        />
+      </div>
+      <div style={{ display: "flex", justifyContent: "space-between", fontFamily: MONO, fontSize: 10, color: FAINT }}>
+        <span>0</span>
+        <span>la moitié</span>
+        <span>100 %</span>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Une carte de chiffre public. Les deux sont strictement parallèles :
+ * légende de ce que le chiffre MESURE, le chiffre, la même jauge, puis ce
+ * que ça change pour le lecteur. Avant, l'une répétait en toutes lettres le
+ * pourcentage déjà géant au-dessus et l'autre s'y accrochait
+ * grammaticalement (« des Français utilisent… ») : deux cartes qui ne se
+ * lisaient pas de la même façon.
+ */
 function StatCard({
   logo,
   logoAlt,
+  mesure,
   value,
   unit,
-  suffix,
-  line,
-  chart,
+  implication,
+  couleur,
   source,
   wide,
 }: {
   logo?: string | undefined;
   logoAlt: string;
+  mesure: string;
   value: string;
   unit: string;
-  suffix?: string;
-  line: string;
-  chart: React.ReactNode;
+  implication: React.ReactNode;
+  couleur: string;
   source: string;
   wide: boolean;
 }) {
@@ -145,39 +222,57 @@ function StatCard({
       className="stat-card"
       style={{
         border: `1px solid ${HAIR}`,
+        borderTop: `3px solid ${couleur}`,
         borderRadius: 4,
         background: CARD,
-        padding: wide ? "22px 22px 18px" : "18px 18px 15px",
+        padding: wide ? "20px 22px 18px" : "18px 18px 16px",
         display: "flex",
         flexDirection: "column",
-        gap: 14,
+        gap: 12,
       }}
     >
-      <div style={{ display: "flex", alignItems: "baseline", gap: suffix ? 6 : 4 }}>
+      <span
+        style={{
+          fontFamily: MONO,
+          fontSize: 10.5,
+          letterSpacing: "0.13em",
+          textTransform: "uppercase",
+          color: MUTED,
+          lineHeight: 1.4,
+          minHeight: wide ? 30 : undefined,
+        }}
+      >
+        {mesure}
+      </span>
+
+      <div style={{ display: "flex", alignItems: "baseline", gap: 4 }}>
         <CountUp
           value={value}
           style={{
-            fontSize: wide ? 64 : 52,
+            fontSize: wide ? 68 : 54,
             fontWeight: 800,
             letterSpacing: "-0.05em",
-            lineHeight: 0.88,
+            lineHeight: 0.85,
+            color: couleur,
             fontVariantNumeric: "tabular-nums",
           }}
         />
-        <span style={{ fontSize: wide ? 30 : 25, fontWeight: 800, letterSpacing: "-0.03em", color: FAINT }}>
+        <span style={{ fontSize: wide ? 30 : 25, fontWeight: 800, letterSpacing: "-0.03em", color: couleur }}>
           {unit}
         </span>
-        {suffix ? <span style={{ fontFamily: MONO, fontSize: 12.5, color: ON_INK_MUTED }}>{suffix}</span> : null}
       </div>
 
-      <span style={{ fontSize: 15.5, lineHeight: 1.4, color: BODY_STRONG, textWrap: "pretty" as never }}>
-        {line}
+      <Jauge pct={Number(value.replace(",", "."))} couleur={couleur} wide={wide} />
+
+      <span style={{ fontSize: wide ? 15.5 : 14.5, lineHeight: 1.45, color: BODY_STRONG, textWrap: "pretty" as never }}>
+        {implication}
       </span>
-      {chart}
+
       <div
         style={{
           marginTop: "auto",
           paddingTop: 12,
+          borderTop: `1px solid ${HAIR}`,
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
@@ -193,26 +288,6 @@ function StatCard({
           />
         ) : null}
       </div>
-    </div>
-  );
-}
-
-/** Barre pleine à l'échelle 0-100. */
-function Bar({ pct, color = INK }: { pct: number; color?: string }) {
-  return (
-    <div style={{ position: "relative", height: 8, background: TRACK, borderRadius: 99, overflow: "hidden" }}>
-      <div style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: `${pct}%`, background: color, borderRadius: 99 }} />
-    </div>
-  );
-}
-
-/** 25 barrettes, dont 9 pleines : 38 % lisible d'un coup d'œil. */
-function DotScale({ filled = 9, total = 25 }: { filled?: number; total?: number }) {
-  return (
-    <div style={{ display: "flex", gap: 3, alignItems: "flex-end", height: 22 }}>
-      {Array.from({ length: total }, (_, i) => (
-        <div key={i} style={{ flex: 1, height: i < filled ? 22 : 10, background: i < filled ? INK : HAIR, borderRadius: 1 }} />
-      ))}
     </div>
   );
 }
@@ -443,108 +518,75 @@ export function CostCalculator({ sprintPrice = 2900 }: { sprintPrice?: number } 
               >
                 Le trafic baisse. La demande, non.
               </ScrollFloat>
+              {/* Une seule phrase de corps depuis le 15/08/2026. Il y en avait
+                  quatre, dont un bloc de 26px qui concurrençait le titre, et
+                  toutes disaient la même chose : le marché existe, il se
+                  décide ailleurs, dans une réponse qui ne cite personne. */}
               <p
                 style={{
                   margin: 0,
-                  fontSize: wide ? 17 : 15.5,
-                  lineHeight: 1.55,
+                  fontSize: wide ? 19 : 16.5,
+                  lineHeight: 1.5,
                   color: BODY,
                   textWrap: "pretty" as never,
                 }}
               >
-                Votre marché n'a pas disparu. C'est{" "}
-                <strong style={{ color: BODY_STRONG }}>l'endroit où il se décide</strong> qui a
-                changé de place, et personne ne vous a prévenu.
-              </p>
-              <div
-                style={{
-                  height: 1,
-                  width: "100%",
-                  maxWidth: 420,
-                  background: LINE_INK,
-                  margin: wide ? "14px 0 4px" : "10px 0 2px",
-                }}
-              />
-              <p
-                style={{
-                  margin: 0,
-                  fontSize: wide ? 26 : 21,
-                  fontWeight: 600,
-                  letterSpacing: "-0.02em",
-                  lineHeight: 1.2,
-                  color: INK,
-                  textWrap: "pretty" as never,
-                }}
-              >
-                La décision des clients se prend désormais via les moteurs IA, pas sur votre site.
-              </p>
-              <p style={{ margin: 0, fontSize: 15.5, lineHeight: 1.5, color: BODY }}>
-                Et dans cette réponse, il n'y a que{" "}
-                <span style={{ color: RED_DARK }}>trois noms</span>.
+                Vos clients ne sont pas partis, ils demandent à une IA avant de choisir.{" "}
+                <strong style={{ color: INK, fontWeight: 700 }}>
+                  Et sa réponse ne cite que trois noms.
+                </strong>
               </p>
             </div>
           </div>
 
+          {/* Empilées hors grand écran depuis le 15/08/2026. C'était un
+              carrousel horizontal sans indicateur : sous 1100px, la seconde
+              carte était purement et simplement hors de l'écran, et rien ne
+              disait qu'elle existait. Deux cartes ne valent pas un
+              carrousel. */}
           <div
-            style={
-              wide
-                ? { display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 16 }
-                : {
-                    display: "flex",
-                    gap: 0,
-                    overflowX: "auto",
-                    scrollSnapType: "x mandatory",
-                    WebkitOverflowScrolling: "touch",
-                    margin: "0 -20px",
-                    padding: "0 0 6px",
-                    scrollbarWidth: "none",
-                  }
-            }
+            style={{
+              display: "grid",
+              gridTemplateColumns: wide ? "repeat(2, 1fr)" : "1fr",
+              gap: 16,
+              alignItems: "stretch",
+            }}
           >
+            {/* L'ordre raconte : d'abord l'usage général, ensuite l'usage qui
+                décide d'un achat — c'est ce dernier chiffre qui sert de base
+                au simulateur juste en dessous. Le rouge est réservé à la
+                carte qui parle de SES clients. */}
             {[
-              <StatCard
-                key="mck"
-                wide={wide}
-                logo="/img/mckinsey.png"
-                logoAlt="McKinsey"
-                value="38"
-                unit="%"
-                line="Près de 38 % des acheteurs demandent à une IA avant de choisir leur prestataire."
-                chart={<DotScale />}
-                source="McKinsey · mars 2026"
-              />,
               <StatCard
                 key="arcom"
                 wide={wide}
                 logo="/img/arcom.jpg"
                 logoAlt="Arcom / Médiamétrie"
+                mesure="Des Français utilisent l'IA"
                 value="56,6"
                 unit="%"
-                line="des Français utilisent déjà l'IA. Vous n'êtes pas devenu invisible, le marché a changé de fenêtre."
-                chart={<Bar pct={56.6} />}
+                couleur={INK}
+                implication="Plus d'un sur deux. Vos clients y posent déjà leurs questions."
                 source="Arcom / Médiamétrie · avr. 2026"
               />,
-            ].map((card, i) =>
-              wide ? (
-                card
-              ) : (
-                <div
-                  key={i}
-                  style={{
-                    flex: "none",
-                    width: "100%",
-                    boxSizing: "border-box",
-                    padding: "0 20px",
-                    display: "flex",
-                    flexDirection: "column",
-                    scrollSnapAlign: "center",
-                    scrollSnapStop: "always" as never,
-                  }}
-                >
-                  {card}
-                </div>
-              ),
-            )}
+              <StatCard
+                key="mck"
+                wide={wide}
+                logo="/img/mckinsey.png"
+                logoAlt="McKinsey"
+                mesure="Des acheteurs interrogent une IA avant de choisir"
+                value="38"
+                unit="%"
+                couleur={RED}
+                implication={
+                  <>
+                    Près de <strong style={{ fontWeight: 700 }}>quatre acheteurs sur dix</strong>{" "}
+                    arrivent avec une liste déjà faite. Vous y êtes, ou vous n'existez pas.
+                  </>
+                }
+                source="McKinsey · mars 2026"
+              />,
+            ]}
           </div>
         </div>
 
