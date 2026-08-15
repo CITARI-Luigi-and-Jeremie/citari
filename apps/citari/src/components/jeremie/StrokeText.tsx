@@ -8,6 +8,8 @@
  */
 import { useEffect, useId, useRef, useState } from "react";
 
+import { useApparition } from "@/lib/use-apparition";
+
 type StrokeTextProps = {
   text: string;
   /** Couleur du contour. */
@@ -48,7 +50,9 @@ export function StrokeText({
   const wrapRef = useRef<HTMLDivElement>(null);
   const measureRef = useRef<SVGTextElement>(null);
   const [width, setWidth] = useState<number | null>(null);
-  const [play, setPlay] = useState(false);
+  // REJOUABLE (15/08/2026) : le balayage se réarme dès que le pont sort
+  // entièrement de l'écran, et rejoue à chaque retour, dans les deux sens.
+  const play = useApparition(wrapRef, 0.3);
   // `useId` et non un aléa : la page est rendue côté serveur, un id tiré au
   // hasard diffère à l'hydratation et React signale le HTML entier en erreur.
   const maskId = `stroke-mask-${useId().replace(/[^a-zA-Z0-9_-]/g, "")}`;
@@ -69,29 +73,6 @@ export function StrokeText({
       cancelled = true;
     };
   }, [text]);
-
-  // Déclenchement au scroll.
-  useEffect(() => {
-    const el = wrapRef.current;
-    if (!el) return;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      setPlay(true);
-      return;
-    }
-    const io = new IntersectionObserver(
-      (entries) => {
-        for (const entry of entries) {
-          if (entry.isIntersecting) {
-            setPlay(true);
-            io.disconnect();
-          }
-        }
-      },
-      { threshold: 0.3 },
-    );
-    io.observe(el);
-    return () => io.disconnect();
-  }, []);
 
   const pad = 4;
   const viewWidth = (width ?? 1000) + pad * 2;

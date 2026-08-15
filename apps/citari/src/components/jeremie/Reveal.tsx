@@ -3,9 +3,16 @@
  * Le contenu est présent dans le DOM dès le rendu serveur : seule
  * l'opacité et la translation sont animées à l'entrée dans le viewport.
  *
- * Porté du projet Lovable de Jérémie le 07/08/2026, à l'identique.
+ * Porté du projet Lovable de Jérémie le 07/08/2026. REJOUABLE depuis le
+ * 15/08/2026 (demande Luigi) : l'animation se réarme quand le bloc sort
+ * complètement de l'écran, et rejoue à chaque retour, en montant comme en
+ * descendant. Conséquence assumée : un bloc au-dessus de la fenêtre est
+ * masqué (avant, il était montré d'office), c'est précisément ce qui permet
+ * de le voir rejouer en remontant.
  */
 import { useEffect, useRef, type ReactNode } from "react";
+
+import { useApparition } from "@/lib/use-apparition";
 
 type Props = {
   children: ReactNode;
@@ -17,41 +24,24 @@ type Props = {
 
 export function Reveal({ children, delay = 0, className = "", as = "div" }: Props) {
   const ref = useRef<HTMLElement | null>(null);
+  const visible = useApparition(ref, 0.12);
 
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      el.classList.add("reveal-on");
-      return;
-    }
-    const show = () => {
-      el.classList.add("reveal-on");
-      io.disconnect();
-      clearTimeout(safety);
-    };
-    const io = new IntersectionObserver(
-      (entries) => {
-        for (const e of entries) {
-          // Visible, ou déjà dépassé (page chargée ou remontée en position basse).
-          if (e.isIntersecting || e.boundingClientRect.bottom < 0) {
-            show();
-          }
-        }
-      },
-      { threshold: 0.12, rootMargin: "0px 0px -8% 0px" },
-    );
-    io.observe(el);
-    // Filet de sécurité : un bloc déjà dans (ou au-dessus de) la fenêtre
-    // ne doit jamais rester invisible, même si l'observateur ne se déclenche pas.
+    el.classList.toggle("reveal-on", visible);
+  }, [visible]);
+
+  // Filet de sécurité au montage : un bloc déjà dans la fenêtre ne doit
+  // jamais rester invisible, même si l'observateur ne se déclenche pas.
+  useEffect(() => {
     const safety = window.setTimeout(() => {
+      const el = ref.current;
+      if (!el) return;
       const rect = el.getBoundingClientRect();
-      if (rect.top < window.innerHeight) show();
+      if (rect.top < window.innerHeight && rect.bottom > 0) el.classList.add("reveal-on");
     }, 600);
-    return () => {
-      io.disconnect();
-      clearTimeout(safety);
-    };
+    return () => clearTimeout(safety);
   }, []);
 
   const Tag = as as "div";

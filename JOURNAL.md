@@ -5,6 +5,32 @@ d'une nouvelle session, après `CLAUDE.md`.
 
 ---
 
+## 2026-08-15 — Les animations rejouent, et la fiche premium retrouve son logo
+
+**Les animations d'entrée se réarment.** Reveal, StrokeText et les
+compteurs/jauges des statistiques coupaient leur observateur au premier
+passage : jouées une fois, plus jamais. Elles rejouent désormais à chaque
+retour, en montant comme en descendant. Le mécanisme, dans
+`lib/use-apparition.ts` : visible à l'entrée (au seuil du composant), remise
+à zéro UNIQUEMENT quand l'élément est complètement hors écran, pour que le
+réarmement ne soit jamais visible. Piège d'implémentation : avec le seul
+seuil d'entrée, la sortie totale ne déclenche aucun rappel d'observateur et
+l'état ne se réarme jamais ; il faut observer les seuils [0, seuil].
+ScrollFloat (GSAP scrub) rejouait déjà par construction ; le titre du héros
+garde son animation de chargement. Conséquence assumée sur Reveal : un bloc
+au-dessus de la fenêtre est masqué (avant, montré d'office), c'est ce qui
+permet de le voir rejouer en remontant. Vérifié au navigateur sur trois
+allers-retours : compteur 0 → 56,6 → 0 → 56,6, pont et reveals réarmés.
+
+**La fiche /scan-premium n'avait ni logo ni retour accueil** : le
+`sansChrome` de la racine masquait le chrome sur tout préfixe « /scan », règle
+écrite pour l'écran de mesure `/scan/$id` avant que `/scan-premium` existe.
+Corrigé en « /scan/ » avec la barre. Le rapport et l'écran de mesure restent
+sans chrome, vérifié sur les trois HTML servis. Sur /methode et /sprint, le
+logo était déjà cliquable : le défaut réel ne touchait que la fiche.
+
+---
+
 ## 2026-08-15 — Le tiret cadratin dégagé de tout ce qui s'affiche
 
 La doctrine l'interdisait depuis le début (« pas de tiret cadratin dans les

@@ -16,6 +16,7 @@ import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react"
 import { ScrollFloat } from "@/components/jeremie/ScrollFloat";
 import { Quadrillage } from "@/components/jeremie/Quadrillage";
 import { useScanFormFocus } from "@/lib/scan-form-focus";
+import { useApparition } from "@/lib/use-apparition";
 
 const INK = "#17160F";
 const PAPER = "#FBFAF7";
@@ -62,50 +63,42 @@ function useWide(px = 1100) {
 
 /* ---------------------------------------------------------------- chiffres */
 
-/** Chiffre qui se compose à l'entrée dans le champ de vision. */
+/**
+ * Chiffre qui se compose à l'entrée dans le champ de vision. REJOUABLE
+ * (15/08/2026) : il retombe à zéro quand la carte sort entièrement de
+ * l'écran, et se recompose à chaque retour.
+ */
 function CountUp({ value, style }: { value: string; style?: CSSProperties }) {
   const negatif = value.trim().startsWith("−") || value.trim().startsWith("-");
   const brut = value.replace("−", "").replace("-", "").replace(",", ".");
   const cible = Number.parseFloat(brut);
   const decimales = brut.includes(".") ? brut.split(".")[1]!.length : 0;
   const ref = useRef<HTMLSpanElement | null>(null);
+  const visible = useApparition(ref, 0.6);
   const [affiche, setAffiche] = useState(Number.isFinite(cible) ? 0 : cible);
 
   useEffect(() => {
-    const el = ref.current;
-    if (!el || !Number.isFinite(cible)) return;
+    if (!Number.isFinite(cible)) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
       setAffiche(cible);
       return;
     }
+    if (!visible) {
+      setAffiche(0);
+      return;
+    }
     let frame = 0;
-    const io = new IntersectionObserver(
-      (entrees) => {
-        if (!entrees[0]?.isIntersecting) return;
-        io.disconnect();
-        const debut = performance.now();
-        const duree = 1100;
-        const tick = (now: number) => {
-          const t = Math.min(1, (now - debut) / duree);
-          const eased = 1 - Math.pow(1 - t, 3);
-          setAffiche(cible * eased);
-          if (t < 1) frame = requestAnimationFrame(tick);
-        };
-        frame = requestAnimationFrame(tick);
-      },
-      // Sa maquette exigeait 90 % de visibilité dans une fenêtre rognée de
-      // 25 % de chaque côté (le centrage du carrousel mobile) : selon la
-      // largeur d'écran, le chiffre de GAUCHE tombait dans la zone exclue et
-      // restait à 0 pour toujours. Un seuil simple suffit : les deux cartes
-      // démarrent dès qu'elles entrent à l'écran, de la même manière.
-      { threshold: 0.6 },
-    );
-    io.observe(el);
-    return () => {
-      io.disconnect();
-      cancelAnimationFrame(frame);
+    const debut = performance.now();
+    const duree = 1100;
+    const tick = (now: number) => {
+      const t = Math.min(1, (now - debut) / duree);
+      const eased = 1 - Math.pow(1 - t, 3);
+      setAffiche(cible * eased);
+      if (t < 1) frame = requestAnimationFrame(tick);
     };
-  }, [cible]);
+    frame = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(frame);
+  }, [cible, visible]);
 
   const texte = Number.isFinite(cible)
     ? `${negatif ? "−" : ""}${affiche.toFixed(decimales).replace(".", ",")}`
@@ -128,27 +121,9 @@ function CountUp({ value, style }: { value: string; style?: CSSProperties }) {
  * à 50 % fait le travail tout seul : un chiffre le dépasse, l'autre non.
  */
 function Jauge({ pct, couleur, wide }: { pct: number; couleur: string; wide: boolean }) {
-  const [on, setOn] = useState(false);
   const ref = useRef<HTMLDivElement | null>(null);
-
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      setOn(true);
-      return;
-    }
-    const io = new IntersectionObserver(
-      (e) => {
-        if (!e[0]?.isIntersecting) return;
-        io.disconnect();
-        setOn(true);
-      },
-      { threshold: 0.6 },
-    );
-    io.observe(el);
-    return () => io.disconnect();
-  }, []);
+  // REJOUABLE (15/08/2026) : la barre se vide hors écran, se remplit au retour.
+  const on = useApparition(ref, 0.6);
 
   return (
     <div ref={ref} style={{ display: "flex", flexDirection: "column", gap: 6 }}>
