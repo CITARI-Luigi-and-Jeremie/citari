@@ -20,9 +20,13 @@ ont tourné contre la vraie base. 180 tests passent.
    longtemps affirmé que le second mot de passe avait fuité dans le dépôt ;
    c'était faux (vérifié le 09/08 dans l'historique git), le problème était
    la duplication, pas une fuite.
-2. Resend et mise en ligne : voir `SETUP.md` et `docs/DEPLOIEMENT.md`. Le
-   domaine est acheté, chez Hostinger. Le site part sur **Cloudflare Workers**,
-   puis basculera sur le **VPS Hostinger** quand tout le reste sera fini.
+2. Resend et mise en ligne : voir `SETUP.md` et `docs/DEPLOIEMENT.md`. Domaine
+   et hébergement sont **chez Hostinger**, et la mise en ligne est
+   **automatique depuis GitHub** — aucune commande à lancer. La bascule depuis
+   Cloudflare Workers a eu lieu (vérifié le 16/08/2026 : `citari.fr` répond
+   `server: hcdn`, serveurs de noms `dns-parking.com`, aucun en-tête
+   Cloudflare). `scripts/deployer.sh` déploie encore sur Cloudflare : il est
+   **obsolète** et ne met plus le site en ligne.
 
 **Le crédit Anthropic est rechargé** (vérifié le 06/08/2026 par un appel réel :
 `claude-sonnet-5` répond). Le diagnostic complet retrouve ses six moteurs. Il

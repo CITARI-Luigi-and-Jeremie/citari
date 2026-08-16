@@ -3,101 +3,76 @@
 Trois choses à mettre en ligne, dans cet ordre : le site, l'envoi d'emails, le
 poste de pilotage. Chacune est indépendante des deux autres.
 
-Tout ce qui suit a été vérifié en local sur le vrai bundle de production, pas
-seulement en développement : le worker Cloudflare a lancé un scan réel de bout
-en bout (Keobiz, 34/100, 20 questions, 40 réponses, lead créé avec son
-consentement).
+Tout ce qui suit a été vérifié sur le vrai bundle de production, pas seulement
+en développement : un scan réel a été lancé de bout en bout (Keobiz, 34/100,
+20 questions, 40 réponses, lead créé avec son consentement).
 
 ---
 
 ## 1. Le site
 
-### Ce que le build produit
+### Où il tourne réellement
 
-`vite build` passe par nitro et vise **Cloudflare Workers**. La sortie est dans
-`.output/`, avec un `wrangler.json` généré. Le drapeau `nodejs_compat` est actif,
-ce qui permet au code de lire ses secrets dans `process.env` comme partout
-ailleurs, sans traitement particulier.
+**Chez Hostinger.** La bascule annoncée plus bas dans les anciennes versions de
+ce document a eu lieu ; ce qui suit a été vérifié le 16/08/2026 depuis
+l'extérieur, sans accès au panneau :
 
-### Une seule fois : le compte et les secrets
+| Ce qu'on observe | Valeur |
+| --- | --- |
+| En-tête `server` de `citari.fr` | `hcdn` — le CDN Hostinger |
+| Serveurs de noms | `nova.dns-parking.com`, `cosmos.dns-parking.com` (Hostinger) |
+| Adresses A | `147.79.116.197`, `193.58.105.164` |
+| En-tête Cloudflare (`cf-ray`) | **absent** |
 
-Il faut un compte Cloudflare. Je ne peux pas le créer à ta place, c'est la seule
-étape qui te revient obligatoirement.
+Toutes les routes répondent en 200, `/sprint` et `/equipe` comprises.
 
-```bash
-npx wrangler login
-```
+### La mise en ligne est automatique
 
-Puis poser les huit secrets. Ils ne transitent jamais par le dépôt ni par un
-fichier de configuration : `wrangler secret put` les demande de façon
-interactive et les stocke chiffrés chez Cloudflare.
+Le déploiement se déclenche **tout seul depuis GitHub** : il n'y a aucune
+commande à lancer, ni par Jérémie ni par Luigi.
 
-```bash
-cd apps/citari
-for cle in OPENAI_API_KEY GOOGLE_AI_API_KEY ANTHROPIC_API_KEY \
-           PERPLEXITY_API_KEY XAI_API_KEY MISTRAL_API_KEY \
-           SUPABASE_URL SUPABASE_SERVICE_ROLE_KEY; do
-  npx wrangler secret put "$cle" --name citari
-done
-```
+> [!IMPORTANT]
+> **Le dépôt a changé d'adresse le 16/08/2026** (compte personnel →
+> organisation `CITARI-Luigi-and-Jeremie`), et l'intégration Hostinger est
+> restée branchée sur l'ancienne. Tant qu'elle n'est pas repointée, `main`
+> avance sans que le site bouge — et rien ne le signale, puisque GitHub
+> redirige encore les pushs. Symptôme observé le 16/08 : la balise GA fusionnée
+> dans `main` était toujours absente de `citari.fr` une heure après.
+> Voir `CLAUDE.md`, section dépôt.
 
-Il faut aussi poser `NEXT_PUBLIC_SITE_URL` avec le vrai domaine. Tant qu'il vaut
-`http://localhost:8080`, les liens de rapport envoyés par email seront
-inutilisables.
+### À compléter par Luigi
 
-### Brancher le domaine
+Ces points demandent le panneau Hostinger, et personne ne devrait avoir à les
+redécouvrir en urgence un jour de mise en ligne :
 
-Le domaine est chez **Hostinger** (acheté le 06/08/2026), le site tourne chez
-Cloudflare. Rattacher un domaine à un worker **exige que la zone DNS soit gérée
-par Cloudflare** : un simple CNAME depuis Hostinger ne suffit pas.
+- la branche surveillée et la commande de build utilisée côté Hostinger ;
+- **où vivent les huit secrets** (`OPENAI_API_KEY`, `GOOGLE_AI_API_KEY`,
+  `ANTHROPIC_API_KEY`, `PERPLEXITY_API_KEY`, `XAI_API_KEY`, `MISTRAL_API_KEY`,
+  `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`) depuis qu'ils ne sont plus dans
+  `wrangler secret` ;
+- comment lire les journaux quand un déploiement échoue.
 
-1. Ajouter le domaine comme site dans Cloudflare, plan gratuit.
-2. Cloudflare donne deux serveurs de noms.
-3. Chez Hostinger, remplacer les serveurs de noms du domaine par ceux-là.
-   C'est le seul geste à faire côté Hostinger.
-4. Attendre la propagation, de quelques minutes à quelques heures.
-5. Attacher le domaine au worker `citari` en « Custom Domain ». Cloudflare pose
-   le certificat TLS tout seul.
-6. Poser `NEXT_PUBLIC_SITE_URL` avec le domaine réel, en `https://`.
+`NEXT_PUBLIC_SITE_URL` doit valoir le domaine réel en `https://`. Ce n'est pas
+cosmétique : tant qu'il vaut `http://localhost:8080`, les liens de rapport
+envoyés par email sont inutilisables, et c'est le lien sur lequel le prospect
+clique.
 
-L'étape 6 n'est pas cosmétique : tant que la variable vaut
-`http://localhost:8080`, les liens de rapport envoyés par email sont
-inutilisables, et c'est le lien sur lequel le prospect clique.
+### Après une mise en ligne : la seule preuve qui vaut
 
-### Ensuite, à chaque mise en ligne
+**Relancer un scan réel de bout en bout.** C'est ainsi que la production a été
+validée la première fois, et aucun autre test ne remplace celui-là.
 
-```bash
-./apps/citari/scripts/deployer.sh
-```
+### L'ancien chemin Cloudflare (historique)
 
-Le script construit, renomme le worker en `citari` (sans quoi il s'appellerait
-`luigirevelli-sprint-voice-insight-apps-citari`, ce qui deviendrait le
-sous-domaine public), puis déploie.
+Le site est passé par **Cloudflare Workers** avant Hostinger. Il en reste des
+traces dans le dépôt, à ne pas prendre pour la procédure courante :
 
-### Ce qui reste à surveiller au premier vrai trafic
-
-Un lot d'aperçu déclenche une vingtaine d'appels d'API dans une seule requête.
-Le plan gratuit de Cloudflare limite à **50 sous-requêtes** par requête, le plan
-payant à 1000. Un aperçu passe, un diagnostic complet est plus juste. Si des
-scans s'arrêtent en cours de route sans erreur claire, c'est la première piste :
-réduire la taille des lots dans `lotDuMode()`, ou passer au plan payant.
-
-### Après : la bascule vers le VPS Hostinger
-
-Cloudflare est l'étape, pas la destination. Une fois le front de Jérémie intégré
-et le reste terminé, tout passe sur le VPS Hostinger. Ce que ça demande, écrit
-ici pour que ce ne soit pas découvert en cours de route :
-
-- changer le preset nitro, `cloudflare-module` → `node-server` ;
-- un service qui survit au redémarrage, systemd ou PM2 ;
-- un reverse proxy et son certificat, nginx ou Caddy avec Let's Encrypt ;
-- reporter les huit secrets de `wrangler secret` vers le `.env` du serveur ;
-- repointer les serveurs de noms de Cloudflare vers Hostinger ;
-- **relancer un scan réel de bout en bout.** C'est la seule preuve qui vaut, et
-  c'est ainsi que le worker Cloudflare avait été validé.
-
-Ce que la bascule fait gagner : la limite des 50 sous-requêtes disparaît, donc
-le diagnostic complet à six moteurs cesse d'être le cas juste.
+- `apps/citari/scripts/deployer.sh` déploie sur Cloudflare — **obsolète**, il ne
+  met plus le site en ligne ;
+- le script `build:cloudflare` (preset nitro `cloudflare-module`) existe
+  toujours à côté de `build` (`node-server`) ;
+- la limite des **50 sous-requêtes** du plan gratuit Cloudflare, qui rendait le
+  diagnostic complet à six moteurs juste à la limite, ne s'applique plus.
 
 ---
 
