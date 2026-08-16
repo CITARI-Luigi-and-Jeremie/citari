@@ -25,9 +25,15 @@ const params = JSON.parse(process.argv[2] ?? "{}") as {
   parallele: number;
 };
 
-const { creerScan, avancerScan, etatScan, teaserScan, scoreSurMoteurs } = (await import(
+const { creerScan, avancerScan, etatScan, scoreSurMoteurs } = (await import(
   new URL("./src/lib/orchestrateur.server.ts", `file://${process.cwd()}/`).href
 )) as any;
+// `teaserScan` a disparu le 09/08/2026 avec l'écran d'aguiche (« Supprimer
+// l'aguiche »), et ce pilote l'appelait encore : scan-lot échouait sur chaque
+// ligne sans jamais interroger un moteur. La lecture passe désormais par
+// `buildScanInsights`, celle qu'utilise déjà `relance`. Elle lit les mêmes
+// colonnes et rend en plus le verbatim (`killerQuote`).
+const { buildScanInsights } = await import("./insights.js");
 const { supabaseAdmin } = (await import(
   new URL("./src/integrations/supabase/client.server.ts", `file://${process.cwd()}/`).href
 )) as any;
@@ -45,16 +51,23 @@ async function derouler(scanId: string) {
     const etat = await etatScan(scanId);
     if (!etat || etat.status !== "running") break;
   }
-  return teaserScan(scanId);
+  // `teaserScan` refusait de rendre quoi que ce soit tant que le scan n'était
+  // pas « done », et l'appelant s'appuie sur ce null pour signaler « scan non
+  // terminé ». `buildScanInsights` ne vérifie rien : sans ce contrôle, un scan
+  // interrompu rendrait un score partiel présenté comme définitif.
+  const final = await etatScan(scanId);
+  if (!final || final.status !== "done") return null;
+  return buildScanInsights(scanId);
 }
 
 function resume(t: any) {
   return {
     score: t.score,
-    cite: t.comptage.citationsCible,
-    concurrents: t.comptage.citationsConcurrents,
-    perdues: t.comptage.questionsPerdues,
-    botsBloques: t.aguiches?.botsBloques ?? [],
+    cite: t.citationsCible,
+    concurrents: t.citationsConcurrents,
+    perdues: t.missedCount,
+    botsBloques: t.botsBloques ?? [],
+    verbatim: t.killerQuote ?? null,
   };
 }
 
