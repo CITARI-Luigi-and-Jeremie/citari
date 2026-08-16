@@ -965,6 +965,43 @@ export async function rapportParJeton(jeton: string) {
   return { scan: scanPublic, questions: questions ?? [], reponses: reponsesPubliques, mentions: mentions ?? [], precedent };
 }
 
+/**
+ * La visio : le rapport, plus l'APERÇU du même domaine s'il existe.
+ *
+ * L'écart aperçu → complet (mémoire seule → web ouvert) est l'ouverture de
+ * la présentation : « l'aperçu disait 24, connectés au web les moteurs
+ * disent 13 ». On le cherche par `domain_key`, avant que `rapportParJeton`
+ * ne l'ait retiré de la charge publique, et on ne renvoie que deux champs.
+ */
+export async function visioParJeton(jeton: string) {
+  const base = await rapportParJeton(jeton);
+  if (!base) return null;
+
+  let apercu: { score: number; date: string } | null = null;
+  const { data: brut } = await supabaseAdmin
+    .from("scans")
+    .select("domain_key, completed_at")
+    .eq("report_token", jeton)
+    .maybeSingle();
+  if (brut?.domain_key) {
+    const { data: prev } = await supabaseAdmin
+      .from("scans")
+      .select("score_global, completed_at")
+      .eq("mode", "apercu")
+      .eq("status", "done")
+      .eq("domain_key", brut.domain_key)
+      .lt("completed_at", brut.completed_at ?? "9999-12-31")
+      .order("completed_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (prev?.completed_at && prev.score_global !== null) {
+      apercu = { score: Math.round(Number(prev.score_global)), date: prev.completed_at };
+    }
+  }
+
+  return { ...base, apercu };
+}
+
 /** Priorité commerciale déduite du score : plus il est bas, plus le besoin est fort. */
 export function prioriteDuScore(score: number): "chaud" | "tiede" | "froid" {
   return score < 25 ? "chaud" : score < 55 ? "tiede" : "froid";

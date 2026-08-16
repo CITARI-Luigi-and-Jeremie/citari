@@ -21,6 +21,7 @@ import { Route as ScanCompletRouteImport } from './routes/scan-complet'
 import { Route as SprintRouteImport } from './routes/sprint'
 import { Route as RapportJetonRouteImport } from './routes/rapport.$jeton'
 import { Route as ScanIdRouteImport } from './routes/scan.$id'
+import { Route as VisioJetonRouteImport } from './routes/visio.$jeton'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -82,6 +83,11 @@ const ScanIdRoute = ScanIdRouteImport.update({
   path: '/scan/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const VisioJetonRoute = VisioJetonRouteImport.update({
+  id: '/visio/$jeton',
+  path: '/visio/$jeton',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -96,6 +102,7 @@ export interface FileRoutesByFullPath {
   '/sprint': typeof SprintRoute
   '/rapport/$jeton': typeof RapportJetonRoute
   '/scan/$id': typeof ScanIdRoute
+  '/visio/$jeton': typeof VisioJetonRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -110,6 +117,7 @@ export interface FileRoutesByTo {
   '/sprint': typeof SprintRoute
   '/rapport/$jeton': typeof RapportJetonRoute
   '/scan/$id': typeof ScanIdRoute
+  '/visio/$jeton': typeof VisioJetonRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -125,6 +133,7 @@ export interface FileRoutesById {
   '/sprint': typeof SprintRoute
   '/rapport/$jeton': typeof RapportJetonRoute
   '/scan/$id': typeof ScanIdRoute
+  '/visio/$jeton': typeof VisioJetonRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -141,6 +150,7 @@ export interface FileRouteTypes {
     | '/sprint'
     | '/rapport/$jeton'
     | '/scan/$id'
+    | '/visio/$jeton'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -155,6 +165,7 @@ export interface FileRouteTypes {
     | '/sprint'
     | '/rapport/$jeton'
     | '/scan/$id'
+    | '/visio/$jeton'
   id:
     | '__root__'
     | '/'
@@ -169,6 +180,7 @@ export interface FileRouteTypes {
     | '/sprint'
     | '/rapport/$jeton'
     | '/scan/$id'
+    | '/visio/$jeton'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -184,6 +196,7 @@ export interface RootRouteChildren {
   SprintRoute: typeof SprintRoute
   RapportJetonRoute: typeof RapportJetonRoute
   ScanIdRoute: typeof ScanIdRoute
+  VisioJetonRoute: typeof VisioJetonRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -272,6 +285,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ScanIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/visio/$jeton': {
+      id: '/visio/$jeton'
+      path: '/visio/$jeton'
+      fullPath: '/visio/$jeton'
+      preLoaderRoute: typeof VisioJetonRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -288,6 +308,7 @@ const rootRouteChildren: RootRouteChildren = {
   SprintRoute: SprintRoute,
   RapportJetonRoute: RapportJetonRoute,
   ScanIdRoute: ScanIdRoute,
+  VisioJetonRoute: VisioJetonRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -159,7 +159,8 @@ function RootComponent() {
   // 14/08/2026 avant la mise en ligne : le seul back-office est apps/admin.)
   // « /scan/ » avec la barre : le préfixe nu attrapait /scan-complet depuis
   // sa création (15/08/2026), et la fiche n'avait ni logo ni retour accueil.
-  const sansChrome = pathname.startsWith("/scan/") || pathname.startsWith("/rapport/");
+  const sansChrome =
+    pathname.startsWith("/scan/") || pathname.startsWith("/rapport/") || pathname.startsWith("/visio/");
 
   return (
     <QueryClientProvider client={queryClient}>

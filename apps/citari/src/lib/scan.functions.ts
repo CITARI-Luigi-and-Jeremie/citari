@@ -126,6 +126,13 @@ export const lireScan = createServerFn({ method: "POST" })
     return await etatScan(data.id);
   });
 
+export const chargerVisio = createServerFn({ method: "POST" })
+  .inputValidator((data: unknown) => z.object({ jeton: z.string().min(10) }).parse(data))
+  .handler(async ({ data }) => {
+    const { visioParJeton } = await import("@/lib/orchestrateur.server");
+    return await visioParJeton(data.jeton);
+  });
+
 export const chargerRapport = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => z.object({ jeton: z.string().min(10).max(80) }).parse(d))
   .handler(async ({ data }) => {

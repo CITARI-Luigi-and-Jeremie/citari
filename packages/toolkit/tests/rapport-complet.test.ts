@@ -486,3 +486,26 @@ describe("les données mesurées et jamais montrées (passe 3)", () => {
     expect(reponsesRecommandees(mentions, null, {}, true)).toBe(1);
   });
 });
+
+describe("la visio : l'assemblage du support de présentation", () => {
+  it("écarte les domaines détenus par un rival ou un géant des cibles de citation", async () => {
+    const { domainesCitables } = await import("@/lib/visio");
+    const domaines = [
+      { hote: "ubiq.fr", lectures: 23, votreSite: false },
+      { hote: "deskeo.com", lectures: 18, votreSite: false },
+      { hote: "wework.com", lectures: 11, votreSite: false },
+      { hote: "bureauxlocaux.com", lectures: 8, votreSite: false },
+      { hote: "monsite.fr", lectures: 9, votreSite: true },
+    ];
+    const classes = { Deskeo: "rival", WeWork: "geant", Ubiq: "outil" };
+    const citables = domainesCitables(domaines, classes, {});
+    // Une place de marché reste citable ; le site d'un rival, jamais ; le
+    // sien non plus (on ne se cite pas soi-même comme conquête).
+    expect(citables.map((c) => c.hote)).toEqual(["ubiq.fr", "bureauxlocaux.com"]);
+  });
+
+  it("la remesure se calcule depuis la date du scan, jamais depuis l'horloge", async () => {
+    const { dateRemesure } = await import("@/lib/visio");
+    expect(dateRemesure("2026-08-15T21:13:57+00:00")).toBe("13 novembre 2026");
+  });
+});
