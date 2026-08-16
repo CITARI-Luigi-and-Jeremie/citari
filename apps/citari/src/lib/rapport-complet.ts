@@ -124,6 +124,14 @@ export type CiblePlan = { titre: string; detail: string };
 export type PhasePlan = {
   nom: string;
   periode: string;
+  /**
+   * Bornes en JOURS, pour dessiner la frise à l'échelle. Portées ici plutôt
+   * que devinées en analysant la chaîne « J1 à J15 » dans le composant : les
+   * phases se CHEVAUCHENT, et c'est l'argument commercial que trois blocs
+   * empilés dissimulent.
+   */
+  debut: number;
+  fin: number;
   /** Le fait MESURÉ qui justifie la phase : jamais une promesse. */
   constat: string;
   actions: ActionPlan[];
@@ -678,6 +686,8 @@ export function construirePlan(entree: {
     {
       nom: "Ouvrir les portes",
       periode: "J1 à J15",
+      debut: 1,
+      fin: 15,
       constat: constatTechnique,
       actions: parChantier("Technique"),
       cibles: [],
@@ -685,6 +695,8 @@ export function construirePlan(entree: {
     {
       nom: "Écrire ce qui manque",
       periode: "J8 à J45",
+      debut: 8,
+      fin: 45,
       constat: constatContenu,
       actions: parChantier("Contenu"),
       cibles: gagnables.map((g) => ({ titre: `« ${g.texte} »`, detail: g.raison })),
@@ -692,6 +704,8 @@ export function construirePlan(entree: {
     {
       nom: "Être cité là où les IA lisent",
       periode: "J30 à J90",
+      debut: 30,
+      fin: 90,
       constat: constatCitations,
       actions: parChantier("Citations"),
       cibles: ciblesCitations,

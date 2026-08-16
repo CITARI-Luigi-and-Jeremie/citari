@@ -372,3 +372,34 @@ describe("extrait", () => {
     expect(e.texte.length).toBeLessThanOrEqual(102);
   });
 });
+
+describe("les bornes des phases, pour la frise à l'échelle", () => {
+  it("porte des jours en nombres, et les phases se chevauchent", () => {
+    const plan = construirePlan({
+      actions: [],
+      gagnables: [],
+      sources: { domaines: [], totalLectures: 0, totalDomaines: 0, lecturesVotreSite: 0, moteursAvecSources: [] },
+      technique: null,
+      matrice: {
+        moteurs: [],
+        lignes: [],
+        totaux: {},
+        questionsCitees: 0,
+        questionsMesurees: 0,
+      },
+      site: null,
+    });
+    expect(plan.map((p) => [p.debut, p.fin])).toEqual([
+      [1, 15],
+      [8, 45],
+      [30, 90],
+    ]);
+    // Le chevauchement EST l'argument commercial : les chantiers sont
+    // concurrents, pas séquentiels, et trois blocs empilés le dissimulaient.
+    expect(plan[1]!.debut).toBeLessThan(plan[0]!.fin);
+    expect(plan[2]!.debut).toBeLessThan(plan[1]!.fin);
+    // La frise couvre J1 à J90 : aucune phase ne sort du cadre dessiné.
+    expect(Math.min(...plan.map((p) => p.debut))).toBe(1);
+    expect(Math.max(...plan.map((p) => p.fin))).toBe(90);
+  });
+});

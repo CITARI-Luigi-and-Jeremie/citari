@@ -1234,6 +1234,142 @@
   font-family: var(--font-sans);
 }
 
+/* ============================================================
+   DOCUMENT DE MESURE — la convention de surface du rapport complet.
+   Refonte « cadastre » du 16/08/2026.
+
+   Une seule légende, déclarée une fois en tête du document et tenue sur
+   tous les chapitres. Quatre valeurs de surface, et elles disent QUI TIENT
+   QUOI :
+
+     encre pleine   → tenu par vous        (le noir est la possession)
+     hachure montante → tenu par une autre marque
+     papier nu      → personne, ou vous êtes absent
+     hachure fine descendante → non relevé (réponse en erreur, hors mesure)
+
+   Les deux hachures ont des pentes opposées et des densités différentes :
+   elles restent distinctes en niveaux de gris, en vision daltonienne et sur
+   papier. En CSS et non en <pattern> SVG, donc aucun identifiant à générer
+   et aucun risque d'hydratation.
+   ============================================================ */
+
+@utility tenue {
+  background-image: repeating-linear-gradient(
+    45deg,
+    transparent 0 4px,
+    color-mix(in srgb, var(--ink) 13%, transparent) 4px 6px
+  );
+  print-color-adjust: exact;
+  -webkit-print-color-adjust: exact;
+}
+
+@utility non-relevee {
+  background-image: repeating-linear-gradient(
+    -45deg,
+    transparent 0 3px,
+    color-mix(in srgb, var(--ink) 7%, transparent) 3px 4px
+  );
+  print-color-adjust: exact;
+  -webkit-print-color-adjust: exact;
+}
+
+/* La serif ÉNONCE. `quote-serif` force l'italique ; un titre de chapitre est
+   du texte de notre main, pas une citation : il lui faut le romain. */
+@utility serif-roman {
+  font-family: var(--font-quote);
+  font-style: normal;
+  font-weight: 400;
+}
+
+@utility serif-ital {
+  font-family: var(--font-quote);
+  font-style: italic;
+  font-weight: 400;
+}
+
+/* Le kicker : numéro de chapitre et angle, en tête de chaque planche. */
+@utility kicker {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+
+/* La conduite : la ligne de points du bordereau français, qui relie un
+   objet à sa valeur. C'est elle qui donne au bloc son identité de pièce
+   officielle plutôt que de tableau. */
+@utility conduite {
+  flex: 1 1 auto;
+  min-width: 1.5rem;
+  border-bottom: 1px dotted var(--rule-strong);
+  transform: translateY(-0.25em);
+}
+
+/**
+ * La planche : un chapitre qui déborde jusqu'aux bords de la fenêtre.
+ *
+ * `overflow-x: clip` (jamais `hidden`) sur le document : `hidden` crée un
+ * conteneur de défilement et tue tous les `position: sticky` descendants.
+ * Le débord passe par les marges négatives et jamais par `w-screen` : 100vw
+ * inclut la barre de défilement et ferait déborder le corps.
+ */
+@utility planche {
+  margin-inline: calc(50% - 50vw);
+  padding-inline: calc(50vw - 50%);
+}
+
+@utility doc-clip {
+  overflow-x: clip;
+}
+
+/* ---- Impression ----------------------------------------------------
+   `no-print` et `avoid-break` étaient utilisés par le rapport depuis
+   toujours et n'étaient définis NULLE PART : le bouton « imprimer »
+   sortait le sommaire et coupait les tableaux au milieu. DESIGN.md §8 :
+   le PDF partage le système de l'écran, seul le fond passe au blanc.     */
+
+.no-print {
+  /* hors impression, la classe ne fait rien : elle marque seulement */
+}
+
+@media print {
+  :root {
+    --paper: #ffffff;
+    --paper-2: #f7f6f3;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  .avoid-break,
+  figure,
+  li,
+  tr {
+    break-inside: avoid;
+  }
+
+  thead {
+    display: table-header-group;
+  }
+
+  /* Les URL sont imprimées : un document papier doit rester vérifiable. */
+  a[href^="http"]::after {
+    content: " (" attr(href) ")";
+    font-family: var(--font-mono);
+    font-size: 9px;
+    color: var(--ink-3);
+    word-break: break-all;
+  }
+
+  /* Un document imprimé ne déborde jamais : la planche perd son débord. */
+  .planche {
+    margin-inline: 0;
+    padding-inline: 0;
+  }
+}
+
 /* Étape « Les N questions » de la séquence de rapport : l'affordance de clic.
    Le survol et la rotation du chevron dépendent de l'état [open] du <details>,
    hors de portée des styles en ligne du composant. */

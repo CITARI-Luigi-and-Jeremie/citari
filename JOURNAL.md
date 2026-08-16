@@ -5,6 +5,80 @@ d'une nouvelle session, après `CLAUDE.md`.
 
 ---
 
+## 2026-08-16 — Le cadastre : une absence est un trou, pas une case rose
+
+« J'ai encore du mal niveau esthétique, lisibilité et pertinence, on est loin
+de ce qu'on veut » (Luigi), avec une consigne : aller chercher les skills de
+design. `artifact-design` et `dataviz` chargés comme l'impose CLAUDE.md, plus
+DESIGN.md qui fait foi. Le diagnostic s'est révélé chiffrable, et sévère :
+**16 tailles de texte distinctes dont 530 éléments entassés entre 10 et
+15px**, tous en Archivo 600, et Newsreader présente 9 fois sur 673 éléments.
+C'est mot pour mot « l'échelle molle où tout se ressemble » que DESIGN.md §3
+interdit. Le document échouait aussi au test de sortie du §10 : un 13/100
+s'affichait en noir neutre à côté du mot « Invisible » en noir.
+
+Quatre directions produites et jugées par trois lentilles (directeur
+artistique, dirigeant de PME, ingénieur). **« Cadastre » l'emporte**, et sa
+thèse tient en quatre valeurs de surface déclarées une fois pour tout le
+document : encre pleine = tenu par vous, hachure montante = tenu par une
+autre marque, papier nu = personne ou vous êtes absent, hachure fine =
+non relevé. Le lecteur apprend la légende en dix secondes puis lit le
+territoire sans qu'on lui explique.
+
+**La correction la plus importante ne m'appartient pas.** J'avais diagnostiqué
+« le signal est sous-employé » ; la direction gagnante a démontré l'inverse :
+il était DÉPENSÉ EN DÉCORATION. 124 cases teintées dans la carte, un chevron
+rouge sur chacune des 24 lignes, la marque du client en rouge dans chaque
+liste. À ce régime le rouge est un motif de fond et plus rien ne peut
+alarmer. On ne crée pas la tension en ajoutant du rouge, on la crée en le
+rationnant : budget opposable de 2 % de la surface encrée, et le rouge ne dit
+plus qu'une chose, la perte. `--verdict` (bleu encre), déclaré depuis
+toujours et quasi jamais employé, porte l'acquis. Conséquence assumée : sur
+un site au robots.txt ouvert, le chapitre technique est ENTIÈREMENT BLEU. Un
+document rouge de bout en bout ne fait plus peur nulle part.
+
+Ce que la refonte a produit, vérifié sur le scan Snapdesk :
+
+- **la carte** : segments jointifs, une absence est du papier nu (plus de
+  croix rose), et la colonne du tenant est hachurée sur 24 lignes, ce qui
+  produit un mur continu le long du bord droit face à six colonnes presque
+  vides. L'œil lit « tout est tenu, sauf par vous » avant un seul chiffre ;
+- **le verdict** : le score devient un point sur une règle graduée de 0 à
+  100. À 13, le trait rouge tombe à 13 % et 87 % de la règle reste vide. Le
+  territoire manquant est dessiné à l'échelle, sans un mot ;
+- **les quatre composantes** en grille `50fr 20fr 20fr 10fr` : la largeur de
+  chaque colonne EST son poids dans la formule. La mise en page démontre la
+  formule au lieu de la réciter ;
+- **la question décisive** : six colonnes de journal, et les six lignes
+  d'état alignées font que cinq « absent » en rouge tracent une règle
+  horizontale à travers la page. Personne ne l'a dessinée, c'est la donnée ;
+- **le duel** passe sur un AXE UNIQUE (les réponses lues) : l'ancien axe
+  était le maximum des deux barres, ce qui donnait au rival une barre pleine
+  largeur quelle que soit sa domination et détruisait l'échelle ;
+- **les sources** : six pastilles par ligne disent quels moteurs lisent ce
+  site. La donnée existait et était diluée en une liste de noms ;
+- **le rail de sommaire** est remplacé par un BORDEREAU en ouverture, neuf
+  lignes à points de conduite portant chacune le chiffre clé de son
+  chapitre. Il s'imprime, lui, et il sert de résumé exécutif.
+
+Trois familles, trois métiers : le mono COMPTE, Archivo ÉTIQUETTE, Newsreader
+ÉNONCE (romain pour les titres, italique pour les paroles prélevées : la
+distinction porte du sens). Newsreader passe de 9 à 129 occurrences.
+
+**Deux bugs réels trouvés au passage.** `no-print` et `avoid-break` étaient
+utilisés depuis toujours dans le rapport et n'étaient définis NULLE PART : il
+n'existait aucun bloc `@media print`, donc le bouton « imprimer » sortait le
+sommaire et coupait les tableaux au milieu. Et le titre de la carte comptait
+en QUESTIONS pendant que son pied comptait en RÉPONSES, deux nombres justes
+dans le même chapitre : le pied a été supprimé, une unité par chapitre,
+toujours nommée. C'est la règle payée le 14/08.
+
+Piège de syntaxe repayé : un commentaire `{/* */}` entre deux attributs JSX
+casse le parseur, et `tsc` ne le voit pas si on ne le relance pas après
+l'édition. Le serveur de dev, lui, l'a vu tout de suite.
+
+---
+
 ## 2026-08-16 — Le document de mesure devient l'instrument de la visio
 
 « Le scan complet est beaucoup trop indigeste et impertinent » (Luigi). Le

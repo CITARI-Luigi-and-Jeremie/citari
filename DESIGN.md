@@ -39,11 +39,27 @@ Références mentales (ne pas copier, s'en inspirer) : la presse économique imp
 
 ### Choix engagés pour ce projet
 
+Mis à jour le 16/08/2026 contre `apps/citari/src/styles.css`, qui fait foi :
+ce tableau annonçait encore Instrument Serif et Public Sans, abandonnées au
+portage du front v3. Un document de référence qui contredit le code fait
+perdre une heure à chaque relecture.
+
 | Rôle | Police | Usage |
 |---|---|---|
-| Titres | **Instrument Serif** | H1/H2 éditoriaux, chiffres héros |
-| Corps | **Public Sans** | texte courant, UI |
-| Données | **IBM Plex Mono** | scores, pourcentages, requêtes, moteurs, labels techniques |
+| Nom, étiquettes, UI | **Archivo** (400/500/600/700/800) | le nom de marque en 800, les labels, le texte courant |
+| Titres et parole | **Newsreader** (400 romain et italique) | titres de chapitre en ROMAIN, verbatims en ITALIQUE |
+| Données | **IBM Plex Mono** (400/500) | scores, pourcentages, requêtes, moteurs, labels techniques |
+
+**Trois familles, trois métiers, et le métier fait le contraste** (refonte du
+document de mesure, 16/08/2026) : le mono COMPTE, Archivo ÉTIQUETTE,
+Newsreader ÉNONCE. La règle opposable : entre deux niveaux voisins, jamais
+moins d'un facteur 1,5 en taille ou un changement de famille. Le document de
+mesure avait 16 tailles distinctes dont 530 éléments entassés entre 10 et
+15px, tous en Archivo 600 : c'est cette bouillie que la règle interdit.
+
+La distinction romain/italique de Newsreader PORTE DU SENS et ne se choisit
+pas au goût : l'italique est une phrase prélevée comme pièce, le romain est
+un texte rendu tel quel ou un titre de notre main.
 
 ## 4. Couleur
 
@@ -68,19 +84,49 @@ Références mentales (ne pas copier, s'en inspirer) : la presse économique imp
 
 ### Palette engagée (validée CVD — voir §11)
 
-| Token | Valeur | Rôle | Contraste sur `--paper` |
-|---|---|---|---|
-| `--paper` | `#E9E8E3` | fond, papier gris-vert pâle (jamais blanc pur) | — |
-| `--paper-raised` | `#F2F1ED` | surfaces surélevées, champs | — |
-| `--paper-sunken` | `#E1E0DA` | lignes alternées de tableau | — |
-| `--rule` | `#C9C7C0` | filets 1px | — |
-| `--rule-strong` | `#A8A59C` | filets accentués, cadres de champ | — |
-| `--track` | `#D6D4CD` | piste des jauges (lisible même à 0 %) | — |
-| `--ink` | `#17191C` | texte principal | 14,4:1 |
-| `--ink-dim` | `#4E5257` | texte secondaire | 6,4:1 |
-| `--ink-faint` | `#5F6368` | labels, texte tertiaire | 4,9:1 |
-| `--signal` | `#A33449` | bordeaux — accent unique : alerte + action | 5,4:1 |
-| `--valid` | `#175FB4` | bleu encre — score élevé | 5,1:1 |
+Mise à jour le 16/08/2026 contre `styles.css` : les valeurs ci-dessous sont
+celles du code, et les noms `--paper-raised`, `--paper-sunken`, `--track`,
+`--ink-dim`, `--ink-faint`, `--valid` n'existent plus depuis le portage v3.
+
+| Token | Valeur | Rôle |
+|---|---|---|
+| `--paper` | `#fbfaf7` | fond, papier chaud (jamais blanc pur) |
+| `--paper-2` | `#f2f0ea` | planches, dépliés, pistes de jauge |
+| `--ink` | `#17160f` | texte principal, ET la possession dans le document de mesure |
+| `--ink-2` | `#5c5a52` | texte secondaire |
+| `--ink-3` | `#7a756b` | labels, texte tertiaire |
+| `--signal` | `#c0371d` | accent unique : la PERTE, et l'action |
+| `--signal-tint` | `#f6dfd8` | surlignage d'un concurrent, ligne d'un robot refusé |
+| `--verdict` | `#1f3a5c` | bleu encre : l'ACQUIS mesuré (porte ouverte, score ≥ 70) |
+| `--rule` / `--rule-strong` | encre à 15 % / 20 % | filets |
+
+**Le rouge se rationne, il ne s'ajoute pas** (refonte du 16/08/2026). Le
+document de mesure avait 124 cases teintées et 24 chevrons rouges : à ce
+régime, le rouge est un motif de fond et plus rien n'alarme. Budget
+opposable en revue : `--signal` ne couvre jamais plus de 2 % de la surface
+encrée d'un écran, et ne dit qu'une seule chose, la perte. `--verdict` porte
+l'acquis, et c'est lui qui rend les chapitres rouges crédibles : un document
+rouge de bout en bout ne fait plus peur nulle part.
+
+### La convention de surface du document de mesure
+
+Quatre valeurs, déclarées une fois en tête du rapport et tenues sur tous les
+chapitres. Elles disent QUI TIENT QUOI, et le lecteur les apprend en dix
+secondes :
+
+| Surface | Sens |
+|---|---|
+| encre pleine | tenu par vous |
+| hachure montante 45° (`tenue`) | tenu par une autre marque |
+| papier nu | personne, ou vous êtes absent |
+| hachure fine descendante (`non-relevee`) | non relevé, hors mesure |
+
+Les deux hachures ont des pentes opposées et des densités différentes :
+elles restent distinctes en niveaux de gris, en vision daltonienne et sur
+papier (avec `print-color-adjust: exact`, sans quoi toute la convention
+disparaît à l'impression). Conséquence directe : **une absence est un trou,
+jamais une case décorée**. Sur un scan à 13/100, les 124 absences de la
+carte cessent de remplir l'écran et se mettent à manquer.
 
 Le `--signal` est la seule couleur saturée du système. Il sert à l'action (CTA) **et** à l'alerte (score bas). Cette double fonction est volontaire : chez nous, la mauvaise nouvelle *est* l'appel à l'action.
 
