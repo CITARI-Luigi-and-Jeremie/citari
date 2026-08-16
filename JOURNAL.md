@@ -5,6 +5,31 @@ d'une nouvelle session, après `CLAUDE.md`.
 
 ---
 
+## 2026-08-16 — Le transfert vers l'organisation a tué les déploiements, en silence
+
+Le dépôt a quitté `LuigiRevelli/citari` pour l'organisation
+`CITARI-Luigi-and-Jeremie` (créée avec Jérémie ; on y pousse tout,
+en permanence). Deux pièges payés, à connaître :
+
+1. **GitHub redirige les pushs vers l'ancienne adresse**, donc tout SEMBLE
+   marcher : `git push` réussit, aucun message d'erreur. Mais le déploiement
+   automatique Hostinger, lui, était mort — deux mises à jour (le PR
+   analytics GA4 et la projection) sont restées sur GitHub sans jamais
+   partir en production. Un déploiement qui prenait 2 à 4 minutes qui n'est
+   pas passé en 15, c'est un circuit coupé, pas un circuit lent.
+2. **La cause exacte, diagnostiquée par l'API GitHub** (`gh api
+   /orgs/.../installations`) : l'app Hostinger était bien INSTALLÉE sur
+   l'organisation, mais en mode « dépôts sélectionnés » sans `citari` coché.
+   Tout semble en place, et le dépôt est invisible pour Hostinger — c'est ce
+   qui a rendu la reconnexion « impossible » depuis le panneau. Réglage :
+   la page d'installation de l'app dans les réglages de l'organisation →
+   Repository access → cocher le dépôt → reconnecter côté Hostinger.
+
+Après la reconnexion par Luigi, le déploiement est reparti et la projection
+est en ligne, vérifiée en production.
+
+---
+
 ## 2026-08-16 — La projection : le scan complet adopte le seul format que Luigi a validé
 
 Troisième retour identique de Luigi sur le document (« pas lisible, pas
