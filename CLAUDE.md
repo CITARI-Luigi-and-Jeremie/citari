@@ -134,17 +134,30 @@ moteur qu'on vient d'interroger et de facturer serait un mensonge : ne jamais
 rendre cet aiguillage configurable.
 
 **La VISIO est le troisième artefact du scan complet** (16/08/2026, théâtre
-sombre le soir même) : `/visio/$jeton`, plein écran SUR L'ENCRE (grille de
-la séquence de résultat, texte papier, fil de progression, chiffres
-comptés), 23 écrans en cinq actes (verdict, preuve, causes, plan,
-décision), pilotés aux flèches ou à la télécommande. C'est le support que
-LUIGI commente en partage d'écran pour vendre le Sprint ; l'URL n'est liée
-nulle part. Règle de pertinence : chaque écran porte une donnée propre au
-prospect, 40 mots max ; sur l'encre les concurrents se soulignent EN
-PAPIER, le minium (éclairci au `color-mix`) reste réservé au manque.
-`?places=N` affiche les places restantes du mois : un chiffre réel saisi
-par Luigi, jamais déduit. L'assemblage vit dans `lib/visio.ts`, l'écart
-aperçu → complet vient de `visioParJeton`.
+sombre puis refonte de CONTENU le soir même, architecture passée au panel
+de juges et validée par Luigi) : `/visio/$jeton`, plein écran SUR L'ENCRE,
+**20 écrans en SIX actes** (le verdict, vos acheteurs, pourquoi eux, le
+plan, cette semaine, la décision), pilotés aux flèches ou à la
+télécommande. C'est le support que LUIGI commente en partage d'écran pour
+vendre le Sprint ; l'URL n'est liée nulle part. La règle au-dessus des
+autres : chaque écran porte une donnée propre à CE prospect ET un
+enseignement stratégique, jamais une reformulation du chiffre ; zéro écran
+de méthode, zéro promesse de résultat (la remesure datée est le seul
+engagement, et elle FERME le déroulé, après l'offre). Pièces maîtresses :
+la règle du jeu annoncée AVANT le verdict (« si votre score est bon, on ne
+vous vend rien »), le score aux DEUX protocoles étiquetés (l'écart
+mémoire/web n'est pas à périmètre constant : on l'affiche tel quel), la
+carte des 134 réponses (anti-« montage d'extraits »), les moments d'achat
+avec leur score, le classement unifié des sources lues (annuaire > site
+concurrent > votre site, la porte robots innocentée), le pivot « cité 8
+fois moins, recommandé au même taux » (chaque moitié gardée par sa
+donnée), le retournement du 86 (« 48 réponses se jouent sans Wojo »), les
+3 gestes OFFERTS dédupliqués des livrables du Sprint, et le Sprint ligne
+par ligne (constat mesuré → livrable). Sur l'encre le minium (éclairci au
+`color-mix`) reste réservé au manque. `?places=N` affiche les places
+restantes du mois : un chiffre réel saisi par Luigi, jamais déduit.
+L'assemblage vit dans `lib/visio.ts`, l'écart aperçu → complet vient de
+`visioParJeton`.
 
 **L'ANALYSE COMPLÉMENTAIRE nourrit les deux écrans les plus vendeurs de la
 visio** (16/08/2026) : `lib/analyse.server.ts`, cache dans

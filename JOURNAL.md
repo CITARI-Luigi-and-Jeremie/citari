@@ -5,6 +5,62 @@ d'une nouvelle session, après `CLAUDE.md`.
 
 ---
 
+## 2026-08-16 — La visio refondue en livrable de conseil : 20 écrans, 6 actes
+
+Brief exigeant de Luigi le soir même : « il affiche des données, il
+n'apprend rien ». Le standard : un livrable de cabinet qu'on aurait payé
+cher, un CEO à 15 ans de métier doit y apprendre des choses sur SON
+marché, 3 informations qu'il veut répéter à son associé. Méthode imposée :
+architecture proposée en texte, validation, puis construction.
+
+**Le panel de juges avant la proposition** (workflow : un CEO sceptique du
+secteur, un associé de cabinet, l'auditeur d'honnêteté, un critique de
+complétude). Ce qu'ils ont corrigé de mon premier jet, à retenir :
+
+- **L'écart 24 → 13 n'est pas à périmètre constant** (20 questions × 2
+  moteurs sans web contre 24 × 6 avec web) : affiché tel quel avec ses
+  deux protocoles étiquetés, jamais comme une preuve unique. L'option
+  « rejouer les 24 questions sans web » (~0,20 €) reste ouverte.
+- **« La place se reprend en 90 jours » était une promesse déguisée en
+  constat** : supprimée. La remesure datée est le seul engagement, et elle
+  FERME le déroulé (le prix avant, l'engagement après : c'est l'écran qui
+  reste affiché pendant la discussion).
+- **« Si votre score est bon, on ne vous vend rien » prononcé à la fin ne
+  coûte rien** : monté à l'écran 1, en règle du jeu, AVANT le verdict.
+- **Les arguments du rival seuls n'apprennent rien** à un CEO qui les lit
+  dans chaque appel d'offres : la nouveauté est que les machines les
+  récitent parce que LUI les a écrits là où elles lisent.
+- **Le pivot est obligatoire** (« cité 8 fois moins, recommandé au même
+  taux, jamais une phrase négative ») : sans lui, 18 écrans de mauvaises
+  nouvelles fabriquent un fataliste qui ne signe pas. Chaque moitié de la
+  phrase est gardée par sa donnée (taux par réponse ≥ rival ; zéro mention
+  négative) ; si aucune ne tient, l'écran sort.
+- **Le cadeau et le plan sont dédupliqués** : 3 gestes offerts (llms.txt,
+  3 inscriptions, la page de la question gagnable n°1), et le Sprint
+  couvre explicitement le RESTE (« hors les 3 offertes », « la première
+  est déjà à vous »). Le recouvrement assumé vaut mieux que découvert.
+- **La carte des 134 réponses** en plein écran, zéro texte : la preuve
+  d'ampleur qui désamorce le soupçon de montage d'extraits.
+- **Deskeo réconcilié** : site concurrent le plus lu (18 lectures), il
+  apparaît au classement des sources ; le rival 2 du duel des
+  recommandations vient des classes (`rival` seulement), donc Morning (48
+  recos) et pas Deskeo si celui-ci est classé géant.
+
+**Leçon des vraies données** : je pensais « ils comparent : 0/10 », la
+réalité est 5/10, et c'est « ils ont un problème à régler » qui est à
+0/6. L'écran calcule le pire moment au lieu de réciter une hypothèse :
+écrire l'enseignement en calcul, jamais en texte figé.
+
+Données manquantes signalées plutôt qu'inventées : le poids du canal
+(aucun volume de recherche : traité par les annuaires qu'il connaît déjà
+et les 455 lectures), la médiane sectorielle (baromètre pas constitué),
+le coût d'inaction en euros (le script oral fait chiffrer le CEO
+lui-même), « vous ne figurez sur aucun annuaire » (jamais affirmé : la
+mesure observe des lectures, pas les fiches ; rituel pré-visio :
+`verify-citations` + relire robots/llms le matin de l'appel).
+
+---
+
 ## 2026-08-16 — L'analyse complémentaire et le théâtre sombre
 
 Double rejet de Luigi sur la visio du matin : « tu as juste mis en slide
