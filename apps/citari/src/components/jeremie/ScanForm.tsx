@@ -6,6 +6,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { brandFromDomain } from "@/lib/site";
 import { lancerScan } from "@/lib/scan.functions";
 import { useScanFormFocus } from "@/lib/scan-form-focus";
+import { suivreEvenement } from "@/lib/analytics";
 import { LogosMoteurs } from "@/components/jeremie/LogosMoteurs";
 
 /**
@@ -62,6 +63,9 @@ export function ScanForm({ centered = false }: { centered?: boolean }) {
     if (!marque) setMarque(brandFromDomain(domaine));
     setEtape(1);
     setOuvert(true);
+    // Première marche de l'entonnoir : le visiteur a tapé un domaine et cliqué.
+    // C'est l'intention, à distinguer de la visite qui n'a rien fait.
+    suivreEvenement("scan_formulaire_ouvert");
   };
 
   const fermer = () => {
@@ -94,6 +98,9 @@ export function ScanForm({ centered = false }: { centered?: boolean }) {
       if ("erreur" in reponse && reponse.erreur) {
         setEtat("erreur");
         setMessageErreur(reponse.erreur);
+        // Un refus se compte : quota d'IP atteint ou marque invalide, ce sont
+        // des scans que l'entonnoir a perdus là et nulle part ailleurs.
+        suivreEvenement("scan_refuse", { motif: reponse.erreur.slice(0, 100) });
         return;
       }
 
@@ -105,9 +112,19 @@ export function ScanForm({ centered = false }: { centered?: boolean }) {
         /* stockage indisponible : la réservation reste possible sans préremplissage. */
       }
 
+      // La conversion qui compte sur ce site : un scan part, et l'email est
+      // dans la même soumission — les deux marches du plan initial n'en font
+      // plus qu'une depuis que `lancerScan` exige l'adresse.
+      //
+      // Ni la marque ni l'email ne sont envoyés : Supabase sait déjà QUI a
+      // scanné, GA n'a besoin de savoir que COMBIEN. Envoyer l'adresse d'un
+      // prospect à Google serait au surplus contraire aux conditions de GA.
+      suivreEvenement("scan_lance", { mode: "apercu", deja_en_cache: reponse.cached === true });
+
       navigate({ to: "/scan/$id", params: { id: reponse.id } });
     } catch (e) {
       setEtat("erreur");
+      suivreEvenement("scan_echec");
       // Les messages de validation du serveur sont écrits pour être lus.
       const brut = e instanceof Error ? e.message : "";
       setMessageErreur(
@@ -122,6 +139,9 @@ export function ScanForm({ centered = false }: { centered?: boolean }) {
     if (etape === 1) {
       if (!domaine.trim() || !marque.trim()) return;
       setEtape(2);
+      // L'écart entre cette marche et `scan_lance` mesure exactement ce que
+      // coûte la demande d'email — le seul frein qu'on ait choisi de poser.
+      suivreEvenement("scan_etape_email");
       return;
     }
     void soumettre();
