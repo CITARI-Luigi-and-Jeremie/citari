@@ -5,6 +5,47 @@ d'une nouvelle session, après `CLAUDE.md`.
 
 ---
 
+## 2026-08-16 — La visio : le troisième artefact, celui qui vend
+
+Brief de Luigi, très précis : le scan complet sert AUSSI de support de
+présentation pour la visio de 30 minutes, « simple efficace esthétique
+archi pertinent visuel pragmatique à mort », à la fin de laquelle le
+dirigeant doit vouloir signer le Sprint. Ce n'est pas le rapport autonome :
+c'est un déroulé que LUI commente. D'où `/visio/$jeton`, plein écran, URL
+liée nulle part (elle se tape), noindex.
+
+**Cinq actes imposés, 22 écrans** : le verdict (garde, score avec l'écart
+aperçu → complet, part de voix), la preuve (recommandations 50 contre 6,
+cinq verbatims, la question décisive), les causes (trois, chacune en deux
+écrans : l'explication en langage courant puis la preuve tirée de SES
+données), le plan (calendrier 12 semaines, fondations, contenus nommés
+depuis ses questions perdues, citations), la décision (la remesure datée,
+l'offre).
+
+**La règle de pertinence prime sur tout** : chaque écran porte au moins une
+donnée qui n'existe que pour ce prospect. Zéro écran de méthode, zéro
+gabarit. Et les règles d'écran : un message par écran, 40 mots et 4
+chiffres maximum (« c'est moi qui parle, pas l'écran »), concurrents
+surlignés EN ENCRE, l'absence seule en minium.
+
+Ce qui fait tenir l'esthétique (« pas IA generated ») : un CHROME IDENTIQUE
+sur les 22 écrans (filet haut acte + numéro, filet bas marque + date, tout
+en mono), une grille ancrée à gauche, TROIS tailles de texte par écran au
+plus, plus de la moitié de vide, zéro carte, zéro ombre, zéro icône. La
+constance du gabarit fait le sérieux, pas les effets.
+
+Notes d'implémentation : `visioParJeton` récupère l'APERÇU du même
+`domain_key` pour l'écart 24 → 13 de l'écran 2 (l'argument le plus fort du
+déroulé : la mémoire contre le web ouvert). `domainesCitables` écarte les
+domaines détenus par un rival ou un géant des cibles de citation (on ne
+sera jamais inscrit sur deskeo.com). Les « places restantes » de l'écran
+d'offre ne s'affichent que si Luigi les passe en `?places=N` : un chiffre
+réel saisi, jamais une rareté inventée. La remesure se date depuis
+`completed_at + 90 j`, pas depuis l'horloge. Télécommandes de présentation :
+PageUp/PageDown, en plus des flèches ; F pour le plein écran.
+
+---
+
 ## 2026-08-16 — Le transfert vers l'organisation a tué les déploiements, en silence
 
 Le dépôt a quitté `LuigiRevelli/citari` pour l'organisation

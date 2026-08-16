@@ -133,6 +133,16 @@ deux endroits est le piège déjà payé avec les deux comparatifs. En `complet`
 moteur qu'on vient d'interroger et de facturer serait un mensonge : ne jamais
 rendre cet aiguillage configurable.
 
+**La VISIO est le troisième artefact du scan complet** (16/08/2026) :
+`/visio/$jeton`, plein écran, 22 écrans en cinq actes (verdict, preuve,
+causes, plan, décision), pilotés aux flèches ou à la télécommande. C'est le
+support que LUIGI commente en partage d'écran pour vendre le Sprint ; l'URL
+n'est liée nulle part. Règle de pertinence : chaque écran porte une donnée
+propre au prospect, 40 mots max, concurrents surlignés en encre, l'absence
+seule en minium. `?places=N` affiche les places restantes du mois : un
+chiffre réel saisi par Luigi, jamais déduit. L'assemblage vit dans
+`lib/visio.ts`, l'écart aperçu → complet vient de `visioParJeton`.
+
 **Le scan complet est une PROJECTION, et le document est sa version
 imprimable** (16/08/2026, après trois retours identiques de Luigi sur le
 document défilant : « pas lisible, pas intuitif, pas clair »). À l'écran, le
@@ -382,7 +392,7 @@ du toolkit et les colonnes réelles vit dans
 
 ```bash
 pnpm install
-pnpm -r test                        # 274 tests
+pnpm -r test                        # 276 tests
 pnpm -r typecheck                   # paquets + fichiers du site importés par les tests
 npm --prefix apps/citari run typecheck   # TOUT le site (ajouté le 14/08/2026)
 npm --prefix apps/citari run build
