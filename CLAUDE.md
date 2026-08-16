@@ -133,7 +133,20 @@ deux endroits est le piège déjà payé avec les deux comparatifs. En `complet`
 moteur qu'on vient d'interroger et de facturer serait un mensonge : ne jamais
 rendre cet aiguillage configurable.
 
-**Le document de mesure est fait pour être montré en visio** (refonte du
+**Le scan complet est une PROJECTION, et le document est sa version
+imprimable** (16/08/2026, après trois retours identiques de Luigi sur le
+document défilant : « pas lisible, pas intuitif, pas clair »). À l'écran, le
+rapport `complet`/`controle` est une séquence guidée dans la grammaire de
+l'aperçu (fond encre, une carte par constat, « Suivant : {l'étape qui suit
+RÉELLEMENT} », flèches, points), ouverte sur L'ESSENTIEL : le bordereau des
+neuf constats cliquables. Le document défilant reste monté en permanence
+comme VERSION IMPRIMABLE (Cmd+P imprime toujours le document, jamais une
+carte) et accessible par un lien. Une seule source de chiffres :
+`construireDocument`. Ne pas retomber dans le piège : tout retour de Luigi
+sur la lisibilité du complet se traite dans la PROJECTION, pas en
+réépaississant le document.
+
+**Le document de mesure (version imprimable)** (refonte du
 16/08/2026). Neuf chapitres, et **chaque titre énonce le constat avec les
 chiffres réels** : « Sur 24 questions posées, votre marque apparaît sur 10 »,
 pas « Part de voix ». Un titre générique laisse le consultant faire tout le

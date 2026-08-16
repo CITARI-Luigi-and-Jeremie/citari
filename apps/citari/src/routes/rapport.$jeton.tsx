@@ -29,6 +29,7 @@ import {
   VoixDocument,
 } from "@/components/rapport-complet";
 import { construireDocument, type LigneSourceReponse } from "@/lib/rapport-complet";
+import { ProjectionComplet, classesVueDocument } from "@/components/rapport-complet-projection";
 import { dateFr, fr, frTitre, verdict, NBSP } from "@/lib/typo";
 import { CONTACT_EMAIL } from "@/lib/site";
 import { useEffect, useMemo, useState } from "react";
@@ -218,6 +219,20 @@ function RapportComplet() {
   const marque = scan.brand_name;
   const score = Math.round(Number(scan.score_global ?? 0));
 
+  // ÉCRAN = projection (la séquence guidée), PAPIER = document. La vue
+  // document reste accessible pour qui préfère dérouler, et elle reste
+  // MONTÉE en permanence : Cmd+P imprime toujours le document, jamais une
+  // carte. L'état initial est déterministe, donc sûr à l'hydratation.
+  const [vue, setVue] = useState<"projection" | "document">("projection");
+  const [large, setLarge] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(min-width: 1100px)");
+    const onChange = () => setLarge(mq.matches);
+    onChange();
+    mq.addEventListener("change", onChange);
+    return () => mq.removeEventListener("change", onChange);
+  }, []);
+
   const donnees = useMemo(
     () =>
       construireDocument({
@@ -333,19 +348,44 @@ function RapportComplet() {
   const varianteDe = (id: string) => sections.find((s) => s.id === id)?.variante ?? "releve";
 
   return (
-    <div className="doc-clip">
+    <>
+      {vue === "projection" ? (
+        <div className="flex min-h-screen flex-col">
+          <ProjectionComplet
+            donnees={donnees}
+            reponses={reponses as unknown as LigneReponse[]}
+            mentions={mentions as unknown as LigneMention[]}
+            score={score}
+            precedent={
+              precedent
+                ? { score: Number(precedent.score), parMoteur: precedent.parMoteur }
+                : null
+            }
+            parMoteur={parMoteur}
+            wide={large}
+            onImprimer={() => setVue("document")}
+          />
+        </div>
+      ) : null}
+
+      <div className={cn("doc-clip", classesVueDocument(vue))}>
       <div className="mx-auto max-w-[1240px] px-6 pb-32 lg:px-10">
         {/* ---------------------------------------------- la garde */}
         <header className="pt-14 md:pt-20">
           <div className="flex items-baseline justify-between gap-6">
             <LogoLien hauteur={24} className="no-print" />
-            <button
-              type="button"
-              onClick={() => window.print()}
-              className="label-xs no-print ink-link"
-            >
-              imprimer
-            </button>
+            <span className="no-print flex items-center gap-5">
+              <button
+                type="button"
+                onClick={() => setVue("projection")}
+                className="label-xs ink-link"
+              >
+                version projection
+              </button>
+              <button type="button" onClick={() => window.print()} className="label-xs ink-link">
+                imprimer
+              </button>
+            </span>
           </div>
 
           <div className="mt-10 grid gap-8 lg:grid-cols-[1fr_auto] lg:items-end">
@@ -706,7 +746,8 @@ function RapportComplet() {
           </p>
         </footer>
       </div>
-    </div>
+      </div>
+    </>
   );
 }
 

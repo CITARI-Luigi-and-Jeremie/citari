@@ -5,6 +5,45 @@ d'une nouvelle session, après `CLAUDE.md`.
 
 ---
 
+## 2026-08-16 — La projection : le scan complet adopte le seul format que Luigi a validé
+
+Troisième retour identique de Luigi sur le document (« pas lisible, pas
+intuitif, pas clair »), assorti d'un « je te laisse vraiment trouver une
+solution cette fois ». Trois passes de polissage n'avaient pas réglé le
+problème : LE CADRE était faux. On avait construit un document d'expert de
+quatorze mille pixels, alors que le seul format que Luigi ait jamais validé
+dans ce produit est la SÉQUENCE de l'aperçu — un écran, un message, un
+bouton « Suivant : {l'étape qui suit RÉELLEMENT} », testée sur son père. En
+partage d'écran, un document défilant met tout le travail de guidage sur le
+consultant ; une carte à la fois, c'est le document qui guide, et le
+prospect qui a vu l'aperçu retrouve exactement la même grammaire, en
+version approfondie. Rappel de l'enjeu par Luigi : ce document est ce qui
+convainc, en visio, de payer le Sprint juste après.
+
+**La projection** (`rapport-complet-projection.tsx`) : fond encre quadrillé,
+carte claire centrée, flèches du clavier, points de progression, onze
+cartes. Elle s'ouvre sur L'ESSENTIEL : le bordereau des neuf constats,
+chacun cliquable avec son chiffre clé — on annonce tout, puis on prend les
+constats un par un. Les visuels du cadastre (règle graduée, matrice, duel,
+faces, frise) vivent DANS les cartes ; l'assemblage est strictement le même
+`construireDocument`, pas un comptage ne bouge ; une carte sans donnée sort
+de la séquence.
+
+**Le document défilant n'est pas jeté : il est devenu la version
+imprimable**, ce pour quoi sa forme est bonne. Il reste MONTÉ en permanence
+(`hidden print:block`) : Cmd+P imprime toujours le document, jamais une
+carte. Un lien discret bascule d'une vue à l'autre. Écran = projection,
+papier = document, une seule source de chiffres — ce n'est pas « la même
+pièce à deux endroits » (le piège payé), c'est le même contenu sous deux
+médias, comme l'écran et le PDF de DESIGN.md §8.
+
+Piège d'outillage consigné : le panneau de preview, quand il est masqué,
+gèle `setTimeout` et `requestAnimationFrame` — une séquence à transitions
+paraît alors cassée (carte figée en plein fondu, compteur immobile) alors
+qu'elle est saine. Vérifier sur un onglet VISIBLE avant de diagnostiquer.
+
+---
+
 ## 2026-08-16 — « On met tout ? » : six mesures dormaient en base, et le score arrive enfin
 
 Question de Luigi : « tu es sûr qu'on met tout ? ». Audit de la base contre le
