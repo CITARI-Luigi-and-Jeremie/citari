@@ -233,7 +233,9 @@ Grok et Le Chat.
 | `packages/toolkit` | L'usine : 27 commandes de livraison et d'acquisition | pnpm |
 | `packages/core` | Socle partagé : accès Supabase, appel JSON au modèle, crawl | pnpm |
 
-Tout vit dans `LuigiRevelli/citari`. `apps/citari` a été absorbé par
+Tout vit dans `CITARI-Luigi-and-Jeremie/citari` (le dépôt a quitté le compte
+personnel `LuigiRevelli` pour l'organisation, constaté le 16/08/2026 : GitHub
+redirigeait encore, l'URL du remote a été mise à jour). `apps/citari` a été absorbé par
 `git subtree` le 04/08/2026 : ce n'est **plus** un sous-module, `git log` et
 `git blame` y fonctionnent normalement, et il n'y a qu'un seul `git push`.
 
