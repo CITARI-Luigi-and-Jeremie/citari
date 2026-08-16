@@ -5,6 +5,93 @@ d'une nouvelle session, après `CLAUDE.md`.
 
 ---
 
+## 2026-08-16 — Le document de mesure devient l'instrument de la visio
+
+« Le scan complet est beaucoup trop indigeste et impertinent » (Luigi). Le
+rapport des modes `complet` et `controle` servait neuf sections de tableaux
+bruts, titrées comme un sommaire d'audit (« Part de voix », « Requête par
+requête »), et se fermait sur un mur Calendly — c'est-à-dire qu'il demandait
+de réserver un rendez-vous PENDANT le rendez-vous. Réécrit en déroulé de
+partage d'écran.
+
+**Chaque titre de chapitre énonce le constat, avec les chiffres réels.**
+« Sur 24 questions posées, votre marque apparaît sur 10 », « Wojo est nommé
+8 fois plus souvent que vous », « Pour répondre, les moteurs ont lu 230
+sites. Le vôtre : 8 fois. » Le prospect a compris avant qu'on parle. Un
+titre générique laisse le consultant faire tout le travail à l'oral, et ne
+survit pas au PDF qu'on relit trois jours plus tard.
+
+Neuf chapitres, dont trois nouveaux et deux fusions :
+
+- **la carte des réponses** : la matrice questions × moteurs, une case par
+  réponse (position si cité, croix si absent, tiret si le moteur était en
+  panne), pied de tableau « cité sur N/M » par moteur. Cliquer une ligne
+  déplie les réponses intégrales : elle absorbe l'ancien tableau ET l'ancienne
+  annexe « toutes les réponses », une pièce à un seul endroit ;
+- **la question décisive** : les six réponses côte à côte sur la question la
+  plus disputée. C'est la pièce qui remplace l'épreuve du direct ;
+- **le plan des 90 jours** : trois phases (J1-15 ouvrir les portes, J8-45
+  écrire ce qui manque, J30-90 être cité là où les IA lisent). Chaque phase
+  s'ouvre sur un CONSTAT relevé plus haut, liste les actions du scan, et se
+  ferme sur des cibles calculées : les 5 questions les plus prenables avec
+  qui les tient, les 8 domaines où être cité. Le mur Calendly est remplacé
+  par le pont honnête : « ce plan est exactement ce que le Sprint exécute ».
+
+**Les sources ne sont plus celles de Perplexity seul.** ChatGPT, Claude et
+Gemini en renvoient aussi et elles dormaient en base : 455 lectures au lieu
+de 345 sur le scan Snapdesk, avec le site du client reconnu (« le vôtre : 8
+fois ») et le nombre de moteurs qui l'ont lu.
+
+Tout l'assemblage vit dans `lib/rapport-complet.ts`, en fonctions pures
+testées (19 tests) ; la page n'affiche plus que ce qu'on lui donne.
+
+---
+
+## 2026-08-16 — Six défauts trouvés par la revue adversariale, dont deux sérieux
+
+Refonte relue par quatre agents (comptages, doctrine, React/SSR, cohérence),
+chaque défaut attaqué par un sceptique chargé de le RÉFUTER. Six ont survécu,
+tous corrigés. Les deux qui comptent :
+
+**Une question sans aucune réponse était comptée comme perdue.** Quand la
+collecte est amputée (moteur à sec, plafond de coût qui arrête `finaliser`
+en cours de route), les questions de queue n'ont aucune ligne `responses`.
+Elles entraient au dénominateur (« 21 questions sur 24 se jouent sans
+vous »), et pire : n'ayant aucune mention, elles obtenaient le score de
+gagnabilité MAXIMAL et sortaient en tête du plan des 90 jours avec la raison
+« Personne ne tient cette question : la place est vide. » Une affirmation
+fabriquée à partir d'une panne. La règle du dénominateur était appliquée par
+moteur, pas par question. `LigneMatrice.mesuree` la porte désormais partout,
+et le titre annonce la coupe (« 20 ont pu être mesurées ») au lieu de la
+cacher.
+
+**Le duel et la part de voix comptaient le même concurrent différemment.**
+`adversairePrincipal` groupait sur `m.brand` BRUT, sans passer par
+`brand_aliases`, alors que `partDeVoix`, affichée juste en dessous dans la
+MÊME section, regroupe les variantes. « Exco » et « Exco Lyon » restaient
+donc deux adversaires disjoints : le duel annonçait un nombre déflaté, et la
+barre juste dessous en affichait un autre pour la même marque. C'est
+exactement le bug du 14/08 (« 14 d'un côté, 13 de l'autre », scan Airbnb),
+corrigé alors pour la marque CIBLE et pas pour l'adversaire. Corrigé dans
+`rapport-apercu.ts`, donc pour l'aperçu aussi.
+
+Les quatre autres : `dateFr` formatait dans le fuseau du runtime (Cloudflare
+en UTC contre un navigateur parisien : deux dates différentes pour un scan
+achevé après 22 h UTC, donc erreur d'hydratation sur tout l'arbre, invisible
+en dev où les deux partagent le Mac) ; les clés React du plan reposaient sur
+des titres écrits par un modèle, sans unicité garantie ; un scan `controle`
+s'étiquetait « scan complet » en en-tête, contredit par sa propre ligne
+« échantillon » ; et plusieurs tris n'avaient aucun départage alors que
+`mentions` arrive sans ORDER BY, si bien que deux ex æquo pouvaient nommer un
+tenant différent d'une ouverture du rapport à l'autre.
+
+Ce que la revue a coûté et appris : la vérification adversariale a buté deux
+fois sur les limites de session, et une partie des défauts non confirmés n'a
+jamais pu être attaquée. Les six retenus l'ont été sur pièces, avec le
+scénario qui les déclenche.
+
+---
+
 ## 2026-08-15 — Calendly ne parle qu'aux pages qui se déclarent
 
 La vraie réservation de test de Luigi n'est jamais apparue sur /equipe, et

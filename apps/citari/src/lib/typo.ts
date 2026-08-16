@@ -38,6 +38,12 @@ export function dateFr(iso: string | Date): string {
     day: "2-digit",
     month: "long",
     year: "numeric",
+    // Fuseau FIGÉ : sans lui, la date calendaire dépend du runtime. Le
+    // serveur (Cloudflare, UTC) et le navigateur du prospect (Paris) peuvent
+    // alors rendre deux dates différentes pour un scan achevé entre 22 h et
+    // minuit UTC, et ce texte divergent met tout l'arbre React en erreur
+    // d'hydratation. Invisible en dev, où les deux partagent le même Mac.
+    timeZone: "Europe/Paris",
   }).format(d);
 }
 

@@ -3,24 +3,28 @@ import { LogoLien } from "@/components/logo";
 import { chargerRapport } from "@/lib/scan.functions";
 import { Etiquette, Label, Rule } from "@/components/kit";
 import {
-  Actions,
+  AuditRobots,
   LimiteMethodologique,
-  PartDeVoix,
   ScoreGeant,
   ScoresMoteurs,
-  Sources,
-  Miroir,
-  AuditRobots,
-  TableauRequetes,
-  ToutesLesReponses,
-  Verbatims,
-  Vide,
   type Mention,
   type Question,
   type Reponse,
 } from "@/components/rapport";
-import { dateFr, fr, frTitre, verdict, MOTEURS, NBSP } from "@/lib/typo";
-import { bookingUrl } from "@/lib/site";
+import {
+  ComposantesScore,
+  Duel,
+  FaceAFace,
+  MatriceReponses,
+  MiroirDocument,
+  PiecesDocument,
+  Plan90,
+  SourcesVue,
+  VoixDocument,
+} from "@/components/rapport-complet";
+import { construireDocument, type LigneSourceReponse } from "@/lib/rapport-complet";
+import { dateFr, fr, frTitre, verdict, NBSP } from "@/lib/typo";
+import { CONTACT_EMAIL } from "@/lib/site";
 import { useEffect, useMemo, useState } from "react";
 import { SequenceResultat } from "@/components/jeremie/rapport/SequenceResultat";
 import { BookingModal } from "@/components/jeremie/rapport/BookingModal";
@@ -60,18 +64,6 @@ export const Route = createFileRoute("/rapport/$jeton")({
   ),
   component: Rapport,
 });
-
-const SECTIONS = [
-  ["score", "Score global"],
-  ["voix", "Part de voix"],
-  ["requetes", "Requête par requête"],
-  ["verbatims", "Verbatims"],
-  ["reponses", "Toutes les réponses"],
-  ["miroir", "Ce que les IA disent de vous"],
-  ["technique", "Accès des robots"],
-  ["sources", "Sources citées"],
-  ["actions", "Actions prioritaires"],
-] as const;
 
 /**
  * Le rapport, deux artefacts sous une seule adresse.
@@ -204,19 +196,26 @@ function RapportComplet() {
   const { scan, questions, reponses, mentions, precedent } = Route.useLoaderData();
   const marque = scan.brand_name;
   const score = Math.round(Number(scan.score_global ?? 0));
-  const pdv = (Array.isArray(scan.share_of_voice) ? scan.share_of_voice : []) as {
-    name: string;
-    count: number;
-    share: number;
-    target: boolean;
-  }[];
-  const actions = (Array.isArray(scan.actions) ? scan.actions : []) as {
-    chantier: string;
-    titre: string;
-    pourquoi: string;
-    effort: string;
-  }[];
-  // Les six, toujours. Il en manquait deux — Grok et Le Chat — et le rapport
+
+  const donnees = useMemo(
+    () =>
+      construireDocument({
+        marque: scan.brand_name,
+        site: scan.website_url,
+        questions: questions as LigneQuestion[],
+        reponses: reponses as unknown as LigneSourceReponse[],
+        mentions: mentions as unknown as LigneMention[],
+        classes: (scan.concurrent_classes ?? {}) as Record<string, string>,
+        alias: (scan.brand_aliases ?? {}) as Record<string, string>,
+        mesures: scan,
+        miroir: scan.miroir,
+        audit: scan.audit,
+        actions: scan.actions,
+      }),
+    [scan, questions, reponses, mentions],
+  );
+
+  // Les six, toujours. Il en manquait deux (Grok et Le Chat) et le rapport
   // les affichait donc « — » alors qu'ils avaient bien été interrogés et notés.
   const parMoteur: Record<string, number | null> = {
     ChatGPT: scan.score_chatgpt as number | null,
@@ -226,13 +225,25 @@ function RapportComplet() {
     Grok: scan.score_grok as number | null,
     "Le Chat": scan.score_mistral as number | null,
   };
-  // Le nombre de moteurs dépend du mode : annoncer « × 6 moteurs » sur un
-  // aperçu qui en interroge deux gonfle l'ampleur de la mesure vendue.
-  const moteursInterroges = MOTEURS.filter((m) => parMoteur[m] !== null).length || MOTEURS.length;
+
+  // Le sommaire suit les données : une section sans matière sort du document,
+  // elle n'affiche jamais un gabarit vide.
+  const bloques = donnees.technique?.bloques.length ?? 0;
+  const sections: { id: string; nav: string }[] = [
+    { id: "verdict", nav: "Le verdict" },
+    { id: "carte", nav: "La carte des réponses" },
+    { id: "forces", nav: "Le rapport de forces" },
+    ...(donnees.pieces.length ? [{ id: "pieces", nav: "Les phrases exactes" }] : []),
+    ...(donnees.questionCle ? [{ id: "decisive", nav: "La question décisive" }] : []),
+    ...(donnees.miroir.length ? [{ id: "miroir", nav: "Ce que les IA racontent" }] : []),
+    { id: "portes", nav: "L'accès des robots" },
+    ...(donnees.sources.totalLectures ? [{ id: "lectures", nav: "Où les IA lisent" }] : []),
+    { id: "plan", nav: "Le plan des 90 jours" },
+  ];
+  const numero = (id: string) => sections.findIndex((s) => s.id === id) + 1;
 
   return (
     <div className="mx-auto max-w-[1180px] px-6 pb-32 lg:px-10">
-      {/* En-tête éditorial, calé à gauche */}
       <header className="pt-14 md:pt-20">
         <div className="flex items-baseline justify-between gap-6">
           <LogoLien hauteur={24} className="no-print" />
@@ -244,14 +255,32 @@ function RapportComplet() {
             imprimer
           </button>
         </div>
-        <h1 className="mt-8 text-[64px] leading-[0.92] md:text-[96px]">{marque}</h1>
+        {/* Le composant sert AUSSI le mode `controle` (24 × 4, télémétrie
+            interne) : l'étiqueter « scan complet » contredirait la ligne
+            « échantillon » deux lignes plus bas. */}
+        <p className="label-xs mt-8">
+          {frTitre(
+            scan.mode === "controle"
+              ? "document de mesure · contrôle à mi-parcours"
+              : "document de mesure · scan complet",
+          )}
+        </p>
+        <h1 className="mt-2 text-[56px] leading-[0.92] md:text-[88px]">{marque}</h1>
         <dl className="mt-6 flex flex-wrap gap-x-10 gap-y-2 border-t border-rule-strong pt-3">
           {[
             ["secteur", scan.sector],
             ["site", scan.website_url ?? "—"],
             ["date", scan.completed_at ? dateFr(scan.completed_at) : dateFr(scan.created_at)],
-            ["échantillon", `${questions.length} questions × ${moteursInterroges} moteurs`],
-            ["réponses", `${reponses.length}`],
+            [
+              "échantillon",
+              `${donnees.echantillon.questions} questions × ${donnees.echantillon.moteurs} moteurs`,
+            ],
+            [
+              "réponses lues",
+              donnees.echantillon.reponsesEnErreur
+                ? `${donnees.echantillon.reponsesLues} · ${donnees.echantillon.reponsesEnErreur} en erreur, hors mesure`
+                : `${donnees.echantillon.reponsesLues}`,
+            ],
           ].map(([k, v]) => (
             <div key={k}>
               <dt className="label-xs">{k}</dt>
@@ -268,17 +297,19 @@ function RapportComplet() {
         ) : null}
       </header>
 
-      <div className="mt-16 grid gap-12 lg:grid-cols-[168px_1fr] lg:gap-16">
-        {/* Rail de navigation */}
+      <div className="mt-16 grid gap-12 lg:grid-cols-[176px_1fr] lg:gap-16">
         <nav className="no-print h-max lg:sticky lg:top-10">
-          <Label className="pb-2">sections</Label>
+          <Label className="pb-2">sommaire</Label>
           <Rule strong />
           <ol>
-            {SECTIONS.map(([id, titre], i) => (
-              <li key={id} className="border-b border-rule">
-                <a href={`#${id}`} className="flex items-baseline gap-2 py-2 text-[13px] hover:text-signal">
+            {sections.map((s, i) => (
+              <li key={s.id} className="border-b border-rule">
+                <a
+                  href={`#${s.id}`}
+                  className="flex items-baseline gap-2 py-2 text-[13px] hover:text-signal"
+                >
                   <span className="num text-[10px] text-ink-3">{String(i + 1).padStart(2, "0")}</span>
-                  {titre}
+                  {s.nav}
                 </a>
               </li>
             ))}
@@ -286,116 +317,193 @@ function RapportComplet() {
         </nav>
 
         <main className="min-w-0">
-          <Section id="score" titre="Score de visibilité IA">
+          {/* Le titre porte la présence, le cadran porte le score : les deux
+              se complètent au lieu de se répéter. */}
+          <Section
+            id="verdict"
+            numero={numero("verdict")}
+            kicker="le verdict"
+            titre={frTitre(
+              `Sur ${donnees.echantillon.reponsesLues} réponses lues, votre marque apparaît dans ${donnees.voix.vosReponses}.`,
+            )}
+          >
             <ScoreGeant
               score={score}
               verdict={verdict(score)}
               ecart={precedent ? score - Math.round(precedent.score) : null}
             />
-            <p className="mt-6 max-w-[58ch] text-[15px] leading-relaxed text-ink-2">
-              {fr(
-                `Le score pondère quatre indicateurs : taux de mention (50 %), position moyenne dans la réponse (20 %), recommandation explicite (20 %) et sentiment (10 %).`,
-              )}
-            </p>
-            <div className="mt-8 flex flex-wrap gap-x-12 gap-y-4 border-t border-rule pt-4">
-              {[
-                ["taux de mention", pct(scan.mention_rate)],
-                ["position moyenne", scan.avg_position ? Number(scan.avg_position).toFixed(1).replace(".", ",") : "—"],
-                ["recommandation explicite", pct(scan.reco_rate)],
-                ["sentiment", pct(scan.sentiment_score)],
-              ].map(([k, v]) => (
-                <div key={k}>
-                  <Label>{k}</Label>
-                  <div className="num text-[26px] leading-tight">{v}</div>
-                </div>
-              ))}
+            <div className="mt-10 border-t border-rule pt-6">
+              {donnees.composantes ? (
+                <ComposantesScore
+                  composantes={donnees.composantes}
+                  reponsesLues={donnees.echantillon.reponsesLues}
+                  reponsesEnErreur={donnees.echantillon.reponsesEnErreur}
+                />
+              ) : null}
             </div>
+            <p className="mt-6 max-w-[58ch] text-[14px] leading-relaxed text-ink-2">
+              {fr(
+                "La formule est publiée et ne bouge jamais : présence 50 %, position 20 %, recommandation explicite 20 %, tonalité 10 %. Une réponse en erreur ne compte pas au dénominateur.",
+              )}{" "}
+              <Link to="/methode" className="ink-link">
+                {fr("La méthode, publiée en entier")}
+              </Link>
+            </p>
             <div className="mt-10">
               <ScoresMoteurs scores={parMoteur} avant={precedent?.parMoteur ?? null} />
             </div>
           </Section>
 
-          <Section id="voix" titre="Part de voix">
-            <p className="mb-6 max-w-[58ch] text-[15px] text-ink-2">
-              {fr(
-                "Mentions de la marque rapportées au total des mentions relevées, concurrents compris. La marque suivie est en rouge signal ; le contexte reste neutre.",
-              )}
-            </p>
-            <PartDeVoix items={pdv} />
-            {precedent && Array.isArray(precedent.pdv) && precedent.pdv.length ? (
-              <div className="mt-10">
-                <Label className="pb-3">au scan initial</Label>
-                <PartDeVoix items={precedent.pdv} />
-              </div>
+          <Section
+            id="carte"
+            numero={numero("carte")}
+            kicker="la mesure entière"
+            titre={frTitre(donnees.titreMatrice)}
+            sous={fr(
+              "Chaque case est une réponse réelle, conservée mot pour mot. Le re-scan à J+90 rejoue exactement ces questions : c'est ce qui rend l'écart mesurable.",
+            )}
+          >
+            <MatriceReponses
+              matrice={donnees.matrice}
+              reponses={reponses as unknown as LigneReponse[]}
+              mentions={mentions as unknown as LigneMention[]}
+              marque={marque}
+            />
+          </Section>
+
+          <Section
+            id="forces"
+            numero={numero("forces")}
+            kicker={donnees.duel ? donnees.duel.kicker : "le rapport de forces"}
+            titre={frTitre(donnees.duel ? donnees.duel.titre : "Le rapport de forces.")}
+            sous={fr(
+              `${donnees.voix.marquesTotal} marques distinctes sont citées sur votre marché. Dans ${donnees.voix.reponsesPerdues} réponses, un concurrent est nommé et vous ne l'êtes pas.`,
+            )}
+          >
+            {donnees.duel ? (
+              <Duel
+                marque={marque}
+                vous={donnees.duel.vous}
+                adversaire={donnees.duel.adversaire}
+                total={donnees.duel.adversaire.total}
+              />
             ) : null}
+            <div className={donnees.duel ? "mt-12" : ""}>
+              <Label className="pb-3">les marques les plus présentes</Label>
+              <VoixDocument
+                lignes={donnees.voix.lignes}
+                reponsesLues={donnees.echantillon.reponsesLues}
+              />
+            </div>
           </Section>
 
-          <Section id="requetes" titre="Requête par requête">
-            <p className="mb-6 max-w-[58ch] text-[15px] text-ink-2">
-              {fr(
-                "Échantillon figé : le re-scan à J+90 rejoue exactement ces mêmes questions, sinon la comparaison ne vaut rien.",
+          {donnees.pieces.length ? (
+            <Section
+              id="pieces"
+              numero={numero("pieces")}
+              kicker="les phrases exactes"
+              titre={frTitre("Les phrases qui envoient vos prospects ailleurs.")}
+              sous={fr(
+                "Extraits mot pour mot des réponses collectées, concurrent surligné. Le texte intégral de chaque réponse reste lisible dans la carte des réponses.",
               )}
-            </p>
-            <TableauRequetes
-              questions={questions as Question[]}
-              reponses={reponses as unknown as Reponse[]}
-              mentions={mentions as unknown as Mention[]}
-              marque={marque}
-            />
-          </Section>
+            >
+              <PiecesDocument pieces={donnees.pieces} />
+            </Section>
+          ) : null}
 
-          <Section id="verbatims" titre="Verbatims bruts">
-            <Verbatims mentions={mentions as unknown as Mention[]} marque={marque} />
-          </Section>
+          {donnees.questionCle ? (
+            <Section
+              id="decisive"
+              numero={numero("decisive")}
+              kicker="la question décisive"
+              titre={frTitre(`« ${donnees.questionCle.texte} »`)}
+              sous={fr(donnees.questionCle.enjeu)}
+            >
+              <FaceAFace faces={donnees.questionCle.faces} />
+            </Section>
+          ) : null}
 
-          <Section id="reponses" titre="Toutes les réponses, mot pour mot">
-            <p className="mb-6 max-w-[58ch] text-[15px] text-ink-2">
-              {fr(
-                "Rien n'est résumé ni reformulé : chaque réponse est conservée telle que le moteur l'a produite, et rejouable à l'identique au re-scan. Dépliez une question pour lire ce que chaque IA a répondu.",
+          {donnees.miroir.length ? (
+            <Section
+              id="miroir"
+              numero={numero("miroir")}
+              kicker="la question miroir · hors score"
+              titre={frTitre("Ce que chaque IA raconte quand on lui donne votre nom.")}
+              sous={fr(
+                "La seule question du scan qui prononce votre nom, posée à chaque moteur. Elle ne compte pas dans le score : les autres questions mesurent la découverte spontanée, celle-ci mesure ce que les IA récitent sur vous.",
               )}
-            </p>
-            <ToutesLesReponses
-              questions={questions as Question[]}
-              reponses={reponses as unknown as Reponse[]}
-              mentions={mentions as unknown as Mention[]}
-              marque={marque}
-            />
-          </Section>
+            >
+              <MiroirDocument miroir={donnees.miroir} />
+            </Section>
+          ) : null}
 
-          {/* Le miroir et l'audit des robots : le rapport GRATUIT les affiche
-              depuis le 14/08/2026, et le tableau comparatif promet ici « 6
-              moteurs » et les robots contrôlés. Un rapport payant qui tient
-              moins que l'aperçu qu'il prolonge est la pire promesse rompue
-              possible. */}
-          <Section id="miroir" titre="Ce que les IA disent de vous">
-            <p className="mb-6 max-w-[58ch] text-[15px] text-ink-2">
-              {fr(
-                "La seule question du scan qui prononce votre nom, posée à chaque moteur. Elle est hors méthodologie et ne compte pas dans le score : les autres questions mesurent la découverte spontanée, celle-ci mesure ce que les IA récitent quand on les interroge sur vous.",
-              )}
-            </p>
-            <Miroir miroir={scan.miroir} marque={marque} />
-          </Section>
-
-          <Section id="technique" titre="Ce que les robots d'IA peuvent lire">
-            <p className="mb-6 max-w-[58ch] text-[15px] text-ink-2">
-              {fr(
-                "Relevé sur le fichier public robots.txt de votre site. Un robot refusé ne lira jamais ce que vous publiez, quel que soit le contenu.",
-              )}
-            </p>
+          <Section
+            id="portes"
+            numero={numero("portes")}
+            kicker="l'accès technique"
+            titre={frTitre(
+              donnees.technique === null
+                ? "Le robots.txt du site n'a pas pu être lu."
+                : bloques === 0
+                  ? "Toutes les portes sont ouvertes. Ce qui manque, c'est la matière."
+                  : bloques === 1
+                    ? "Un robot d'IA est refusé à votre porte."
+                    : `${bloques} robots d'IA sont refusés à votre porte.`,
+            )}
+            sous={fr(
+              "Relevé sur le fichier public robots.txt de votre site, le jour de la mesure. Un robot refusé ne lira jamais ce que vous publiez, quel que soit le contenu.",
+            )}
+          >
             <AuditRobots audit={scan.audit} domaine={scan.website_url} />
           </Section>
 
-          <Section id="sources" titre="Sources citées par Perplexity">
-            <p className="mb-6 max-w-[58ch] text-[15px] text-ink-2">
-              {fr(
-                "Voilà où il faut être. Ces domaines sont ceux que le moteur consulte pour répondre aux questions de votre marché.",
+          {donnees.sources.totalLectures ? (
+            <Section
+              id="lectures"
+              numero={numero("lectures")}
+              kicker="les sources"
+              titre={frTitre(donnees.titreSources ?? "Où les IA vont lire.")}
+              sous={fr(
+                "Relevées dans les réponses elles-mêmes : ce sont les sites que les moteurs ont consultés pendant la mesure pour répondre aux questions de votre marché. Être cité là, c'est entrer dans la matière première des réponses.",
               )}
-            </p>
-            <Sources reponses={reponses as unknown as Reponse[]} />
-          </Section>
+            >
+              <SourcesVue sources={donnees.sources} />
+            </Section>
+          ) : null}
 
-          <Section id="actions" titre="Dix actions prioritaires">
-            <Actions actions={actions} />
+          <Section
+            id="plan"
+            numero={numero("plan")}
+            kicker="les 90 prochains jours"
+            titre={frTitre("Le plan, phase par phase.")}
+            sous={fr(
+              "Construit sur cette mesure, pas sur un gabarit : chaque phase part d'un constat relevé plus haut, et liste ce qu'il y a à faire pour le changer.",
+            )}
+          >
+            <Plan90 phases={donnees.plan} />
+
+            <div className="avoid-break mt-16 border border-ink p-6 sm:p-10">
+              <Label>et maintenant</Label>
+              <h3 className="mt-2 text-[24px] leading-tight sm:text-[30px]">
+                {frTitre("Ce plan est exactement ce que le Sprint GEO exécute.")}
+              </h3>
+              <p className="measure mt-4 text-[15px] leading-relaxed text-ink-2">
+                {fr(
+                  `Les trois phases ci-dessus, livrées en 90 jours : les correctifs techniques posés, 5 contenus écrits pour les questions à prendre, 8 cibles de citation travaillées, et le re-scan à J+90 qui rejoue ces ${donnees.echantillon.questions} questions à l'identique pour mesurer l'écart. 2 900 € HT, une fois, sans abonnement.`,
+                )}
+              </p>
+              <p className="mt-3 text-[14px] font-medium">
+                {fr("Nous garantissons les actions livrées, jamais un score.")}
+              </p>
+              <div className="mt-6 flex flex-wrap items-center gap-x-8 gap-y-3">
+                <Link to="/sprint" className="cta">
+                  {fr("Le programme des 90 jours, étape par étape")}
+                </Link>
+                <a href={`mailto:${CONTACT_EMAIL}`} className="ink-link num text-[14px]">
+                  {CONTACT_EMAIL}
+                </a>
+              </div>
+            </div>
           </Section>
 
           <div className="mt-16 grid gap-8 md:grid-cols-2">
@@ -404,15 +512,11 @@ function RapportComplet() {
               <Etiquette>engagement</Etiquette>
               <p className="mt-2 text-[13px] leading-snug text-ink-2">
                 {fr(
-                  "Nous garantissons les actions livrées, pas un score. Les moteurs intègrent les changements de contenu et de citations en 4 à 12 semaines : c’est pourquoi le re-scan est planifié à J+90.",
+                  "Les moteurs intègrent les changements de contenu et de citations en 4 à 12 semaines : c'est pourquoi le re-scan est planifié à J+90, sur exactement les mêmes questions.",
                 )}
               </p>
             </div>
           </div>
-
-          {!reponses.length ? <Vide>Aucune réponse collectée pour ce scan.</Vide> : null}
-
-          <Restitution marque={marque} />
         </main>
       </div>
 
@@ -427,57 +531,37 @@ function RapportComplet() {
 }
 
 /**
- * Le mur de restitution.
- *
- * Porté du projet Lovable de Jérémie (`BookingWall`) le 08/08/2026 : le rapport
- * s'arrêtait jusqu'ici sur une note méthodologique, sans jamais proposer la
- * suite. C'est pourtant la page où le prospect est le plus convaincu.
- *
- * Ne rien promettre sur le résultat : on vend trente minutes de lecture du
- * rapport, et on dit à voix haute qu'un bon score ne débouche sur aucune vente.
+ * L'en-tête de chapitre : le numéro, l'angle, et un TITRE QUI ÉNONCE LE
+ * CONSTAT avec les chiffres réels. « Part de voix » n'apprend rien ; « Sur 24
+ * questions posées, votre marque apparaît sur 3 » se lit en partage d'écran
+ * avant même que le consultant parle. Si la donnée manque, la section
+ * n'existe pas.
  */
-function Restitution({ marque }: { marque: string }) {
-  const lien = bookingUrl({ name: marque });
+function Section({
+  id,
+  numero,
+  kicker,
+  titre,
+  sous,
+  children,
+}: {
+  id: string;
+  numero: number;
+  kicker: string;
+  titre: React.ReactNode;
+  sous?: string;
+  children: React.ReactNode;
+}) {
   return (
-    <section className="no-print mt-24 border border-ink p-6 sm:p-12">
-      <h2 className="measure text-[26px] sm:text-[34px]">Le rapport se lit mieux à deux.</h2>
-      <p className="measure mt-6 text-ink-2">
-        {fr(
-          "Trente minutes en visio : les questions une par une, les sources sur lesquelles les moteurs s’appuient pour recommander vos concurrents, et vos actions prioritaires, classées. Vous repartez avec le diagnostic, qu’on travaille ensemble ou non.",
-        )}
-      </p>
-      <div className="mt-8">
-        <iframe
-          src={lien}
-          title="Réserver trente minutes avec Citari"
-          loading="lazy"
-          className="h-[620px] w-full border border-rule-strong bg-paper"
-        />
-      </div>
-      <p className="mt-6">
-        <a href={lien} className="cta">
-          Réserver mes 30 minutes
-        </a>
-      </p>
-      <p className="mono mt-4 text-[13px] text-ink-2">
-        {fr(
-          "Appel gratuit. Si votre score est bon, nous vous le disons et nous ne vous vendons rien. Le Sprint GEO, si vous le faites : 2 900 € HT une fois, sans abonnement.",
-        )}
-      </p>
-    </section>
-  );
-}
-
-function pct(v: unknown) {
-  const n = Number(v ?? 0);
-  return `${Math.round(n * 100)}${NBSP}%`;
-}
-
-function Section({ id, titre, children }: { id: string; titre: string; children: React.ReactNode }) {
-  return (
-    <section id={id} className="mb-20 scroll-mt-8">
-      <div className="mb-6 flex items-baseline gap-4 border-b border-rule-strong pb-2">
-        <h2 className="text-[34px] leading-none md:text-[42px]">{titre}</h2>
+    <section id={id} className="mb-24 scroll-mt-8">
+      <div className="mb-8 border-b border-rule-strong pb-5">
+        <p className="num text-[11px] uppercase tracking-[0.16em] text-ink-3">
+          {String(numero).padStart(2, "0")} · {kicker}
+        </p>
+        <h2 className="mt-2 max-w-[30ch] text-[30px] leading-[1.06] md:text-[42px]">{titre}</h2>
+        {sous ? (
+          <p className="mt-3 max-w-[62ch] text-[15px] leading-relaxed text-ink-2">{sous}</p>
+        ) : null}
       </div>
       {children}
     </section>

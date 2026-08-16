@@ -1,0 +1,374 @@
+import { describe, expect, it } from "vitest";
+import {
+  agregerSources,
+  type Matrice,
+  choisirQuestionCle,
+  construireMatrice,
+  construirePlan,
+  extrait,
+  hoteClient,
+  hoteDeSource,
+  piecesAConviction,
+  questionsGagnables,
+  titreMatrice,
+  titreSources,
+} from "@/lib/rapport-complet";
+import type { LigneMention, LigneQuestion, LigneReponse } from "@/lib/rapport-apercu";
+
+/**
+ * Le VRAI assemblage du document de mesure, importé du site.
+ *
+ * Ces tests verrouillent les règles de la maison sur la refonte du
+ * 15/08/2026 : l'unité RÉPONSE, l'erreur hors dénominateur, les institutions
+ * hors classement, et un plan construit sur des constats mesurés.
+ */
+
+const question = (id: string, rank: number, intent = "comparative", text?: string): LigneQuestion => ({
+  id,
+  rank,
+  intent,
+  text: text ?? `Question ${rank}`,
+});
+
+const reponse = (
+  query_id: string,
+  engine: string,
+  extra: Partial<LigneReponse & { sources: unknown }> = {},
+): LigneReponse & { sources?: unknown } => ({
+  id: `${query_id}-${engine}`,
+  query_id,
+  engine,
+  raw_text: "Réponse mesurée, conservée mot pour mot pour le rapport.",
+  error: null,
+  ...extra,
+});
+
+let compteur = 0;
+const mention = (
+  query_id: string,
+  engine: string,
+  brand: string,
+  extra: Partial<LigneMention> = {},
+): LigneMention => ({
+  id: `m-${(compteur += 1)}`,
+  query_id,
+  response_id: `${query_id}-${engine}`,
+  engine,
+  brand,
+  is_target: false,
+  position: null,
+  recommended: false,
+  sentiment: null,
+  verbatim: null,
+  ...extra,
+});
+
+describe("construireMatrice", () => {
+  const questions = [question("q1", 1), question("q2", 2)];
+  const reponses = [
+    reponse("q1", "ChatGPT"),
+    reponse("q1", "Gemini"),
+    reponse("q2", "ChatGPT"),
+    reponse("q2", "Gemini", { error: "panne", raw_text: null }),
+  ];
+
+  it("pose l'état de chaque case : cité, absent, erreur", () => {
+    const mentions = [
+      mention("q1", "ChatGPT", "Moi", { is_target: true, position: 3 }),
+      mention("q1", "ChatGPT", "Moi", { is_target: true, position: 1 }),
+    ];
+    const m = construireMatrice(questions, reponses, mentions);
+    // Deux mentions de la cible dans la même réponse : UNE case, meilleure position.
+    expect(m.lignes[0]!.cellules.ChatGPT).toEqual({ etat: "cite", position: 1, recommande: false });
+    expect(m.lignes[0]!.cellules.Gemini!.etat).toBe("absent");
+    expect(m.lignes[1]!.cellules.Gemini!.etat).toBe("erreur");
+    expect(m.questionsCitees).toBe(1);
+  });
+
+  it("ne compte pas une réponse en erreur dans le dénominateur du moteur", () => {
+    const m = construireMatrice(questions, reponses, []);
+    expect(m.totaux.Gemini).toEqual({ citees: 0, mesurees: 1 });
+    expect(m.totaux.ChatGPT).toEqual({ citees: 0, mesurees: 2 });
+  });
+
+  it("choisit un rival comme tenant, jamais une institution, un géant à défaut", () => {
+    const mentions = [
+      mention("q1", "ChatGPT", "Ordre des experts-comptables"),
+      mention("q1", "ChatGPT", "KPMG"),
+      mention("q1", "Gemini", "KPMG"),
+      mention("q1", "Gemini", "Cabinet Voisin"),
+    ];
+    const classes = { "Ordre des experts-comptables": "institution", KPMG: "geant", "Cabinet Voisin": "rival" };
+    const m = construireMatrice(questions, reponses, mentions, classes);
+    // KPMG est plus cité (2 réponses), mais le rival passe devant.
+    expect(m.lignes[0]!.tenant).toEqual({ nom: "Cabinet Voisin", classe: "rival", reponses: 1 });
+
+    const sansRival = construireMatrice(questions, reponses, mentions.slice(0, 3), classes);
+    expect(sansRival.lignes[0]!.tenant?.nom).toBe("KPMG");
+  });
+
+  it("énonce le constat dans le titre, y compris le zéro", () => {
+    expect(titreMatrice(0, 24, 24)).toBe("Sur 24 questions posées, votre marque n'apparaît jamais.");
+    expect(titreMatrice(1, 24, 24)).toBe("Sur 24 questions posées, votre marque apparaît sur une seule.");
+    expect(titreMatrice(3, 24, 24)).toBe("Sur 24 questions posées, votre marque apparaît sur 3.");
+  });
+
+  it("annonce une collecte amputée au lieu de compter l'absence de mesure comme une défaite", () => {
+    expect(titreMatrice(3, 20, 24)).toBe(
+      "Sur 24 questions posées, 20 ont pu être mesurées ; votre marque apparaît sur 3.",
+    );
+  });
+
+  it("une question dont toutes les réponses sont en erreur n'est pas mesurée, donc jamais « gagnable »", () => {
+    const troisQuestions = [
+      question("q1", 1, "comparative"),
+      question("q2", 2, "comparative"),
+      question("q3", 3, "comparative"),
+    ];
+    const troisReponses = [
+      reponse("q1", "ChatGPT"),
+      // q2 : la panne totale (plafond de coût, moteur à sec). Pas une défaite.
+      reponse("q2", "ChatGPT", { error: "panne", raw_text: null }),
+      reponse("q3", "ChatGPT"),
+    ];
+    const m = construireMatrice(troisQuestions, troisReponses, [mention("q3", "ChatGPT", "Rival A")]);
+    expect(m.lignes[1]!.mesuree).toBe(false);
+    expect(m.questionsMesurees).toBe(2);
+
+    const g = questionsGagnables(m, [mention("q3", "ChatGPT", "Rival A")], { "Rival A": "rival" });
+    // q1 (mesurée, vraiment vide) et q3 (perdue face à un rival) sortent ;
+    // q2 (non mesurée) jamais, même si son score de gagnabilité aurait été
+    // maximal faute de tenant.
+    expect(g.map((x) => x.id)).toEqual(["q1", "q3"]);
+  });
+});
+
+describe("agregerSources", () => {
+  it("agrège tous les moteurs, regroupe par hôte et reconnaît le site du client", () => {
+    const reponses = [
+      reponse("q1", "ChatGPT", {
+        sources: [
+          { url: "https://www.wojo.com/landing/?utm_source=openai" },
+          { url: "https://exemple.fr/page" },
+        ],
+      }),
+      reponse("q1", "Perplexity", { sources: [{ url: "https://wojo.com/autre" }] }),
+      reponse("q2", "Claude", { sources: [{ url: "https://blog.exemple.fr/article" }] }),
+    ];
+    const s = agregerSources(reponses, "https://www.exemple.fr");
+    expect(s.totalLectures).toBe(4);
+    expect(s.totalDomaines).toBe(3);
+    // wojo.com : « www. » retiré, deux moteurs regroupés.
+    const wojo = s.domaines.find((d) => d.hote === "wojo.com");
+    expect(wojo).toMatchObject({ lectures: 2, moteurs: ["ChatGPT", "Perplexity"] });
+    // Le site du client est reconnu, sous-domaines compris.
+    expect(s.lecturesVotreSite).toBe(2);
+    expect(s.domaines.find((d) => d.hote === "exemple.fr")?.votreSite).toBe(true);
+    expect(s.domaines.find((d) => d.hote === "blog.exemple.fr")?.votreSite).toBe(true);
+  });
+
+  it("ignore les réponses en erreur et les URL inanalysables", () => {
+    const s = agregerSources(
+      [
+        reponse("q1", "ChatGPT", { error: "panne", sources: [{ url: "https://a.fr" }] }),
+        reponse("q2", "ChatGPT", { sources: [{ url: "pas une url" }, { url: 42 }] }),
+      ],
+      null,
+    );
+    expect(s.totalLectures).toBe(0);
+    expect(titreSources(s)).toBeNull();
+  });
+
+  it("dit « jamais » quand le site du client n'a pas été lu", () => {
+    const s = agregerSources([reponse("q1", "ChatGPT", { sources: [{ url: "https://a.fr" }] })], "b.fr");
+    expect(titreSources(s)).toBe("Pour répondre, les moteurs ont lu 1 site. Le vôtre : jamais.");
+  });
+
+  it("hoteDeSource et hoteClient normalisent pareil", () => {
+    expect(hoteDeSource("https://www.Exemple.fr/x?utm_source=openai")).toBe("exemple.fr");
+    expect(hoteClient("https://www.exemple.fr/page")).toBe("exemple.fr");
+    expect(hoteClient("exemple.fr")).toBe("exemple.fr");
+    expect(hoteClient(null)).toBeNull();
+  });
+});
+
+describe("questionsGagnables", () => {
+  it("ne retient que les questions perdues, l'achat d'abord, le champ faible d'abord", () => {
+    const questions = [
+      question("q1", 1, "comparative"),
+      question("q2", 2, "comparative"),
+      question("q3", 3, "probleme"),
+    ];
+    const reponses = ["q1", "q2", "q3"].flatMap((q) => [reponse(q, "ChatGPT"), reponse(q, "Gemini")]);
+    const mentions = [
+      // q1 : gagnée par la marque, elle ne doit pas sortir.
+      mention("q1", "ChatGPT", "Moi", { is_target: true }),
+      // q2 : tenue par un rival isolé.
+      mention("q2", "ChatGPT", "Rival A"),
+      // q3 : tenue par deux géants.
+      mention("q3", "ChatGPT", "KPMG"),
+      mention("q3", "Gemini", "Deloitte"),
+    ];
+    const classes = { "Rival A": "rival", KPMG: "geant", Deloitte: "geant" };
+    const matrice = construireMatrice(questions, reponses, mentions, classes);
+    const g = questionsGagnables(matrice, mentions, classes);
+    expect(g.map((x) => x.id)).toEqual(["q2", "q3"]);
+    expect(g[0]!.raison).toContain("Rival A (1 réponse)");
+    expect(g[0]!.raison).toContain("aucun géant");
+  });
+
+  it("écarte plateformes et institutions du champ mesuré", () => {
+    const questions = [question("q1", 1)];
+    const reponses = [reponse("q1", "ChatGPT")];
+    const mentions = [mention("q1", "ChatGPT", "Annuaire"), mention("q1", "ChatGPT", "Ordre")];
+    const classes = { Annuaire: "outil", Ordre: "institution" };
+    const matrice = construireMatrice(questions, reponses, mentions, classes);
+    const g = questionsGagnables(matrice, mentions, classes);
+    expect(g[0]!.tenants).toEqual([]);
+    expect(g[0]!.raison).toBe("Personne ne tient cette question : la place est vide.");
+  });
+});
+
+describe("choisirQuestionCle", () => {
+  it("préfère la comparative disputée où la marque est absente, et donne les six faces", () => {
+    const questions = [question("q1", 1, "probleme"), question("q2", 2, "comparative")];
+    const moteurs = ["ChatGPT", "Claude", "Gemini"];
+    const reponses = ["q1", "q2"].flatMap((q) => moteurs.map((m) => reponse(q, m)));
+    const mentions = [
+      mention("q1", "ChatGPT", "Moi", { is_target: true, position: 2 }),
+      mention("q2", "ChatGPT", "Rival A", { position: 1 }),
+      mention("q2", "Claude", "Rival B"),
+      mention("q2", "Gemini", "Rival A"),
+    ];
+    const cle = choisirQuestionCle(questions, reponses, mentions, "Moi", { "Rival A": "rival", "Rival B": "rival" });
+    expect(cle?.id).toBe("q2");
+    expect(cle?.enjeu).toBe("2 marques se partagent cette réponse. La vôtre n'y est pas.");
+    expect(cle?.faces).toHaveLength(3);
+    expect(cle?.faces[0]!.statut).toBe("Moi : absent");
+    expect(cle?.faces[0]!.marques).toContain("Rival A");
+  });
+
+  it("marque « hors mesure » une face en erreur, sans l'inventer", () => {
+    const questions = [question("q1", 1)];
+    const reponses = [reponse("q1", "ChatGPT"), reponse("q1", "Gemini", { error: "panne", raw_text: null })];
+    const mentions = [mention("q1", "ChatGPT", "Rival A")];
+    const cle = choisirQuestionCle(questions, reponses, mentions, "Moi");
+    const gemini = cle?.faces.find((f) => f.moteur === "Gemini");
+    expect(gemini).toMatchObject({ erreur: true, extrait: null });
+  });
+});
+
+describe("piecesAConviction", () => {
+  const verbatim = "Pour ce besoin précis, je recommande vivement Rival A, dont l'offre est la plus complète du marché.";
+
+  it("retient l'absence d'abord, et écarte un inconnu hors question d'achat", () => {
+    const questions = [question("q1", 1, "probleme"), question("q2", 2, "comparative")];
+    const mentions = [
+      // Inconnu sur une question de dépannage : le garde-fou anti-GeoComply.
+      mention("q1", "ChatGPT", "GeoComply", { verbatim }),
+      mention("q2", "ChatGPT", "Rival A", { verbatim, recommended: true }),
+    ];
+    const pieces = piecesAConviction(questions, mentions, "Moi", { "Rival A": "rival" });
+    expect(pieces).toHaveLength(1);
+    expect(pieces[0]!.concurrent).toBe("Rival A");
+    expect(pieces[0]!.statut).toBe("Moi : absent de cette réponse");
+    expect(pieces[0]!.texte).toContain("*Rival A*");
+  });
+
+  it("n'utilise jamais deux fois la même question, ni celle déjà montrée en face à face", () => {
+    const questions = [question("q1", 1, "comparative"), question("q2", 2, "comparative")];
+    const mentions = [
+      mention("q1", "ChatGPT", "Rival A", { verbatim }),
+      mention("q1", "Gemini", "Rival B", { verbatim: verbatim.replace("Rival A", "Rival B") }),
+      mention("q2", "ChatGPT", "Rival A", { verbatim }),
+    ];
+    const classes = { "Rival A": "rival", "Rival B": "rival" };
+    const pieces = piecesAConviction(questions, mentions, "Moi", classes, {}, "q1");
+    expect(pieces).toHaveLength(1);
+    expect(pieces[0]!.rang).toBe(2);
+  });
+});
+
+describe("construirePlan", () => {
+  const sourcesVides = { domaines: [], totalLectures: 0, totalDomaines: 0, lecturesVotreSite: 0, moteursAvecSources: [] };
+  const matriceDe = (citees: number, total: number): Matrice =>
+    ({
+      moteurs: ["ChatGPT"],
+      lignes: Array.from({ length: total }, (_, i) => ({
+        id: `q${i}`,
+        rang: i + 1,
+        texte: `Q${i}`,
+        intent: "comparative",
+        citee: i < citees,
+        mesuree: true,
+        tenant: null,
+        cellules: {},
+      })),
+      totaux: {},
+      questionsCitees: citees,
+      questionsMesurees: total,
+    });
+
+  it("répartit les actions par chantier et ouvre chaque phase sur un constat mesuré", () => {
+    const actions = [
+      { chantier: "Technique", titre: "Débloquer robots.txt", pourquoi: "…", effort: "faible" },
+      { chantier: "Contenu", titre: "Page comparative", pourquoi: "…", effort: "moyen" },
+      { chantier: "Citations", titre: "Fiches d'autorité", pourquoi: "…", effort: "faible" },
+    ];
+    const technique = { bloques: ["GPTBot"], autorises: [], llmstxt: false };
+    const sources = {
+      domaines: [
+        { hote: "moncabinet.fr", lectures: 9, moteurs: ["ChatGPT"], votreSite: true },
+        { hote: "classement.fr", lectures: 7, moteurs: ["Perplexity"], votreSite: false },
+      ],
+      totalLectures: 16,
+      totalDomaines: 2,
+      lecturesVotreSite: 9,
+      moteursAvecSources: ["ChatGPT", "Perplexity"],
+    };
+    const plan = construirePlan({
+      actions,
+      gagnables: [
+        { id: "q1", rang: 1, texte: "Quel cabinet choisir ?", intent: "comparative", raison: "…", tenants: [] },
+      ],
+      sources,
+      technique,
+      matrice: matriceDe(3, 24),
+      site: "moncabinet.fr",
+    });
+    expect(plan).toHaveLength(3);
+    expect(plan[0]!.constat).toContain("GPTBot est refusé");
+    expect(plan[0]!.constat).toContain("llms.txt est absent");
+    expect(plan[0]!.actions.map((a) => a.titre)).toEqual(["Débloquer robots.txt"]);
+    expect(plan[1]!.constat).toContain("21 questions sur 24 mesurées");
+    expect(plan[1]!.cibles[0]!.titre).toBe("« Quel cabinet choisir ? »");
+    // Le site du client ne figure jamais dans ses propres cibles de citation.
+    expect(plan[2]!.cibles.map((c) => c.titre)).toEqual(["classement.fr"]);
+  });
+
+  it("reste honnête quand l'audit a échoué et que les sources manquent", () => {
+    const plan = construirePlan({
+      actions: [],
+      gagnables: [],
+      sources: sourcesVides,
+      technique: null,
+      matrice: matriceDe(24, 24),
+      site: null,
+    });
+    expect(plan[0]!.constat).toContain("n'a pas pu être lu");
+    expect(plan[1]!.constat).toContain("toutes les questions mesurées");
+    expect(plan[2]!.constat).toContain("n'ont pas exposé leurs sources");
+    expect(plan[2]!.cibles).toEqual([]);
+  });
+});
+
+describe("extrait", () => {
+  it("coupe au mot et l'annonce, ne coupe pas un texte court", () => {
+    expect(extrait("court", 320)).toEqual({ texte: "court", coupe: false });
+    const long = "mot ".repeat(200).trim();
+    const e = extrait(long, 100);
+    expect(e.coupe).toBe(true);
+    expect(e.texte.endsWith("…")).toBe(true);
+    expect(e.texte.length).toBeLessThanOrEqual(102);
+  });
+});

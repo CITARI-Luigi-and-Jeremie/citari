@@ -56,14 +56,23 @@ export function adversairePrincipal(
     // Les institutions (ordres, chambres) sont citées comme références, jamais
     // comme prestataires à choisir : elles ne prennent la place de personne.
     if (classeDe(m.brand) === "institution") continue;
-    const vu = parMarque.get(m.brand) ?? new Set<string>();
+    // Regroupé par ALIAS, comme `partDeVoix` : sans quoi « Exco » et « Exco
+    // Lyon » restent deux adversaires aux comptages disjoints, et le duel
+    // annonce un nombre plus petit que la barre de part de voix affichée
+    // juste en dessous. C'est le bug du 14/08/2026 (« 14 d'un côté, 13 de
+    // l'autre », scan Airbnb), qui n'avait été corrigé que pour la cible.
+    const nom = alias[m.brand] ?? m.brand;
+    const vu = parMarque.get(nom) ?? new Set<string>();
     vu.add(m.response_id);
-    parMarque.set(m.brand, vu);
+    parMarque.set(nom, vu);
   }
 
   const tri = [...parMarque.entries()]
     .map(([nom, reponses]) => ({ nom, reponses: reponses.size, classe: classeDe(nom) }))
-    .sort((a, b) => b.reponses - a.reponses);
+    // Départage par nom : `mentions` arrive sans ORDER BY, deux ex æquo
+    // sortiraient donc dans l'ordre du moment et le rapport pourrait nommer
+    // un adversaire différent d'une ouverture à l'autre.
+    .sort((a, b) => b.reponses - a.reponses || a.nom.localeCompare(b.nom));
 
   const rival = tri.find((c) => c.classe === "rival") ?? tri[0];
   if (!rival) return null;
@@ -117,7 +126,9 @@ export function partDeVoix(
 
   const toutes = [...parNom.entries()]
     .map(([nom, v]) => ({ nom, reponses: v.reponses.size, cible: v.cible }))
-    .sort((a, b) => b.reponses - a.reponses);
+    // Départage par nom : `mentions` arrive sans ordre garanti, et le
+    // classement affiché ne doit pas changer d'une ouverture à l'autre.
+    .sort((a, b) => b.reponses - a.reponses || a.nom.localeCompare(b.nom));
 
   const tete = toutes.slice(0, max);
   const cible = toutes.find((l) => l.cible);

@@ -57,6 +57,7 @@ function sequenceDe(entree: {
   reponses: LigneReponse[];
   mentions: LigneMention[];
   classes?: Record<string, string>;
+  alias?: Record<string, string>;
   marque?: string;
   score?: number;
   miroir?: unknown;
@@ -72,7 +73,7 @@ function sequenceDe(entree: {
     reponses: entree.reponses,
     mentions: entree.mentions,
     classes: entree.classes ?? {},
-    alias: {},
+    alias: entree.alias ?? {},
     miroir: entree.miroir,
     audit: entree.audit,
   });
@@ -230,6 +231,48 @@ describe("adversaire — jamais un outil ni une institution", () => {
       mentions: [mention(r.id, q.id, "Cible", { is_target: true })],
     });
     expect(seq.adversaire).toBeNull();
+  });
+
+  it("regroupe les variantes d'écriture de l'adversaire, comme la part de voix", () => {
+    // Sans regroupement, « Exco » (2 réponses) et « Exco Lyon » (2 réponses)
+    // restent deux adversaires disjoints : le duel annonçait 2 quand la barre
+    // de part de voix, juste en dessous, en affichait 4. Le bug du 14/08/2026
+    // (scan Airbnb) n'avait été corrigé que pour la marque cible.
+    const q = question(1, "comparative");
+    const reponses = [reponse(q.id), reponse(q.id), reponse(q.id), reponse(q.id)];
+    const mentions = [
+      mention(reponses[0]!.id, q.id, "Exco"),
+      mention(reponses[1]!.id, q.id, "Exco"),
+      mention(reponses[2]!.id, q.id, "Exco Lyon"),
+      mention(reponses[3]!.id, q.id, "Exco Lyon"),
+    ];
+    const alias = { "Exco Lyon": "Exco" };
+    const seq = sequenceDe({ questions: [q], reponses, mentions, alias });
+    expect(seq.adversaire).toMatchObject({ nom: "Exco", reponses: 4 });
+    // La part de voix affichée sous le duel dit exactement le même nombre.
+    expect(seq.voix.find((l) => l.nom === "Exco")?.reponses).toBe(4);
+  });
+
+  it("départage deux ex æquo par le nom, pour que le rapport ne bouge pas", () => {
+    // `mentions` arrive de Postgres sans ORDER BY : deux rivaux à égalité
+    // sortiraient dans l'ordre du moment, et le rapport nommerait un
+    // adversaire différent d'une ouverture à l'autre.
+    const q = question(1, "comparative");
+    const reponses = [reponse(q.id), reponse(q.id)];
+    const ordre = [
+      mention(reponses[0]!.id, q.id, "Zebre"),
+      mention(reponses[1]!.id, q.id, "Ardoise"),
+    ];
+    const classes = { Zebre: "rival", Ardoise: "rival" };
+    const premier = sequenceDe({ questions: [q], reponses, mentions: ordre, classes });
+    const inverse = sequenceDe({
+      questions: [q],
+      reponses,
+      mentions: [...ordre].reverse(),
+      classes,
+    });
+    expect(premier.adversaire?.nom).toBe("Ardoise");
+    expect(inverse.adversaire?.nom).toBe(premier.adversaire?.nom);
   });
 });
 

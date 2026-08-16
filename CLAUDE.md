@@ -80,7 +80,7 @@ trois étapes s'appelait « Méthode » et occupait le mot. Elle s'appelle
 
 **Trois notices, trois rôles, jamais de recouvrement** (15/08/2026). Chaque
 carte du parcours porte SA notice en bouton : 01 → `/methode` (COMMENT on
-mesure, la règle du jeu commune aux deux scans), 02 → `/scan-premium` (ce que
+mesure, la règle du jeu commune aux deux scans), 02 → `/scan-complet` (ce que
 la mesure complète LIVRE, le déroulé de l'appel, pourquoi c'est offert),
 03 → `/sprint` (les 90 jours d'exécution). La section « Vérifiabilité » qui
 doublonnait les cartes a été supprimée le jour de sa création. Le dépliant
@@ -128,6 +128,30 @@ deux endroits est le piège déjà payé avec les deux comparatifs. En `complet`
 `controle`, c'est le document de mesure. Présenter comme « verrouillé » un
 moteur qu'on vient d'interroger et de facturer serait un mensonge : ne jamais
 rendre cet aiguillage configurable.
+
+**Le document de mesure est fait pour être montré en visio** (refonte du
+16/08/2026). Neuf chapitres, et **chaque titre énonce le constat avec les
+chiffres réels** : « Sur 24 questions posées, votre marque apparaît sur 10 »,
+pas « Part de voix ». Un titre générique laisse le consultant faire tout le
+travail à l'oral et ne survit pas au document relu trois jours après. Les
+pièces maîtresses : la **carte des réponses** (matrice questions × moteurs,
+une case par réponse, cliquer une ligne déplie les réponses intégrales — elle
+a absorbé l'annexe, une pièce à un seul endroit), la **question décisive**
+(les six réponses côte à côte) et le **plan des 90 jours** en trois phases,
+chacune ouverte par un constat relevé plus haut et fermée par des cibles
+calculées. Pas de mur Calendly à la fin : on ne demande pas de réserver un
+rendez-vous pendant le rendez-vous, on fait le pont vers le Sprint.
+L'assemblage vit dans `lib/rapport-complet.ts`, en fonctions pures testées ;
+la page n'affiche que ce qu'on lui donne.
+
+**La règle du dénominateur vaut aussi par QUESTION** (16/08/2026). Une
+question dont toutes les réponses sont en erreur n'est pas perdue, elle n'est
+pas mesurée : elle sort des comptages et des questions gagnables, et le titre
+annonce la coupe. Sans ça, une panne devenait « personne ne tient cette
+question : la place est vide » en tête du plan. Et l'adversaire du duel se
+regroupe par `brand_aliases` comme la part de voix affichée sous lui : deux
+comptages du même concurrent sur le même écran est le bug du 14/08, qui
+n'avait été corrigé que pour la marque cible.
 
 **Le parcours a trois écrans, pas quatre.** Landing → `/scan/$id` (l'attente,
 carte perforée) → `/rapport/$jeton`. L'aguiche qui vivait sur l'écran de scan a
@@ -335,7 +359,7 @@ du toolkit et les colonnes réelles vit dans
 
 ```bash
 pnpm install
-pnpm -r test                        # 235 tests
+pnpm -r test                        # 268 tests
 pnpm -r typecheck                   # paquets + fichiers du site importés par les tests
 npm --prefix apps/citari run typecheck   # TOUT le site (ajouté le 14/08/2026)
 npm --prefix apps/citari run build
