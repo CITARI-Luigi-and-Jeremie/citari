@@ -139,6 +139,59 @@ Elle lit ses secrets dans le `.env` de la racine, chargé par `next.config.ts`.
 
 ---
 
+## 4. La mesure d'audience
+
+Google Analytics 4, propriété `G-6XD5KYMRE0`. Le code est posé dans
+`src/routes/__root.tsx` et `src/lib/analytics.ts` ; rien à installer, rien à
+configurer au déploiement.
+
+**Elle ne tourne qu'en production.** Un `bun dev` local enverrait des scans de
+test dans les mêmes rapports que le vrai trafic, et c'est le taux de conversion
+qui se juge sur ces chiffres. En local, GA reste donc vide : c'est voulu, ce
+n'est pas une panne. Pour vérifier une pose d'événement, il faut le site
+déployé et le DebugView de GA.
+
+**Aucun bandeau de consentement**, décision de Jérémie du 16/08/2026. À savoir :
+GA4 sans consentement est contraire à l'article 82 de la loi Informatique et
+Libertés, et GA4 ne figure pas sur la liste des exemptions de la CNIL. Le risque
+croît avec le trafic.
+
+### Les sept événements
+
+| Événement | Moment |
+| --- | --- |
+| `scan_formulaire_ouvert` | un domaine est saisi et le visiteur clique |
+| `scan_etape_email` | il atteint l'écran qui demande l'email |
+| `scan_lance` | le scan part |
+| `scan_refuse` | refus serveur (quota d'IP, marque invalide), avec le motif |
+| `scan_echec` | panne au lancement |
+| `reservation_ouverte` | le calendrier Calendly s'affiche |
+| `reservation_call` | le créneau est confirmé |
+
+`scan_lance` vaut aussi « email donné » : `lancerScan` exige l'adresse, donc les
+deux marches prévues à l'origine n'en font plus qu'une.
+
+Ni la marque ni l'email ne sont envoyés à Google. Supabase sait déjà QUI a
+scanné, GA n'a besoin que du COMBIEN — et transmettre l'adresse d'un prospect
+serait contraire aux conditions d'utilisation de GA.
+
+### Les trois réglages à faire UNE fois dans la console GA
+
+Ils demandent le compte Google et ne peuvent pas être faits depuis le dépôt.
+Tant qu'ils ne sont pas posés, la mesure tourne mais les rapports sont muets ou
+faussés.
+
+1. **Marquer `scan_lance` et `reservation_call` comme événements clés.** Sans
+   ça, aucune conversion n'apparaît. Admin → Événements clés → Créer, en tapant
+   le nom exact (inutile d'attendre le premier trafic).
+2. **Porter la conservation des données de 2 à 14 mois.** Admin → Conservation
+   des données. Le défaut de GA4 est 2 mois, et ce qui est perdu ne revient
+   jamais — un batch de prospection se juge sur plus long que ça.
+3. **Filtrer le trafic interne.** Nos propres visites, sinon, gonflent des
+   chiffres qu'on lit à quelques dizaines de sessions près.
+
+---
+
 ## Rappel de sécurité
 
 La base est en RLS deny-all : aucune requête n'est possible depuis un
