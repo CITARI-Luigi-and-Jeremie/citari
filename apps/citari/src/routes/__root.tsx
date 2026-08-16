@@ -16,6 +16,7 @@ import { SiteMark } from "@/components/jeremie/SiteMark";
 import { SiteFloatingContact } from "@/components/jeremie/SiteFloatingContact";
 import { SectionSidebar } from "@/components/jeremie/SectionSidebar";
 import { ScanFormFocusProvider } from "@/lib/scan-form-focus";
+import { MESURE_GA, useSuiviPages } from "@/lib/analytics";
 
 /**
  * Racine du site.
@@ -88,6 +89,23 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "icon", href: "/favicon.png", type: "image/png" },
     ],
     scripts: [
+      // Google Analytics 4, en production seulement — voir `@/lib/analytics`.
+      // Le `config` est conservé tel quel : il envoie la vue de la page
+      // d'entrée, les suivantes viennent du routeur via `useSuiviPages`.
+      ...(import.meta.env.PROD
+        ? [
+            {
+              src: `https://www.googletagmanager.com/gtag/js?id=${MESURE_GA}`,
+              async: true,
+            },
+            {
+              children: `window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', '${MESURE_GA}');`,
+            },
+          ]
+        : []),
       {
         type: "application/ld+json",
         children: JSON.stringify({
@@ -131,6 +149,10 @@ function RootShell({ children }: { children: ReactNode }) {
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+
+  // La navigation ne recharge aucun document : sans ça, GA ne verrait qu'une
+  // seule page par visite.
+  useSuiviPages();
 
   // L'écran de scan et le rapport se lisent sans distraction : ni logo
   // flottant, ni contact. (La route /admin du site a été supprimée le

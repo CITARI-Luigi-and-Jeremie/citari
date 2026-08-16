@@ -4,6 +4,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { bookingUrl } from "@/lib/site";
 import { estOrigineCalendly } from "@/lib/calendly";
 import { enregistrerReservation } from "@/lib/equipe.functions";
+import { suivreEvenement } from "@/lib/analytics";
 
 /**
  * Réservation Calendly en pop-up plein écran. Portée le 14/08/2026.
@@ -31,14 +32,27 @@ export function BookingModal({
   const enregistrer = useServerFn(enregistrerReservation);
 
   useEffect(() => {
-    if (!open || !jeton) return;
+    if (!open) return;
+    // L'écart entre cette ouverture et la confirmation mesure l'abandon
+    // DEVANT le calendrier, que la base ne verra jamais : elle n'enregistre
+    // que les réservations abouties.
+    suivreEvenement("reservation_ouverte", { avec_jeton: jeton !== null });
+
     const onMessage = (e: MessageEvent) => {
       // Seul Calendly est écouté, et seul l'événement de confirmation compte.
       if (typeof e.origin !== "string" || !estOrigineCalendly(e.origin)) return;
       const type = (e.data as { event?: string } | null)?.event;
       if (type !== "calendly.event_scheduled") return;
+
+      // Le rendez-vous pris : la fin de l'entonnoir, et le seul chiffre sur
+      // lequel se juge un batch de prospection. Mesuré même sans jeton — la
+      // modale s'ouvre aussi depuis des pages qui n'en portent pas, et ces
+      // réservations-là existent tout autant.
+      suivreEvenement("reservation_call", { avec_jeton: jeton !== null });
+
       // Tolérant : une capture ratée ne doit jamais gêner la réservation
       // elle-même, qui est déjà confirmée chez Calendly.
+      if (!jeton) return;
       void enregistrer({ data: { jeton, email: email ?? null } }).catch(() => undefined);
     };
     window.addEventListener("message", onMessage);
