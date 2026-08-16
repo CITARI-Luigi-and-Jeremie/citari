@@ -25,8 +25,24 @@ en permanence). Deux pièges payés, à connaître :
    la page d'installation de l'app dans les réglages de l'organisation →
    Repository access → cocher le dépôt → reconnecter côté Hostinger.
 
-Après la reconnexion par Luigi, le déploiement est reparti et la projection
-est en ligne, vérifiée en production.
+La suite a montré que la reconnexion « à moitié » ne suffisait pas : les
+tentatives successives avaient créé puis remplacé TROIS installations de
+l'app (154176983, 154190055, 154194229), la fiche Hostinger pointant tour à
+tour sur une installation disparue. Symptôme piégeux : le REDÉPLOIEMENT
+MANUEL marchait (la fiche garde une référence au dépôt) pendant que les
+pushs restaient ignorés (le webhook de la nouvelle installation ne
+correspondait plus). Le remède qui a tout réglé, exécuté au navigateur dans
+la session de Luigi : DÉSINSTALLER l'app de l'organisation, puis refaire UNE
+connexion complète DEPUIS Hostinger — le parcours d'installation neuf
+affiche « Next: you'll be redirected to hpanel.hostinger.com/.../callback »
+et reboucle vers Hostinger avec l'identifiant d'installation. C'est ce
+rebouclage qui manquait à tous les parcours « déjà installé », qui
+s'arrêtent sur la page de réglages GitHub sans jamais rappeler Hostinger.
+
+Preuve finale : commit-test poussé à 18:24:57, en compilation chez
+Hostinger à 18:25:02. Cinq secondes. La règle à retenir : quand une app
+GitHub se dérègle, on ne la répare pas, on la désinstalle et on refait le
+parcours complet depuis le service qui la consomme.
 
 ---
 
