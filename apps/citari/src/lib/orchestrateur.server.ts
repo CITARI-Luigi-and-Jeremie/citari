@@ -999,7 +999,29 @@ export async function visioParJeton(jeton: string) {
     }
   }
 
-  return { ...base, apercu };
+  // L'analyse complémentaire : identité perçue et arguments du rival,
+  // extraites des réponses stockées, en cache après le premier calcul.
+  const { analyseComplementaire } = await import("@/lib/analyse.server");
+  const scanBase = base.scan as {
+    id: string;
+    brand_name: string;
+    miroir: unknown;
+    concurrent_classes: unknown;
+    brand_aliases: unknown;
+    analyse_ia: unknown;
+  };
+  const analyse = await analyseComplementaire({
+    scanId: scanBase.id,
+    marque: scanBase.brand_name,
+    miroir: scanBase.miroir,
+    mentions: base.mentions as never[],
+    reponsesRetenues: base.reponses.filter((r) => !r.error && r.raw_text).length,
+    classes: (scanBase.concurrent_classes ?? {}) as Record<string, string>,
+    alias: (scanBase.brand_aliases ?? {}) as Record<string, string>,
+    cacheExistant: scanBase.analyse_ia ?? null,
+  });
+
+  return { ...base, apercu, analyse };
 }
 
 /** Priorité commerciale déduite du score : plus il est bas, plus le besoin est fort. */

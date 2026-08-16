@@ -1,10 +1,14 @@
 import { dateFr, verdict as motVerdict } from "@/lib/typo";
 import {
+  hoteDeSource,
   piecesAConviction,
+  questionsGagnables,
   type DonneesDocument,
+  type LigneSourceReponse,
   type Piece,
 } from "@/lib/rapport-complet";
 import type { LigneMention, LigneQuestion } from "@/lib/rapport-apercu";
+import type { AnalyseIa } from "@/lib/analyse.server";
 
 /**
  * LA VISIO : le support de présentation du scan complet, 16/08/2026.
@@ -53,6 +57,14 @@ export type EcranVisio =
       recoAdversaire: number;
       recoVous: number;
     }
+  | {
+      /** Les arguments que les moteurs répètent pour recommander le rival,
+       *  chacun prouvé par un verbatim réel. C'est la liste de ce qu'il
+       *  publie et que le client ne publie pas. */
+      type: "rival-pourquoi";
+      rival: string;
+      arguments: { resume: string; citation: string; moteur: string }[];
+    }
   | { type: "piece"; piece: Piece; indexPiece: number; totalPieces: number }
   | {
       type: "decisive";
@@ -62,7 +74,13 @@ export type EcranVisio =
       marques: number;
     }
   | { type: "cause"; numero: 1 | 2 | 3; titre: string; phrase: string }
-  | { type: "preuve-matiere"; lectures: number; votreSite: number; questionsPerdues: string[] }
+  | {
+      type: "preuve-matiere";
+      lectures: number;
+      votreSite: number;
+      /** Questions gagnables, chacune avec les sites réellement lus dessus. */
+      questionsPerdues: { texte: string; lus: string[] }[];
+    }
   | {
       type: "preuve-adresses";
       adresses: { hote: string; lectures: number }[];
@@ -71,6 +89,14 @@ export type EcranVisio =
       type: "preuve-identite";
       moteur: string;
       extrait: string;
+      llmstxt: boolean;
+    }
+  | {
+      /** Le métier que chaque moteur attribue à l'entreprise, extrait de sa
+       *  réponse miroir : la divergence se juge d'elle-même. */
+      type: "identite";
+      marque: string;
+      lignes: { moteur: string; metier: string; citation: string }[];
       llmstxt: boolean;
     }
   | { type: "plan-calendrier"; questions: number }
@@ -133,6 +159,33 @@ export function domainesCitables(
     .map(({ hote, lectures }) => ({ hote, lectures }));
 }
 
+/**
+ * Les sites que les moteurs ont RÉELLEMENT lus pour répondre à UNE question,
+ * classés par nombre de lectures. Calcul pur sur les sources stockées :
+ * c'est la cause précise d'une question perdue, adresse par adresse.
+ */
+export function sourcesParQuestion(
+  reponses: LigneSourceReponse[],
+  queryId: string,
+  max = 3,
+): string[] {
+  const parHote = new Map<string, number>();
+  for (const r of reponses) {
+    if (r.error || r.query_id !== queryId) continue;
+    const liste = Array.isArray(r.sources) ? (r.sources as { url?: unknown }[]) : [];
+    for (const src of liste) {
+      if (typeof src?.url !== "string") continue;
+      const hote = hoteDeSource(src.url);
+      if (!hote) continue;
+      parHote.set(hote, (parHote.get(hote) ?? 0) + 1);
+    }
+  }
+  return [...parHote.entries()]
+    .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+    .slice(0, max)
+    .map(([hote]) => hote);
+}
+
 export function construireVisio(entree: {
   donnees: DonneesDocument;
   questions: LigneQuestion[];
@@ -143,6 +196,11 @@ export function construireVisio(entree: {
   completedAt: string;
   apercu: { score: number; date: string } | null;
   score: number;
+  /** Les réponses avec leurs sources, pour la cause par question perdue. */
+  reponses: LigneSourceReponse[];
+  /** L'analyse complémentaire (identité perçue, arguments du rival), ou null
+   *  si le modèle d'extraction était indisponible : les écrans sortent. */
+  analyse: AnalyseIa | null;
   /** Places restantes du mois : un chiffre RÉEL saisi par Luigi, jamais déduit. */
   places: number | null;
 }): { ecrans: EcranVisio[]; actes: ActeVisio[] } {
@@ -201,6 +259,15 @@ export function construireVisio(entree: {
       recoAdversaire: donnees.duel.recoAdversaire,
       recoVous: donnees.duel.recoVous,
     });
+    // Pourquoi lui : ses arguments, extraits de ses verbatims, chacun prouvé.
+    const rival = entree.analyse?.rival;
+    if (rival && rival.arguments.length >= 2) {
+      ecrans.push({
+        type: "rival-pourquoi",
+        rival: rival.nom,
+        arguments: rival.arguments,
+      });
+    }
   }
 
   // Cinq pièces au plus, la question décisive gardée pour son propre écran.
@@ -247,17 +314,22 @@ export function construireVisio(entree: {
       : "Une partie des robots d'IA n'a même pas le droit de lire votre site.",
   });
 
-  const gagnables = donnees.plan
-    .flatMap((p) => p.cibles)
-    .filter((c) => c.titre.startsWith("«"))
-    .slice(0, 3)
-    .map((c) => c.titre.replace(/^«\s?|\s?»$/g, ""));
+  const gagnables = questionsGagnables(
+    donnees.matrice,
+    entree.mentions,
+    entree.classes,
+    entree.alias,
+    3,
+  );
   if (donnees.sources.totalLectures) {
     ecrans.push({
       type: "preuve-matiere",
       lectures: donnees.sources.totalLectures,
       votreSite: donnees.sources.lecturesVotreSite,
-      questionsPerdues: gagnables,
+      questionsPerdues: gagnables.map((g) => ({
+        texte: g.texte,
+        lus: sourcesParQuestion(entree.reponses, g.id),
+      })),
     });
   }
 
@@ -272,8 +344,22 @@ export function construireVisio(entree: {
     ecrans.push({ type: "preuve-adresses", adresses: citables.slice(0, 5) });
   }
 
+  const identites = entree.analyse?.identites ?? [];
   const miroir = donnees.miroir[0];
-  if (miroir) {
+  if (identites.length >= 2) {
+    ecrans.push({
+      type: "cause",
+      numero: 3,
+      titre: "Votre identité est floue. Alors les IA inventent.",
+      phrase: `On a donné votre nom aux ${identites.length} moteurs. Voici le métier que chacun vous prête.`,
+    });
+    ecrans.push({
+      type: "identite",
+      marque: donnees.marque,
+      lignes: identites,
+      llmstxt: donnees.technique?.llmstxt ?? false,
+    });
+  } else if (miroir) {
     ecrans.push({
       type: "cause",
       numero: 3,
@@ -302,7 +388,7 @@ export function construireVisio(entree: {
   if (fondations.length) ecrans.push({ type: "plan-fondations", actions: fondations });
 
   const contenus = [
-    ...gagnables.map((q) => `Une page qui répond à : « ${q} »`),
+    ...gagnables.map((g) => `Une page qui répond à : « ${g.texte} »`),
     ...actionsDe("Contenu").slice(0, 2),
   ].slice(0, 5);
   if (contenus.length) ecrans.push({ type: "plan-contenus", contenus });

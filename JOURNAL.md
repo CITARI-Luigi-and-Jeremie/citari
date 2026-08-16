@@ -5,6 +5,79 @@ d'une nouvelle session, après `CLAUDE.md`.
 
 ---
 
+## 2026-08-16 — L'analyse complémentaire et le théâtre sombre
+
+Double rejet de Luigi sur la visio du matin : « tu as juste mis en slide
+tous ce qu'on a fait sans rien changer » et « change tout radicalement ...
+fais le rendu d'une licorne ». Le diagnostic est le même que pour la
+projection : la valeur ne vient pas d'un réagencement, elle vient de
+DONNÉES QUE PERSONNE D'AUTRE NE MONTRE. D'où deux chantiers, back puis
+front, dans le même geste.
+
+**Le back : `scans.analyse_ia`** (colonne jsonb, `lib/analyse.server.ts`).
+Deux extractions par le modèle d'analyse (gemini flash-lite, ~1 centime)
+sur les réponses DÉJÀ stockées — zéro nouvel appel aux six moteurs, le
+score reste figé :
+
+1. **L'identité perçue** : le métier que chaque moteur attribue à
+   l'entreprise dans sa réponse miroir. On n'affirme jamais qui a raison
+   (le `sector` déduit peut lui-même être faux : Snapdesk y est « Agence
+   immobilière ») : les six lignes côte à côte suffisent, la divergence se
+   juge d'elle-même. Sur Snapdesk : TROIS moteurs répondent « non précisé »,
+   les trois autres disent proptech / bureaux opérés / agence immobilière.
+2. **Les arguments du rival** : ce que les moteurs répètent quand ils
+   recommandent le concurrent principal, extrait de ses verbatims réels.
+   Sur Snapdesk : réseau national (ChatGPT), engagement souple (Grok),
+   espace privatif (Claude), équipes mobiles (Gemini). C'est littéralement
+   la liste de ce que le client devra publier — l'écran fait le pont vers
+   les contenus du Sprint.
+
+**Le garde-fou contre l'invention est dans le CODE, pas dans le prompt** :
+chaque ligne extraite doit porter une citation, et `citationProuvee`
+(sous-chaîne normalisée, 12 caractères minimum) jette toute ligne dont la
+citation ne se retrouve pas mot pour mot dans le texte source. Calcul au
+premier chargement de la visio, cache dans `analyse_ia`, `null` en cas de
+panne du modèle (jamais de cache d'échec : on réessaie au chargement
+suivant, et les deux écrans sortent du déroulé en attendant).
+
+**La cause par question perdue est un calcul PUR** : `sourcesParQuestion`
+relit les `sources` stockées et affiche, sous chaque question gagnable de
+l'écran matière, les sites que les moteurs ont réellement lus dessus
+(« lu à la place : wework.com · workin.space · wojo.com »). Le rival est
+DANS les sources : aucun modèle n'est nécessaire pour le prouver. Au
+passage, l'écran matière ne gratte plus les titres du plan par regex : il
+appelle `questionsGagnables` directement.
+
+**Le front : le théâtre sombre.** La scène passe à l'encre (la grammaire
+sombre déjà validée du site : `GrilleFond` de la séquence de résultat,
+sections basses de la landing), texte papier, chrome constant enrichi (les
+CINQ actes visibles en haut, l'acte courant en papier, fil de progression
+signal), transitions `anim-panel` au changement d'écran, grands chiffres
+qui se comptent en 800 ms (`Compteur`, rendu serveur = valeur finale, donc
+jamais d'écart d'hydratation ; `prefers-reduced-motion` coupe tout). Sur
+l'encre, la convention tourne d'un cran : les concurrents se soulignent EN
+PAPIER, et le minium — éclairci par `color-mix` pour rester lisible (55 %
+signal / 45 % papier ≈ 6,5:1) — ne dit toujours qu'une chose, le manque.
+Réalisation : une feuille scopée `.visio-scene` retourne les utilitaires
+du document (`text-ink` → papier, `border-rule` → filet papier 16 %...),
+le balisage des écrans sert les deux mondes sans duplication.
+
+Le déroulé passe de 22 à 23 écrans : « pourquoi lui » s'insère après le
+50 contre 6 (acte 2, qui reste dans la fourchette 6-8 du brief), et
+l'écran identité remplace l'ancien extrait miroir à un seul moteur quand
+l'analyse existe (l'extrait reste en secours si le modèle a échoué).
+
+Vérifié sur Snapdesk en conditions réelles : première ouverture ⇒
+extraction ⇒ `analyse_ia` écrit en base ⇒ écrans grounded (chaque citation
+vérifiée présente dans les verbatims). Typecheck ×2, build, 277 tests.
+
+Note : Luigi évoque « les 47 étapes » de nos solutions. Rien dans le code
+ne produit ce compte (la proposition n'énumère pas 47 étapes) : aucun
+écran n'affiche donc ce chiffre. Si cette liste existe quelque part
+(Notion ?), la brancher un jour sur l'acte du plan — jamais en dur.
+
+---
+
 ## 2026-08-16 — La visio : le troisième artefact, celui qui vend
 
 Brief de Luigi, très précis : le scan complet sert AUSSI de support de

@@ -508,4 +508,26 @@ describe("la visio : l'assemblage du support de présentation", () => {
     const { dateRemesure } = await import("@/lib/visio");
     expect(dateRemesure("2026-08-15T21:13:57+00:00")).toBe("13 novembre 2026");
   });
+
+  it("relève les sites lus sur UNE question, réponses en erreur exclues", async () => {
+    const { sourcesParQuestion } = await import("@/lib/visio");
+    const r = (query_id: string, error: string | null, urls: string[]) => ({
+      id: `${query_id}-${urls.length}-${error ?? "ok"}`,
+      query_id,
+      engine: "ChatGPT",
+      raw_text: error ? null : "…",
+      error,
+      sources: urls.map((url) => ({ url })),
+    });
+    const reponses = [
+      r("q1", null, ["https://ubiq.fr/a?utm_source=openai", "https://ubiq.fr/b", "https://www.bureauxlocaux.com/x"]),
+      r("q1", null, ["https://bureauxlocaux.com/y"]),
+      // La même adresse sur une AUTRE question ne compte pas ici.
+      r("q2", null, ["https://autre.fr/z"]),
+      // Une réponse en erreur ne compte dans aucun dénominateur : règle de la maison.
+      r("q1", "indisponible", ["https://fantome.fr/"]),
+    ];
+    expect(sourcesParQuestion(reponses, "q1")).toEqual(["bureauxlocaux.com", "ubiq.fr"]);
+    expect(sourcesParQuestion(reponses, "q2")).toEqual(["autre.fr"]);
+  });
 });

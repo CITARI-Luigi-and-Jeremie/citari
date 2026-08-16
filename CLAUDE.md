@@ -133,15 +133,33 @@ deux endroits est le piège déjà payé avec les deux comparatifs. En `complet`
 moteur qu'on vient d'interroger et de facturer serait un mensonge : ne jamais
 rendre cet aiguillage configurable.
 
-**La VISIO est le troisième artefact du scan complet** (16/08/2026) :
-`/visio/$jeton`, plein écran, 22 écrans en cinq actes (verdict, preuve,
-causes, plan, décision), pilotés aux flèches ou à la télécommande. C'est le
-support que LUIGI commente en partage d'écran pour vendre le Sprint ; l'URL
-n'est liée nulle part. Règle de pertinence : chaque écran porte une donnée
-propre au prospect, 40 mots max, concurrents surlignés en encre, l'absence
-seule en minium. `?places=N` affiche les places restantes du mois : un
-chiffre réel saisi par Luigi, jamais déduit. L'assemblage vit dans
-`lib/visio.ts`, l'écart aperçu → complet vient de `visioParJeton`.
+**La VISIO est le troisième artefact du scan complet** (16/08/2026, théâtre
+sombre le soir même) : `/visio/$jeton`, plein écran SUR L'ENCRE (grille de
+la séquence de résultat, texte papier, fil de progression, chiffres
+comptés), 23 écrans en cinq actes (verdict, preuve, causes, plan,
+décision), pilotés aux flèches ou à la télécommande. C'est le support que
+LUIGI commente en partage d'écran pour vendre le Sprint ; l'URL n'est liée
+nulle part. Règle de pertinence : chaque écran porte une donnée propre au
+prospect, 40 mots max ; sur l'encre les concurrents se soulignent EN
+PAPIER, le minium (éclairci au `color-mix`) reste réservé au manque.
+`?places=N` affiche les places restantes du mois : un chiffre réel saisi
+par Luigi, jamais déduit. L'assemblage vit dans `lib/visio.ts`, l'écart
+aperçu → complet vient de `visioParJeton`.
+
+**L'ANALYSE COMPLÉMENTAIRE nourrit les deux écrans les plus vendeurs de la
+visio** (16/08/2026) : `lib/analyse.server.ts`, cache dans
+`scans.analyse_ia` (jsonb), calculée au premier chargement par le modèle
+d'analyse (~1 centime), zéro nouvel appel aux six moteurs. (1) L'identité
+perçue : le métier que CHAQUE moteur prête à l'entreprise dans sa réponse
+miroir, six lignes côte à côte, sans juger qui a raison (`scans.sector`
+lui-même peut être faux). (2) Les arguments du rival, extraits de ses
+verbatims réels : la liste de ce qu'il publie et que le client ne publie
+pas. Garde-fou dans le CODE : toute ligne dont la citation ne se retrouve
+pas mot pour mot dans le texte source est jetée (`citationProuvee`). Échec
+du modèle ⇒ `null`, jamais mis en cache, les écrans sortent du déroulé. La
+cause par question perdue (`sourcesParQuestion`, écran matière : « lu à la
+place : wojo.com… ») est un calcul PUR sur les sources stockées, sans
+modèle.
 
 **Le scan complet est une PROJECTION, et le document est sa version
 imprimable** (16/08/2026, après trois retours identiques de Luigi sur le
@@ -392,7 +410,7 @@ du toolkit et les colonnes réelles vit dans
 
 ```bash
 pnpm install
-pnpm -r test                        # 276 tests
+pnpm -r test                        # 277 tests
 pnpm -r typecheck                   # paquets + fichiers du site importés par les tests
 npm --prefix apps/citari run typecheck   # TOUT le site (ajouté le 14/08/2026)
 npm --prefix apps/citari run build

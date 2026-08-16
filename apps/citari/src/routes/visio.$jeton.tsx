@@ -4,7 +4,8 @@ import { z } from "zod";
 
 import { chargerVisio } from "@/lib/scan.functions";
 import { construireDocument, type LigneSourceReponse } from "@/lib/rapport-complet";
-import { TitreChiffre, TexteMarque } from "@/components/rapport-complet";
+import { TitreChiffre } from "@/components/rapport-complet";
+import { GrilleFond } from "@/components/jeremie/rapport/GrilleFond";
 import { acteDe, construireVisio, type EcranVisio } from "@/lib/visio";
 import type { LigneMention, LigneQuestion } from "@/lib/rapport-apercu";
 import { dateFr, fr, frTitre, NBSP } from "@/lib/typo";
@@ -18,14 +19,37 @@ import { cn } from "@/lib/utils";
  * écran, jamais de défilement. Ce n'est pas le rapport autonome : l'URL
  * n'est liée nulle part, elle se tape.
  *
- * L'esthétique applique DESIGN.md à la lettre, et la discipline d'un
- * document d'expertise : un CHROME IDENTIQUE sur chaque écran (filet haut
- * avec l'acte et le numéro, filet bas avec la marque et la date, tout en
- * mono), une grille ancrée à gauche, trois tailles de texte par écran au
- * plus, plus de la moitié de vide, zéro carte, zéro ombre, zéro icône. Le
- * minium ne dit qu'une chose : la perte. Les concurrents se surlignent en
- * encre. C'est la constance du gabarit qui fait « pro », pas les effets.
+ * LE THÉÂTRE SOMBRE (16/08/2026) : la scène est l'encre, le texte est le
+ * papier — la grammaire sombre déjà validée du site (séquence de résultat,
+ * sections basses de la landing), pas une charte nouvelle. Le chrome est
+ * identique sur chaque écran : les cinq actes en haut, la marque en bas, la
+ * progression en filet. Sur l'encre, la convention s'inverse d'un cran : les
+ * CONCURRENTS se soulignent en papier, et le minium — éclairci pour rester
+ * lisible — ne dit toujours qu'une chose, le manque. Zéro carte, zéro ombre,
+ * zéro icône : la constance du gabarit fait « pro », pas les effets.
  */
+
+const CSS_SCENE = `
+.visio-scene{
+  background: var(--ink);
+  color: var(--paper);
+  --v-fil: color-mix(in srgb, var(--paper) 16%, transparent);
+  --v-mut: color-mix(in srgb, var(--paper) 68%, var(--ink));
+  --v-mut2: color-mix(in srgb, var(--paper) 52%, var(--ink));
+  --v-minium: color-mix(in srgb, var(--signal) 55%, var(--paper));
+}
+/* Les utilitaires du document, retournés pour la scène sombre : le même
+   balisage sert les deux mondes, seule la lumière change. */
+.visio-scene .text-ink{color:var(--paper)}
+.visio-scene .text-ink-2{color:var(--v-mut)}
+.visio-scene .text-ink-3{color:var(--v-mut2)}
+.visio-scene .text-signal{color:var(--v-minium)}
+.visio-scene .bg-ink{background-color:var(--paper)}
+.visio-scene .bg-signal{background-color:var(--v-minium)}
+.visio-scene .border-rule{border-color:var(--v-fil)}
+.visio-scene .border-ink{border-color:var(--paper)}
+.visio-scene .conduite{border-bottom-color:color-mix(in srgb, var(--paper) 30%, transparent)}
+`;
 
 const RechercheVisio = z.object({
   /** Places restantes du mois, saisies par Luigi (`?places=2`) : un chiffre
@@ -56,7 +80,7 @@ export const Route = createFileRoute("/visio/$jeton")({
 });
 
 function Visio() {
-  const { scan, questions, reponses, mentions, apercu } = Route.useLoaderData();
+  const { scan, questions, reponses, mentions, apercu, analyse } = Route.useLoaderData();
   const { places } = Route.useSearch();
   const score = Math.round(Number(scan.score_global ?? 0));
 
@@ -88,10 +112,12 @@ function Visio() {
       completedAt: scan.completed_at ?? scan.created_at,
       apercu,
       score,
+      reponses: reponses as unknown as LigneSourceReponse[],
+      analyse: analyse ?? null,
       places: places ?? null,
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [scan, questions, reponses, mentions, apercu, places]);
+  }, [scan, questions, reponses, mentions, apercu, analyse, places]);
 
   const [index, setIndex] = useState(0);
   const aller = useCallback(
@@ -126,21 +152,44 @@ function Visio() {
   const acte = acteDe(actes, index);
 
   return (
-    <div className="fixed inset-0 flex flex-col bg-paper text-ink">
+    <div className="visio-scene fixed inset-0 flex flex-col overflow-hidden">
+      <style>{CSS_SCENE}</style>
+      <GrilleFond />
+
+      {/* Le fil de progression : la seule chose qui bouge entre deux écrans. */}
+      <div
+        aria-hidden
+        className="absolute inset-x-0 top-0 z-20 h-[2px] bg-signal transition-[width] duration-300 ease-out"
+        style={{ width: `${((index + 1) / ecrans.length) * 100}%` }}
+      />
+
       {/* ------------------------------------------------ chrome haut */}
-      <header className="flex items-baseline justify-between border-b border-rule px-[4vw] py-3">
-        <span className="num text-[10px] uppercase tracking-[0.22em] text-ink-3">
-          acte {acte.numero} · {acte.nom}
+      <header className="relative z-10 flex items-baseline justify-between gap-6 border-b border-rule px-[4vw] py-3">
+        <span className="num shrink-0 text-[11px] font-semibold uppercase tracking-[0.3em]">
+          citari
         </span>
-        <span className="num text-[11px] tabular-nums">
+        <span className="hidden min-w-0 items-baseline gap-4 overflow-hidden whitespace-nowrap md:flex">
+          {actes.map((a, i) => (
+            <span
+              key={a.nom}
+              className={cn(
+                "num text-[10px] uppercase tracking-[0.22em] transition-colors duration-300",
+                i + 1 === acte.numero ? "text-paper" : "text-ink-3",
+              )}
+            >
+              {a.nom}
+            </span>
+          ))}
+        </span>
+        <span className="num shrink-0 text-[11px] tabular-nums">
           {String(index + 1).padStart(2, "0")}
           <span className="text-ink-3"> / {String(ecrans.length).padStart(2, "0")}</span>
         </span>
       </header>
 
       {/* ---------------------------------------------------- l'écran */}
-      <main key={index} className="relative min-h-0 flex-1 px-[7vw] py-[5vh]">
-        <Ecran ecran={ecran} marque={scan.brand_name} />
+      <main key={index} className="anim-panel relative z-10 min-h-0 flex-1 px-[7vw] py-[5vh]">
+        <Ecran ecran={ecran} />
 
         {/* Zones de clic discrètes, pour présenter au trackpad. */}
         <button
@@ -158,9 +207,9 @@ function Visio() {
       </main>
 
       {/* ------------------------------------------------- chrome bas */}
-      <footer className="flex items-baseline justify-between border-t border-rule px-[4vw] py-3">
+      <footer className="relative z-10 flex items-baseline justify-between border-t border-rule px-[4vw] py-3">
         <span className="num text-[10px] uppercase tracking-[0.22em] text-ink-3">
-          citari · document de mesure
+          document de mesure · rien de simulé
         </span>
         <span className="num text-[10px] text-ink-3">
           {scan.brand_name} ·{" "}
@@ -176,7 +225,7 @@ function Visio() {
 /*  serif, le chiffre en mono, la métadonnée en mono 10px.               */
 /* ==================================================================== */
 
-function Ecran({ ecran, marque }: { ecran: EcranVisio; marque: string }) {
+function Ecran({ ecran }: { ecran: EcranVisio }) {
   switch (ecran.type) {
     /* -------------------------------------------------- 01 · la garde */
     case "garde":
@@ -189,7 +238,7 @@ function Ecran({ ecran, marque }: { ecran: EcranVisio; marque: string }) {
             <h1 className="text-[9vw] font-extrabold leading-[0.9] tracking-[-0.04em]">
               {ecran.marque}
             </h1>
-            <p className="serif-roman mt-[4vh] max-w-[30ch] text-[2.2vw] leading-[1.25]">
+            <p className="serif-roman mt-[4vh] max-w-[30ch] text-[2.2vw] leading-[1.25] text-ink-2">
               <TitreChiffre
                 texte={fr(
                   `${ecran.questions} questions d'acheteur, posées aux ${ecran.moteurs} moteurs, web ouvert.`,
@@ -224,7 +273,9 @@ function Ecran({ ecran, marque }: { ecran: EcranVisio; marque: string }) {
             ) : null}
           </div>
           <div className="shrink-0 text-right">
-            <div className="num text-[18vw] leading-[0.8] tracking-[-0.06em]">{ecran.score}</div>
+            <div className="num text-[18vw] leading-[0.8] tracking-[-0.06em]">
+              <Compteur valeur={ecran.score} />
+            </div>
             <div className="mt-2 flex items-baseline justify-end gap-3">
               <span className="num text-[12px] text-ink-3">sur 100</span>
               <span className="text-[1.6vw] font-bold text-signal">{ecran.verdictMot}</span>
@@ -289,7 +340,7 @@ function Ecran({ ecran, marque }: { ecran: EcranVisio; marque: string }) {
           <div className="mt-[7vh] flex max-w-[60vw] items-end gap-[8vw]">
             <div>
               <div className="num text-[9vw] leading-[0.85] tracking-[-0.05em]">
-                {ecran.recoAdversaire}
+                <Compteur valeur={ecran.recoAdversaire} />
               </div>
               <p className="num mt-3 border-t border-rule pt-2 text-[13px]">
                 réponses où {ecran.adversaire} est recommandé
@@ -297,7 +348,7 @@ function Ecran({ ecran, marque }: { ecran: EcranVisio; marque: string }) {
             </div>
             <div>
               <div className="num text-[9vw] leading-[0.85] tracking-[-0.05em] text-signal">
-                {ecran.recoVous}
+                <Compteur valeur={ecran.recoVous} />
               </div>
               <p className="num mt-3 border-t border-rule pt-2 text-[13px] text-signal">
                 où vous l'êtes
@@ -305,12 +356,45 @@ function Ecran({ ecran, marque }: { ecran: EcranVisio; marque: string }) {
             </div>
           </div>
           <p className="num mt-[6vh] text-[11px] text-ink-3">
-            recommandations explicites, relevées phrase par phrase · voici les pièces
+            recommandations explicites, relevées phrase par phrase · voici pourquoi
           </p>
         </div>
       );
 
-    /* ------------------------------------------ 05-09 · les pièces */
+    /* ----------------------------------- 05 · pourquoi le rival gagne */
+    case "rival-pourquoi":
+      return (
+        <div className="flex h-full flex-col justify-center">
+          <p className="num text-[11px] uppercase tracking-[0.2em] text-ink-3">
+            pourquoi lui · dans les mots des moteurs
+          </p>
+          <h2 className="serif-roman mt-[2vh] max-w-[24ch] text-[3vw] leading-[1.1]">
+            {frTitre(`Ce que les machines répètent sur ${ecran.rival}.`)}
+          </h2>
+          <div className="mt-[5vh] max-w-[64vw]">
+            {ecran.arguments.map((a, i) => (
+              <div key={a.resume} className="flex items-baseline gap-5 border-b border-rule py-[1.8vh]">
+                <span className="num shrink-0 text-[12px] text-ink-3">
+                  {String(i + 1).padStart(2, "0")}
+                </span>
+                <span className="w-[16vw] shrink-0 text-[1.5vw] font-semibold leading-snug">
+                  {fr(a.resume)}
+                </span>
+                <span className="serif-ital min-w-0 flex-1 truncate text-[1.2vw] text-ink-2">
+                  «{NBSP}{a.citation}{NBSP}»
+                </span>
+                <span className="num shrink-0 text-[11px] text-ink-3">{a.moteur}</span>
+              </div>
+            ))}
+          </div>
+          <p className="num mt-[4vh] text-[11px] text-ink-3">
+            extraits mot pour mot des réponses conservées · c'est la liste de ce qu'il publie, et
+            que vous ne publiez pas
+          </p>
+        </div>
+      );
+
+    /* ------------------------------------------ 06-10 · les pièces */
     case "piece":
       return (
         <div className="flex h-full flex-col justify-center">
@@ -323,14 +407,14 @@ function Ecran({ ecran, marque }: { ecran: EcranVisio; marque: string }) {
           </p>
           <blockquote className="serif-ital mt-[5vh] max-w-[38ch] text-[2.6vw] leading-[1.3]">
             <span className="text-ink-3">«{NBSP}</span>
-            <MarquageEncre texte={ecran.piece.texte} />
+            <MarquagePapier texte={ecran.piece.texte} />
             <span className="text-ink-3">{NBSP}»</span>
           </blockquote>
           <p className="num mt-[5vh] text-[14px] font-medium text-signal">{ecran.piece.statut}</p>
         </div>
       );
 
-    /* --------------------------------------- 10 · la question décisive */
+    /* --------------------------------------- 11 · la question décisive */
     case "decisive":
       return (
         <div className="flex h-full flex-col justify-center">
@@ -354,7 +438,7 @@ function Ecran({ ecran, marque }: { ecran: EcranVisio; marque: string }) {
         </div>
       );
 
-    /* -------------------------------------------- 11, 13, 15 · causes */
+    /* ------------------------------------------------ les causes */
     case "cause":
       return (
         <div className="flex h-full flex-col justify-center">
@@ -370,13 +454,15 @@ function Ecran({ ecran, marque }: { ecran: EcranVisio; marque: string }) {
         </div>
       );
 
-    /* --------------------------------------- 12 · preuve : la matière */
+    /* -------------------------------------------- preuve : la matière */
     case "preuve-matiere":
       return (
         <div className="flex h-full flex-col justify-center">
           <div className="flex max-w-[64vw] items-end gap-[8vw]">
             <div>
-              <div className="num text-[8vw] leading-[0.85] tracking-[-0.05em]">{ecran.lectures}</div>
+              <div className="num text-[8vw] leading-[0.85] tracking-[-0.05em]">
+                <Compteur valeur={ecran.lectures} />
+              </div>
               <p className="num mt-3 border-t border-rule pt-2 text-[13px]">
                 lectures faites par les moteurs pendant la mesure
               </p>
@@ -391,21 +477,28 @@ function Ecran({ ecran, marque }: { ecran: EcranVisio; marque: string }) {
             </div>
           </div>
           {ecran.questionsPerdues.length ? (
-            <div className="mt-[7vh] max-w-[60vw]">
+            <div className="mt-[6vh] max-w-[62vw]">
               <p className="num text-[11px] uppercase tracking-[0.2em] text-ink-3">
                 et aucune page chez vous ne répond à
               </p>
               {ecran.questionsPerdues.map((q) => (
-                <p key={q} className="serif-roman mt-[1.6vh] border-b border-rule pb-[1.4vh] text-[1.5vw] leading-snug">
-                  «{NBSP}{q}{NBSP}»
-                </p>
+                <div key={q.texte} className="border-b border-rule py-[1.4vh]">
+                  <p className="serif-roman text-[1.5vw] leading-snug">
+                    «{NBSP}{q.texte}{NBSP}»
+                  </p>
+                  {q.lus.length ? (
+                    <p className="num mt-1 text-[11px] text-ink-3">
+                      lu à la place{NBSP}: {q.lus.join(" · ")}
+                    </p>
+                  ) : null}
+                </div>
               ))}
             </div>
           ) : null}
         </div>
       );
 
-    /* ------------------------------------- 14 · preuve : les adresses */
+    /* ------------------------------------------ preuve : les adresses */
     case "preuve-adresses":
       return (
         <div className="flex h-full flex-col justify-center">
@@ -429,7 +522,7 @@ function Ecran({ ecran, marque }: { ecran: EcranVisio; marque: string }) {
         </div>
       );
 
-    /* ------------------------------------- 16 · preuve : l'identité */
+    /* ------------------------------------------- preuve : l'identité */
     case "preuve-identite":
       return (
         <div className="flex h-full flex-col justify-center">
@@ -446,7 +539,48 @@ function Ecran({ ecran, marque }: { ecran: EcranVisio; marque: string }) {
         </div>
       );
 
-    /* ------------------------------------------ 17 · le calendrier */
+    /* --------------------------------- l'identité, moteur par moteur */
+    case "identite":
+      return (
+        <div className="flex h-full flex-col justify-center">
+          <p className="num text-[11px] uppercase tracking-[0.2em] text-ink-3">
+            réponses miroir, hors score · le métier que chaque moteur prête à {ecran.marque}
+          </p>
+          <div className="mt-[4vh] max-w-[68vw]">
+            {ecran.lignes.map((l) => {
+              const inconnu = l.metier.toLowerCase().includes("non précisé");
+              return (
+                <div key={l.moteur} className="flex items-baseline gap-[2.5vw] border-b border-rule py-[1.7vh]">
+                  <span className="num w-[9vw] shrink-0 text-[12px] text-ink-3">{l.moteur}</span>
+                  <span
+                    className={cn(
+                      "serif-roman w-[24vw] shrink-0 text-[1.7vw] leading-snug",
+                      inconnu && "text-signal",
+                    )}
+                  >
+                    {fr(l.metier)}
+                  </span>
+                  {l.citation ? (
+                    <span className="serif-ital min-w-0 flex-1 truncate text-[1vw] text-ink-3">
+                      «{NBSP}{l.citation}{NBSP}»
+                    </span>
+                  ) : null}
+                </div>
+              );
+            })}
+          </div>
+          <p className="num mt-[4vh] text-[11px] text-ink-3">
+            extraits mot pour mot des réponses conservées
+            {ecran.llmstxt ? "" : (
+              <span className="text-signal">
+                {NBSP}· fichier llms.txt{NBSP}: absent, rien ne fixe votre identité
+              </span>
+            )}
+          </p>
+        </div>
+      );
+
+    /* ------------------------------------------ le calendrier */
     case "plan-calendrier":
       return (
         <div className="flex h-full flex-col justify-center">
@@ -469,7 +603,7 @@ function Ecran({ ecran, marque }: { ecran: EcranVisio; marque: string }) {
         </div>
       );
 
-    /* ------------------------------------------ 18 · les fondations */
+    /* ------------------------------------------ les fondations */
     case "plan-fondations":
       return (
         <EcranListe
@@ -480,7 +614,7 @@ function Ecran({ ecran, marque }: { ecran: EcranVisio; marque: string }) {
         />
       );
 
-    /* ------------------------------------------- 19 · les contenus */
+    /* ------------------------------------------- les contenus */
     case "plan-contenus":
       return (
         <EcranListe
@@ -491,7 +625,7 @@ function Ecran({ ecran, marque }: { ecran: EcranVisio; marque: string }) {
         />
       );
 
-    /* ------------------------------------------ 20 · les citations */
+    /* ------------------------------------------ les citations */
     case "plan-citations":
       return (
         <EcranListe
@@ -502,7 +636,7 @@ function Ecran({ ecran, marque }: { ecran: EcranVisio; marque: string }) {
         />
       );
 
-    /* ------------------------------------------- 21 · la remesure */
+    /* ------------------------------------------- la remesure */
     case "remesure":
       return (
         <div className="flex h-full flex-col justify-center">
@@ -529,7 +663,7 @@ function Ecran({ ecran, marque }: { ecran: EcranVisio; marque: string }) {
         </div>
       );
 
-    /* ---------------------------------------------- 22 · l'offre */
+    /* ---------------------------------------------- l'offre */
     default:
       return (
         <div className="flex h-full flex-col justify-center">
@@ -591,11 +725,35 @@ function EcranListe({
 }
 
 /**
- * Le marquage des concurrents dans un verbatim, version visio : le nom du
- * concurrent se surligne EN ENCRE (règle du déroulé : concurrents en encre,
- * l'absence seule est en minium). Le marqueur `*...*` vient de l'assemblage.
+ * Le grand chiffre qui SE COMPTE à l'arrivée de l'écran. Rendu serveur avec
+ * sa valeur finale (l'hydratation ne diffère jamais), puis l'effet rejoue la
+ * montée en 800 ms. `prefers-reduced-motion` coupe tout.
  */
-function MarquageEncre({ texte }: { texte: string }) {
+function Compteur({ valeur }: { valeur: number }) {
+  const [v, setV] = useState(valeur);
+  useEffect(() => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    let raf = 0;
+    const t0 = performance.now();
+    const tick = (t: number) => {
+      const p = Math.min(1, (t - t0) / 800);
+      setV(Math.round(valeur * (1 - Math.pow(1 - p, 3))));
+      if (p < 1) raf = requestAnimationFrame(tick);
+    };
+    setV(0);
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [valeur]);
+  return <>{v}</>;
+}
+
+/**
+ * Le marquage des concurrents dans un verbatim, version scène sombre : le nom
+ * du concurrent se souligne EN PAPIER (sur l'encre, la présence est claire ;
+ * le minium reste réservé au manque). Le marqueur `*...*` vient de
+ * l'assemblage.
+ */
+function MarquagePapier({ texte }: { texte: string }) {
   const morceaux = texte.split(/(\*[^*]+\*)/g);
   return (
     <>

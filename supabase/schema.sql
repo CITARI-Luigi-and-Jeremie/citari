@@ -42,6 +42,10 @@ CREATE TABLE scans (
   share_of_voice jsonb NOT NULL DEFAULT '[]',
   actions jsonb NOT NULL DEFAULT '[]',
   audit jsonb, miroir jsonb,
+  -- L'analyse complémentaire du scan complet (identité perçue, arguments du
+  -- rival), extraite des réponses stockées et mise en cache. Voir
+  -- apps/citari/src/lib/analyse.server.ts.
+  analyse_ia jsonb,
   -- Classement des concurrents relatif au client suivi :
   -- { "Deloitte": "geant", "Cabinet Odicéo": "rival", "QuickBooks": "outil" }
   -- Vide = tout est rival, le parti pris prudent.

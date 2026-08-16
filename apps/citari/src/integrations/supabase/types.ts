@@ -665,6 +665,7 @@ export type Database = {
       scans: {
         Row: {
           actions: Json
+          analyse_ia: Json | null
           avg_position: number | null
           brand_aliases: Json
           brand_name: string
@@ -705,6 +706,7 @@ export type Database = {
         }
         Insert: {
           actions?: Json
+          analyse_ia?: Json | null
           avg_position?: number | null
           brand_name: string
           city?: string | null
@@ -744,6 +746,7 @@ export type Database = {
         }
         Update: {
           actions?: Json
+          analyse_ia?: Json | null
           avg_position?: number | null
           brand_aliases?: Json
           brand_name?: string
