@@ -279,17 +279,335 @@ function Ecran({ ecran, marque }: { ecran: EcranVisio; marque: string }) {
       );
     }
 
-    /* --------------------------- les actes suivants, écran par écran */
+    /* ---------------------------------------------- 04 · 50 contre 6 */
+    case "reco":
+      return (
+        <div className="flex h-full flex-col justify-center">
+          <p className="serif-roman max-w-[26ch] text-[2.8vw] leading-[1.15]">
+            {fr("Être cité n'est pas être recommandé.")}
+          </p>
+          <div className="mt-[7vh] flex max-w-[60vw] items-end gap-[8vw]">
+            <div>
+              <div className="num text-[9vw] leading-[0.85] tracking-[-0.05em]">
+                {ecran.recoAdversaire}
+              </div>
+              <p className="num mt-3 border-t border-rule pt-2 text-[13px]">
+                réponses où {ecran.adversaire} est recommandé
+              </p>
+            </div>
+            <div>
+              <div className="num text-[9vw] leading-[0.85] tracking-[-0.05em] text-signal">
+                {ecran.recoVous}
+              </div>
+              <p className="num mt-3 border-t border-rule pt-2 text-[13px] text-signal">
+                où vous l'êtes
+              </p>
+            </div>
+          </div>
+          <p className="num mt-[6vh] text-[11px] text-ink-3">
+            recommandations explicites, relevées phrase par phrase · voici les pièces
+          </p>
+        </div>
+      );
+
+    /* ------------------------------------------ 05-09 · les pièces */
+    case "piece":
+      return (
+        <div className="flex h-full flex-col justify-center">
+          <p className="num text-[11px] uppercase tracking-[0.2em] text-ink-3">
+            pièce {ecran.indexPiece} / {ecran.totalPieces} · question{" "}
+            {String(ecran.piece.rang).padStart(2, "0")} · {ecran.piece.moteur}
+          </p>
+          <p className="mt-[2vh] max-w-[58ch] text-[1.25vw] font-medium leading-snug text-ink-2">
+            {ecran.piece.question}
+          </p>
+          <blockquote className="serif-ital mt-[5vh] max-w-[38ch] text-[2.6vw] leading-[1.3]">
+            <span className="text-ink-3">«{NBSP}</span>
+            <MarquageEncre texte={ecran.piece.texte} />
+            <span className="text-ink-3">{NBSP}»</span>
+          </blockquote>
+          <p className="num mt-[5vh] text-[14px] font-medium text-signal">{ecran.piece.statut}</p>
+        </div>
+      );
+
+    /* --------------------------------------- 10 · la question décisive */
+    case "decisive":
+      return (
+        <div className="flex h-full flex-col justify-center">
+          <p className="num text-[11px] uppercase tracking-[0.2em] text-ink-3">
+            la question décisive · question {String(ecran.rang).padStart(2, "0")}
+          </p>
+          <p className="serif-roman mt-[3vh] max-w-[30ch] text-[2.6vw] leading-[1.2]">
+            «{NBSP}{ecran.question}{NBSP}»
+          </p>
+          <div className="mt-[7vh] flex max-w-[62vw] items-baseline gap-[6vw] border-t border-rule pt-[3vh]">
+            <span className="num text-[1.6vw]">
+              {ecran.moteurs} <span className="text-[12px] text-ink-3">moteurs ont répondu</span>
+            </span>
+            <span className="num text-[1.6vw]">
+              {ecran.marques} <span className="text-[12px] text-ink-3">marques citées</span>
+            </span>
+            <span className="num text-[1.6vw] font-medium text-signal">
+              vous{NBSP}: aucune réponse
+            </span>
+          </div>
+        </div>
+      );
+
+    /* -------------------------------------------- 11, 13, 15 · causes */
+    case "cause":
+      return (
+        <div className="flex h-full flex-col justify-center">
+          <p className="num text-[11px] uppercase tracking-[0.2em] text-ink-3">
+            cause {ecran.numero} / 3
+          </p>
+          <h2 className="serif-roman mt-[3vh] max-w-[22ch] text-[4vw] leading-[1.08]">
+            {frTitre(ecran.titre)}
+          </h2>
+          <p className="mt-[4vh] max-w-[52ch] text-[1.4vw] leading-relaxed text-ink-2">
+            {fr(ecran.phrase)}
+          </p>
+        </div>
+      );
+
+    /* --------------------------------------- 12 · preuve : la matière */
+    case "preuve-matiere":
+      return (
+        <div className="flex h-full flex-col justify-center">
+          <div className="flex max-w-[64vw] items-end gap-[8vw]">
+            <div>
+              <div className="num text-[8vw] leading-[0.85] tracking-[-0.05em]">{ecran.lectures}</div>
+              <p className="num mt-3 border-t border-rule pt-2 text-[13px]">
+                lectures faites par les moteurs pendant la mesure
+              </p>
+            </div>
+            <div>
+              <div className="num text-[8vw] leading-[0.85] tracking-[-0.05em] text-signal">
+                {ecran.votreSite}
+              </div>
+              <p className="num mt-3 border-t border-rule pt-2 text-[13px] text-signal">
+                sur votre site
+              </p>
+            </div>
+          </div>
+          {ecran.questionsPerdues.length ? (
+            <div className="mt-[7vh] max-w-[60vw]">
+              <p className="num text-[11px] uppercase tracking-[0.2em] text-ink-3">
+                et aucune page chez vous ne répond à
+              </p>
+              {ecran.questionsPerdues.map((q) => (
+                <p key={q} className="serif-roman mt-[1.6vh] border-b border-rule pb-[1.4vh] text-[1.5vw] leading-snug">
+                  «{NBSP}{q}{NBSP}»
+                </p>
+              ))}
+            </div>
+          ) : null}
+        </div>
+      );
+
+    /* ------------------------------------- 14 · preuve : les adresses */
+    case "preuve-adresses":
+      return (
+        <div className="flex h-full flex-col justify-center">
+          <p className="serif-roman max-w-[26ch] text-[2.6vw] leading-[1.15]">
+            {fr("Leurs adresses sur votre marché, comptées en lectures.")}
+          </p>
+          <div className="mt-[5vh] max-w-[54vw]">
+            {ecran.adresses.map((a) => (
+              <div key={a.hote} className="flex items-baseline gap-4 border-b border-rule py-[1.5vh]">
+                <span className="num text-[1.5vw]">{a.hote}</span>
+                <span className="conduite" aria-hidden />
+                <span className="num shrink-0 text-[1.2vw] tabular-nums">
+                  {a.lectures} <span className="text-[11px] text-ink-3">lectures</span>
+                </span>
+              </div>
+            ))}
+          </div>
+          <p className="num mt-[4vh] text-[14px] font-medium text-signal">
+            vous ne figurez sur aucune
+          </p>
+        </div>
+      );
+
+    /* ------------------------------------- 16 · preuve : l'identité */
+    case "preuve-identite":
+      return (
+        <div className="flex h-full flex-col justify-center">
+          <p className="num text-[11px] uppercase tracking-[0.2em] text-ink-3">
+            {ecran.moteur}, quand on lui donne votre nom · hors score
+          </p>
+          <blockquote className="serif-roman mt-[4vh] max-w-[52ch] text-[1.8vw] leading-[1.4]">
+            «{NBSP}{ecran.extrait}{NBSP}»
+          </blockquote>
+          <p className="num mt-[5vh] border-t border-rule pt-3 text-[13px] text-ink-2">
+            rien sur votre site ne dit aux machines qui vous êtes
+            {ecran.llmstxt ? "" : " · fichier llms.txt : absent"}
+          </p>
+        </div>
+      );
+
+    /* ------------------------------------------ 17 · le calendrier */
+    case "plan-calendrier":
+      return (
+        <div className="flex h-full flex-col justify-center">
+          <p className="serif-roman max-w-[26ch] text-[2.8vw] leading-[1.15]">
+            {fr("Douze semaines, trois chantiers, une remesure.")}
+          </p>
+          <div className="mt-[6vh] max-w-[58vw]">
+            {[
+              ["semaines 1-2", "dire aux machines qui vous êtes"],
+              ["semaines 2-6", "écrire les pages qui répondent à vos questions perdues"],
+              ["semaines 5-12", "être inscrit là où les IA lisent"],
+              ["semaine 12", `remesure : vos ${ecran.questions} questions, rejouées à l'identique`],
+            ].map(([quand, quoi]) => (
+              <div key={quand} className="flex items-baseline gap-6 border-b border-rule py-[1.8vh]">
+                <span className="num w-[11vw] shrink-0 text-[1.2vw]">{quand}</span>
+                <span className="text-[1.4vw] leading-snug">{fr(quoi)}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+
+    /* ------------------------------------------ 18 · les fondations */
+    case "plan-fondations":
+      return (
+        <EcranListe
+          kicker="semaines 1-2 · chez vous"
+          titre="Dire aux machines qui vous êtes."
+          note="une semaine de développeur, pas une refonte"
+          items={ecran.actions}
+        />
+      );
+
+    /* ------------------------------------------- 19 · les contenus */
+    case "plan-contenus":
+      return (
+        <EcranListe
+          kicker="semaines 2-6 · vos questions perdues"
+          titre="Les pages qui manquent, nommées."
+          note="chaque page répond à une question réellement posée aux IA"
+          items={ecran.contenus}
+        />
+      );
+
+    /* ------------------------------------------ 20 · les citations */
+    case "plan-citations":
+      return (
+        <EcranListe
+          kicker="semaines 5-12 · là où les IA lisent"
+          titre="Être inscrit à leurs adresses."
+          note="cibles relevées dans les sources de votre propre mesure"
+          items={ecran.cibles}
+        />
+      );
+
+    /* ------------------------------------------- 21 · la remesure */
+    case "remesure":
+      return (
+        <div className="flex h-full flex-col justify-center">
+          <p className="serif-roman max-w-[26ch] text-[2.8vw] leading-[1.15]">
+            <TitreChiffre
+              texte={fr(`Le ${ecran.dateRemesure}, on repose exactement les mêmes questions.`)}
+            />
+          </p>
+          <div className="mt-[5vh] max-w-[58vw]">
+            {ecran.questionsExemple.map((q) => (
+              <p key={q} className="serif-ital mt-[1.4vh] text-[1.4vw] leading-snug text-ink-2">
+                «{NBSP}{q}{NBSP}» …
+              </p>
+            ))}
+          </div>
+          <p className="num mt-[6vh] border-t border-rule pt-3 text-[1.4vw]">
+            la ligne comparée{NBSP}: votre nom dans {ecran.vosReponses} réponses sur {ecran.lues}
+            {NBSP}<span className="text-ink-3">→</span>{NBSP}
+            <span className="text-signal">?</span>
+          </p>
+          <p className="num mt-3 text-[11px] text-ink-3">
+            mêmes questions, mêmes moteurs, chiffres publiés · c'est ce qui rend l'écart mesurable
+          </p>
+        </div>
+      );
+
+    /* ---------------------------------------------- 22 · l'offre */
     default:
       return (
-        <div className="flex h-full items-center">
-          <p className="num text-[13px] uppercase tracking-[0.2em] text-ink-3">
-            {frTitre(`écran « ${ecran.type} » · en construction`)}
+        <div className="flex h-full flex-col justify-center">
+          <p className="num text-[11px] uppercase tracking-[0.2em] text-ink-3">
+            une seule offre · sans abonnement
+          </p>
+          <h2 className="serif-roman mt-[2vh] text-[5vw] leading-[1.02]">Sprint GEO</h2>
+          <div className="num mt-[3vh] text-[3.4vw] tracking-[-0.03em]">
+            2{NBSP}900{NBSP}€ <span className="text-[1.2vw] text-ink-3">HT · une fois</span>
+          </div>
+          <div className="mt-[4vh] flex max-w-[54vw] items-baseline gap-[4vw] border-t border-rule pt-[2.5vh]">
+            {["5 contenus", "8 citations", "remesure incluse"].map((x) => (
+              <span key={x} className="num text-[1.3vw]">{x}</span>
+            ))}
+          </div>
+          <p className="serif-roman mt-[6vh] max-w-[40ch] text-[1.6vw] leading-[1.35]">
+            {fr("Si votre score est bon, on vous le dit et on ne vous vend rien.")}
+          </p>
+          <p className="num mt-[3vh] text-[13px] text-ink-2">
+            cadence{NBSP}: 3 sprints par mois, pas plus
+            {ecran.places !== null ? (
+              <span className="text-signal">
+                {NBSP}· places restantes ce mois-ci{NBSP}: {ecran.places}
+              </span>
+            ) : null}
           </p>
         </div>
       );
   }
 }
 
-/** Réservé aux actes suivants : le marquage des concurrents dans un verbatim. */
-export { TexteMarque as MarquageVisio };
+/** Une liste de chantier : kicker, titre serif, lignes numérotées, note. */
+function EcranListe({
+  kicker,
+  titre,
+  note,
+  items,
+}: {
+  kicker: string;
+  titre: string;
+  note: string;
+  items: string[];
+}) {
+  return (
+    <div className="flex h-full flex-col justify-center">
+      <p className="num text-[11px] uppercase tracking-[0.2em] text-ink-3">{kicker}</p>
+      <h2 className="serif-roman mt-[2vh] max-w-[24ch] text-[3vw] leading-[1.1]">{frTitre(titre)}</h2>
+      <div className="mt-[5vh] max-w-[58vw]">
+        {items.map((item, i) => (
+          <div key={item} className="flex items-baseline gap-5 border-b border-rule py-[1.6vh]">
+            <span className="num shrink-0 text-[12px] text-ink-3">{String(i + 1).padStart(2, "0")}</span>
+            <span className="text-[1.4vw] leading-snug">{fr(item)}</span>
+          </div>
+        ))}
+      </div>
+      <p className="num mt-[3vh] text-[11px] text-ink-3">{note}</p>
+    </div>
+  );
+}
+
+/**
+ * Le marquage des concurrents dans un verbatim, version visio : le nom du
+ * concurrent se surligne EN ENCRE (règle du déroulé : concurrents en encre,
+ * l'absence seule est en minium). Le marqueur `*...*` vient de l'assemblage.
+ */
+function MarquageEncre({ texte }: { texte: string }) {
+  const morceaux = texte.split(/(\*[^*]+\*)/g);
+  return (
+    <>
+      {morceaux.map((bout, i) =>
+        bout.startsWith("*") && bout.endsWith("*") && bout.length > 2 ? (
+          <span key={i} className="border-b-2 border-ink font-semibold not-italic">
+            {bout.slice(1, -1)}
+          </span>
+        ) : (
+          <span key={i}>{bout}</span>
+        ),
+      )}
+    </>
+  );
+}
