@@ -28,9 +28,12 @@ seule.
 2. **Scanner le lot** et classer du pire au meilleur score.
 3. **Contacter les vingt plus mauvais**, en commençant par ceux dont le panier
    moyen dépasse 2 900 €.
-4. **Ne contacter qu'une entreprise par secteur et par zone à la fois.** La
-   règle du client unique s'applique dès la prospection : promettre
-   l'exclusivité à deux prospects concurrents est intenable.
+4. **L'exclusivité ne s'engage qu'à la signature.** Prospecter plusieurs
+   concurrents d'une même zone est permis : le premier message ne promet rien,
+   il offre un diagnostic. La règle du client unique reste entière — elle se
+   déclenche au contrat, pas au premier contact. *Tranché le 16/08/2026 par
+   Jérémy ; la règle inverse interdisait le test des dix, qui porte par
+   construction sur dix cabinets d'un même secteur et d'une même zone.*
 
 ---
 

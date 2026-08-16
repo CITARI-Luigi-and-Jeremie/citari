@@ -5,6 +5,27 @@ d'une nouvelle session, après `CLAUDE.md`.
 
 ---
 
+## 2026-08-16 — L'exclusivité se déclenche au contrat, pas au premier mail
+
+Le manuel de vente se contredisait depuis le début et personne ne l'avait vu :
+son point 3 dit de contacter les vingt plus mauvais d'une liste de trente à
+cinquante, son point 4 disait de n'en contacter qu'un par secteur et par zone
+à la fois. Les deux ne peuvent pas être vrais ensemble.
+
+La contradiction est devenue bloquante en préparant le test des dix, qui porte
+par construction sur dix cabinets comptables lyonnais — même secteur, même
+zone. **Tranché par Jérémy : l'exclusivité ne s'engage qu'à la signature.**
+Le premier message ne promet rien, il offre un diagnostic ; la règle du client
+unique reste entière mais se déclenche au contrat.
+
+Effet secondaire qui rend le discours plus honnête, pas moins : la réponse à
+« je vais y réfléchir » (« si un concurrent direct nous appelle d'ici là, la
+place part ») cesse d'être une figure de style. Les concurrents ont réellement
+reçu le même diagnostic.
+
+`POSITIONNEMENT.md` n'est pas touché : sa phrase sur les « deux cabinets
+comptables lyonnais concurrents » parle de deux **clients** servis, ce qui
+reste interdit.
 ## 2026-08-16 — La visio refondue en livrable de conseil : 20 écrans, 6 actes
 
 Brief exigeant de Luigi le soir même : « il affiche des données, il
