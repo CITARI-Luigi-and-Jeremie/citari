@@ -233,9 +233,13 @@ Grok et Le Chat.
 | `packages/toolkit` | L'usine : 27 commandes de livraison et d'acquisition | pnpm |
 | `packages/core` | Socle partagé : accès Supabase, appel JSON au modèle, crawl | pnpm |
 
-Tout vit dans `CITARI-Luigi-and-Jeremie/citari` (le dépôt a quitté le compte
-personnel `LuigiRevelli` pour l'organisation, constaté le 16/08/2026 : GitHub
-redirigeait encore, l'URL du remote a été mise à jour). `apps/citari` a été absorbé par
+**Le dépôt est `github.com/CITARI-Luigi-and-Jeremie/citari`**, et c'est la
+seule adresse : une organisation a été créée le 16/08/2026 et le dépôt a
+quitté le compte personnel `LuigiRevelli`. GitHub redirigeait encore les
+pushs, ce qui masque la bascule — vérifier `git remote -v` avant de
+s'étonner. **Conséquence à ne pas rater : toute intégration branchée sur
+l'ancienne adresse est à reconnecter**, à commencer par le déploiement
+automatique Hostinger. `apps/citari` a été absorbé par
 `git subtree` le 04/08/2026 : ce n'est **plus** un sous-module, `git log` et
 `git blame` y fonctionnent normalement, et il n'y a qu'un seul `git push`.
 
