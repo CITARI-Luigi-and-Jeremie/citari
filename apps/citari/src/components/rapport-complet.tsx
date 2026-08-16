@@ -1,15 +1,19 @@
-import { Fragment, useState } from "react";
+import { Fragment, useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 import { MoteurLogo } from "@/components/moteur-logo";
 import { TexteMoteur, Vide } from "@/components/rapport";
 import { MOTEURS, NBSP } from "@/lib/typo";
+import { phrasePortee } from "@/lib/rapport-complet";
 import type {
   FaceMoteur,
+  Intentions,
   Matrice,
   PhasePlan,
   Piece,
+  Portee,
   SourcesDocument,
   TechniqueDocument,
+  Tonalite,
 } from "@/lib/rapport-complet";
 import type { LigneMention, LigneReponse } from "@/lib/rapport-apercu";
 
@@ -136,6 +140,65 @@ export function tonDuScore(score: number): string {
 }
 
 /**
+ * L'ARRIVÉE DU SCORE — le seul moment orchestré de tout le document.
+ *
+ * DESIGN.md §6 autorise et souhaite un moment chorégraphié à la révélation
+ * du score, et exige la sobriété partout ailleurs. Ce hook est donc la seule
+ * mécanique de mouvement du rapport, et il obéit à quatre règles.
+ *
+ * 1. L'ÉTAT INITIAL EST L'ÉTAT FINAL. `valeur` vaut le score dès le premier
+ *    rendu : le HTML du serveur et le premier rendu client sont identiques,
+ *    donc aucune erreur d'hydratation. L'animation ne démarre qu'après, dans
+ *    un effet, qui ne tourne jamais sur le serveur.
+ * 2. RIEN N'EST SIMULÉ. On interpole vers une valeur RÉELLE déjà connue et
+ *    déjà écrite en base ; l'instrument (graduations, bandes, légendes) est
+ *    dessiné complet dès le premier pixel et ne bouge jamais.
+ * 3. JOUÉ UNE FOIS. Pas de rejeu au défilement : un compteur qui se rembobine
+ *    chaque fois qu'on remonte devient un tic, et le document est long.
+ * 4. `prefers-reduced-motion` COUPE TOUT, sans exception, et le document
+ *    reste juste sans JavaScript comme à l'impression.
+ */
+function useArriveeDuScore(score: number) {
+  const ref = useRef<HTMLDivElement | null>(null);
+  const [valeur, setValeur] = useState(score);
+  const [arrive, setArrive] = useState(true);
+
+  useEffect(() => {
+    const noeud = ref.current;
+    if (!noeud) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    let image = 0;
+    const observateur = new IntersectionObserver(
+      (entrees) => {
+        if (!entrees.some((e) => e.isIntersecting)) return;
+        observateur.disconnect();
+        setValeur(0);
+        setArrive(false);
+        const depart = performance.now();
+        const avance = (maintenant: number) => {
+          const t = Math.min(1, (maintenant - depart) / 900);
+          // Décélération cubique : le trait arrive et se pose, il ne rebondit
+          // pas. DESIGN.md interdit le flottant et le rebond.
+          setValeur(Math.round(score * (1 - Math.pow(1 - t, 3))));
+          if (t < 1) image = requestAnimationFrame(avance);
+          else setArrive(true);
+        };
+        image = requestAnimationFrame(avance);
+      },
+      { threshold: 0.35 },
+    );
+    observateur.observe(noeud);
+    return () => {
+      observateur.disconnect();
+      cancelAnimationFrame(image);
+    };
+  }, [score]);
+
+  return { valeur, arrive, ref };
+}
+
+/**
  * Le score n'est plus un nombre posé à côté d'un mot : c'est un POINT SUR
  * UNE RÈGLE GRADUÉE DE 0 À 100, tracée à l'échelle. À 13/100, le trait tombe
  * à 13 % et 87 % de la règle reste vide : le territoire manquant est dessiné
@@ -152,9 +215,10 @@ export function RegleScore({
   precedent: number | null;
 }) {
   const aGauche = score >= 50;
+  const { valeur, arrive, ref } = useArriveeDuScore(score);
   return (
     <div className="w-full">
-      <div className="relative h-[168px] w-full">
+      <div ref={ref} className="relative h-[168px] w-full">
         {/* La bande du verdict atteint, hachurée : le territoire tenu. */}
         {BANDES.map((b) => {
           const dedans = score >= b.min && (score < b.max || (b.max === 100 && score >= 100));
@@ -218,23 +282,31 @@ export function RegleScore({
         <span
           aria-hidden
           className="absolute bottom-[46px] w-[3px] bg-signal"
-          style={{ left: `${Math.min(100, Math.max(0, score))}%`, height: "72px" }}
+          style={{ left: `${Math.min(100, Math.max(0, valeur))}%`, height: "72px" }}
         />
 
         {/* Le chiffre, posé du côté du trait où il reste de la place. */}
         <span
           className="num absolute bottom-[104px] flex items-baseline gap-2 whitespace-nowrap text-[64px] leading-[0.78] tracking-[-0.06em] sm:text-[128px]"
           style={{
-            left: `${Math.min(100, Math.max(0, score))}%`,
+            left: `${Math.min(100, Math.max(0, valeur))}%`,
             transform: aGauche ? "translateX(calc(-100% - 14px))" : "translateX(14px)",
           }}
         >
-          {score}
+          {valeur}
           <span className="text-[13px] tracking-normal text-ink-3">sur 100</span>
         </span>
       </div>
 
-      <p className={cn("mt-4 text-[24px] font-bold sm:text-[30px]", tonDuScore(score))}>{verdict}</p>
+      <p
+        className={cn(
+          "mt-4 text-[24px] font-bold transition-opacity duration-150 sm:text-[30px]",
+          tonDuScore(score),
+          arrive ? "opacity-100" : "opacity-0",
+        )}
+      >
+        {verdict}
+      </p>
       {precedent !== null ? (
         <p className="num mt-1 text-[11px] text-ink-2">
           scan initial {precedent}
@@ -290,7 +362,7 @@ export function ComposantesScore({
             </div>
             <div className="num mt-1 text-[22px] leading-tight sm:text-[34px]">{b.valeur}</div>
             {b.ratio !== null ? (
-              <div className="mt-2 h-1 w-full bg-paper-2">
+              <div className="mt-2 h-1 w-full bg-rule">
                 <div
                   className="h-1 bg-ink"
                   style={{ width: `${Math.min(100, Math.max(1, b.ratio * 100))}%` }}
@@ -304,6 +376,38 @@ export function ComposantesScore({
       <p className="num mt-3 text-[10.5px] text-ink-3">
         calculé sur {reponsesLues} réponses lues
         {reponsesEnErreur ? ` · ${reponsesEnErreur} en erreur, hors mesure` : ""}
+      </p>
+    </div>
+  );
+}
+
+/**
+ * La composition de la tonalité, en points de conduite. Le score affiche
+ * « tonalité 80 % » sans dire de quoi c'est fait : sur un document à 13/100,
+ * « quand une IA parle de vous, c'est positif 7 fois sur 11 » est la seule
+ * bonne nouvelle, elle est vraie, et elle est mesurée. Le positif porte le
+ * bleu de l'acquis ; le rouge reste réservé à la perte.
+ */
+export function TonaliteDepliee({ tonalite }: { tonalite: NonNullable<Tonalite> }) {
+  const lignes = [
+    { nom: "positives", n: tonalite.positives, ton: "text-verdict" },
+    { nom: "neutres", n: tonalite.neutres, ton: "text-ink" },
+    { nom: "négatives", n: tonalite.negatives, ton: tonalite.negatives ? "text-signal" : "text-ink-3" },
+  ];
+  return (
+    <div className="max-w-[420px]">
+      <p className="label-xs pb-2">la tonalité, dépliée</p>
+      <div className="border-t border-rule-strong">
+        {lignes.map((l) => (
+          <div key={l.nom} className="flex items-baseline gap-3 border-b border-rule py-2">
+            <span className="shrink-0 text-[13px] text-ink-2">{l.nom}</span>
+            <span className="conduite" aria-hidden />
+            <span className={cn("num shrink-0 text-[14px]", l.ton)}>{l.n}</span>
+          </div>
+        ))}
+      </div>
+      <p className="num mt-2 text-[10.5px] text-ink-3">
+        sur les {tonalite.total} réponses où votre marque est citée
       </p>
     </div>
   );
@@ -345,13 +449,20 @@ export function BandeauMoteurs({
             >
               {nul ? "—" : v}
             </div>
-            <div className="mt-2.5 h-[3px] w-full bg-paper-2">
-              <div
-                className={cn("h-[3px]", !nul && Number(v) >= 70 ? "bg-verdict" : "bg-ink")}
-                style={{ width: `${Math.max(1, Number(v ?? 0))}%` }}
-                aria-hidden
-              />
-            </div>
+            {/* Un moteur non interrogé n'a pas de piste : une barre minimale
+                le ferait passer pour un moteur à zéro, et ces deux états ne
+                disent pas du tout la même chose. */}
+            {nul ? (
+              <div className="non-relevee mt-2.5 h-[3px] w-full" aria-hidden />
+            ) : (
+              <div className="mt-2.5 h-[3px] w-full bg-rule">
+                <div
+                  className={cn("h-[3px]", Number(v) >= 70 ? "bg-verdict" : "bg-ink")}
+                  style={{ width: `${Number(v)}%` }}
+                  aria-hidden
+                />
+              </div>
+            )}
             {typeof a === "number" && typeof v === "number" ? (
               <div className="num mt-1.5 text-[10px] text-ink-3">
                 avant {a} → après {v}
@@ -360,6 +471,106 @@ export function BandeauMoteurs({
           </div>
         );
       })}
+    </div>
+  );
+}
+
+/**
+ * L'échantillon par type de question, en tête de la carte : une bande dont
+ * la largeur de chaque segment EST le nombre de questions, et dont la part
+ * encrée est ce que la marque tient. Le mix n'est pas au hasard (la méthode
+ * pose 10 comparatives, 6 problème, 5 locales, 3 confiance quand une ville
+ * est déclarée) : le montrer rend la méthode vérifiable au lieu de
+ * l'affirmer, et fait voir d'un coup sur QUEL type de question on perd.
+ */
+export function BandeIntentions({
+  groupes,
+  portee,
+}: {
+  groupes: Intentions;
+  portee: Portee;
+}) {
+  if (!groupes.length) return null;
+  const total = groupes.reduce((n, g) => n + g.posees, 0);
+  const maxi = Math.max(...groupes.map((g) => g.posees), 1);
+
+  // Les quatre états de la convention, dans l'ordre. Un segment nul n'est pas
+  // rendu : une largeur zéro laisserait un filet orphelin.
+  const segments = (g: Intentions[number]) =>
+    [
+      { n: g.citees, classe: "bg-ink", quoi: "vous y apparaissez" },
+      { n: g.tenues, classe: "tenue", quoi: "tenues par une autre marque" },
+      { n: g.vides, classe: "bg-paper border border-rule-strong", quoi: "que personne ne tient" },
+      { n: g.nonMesurees, classe: "non-relevee", quoi: "non relevées" },
+    ].filter((x) => x.n > 0);
+
+  return (
+    <div className="avoid-break mb-12">
+      <p className="label-xs pb-3">l'échantillon, par type de question</p>
+
+      {/* Largeur = nombre de questions, exactement comme les composantes du
+          score : la géométrie porte la donnée, pas une légende. */}
+      <div
+        className="hidden border-t border-rule-strong pt-3 sm:grid"
+        style={{
+          gridTemplateColumns: groupes.map((g) => `minmax(72px, ${g.posees}fr)`).join(" "),
+        }}
+      >
+        {groupes.map((g, i) => (
+          <div key={g.intent} className={cn("min-w-0 pr-3", i > 0 && "border-l border-rule pl-3")}>
+            <span className="label-xs block truncate" title={g.libelle}>
+              {g.court}
+            </span>
+            <span className="num mt-1 block text-[20px] leading-none">{g.posees}</span>
+            <span className="mt-2 flex h-[22px] w-full">
+              {segments(g).map((seg, j) => (
+                <span
+                  key={j}
+                  title={`${seg.n} ${seg.quoi}`}
+                  className={cn("block h-full", seg.classe, j > 0 && "border-l border-paper")}
+                  style={{ flex: seg.n }}
+                />
+              ))}
+            </span>
+            <span className="num mt-1.5 block text-[10.5px] text-ink-3">
+              {g.citees} sur {g.posees}
+            </span>
+          </div>
+        ))}
+      </div>
+
+      {/* Sous 640 px, la même lecture pivotée : une ligne par type. */}
+      <div className="border-t border-rule-strong pt-3 sm:hidden">
+        {groupes.map((g) => (
+          <div key={g.intent} className="py-2">
+            <div className="flex items-baseline gap-3">
+              <span className="label-xs shrink-0" title={g.libelle}>
+                {g.court}
+              </span>
+              <span className="conduite" aria-hidden />
+              <span className="num shrink-0 text-[12px] text-ink-3">
+                {g.citees} sur {g.posees}
+              </span>
+            </div>
+            <span
+              className="mt-1.5 flex h-[16px]"
+              style={{ width: `${(g.posees / maxi) * 100}%` }}
+            >
+              {segments(g).map((seg, j) => (
+                <span
+                  key={j}
+                  className={cn("block h-full", seg.classe, j > 0 && "border-l border-paper")}
+                  style={{ flex: seg.n }}
+                />
+              ))}
+            </span>
+          </div>
+        ))}
+      </div>
+
+      <p className="num mt-3 text-[10.5px] text-ink-3">
+        {phrasePortee(portee)} {total} questions au total.
+      </p>
     </div>
   );
 }
@@ -402,7 +613,7 @@ export function MatriceReponses({
             {matrice.moteurs.map((m) => (
               <span key={m} className="flex flex-col items-center gap-1 px-1">
                 <MoteurLogo moteur={m} className="text-[14px] text-ink" />
-                <span className="num text-[9px] text-ink-3">{m.slice(0, 4)}</span>
+                <span className="num hidden text-[10px] text-ink-3 xl:inline">{m}</span>
               </span>
             ))}
             <span className="label-xs pl-4">qui tient la question</span>
@@ -465,9 +676,9 @@ export function MatriceReponses({
                     return (
                       <span
                         key={m}
-                        title={`${marque} cité${c.position ? ` en position ${c.position}` : ""}${c.recommande ? ", et recommandé" : ""}`}
+                        title={`${marque} cité${c.position ? ` en position ${c.position}` : ""}${c.recommande ? ", et explicitement recommandé" : ""}`}
                         className="num relative flex items-center justify-center border-l border-paper bg-ink text-[11px] font-medium text-paper"
-                        style={c.recommande ? { boxShadow: "inset 0 -3px 0 var(--signal)" } : undefined}
+                        style={c.recommande ? { boxShadow: "inset 0 -3px 0 var(--verdict)" } : undefined}
                       >
                         {c.position ?? "✓"}
                       </span>
@@ -578,17 +789,22 @@ export function Duel({
   vous,
   adversaire,
   lues,
+  recoVous,
+  recoAdversaire,
 }: {
   marque: string;
   vous: number;
   adversaire: { nom: string; reponses: number };
   lues: number;
+  /** Réponses où chacun est EXPLICITEMENT recommandé, pas seulement nommé. */
+  recoVous: number;
+  recoAdversaire: number;
 }) {
   const axe = Math.max(lues, adversaire.reponses, vous, 1);
   const ecart = adversaire.reponses - vous;
   const barres = [
-    { nom: adversaire.nom, valeur: adversaire.reponses, vous: false },
-    { nom: marque, valeur: vous, vous: true },
+    { nom: adversaire.nom, valeur: adversaire.reponses, vous: false, reco: recoAdversaire },
+    { nom: marque, valeur: vous, vous: true, reco: recoVous },
   ];
   return (
     <div>
@@ -613,6 +829,11 @@ export function Duel({
               aria-hidden
             />
           </div>
+          {/* Être nommé et être RECOMMANDÉ ne sont pas la même chose : la
+              recommandation explicite est ce qui décide un acheteur. */}
+          <p className="num mt-1.5 text-[10.5px] text-ink-3">
+            dont explicitement recommandé : {b.reco}
+          </p>
         </div>
       ))}
 
@@ -660,14 +881,14 @@ export function VoixDocument({
   lignes,
   lues,
 }: {
-  lignes: { nom: string; reponses: number; cible: boolean; classe: string | null }[];
+  lignes: { nom: string; reponses: number; cible: boolean; classe: string | null; rang: number }[];
   lues: number;
 }) {
   if (!lignes.length) return <Vide>Aucune marque détectée dans les réponses collectées.</Vide>;
   const axe = Math.max(lues, ...lignes.map((l) => l.reponses), 1);
   return (
     <div>
-      {lignes.map((l, i) => (
+      {lignes.map((l) => (
         <div
           key={l.nom}
           className={cn(
@@ -676,7 +897,10 @@ export function VoixDocument({
           )}
           style={{ gridTemplateColumns: "28px minmax(120px, 200px) 1fr 72px 56px" }}
         >
-          <span className="num text-[10px] text-ink-3">{String(i + 1).padStart(2, "0")}</span>
+          {/* Le rang RÉEL dans le classement, pas la position dans la
+              liste tronquée : la ligne du client y est poussée quand elle
+              sort du haut de tableau. */}
+          <span className="num text-[10px] text-ink-3">{String(l.rang).padStart(2, "0")}</span>
           <span className={cn("truncate text-[14px]", l.cible ? "font-semibold" : "text-ink-2")}>
             {l.nom}
             {l.cible ? " ◂" : ""}
@@ -754,7 +978,7 @@ export function PiecesDocument({ pieces }: { pieces: Piece[] }) {
 export function FaceAFace({ faces }: { faces: FaceMoteur[] }) {
   return (
     <div
-      className="grid gap-0 border-t border-rule-strong sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6"
+      className="grid gap-0 border-t border-rule-strong sm:grid-cols-3 lg:grid-cols-6"
     >
       {faces.map((f, i) => (
         <div
@@ -913,7 +1137,7 @@ export function ReleveRobots({
         <span
           className={cn(
             "num shrink-0 text-[12px] font-medium",
-            technique.llmstxt ? "text-verdict" : "text-ink-3",
+            technique.llmstxt ? "text-verdict" : "text-ink",
           )}
         >
           {technique.llmstxt ? "PRÉSENT" : "ABSENT"}

@@ -11,6 +11,7 @@ import {
 } from "@/components/rapport";
 import {
   BandeauMoteurs,
+  BandeIntentions,
   ComposantesScore,
   Duel,
   FaceAFace,
@@ -24,6 +25,7 @@ import {
   ReleveRobots,
   SourcesVue,
   TitreChiffre,
+  TonaliteDepliee,
   VoixDocument,
 } from "@/components/rapport-complet";
 import { construireDocument, type LigneSourceReponse } from "@/lib/rapport-complet";
@@ -230,6 +232,7 @@ function RapportComplet() {
         miroir: scan.miroir,
         audit: scan.audit,
         actions: scan.actions,
+        ville: scan.city,
       }),
     [scan, questions, reponses, mentions],
   );
@@ -365,6 +368,7 @@ function RapportComplet() {
             <dl className="grid grid-cols-2 gap-x-8 gap-y-3 border border-rule-strong p-5 sm:grid-cols-3 lg:w-[440px] lg:grid-cols-2">
               {[
                 ["secteur", scan.sector],
+                ["portée", scan.city ? scan.city : "nationale"],
                 ["site", (scan.website_url ?? "—").replace(/^https?:\/\//, "")],
                 ["date", scan.completed_at ? dateFr(scan.completed_at) : dateFr(scan.created_at)],
                 [
@@ -459,6 +463,11 @@ function RapportComplet() {
                   reponsesLues={lues}
                   reponsesEnErreur={donnees.echantillon.reponsesEnErreur}
                 />
+                {donnees.tonalite ? (
+                  <div className="mt-10">
+                    <TonaliteDepliee tonalite={donnees.tonalite} />
+                  </div>
+                ) : null}
               </div>
             ) : null}
 
@@ -480,6 +489,7 @@ function RapportComplet() {
             )}
             variante={varianteDe("carte")}
           >
+            <BandeIntentions groupes={donnees.intentions} portee={donnees.portee} />
             <MatriceReponses
               matrice={donnees.matrice}
               reponses={reponses as unknown as LigneReponse[]}
@@ -504,6 +514,8 @@ function RapportComplet() {
                     vous={donnees.duel.vous}
                     adversaire={donnees.duel.adversaire}
                     lues={lues}
+                    recoVous={donnees.duel.recoVous}
+                    recoAdversaire={donnees.duel.recoAdversaire}
                   />
                 ) : null}
               </div>

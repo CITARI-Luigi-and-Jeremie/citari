@@ -94,7 +94,7 @@ celles du code, et les noms `--paper-raised`, `--paper-sunken`, `--track`,
 | `--paper-2` | `#f2f0ea` | planches, dépliés, pistes de jauge |
 | `--ink` | `#17160f` | texte principal, ET la possession dans le document de mesure |
 | `--ink-2` | `#5c5a52` | texte secondaire |
-| `--ink-3` | `#7a756b` | labels, texte tertiaire |
+| `--ink-3` | `#726d64` | labels, texte tertiaire (4,92:1 — voir §11) |
 | `--signal` | `#c0371d` | accent unique : la PERTE, et l'action |
 | `--signal-tint` | `#f6dfd8` | surlignage d'un concurrent, ligne d'un robot refusé |
 | `--verdict` | `#1f3a5c` | bleu encre : l'ACQUIS mesuré (porte ouverte, score ≥ 70) |

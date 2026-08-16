@@ -65,6 +65,25 @@ export type Matrice = {
   questionsMesurees: number;
 };
 
+/** L'échantillon par type de question : la méthode, rendue vérifiable. */
+export type Intentions = {
+  intent: string;
+  court: string;
+  libelle: string;
+  posees: number;
+  /** Les quatre états de la convention de surface, dans l'ordre d'affichage. */
+  citees: number;
+  tenues: number;
+  vides: number;
+  nonMesurees: number;
+}[];
+
+/** La portée de l'échantillon : locale quand des questions nomment la ville. */
+export type Portee = { ville: string | null; locales: number; posees: number };
+
+/** La composition de la tonalité : la seule bonne nouvelle possible. */
+export type Tonalite = { positives: number; neutres: number; negatives: number; total: number } | null;
+
 export type SourceAgregee = {
   hote: string;
   lectures: number;
@@ -161,9 +180,20 @@ export interface DonneesDocument {
   } | null;
   matrice: Matrice;
   titreMatrice: string;
-  duel: { kicker: string; titre: string; vous: number; adversaire: Adversaire } | null;
+  duel: {
+    kicker: string;
+    titre: string;
+    vous: number;
+    adversaire: Adversaire;
+    /** Réponses où chacun est EXPLICITEMENT recommandé, pas seulement cité. */
+    recoVous: number;
+    recoAdversaire: number;
+  } | null;
+  intentions: Intentions;
+  portee: Portee;
+  tonalite: Tonalite;
   voix: {
-    lignes: { nom: string; reponses: number; cible: boolean; classe: string | null }[];
+    lignes: { nom: string; reponses: number; cible: boolean; classe: string | null; rang: number }[];
     marquesTotal: number;
     reponsesPerdues: number;
     vosReponses: number;
@@ -327,6 +357,125 @@ export function titreMatrice(citees: number, mesurees: number, posees: number): 
   if (citees === 0) return `${cadre} votre marque n'apparaît jamais.`;
   if (citees === 1) return `${cadre} votre marque apparaît sur une seule.`;
   return `${cadre} votre marque apparaît sur ${citees}.`;
+}
+
+/* ------------------------------------------------------------ intentions */
+
+/** Le mix décidé par la méthode, en toutes lettres. */
+const LIBELLES_INTENT: Record<string, { court: string; libelle: string }> = {
+  comparative: { court: "COMPARER", libelle: "comparer avant de choisir" },
+  probleme: { court: "PROBLÈME", libelle: "décrire un problème" },
+  locale: { court: "VILLE", libelle: "nommer votre ville" },
+  confiance: { court: "CONFIANCE", libelle: "vérifier à qui se fier" },
+};
+
+const ORDRE_INTENT = ["comparative", "probleme", "locale", "confiance"];
+
+/**
+ * L'échantillon par type de question. Le mix n'est pas au hasard : avec une
+ * ville, la méthode pose 10 comparatives, 6 problème, 5 locales et 3
+ * confiance sur 24 ; sans ville, aucune locale et redistribution. Le montrer
+ * rend la méthode vérifiable au lieu d'être affirmée.
+ *
+ * Compté sur les questions MESURÉES : une question dont tous les moteurs ont
+ * échoué n'a pas été posée, pour le lecteur.
+ */
+export function intentionsDeLaMatrice(matrice: Matrice): Intentions {
+  const parIntent = new Map<
+    string,
+    { posees: number; citees: number; tenues: number; vides: number; nonMesurees: number }
+  >();
+  for (const l of matrice.lignes) {
+    const e =
+      parIntent.get(l.intent) ?? { posees: 0, citees: 0, tenues: 0, vides: 0, nonMesurees: 0 };
+    e.posees += 1;
+    if (!l.mesuree) e.nonMesurees += 1;
+    else if (l.citee) e.citees += 1;
+    else if (l.tenant) e.tenues += 1;
+    else e.vides += 1;
+    parIntent.set(l.intent, e);
+  }
+
+  const groupes = [...parIntent.entries()].map(([intent, v]) => ({
+    intent,
+    court: LIBELLES_INTENT[intent]?.court ?? intent,
+    libelle: LIBELLES_INTENT[intent]?.libelle ?? intent,
+    ...v,
+  }));
+
+  // Une bande à un seul segment n'apprend rien que le titre ne dise déjà.
+  if (groupes.length < 2) return [];
+
+  // Ordre de la méthode, puis les intentions inconnues par ordre alphabétique
+  // (déterministe : le rendu ne doit jamais dépendre de l'ordre de lecture).
+  return groupes.sort((a, b) => {
+    const ia = ORDRE_INTENT.indexOf(a.intent);
+    const ib = ORDRE_INTENT.indexOf(b.intent);
+    if (ia !== -1 && ib !== -1) return ia - ib;
+    if (ia !== -1) return -1;
+    if (ib !== -1) return 1;
+    return a.intent.localeCompare(b.intent);
+  });
+}
+
+/**
+ * La portée de l'échantillon, en une phrase. Une ville déclarée change le mix
+ * de questions (la méthode pose alors 5 questions locales sur 24, et aucune
+ * sinon) : la portée n'est donc pas un détail d'en-tête, c'est ce qui décide
+ * ce que la mesure peut dire. Aucun des quatre cas n'affirme rien qui ne soit
+ * relevé dans l'échantillon lui-même.
+ */
+export function phrasePortee(p: Portee): string {
+  if (p.ville && p.locales > 0)
+    return `Portée locale : ${p.locales} des ${p.posees} questions nomment ${p.ville}.`;
+  if (p.ville)
+    return `Portée locale relevée (${p.ville}), mais aucune question de l'échantillon ne nomme la ville.`;
+  if (p.locales === 0) return "Portée nationale : aucune question ne nomme de ville.";
+  return `${p.locales} questions nomment une ville.`;
+}
+
+/**
+ * La composition de la tonalité, en RÉPONSES distinctes où la marque est
+ * citée. Le score affiche « tonalité 80 % » sans jamais dire de quoi c'est
+ * fait : sur un rapport à 13/100, « quand on parle de vous, c'est positif 7
+ * fois sur 11 » est la seule bonne nouvelle du document, et elle est vraie.
+ */
+export function tonaliteDeLaMarque(mentions: LigneMention[]): Tonalite {
+  const parReponse = new Map<string, string>();
+  for (const m of mentions) {
+    if (!m.is_target || !m.sentiment) continue;
+    // Une réponse compte une fois ; le négatif prime sur le neutre, qui
+    // prime sur le positif : on ne s'attribue jamais le meilleur des deux.
+    const connu = parReponse.get(m.response_id);
+    const rang = (s: string) => (s === "negatif" ? 0 : s === "neutre" ? 1 : 2);
+    if (connu === undefined || rang(m.sentiment) < rang(connu)) {
+      parReponse.set(m.response_id, m.sentiment);
+    }
+  }
+  const valeurs = [...parReponse.values()];
+  if (!valeurs.length) return null;
+  return {
+    positives: valeurs.filter((v) => v === "positif").length,
+    neutres: valeurs.filter((v) => v === "neutre").length,
+    negatives: valeurs.filter((v) => v === "negatif").length,
+    total: valeurs.length,
+  };
+}
+
+/** Réponses distinctes où une marque est EXPLICITEMENT recommandée. */
+export function reponsesRecommandees(
+  mentions: LigneMention[],
+  nom: string | null,
+  alias: Record<string, string> = {},
+  cible = false,
+): number {
+  const vues = new Set<string>();
+  for (const m of mentions) {
+    if (!m.recommended) continue;
+    if (cible ? !m.is_target : m.is_target || (alias[m.brand] ?? m.brand) !== nom) continue;
+    vues.add(m.response_id);
+  }
+  return vues.size;
 }
 
 /* ---------------------------------------------------------------- sources */
@@ -751,6 +900,8 @@ export function construireDocument(entree: {
   miroir?: unknown;
   audit?: unknown;
   actions?: unknown;
+  /** `scans.city` : sa présence déclare une clientèle locale. */
+  ville?: string | null;
 }): DonneesDocument {
   const { marque, questions, reponses, mentions, classes, alias } = entree;
 
@@ -760,7 +911,13 @@ export function construireDocument(entree: {
 
   const adversaire = adversairePrincipal(mentions, retenues, classes, alias);
   const duel = adversaire
-    ? { ...carteConcurrent(adversaire.nom, adversaire.reponses, vosReponses), vous: vosReponses, adversaire }
+    ? {
+        ...carteConcurrent(adversaire.nom, adversaire.reponses, vosReponses),
+        vous: vosReponses,
+        adversaire,
+        recoVous: reponsesRecommandees(mentions, null, alias, true),
+        recoAdversaire: reponsesRecommandees(mentions, adversaire.nom, alias),
+      }
     : null;
 
   const classeDe = classeDeFabrique(classes, alias);
@@ -851,6 +1008,13 @@ export function construireDocument(entree: {
     },
     composantes,
     matrice,
+    intentions: intentionsDeLaMatrice(matrice),
+    portee: {
+      ville: entree.ville ?? null,
+      locales: matrice.lignes.filter((l) => l.intent === "locale").length,
+      posees: matrice.lignes.length,
+    },
+    tonalite: tonaliteDeLaMarque(mentions),
     titreMatrice: titreMatrice(
       matrice.questionsCitees,
       matrice.questionsMesurees,

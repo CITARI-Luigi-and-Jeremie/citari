@@ -5,6 +5,82 @@ d'une nouvelle session, après `CLAUDE.md`.
 
 ---
 
+## 2026-08-16 — « On met tout ? » : six mesures dormaient en base, et le score arrive enfin
+
+Question de Luigi : « tu es sûr qu'on met tout ? ». Audit de la base contre le
+document : **six données mesurées, payées et jamais affichées**. La plus
+gênante était `queries.intent`, que la refonte de la veille avait elle-même
+PERDUE en supprimant la colonne « intention » du vieux tableau.
+
+Ce qui entre, et rien d'autre (budget tenu : deux objets neufs, une ligne de
+cartouche) :
+
+- **La bande des intentions**, en tête de la carte. Une colonne par type de
+  question, dont la LARGEUR est le nombre de questions, et dont le
+  remplissage suit la convention de surface en quatre segments : encré ce que
+  vous tenez, hachuré ce qu'une autre marque tient, papier nu ce que personne
+  ne tient, hachure fine ce qui n'a pas été relevé. Sur Snapdesk : 10
+  comparatives, 6 problème, 5 locales, 3 confiance, et zéro citation partout.
+  Le mix n'est pas au hasard (la méthode pose 5 locales quand une ville est
+  déclarée) : le montrer rend la méthode vérifiable au lieu de l'affirmer.
+- **La portée**, sous la bande et dans le cartouche. Quatre phrases possibles,
+  dont aucune n'affirme plus que l'échantillon ne montre : une ville déclarée
+  SANS question locale le dit, au lieu de laisser croire à une mesure locale.
+- **La tonalité dépliée**, sous les composantes du score. « Tonalité 80 % » ne
+  disait pas de quoi c'était fait ; sur un document à 13/100, « quand une IA
+  parle de vous, c'est positif 7 fois sur 11 » est la seule bonne nouvelle, et
+  elle est mesurée. Le positif porte le bleu de l'acquis.
+- **La recommandation explicite**, sous chaque barre du duel. Wojo n'est pas
+  seulement nommé 86 fois : il est explicitement recommandé dans 50 réponses,
+  contre 6 pour Snapdesk. Être cité et être recommandé ne sont pas la même
+  défaite.
+
+REFUSÉ, et c'est un refus de code autant que de design : `scans.competitors`,
+les concurrents que le prospect nomme au formulaire. Vérifié en base, la
+colonne est vide sur les six scans complet/controle existants — et la cause
+est dans `equipe.functions.ts`, qui passe `concurrents: []` en dur au
+lancement depuis /equipe. Afficher une section vide n'aurait rien réglé ; la
+dette est notée, elle est en amont.
+
+**LE MOUVEMENT, enfin, et un seul.** DESIGN.md §6 l'autorise à la révélation
+du score et exige la sobriété partout ailleurs. Le chiffre monte de 0 à sa
+valeur en 900 ms, décélération cubique, pendant que le trait rouge glisse
+jusqu'à sa graduation ; le verdict n'apparaît qu'à l'arrivée. Quatre règles
+tiennent la mécanique : l'état initial EST l'état final (le serveur et le
+premier rendu client sont identiques, donc aucune erreur d'hydratation) ;
+rien n'est simulé, on interpole vers une valeur déjà écrite en base ;
+l'instrument (graduations, bandes, légendes) ne bouge jamais ; joué UNE fois,
+sans rejeu au défilement, parce qu'un compteur qui se rembobine dans un
+document de quatorze mille pixels devient un tic. `prefers-reduced-motion`
+coupe tout.
+
+**Sept correctifs, dont trois graves**, trouvés par une relecture critique :
+
+1. **Le document imprimé mentait.** `print-color-adjust: exact` n'était
+   déclaré que sur les deux hachures ; tous les autres aplats (les cases
+   encrées de la carte, les barres du duel) disparaissaient sur papier, et la
+   convention s'inversait : « tenu par vous » devenait du vide. Déclaré
+   globalement dans le bloc `@media print`.
+2. **Le rang de la part de voix était faux.** `partDeVoix` pousse la ligne du
+   client en fin de liste quand elle sort du haut de tableau, et l'affichage
+   numérotait par l'ordre : une marque classée 47e s'affichait « 09 ». Le rang
+   réel est désormais posé AVANT la troncature.
+3. **Le rouge fuyait sur un acquis** : une case où la marque est explicitement
+   RECOMMANDÉE portait un liseré `--signal`. La meilleure nouvelle de la carte
+   était peinte dans la couleur de la perte. Passée au bleu.
+4. `--ink-3` était à 4,39:1 sur le papier, sous le seuil de 4,5 que DESIGN.md
+   §11 impose au TEXTE, et il portait 249 éléments dont des labels de 10px.
+   Foncé à 4,92:1 (tout le site en profite).
+5. Un moteur NON RELEVÉ recevait la même barre minimale qu'un moteur à zéro,
+   deux états qui ne disent pas du tout la même chose.
+6. La question décisive n'avait ses six colonnes qu'au-delà de 1280px : la
+   règle rouge des « absent » alignés, qui EST le chapitre, n'existait pas en
+   dessous.
+7. Des pistes peintes en `--paper-2` étaient invisibles sur les planches, dont
+   le fond EST `--paper-2`.
+
+---
+
 ## 2026-08-16 — Le cadastre : une absence est un trou, pas une case rose
 
 « J'ai encore du mal niveau esthétique, lisibilité et pertinence, on est loin

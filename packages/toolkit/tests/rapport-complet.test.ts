@@ -8,6 +8,10 @@ import {
   extrait,
   hoteClient,
   hoteDeSource,
+  intentionsDeLaMatrice,
+  phrasePortee,
+  reponsesRecommandees,
+  tonaliteDeLaMarque,
   piecesAConviction,
   questionsGagnables,
   titreMatrice,
@@ -401,5 +405,84 @@ describe("les bornes des phases, pour la frise à l'échelle", () => {
     // La frise couvre J1 à J90 : aucune phase ne sort du cadre dessiné.
     expect(Math.min(...plan.map((p) => p.debut))).toBe(1);
     expect(Math.max(...plan.map((p) => p.fin))).toBe(90);
+  });
+});
+
+describe("les données mesurées et jamais montrées (passe 3)", () => {
+  const q = (id: string, rang: number, intent: string) => question(id, rang, intent);
+
+  it("ventile les questions en quatre états qui somment au total posé", () => {
+    const questions = [q("q1", 1, "comparative"), q("q2", 2, "comparative"), q("q3", 3, "locale")];
+    const reponses = [
+      reponse("q1", "ChatGPT"),
+      reponse("q2", "ChatGPT"),
+      reponse("q3", "ChatGPT", { error: "panne", raw_text: null }),
+    ];
+    const mentions = [
+      mention("q1", "ChatGPT", "Moi", { is_target: true }),
+      mention("q2", "ChatGPT", "Rival A"),
+    ];
+    const m = construireMatrice(questions, reponses, mentions, { "Rival A": "rival" });
+    const g = intentionsDeLaMatrice(m);
+    const comparative = g.find((x) => x.intent === "comparative")!;
+    expect(comparative).toMatchObject({ posees: 2, citees: 1, tenues: 1, vides: 0, nonMesurees: 0 });
+    const locale = g.find((x) => x.intent === "locale")!;
+    expect(locale).toMatchObject({ posees: 1, nonMesurees: 1, citees: 0 });
+    // La somme des quatre états vaut le total posé, par construction.
+    for (const x of g) {
+      expect(x.citees + x.tenues + x.vides + x.nonMesurees).toBe(x.posees);
+    }
+    // L'ordre suit la méthode : comparative, problème, locale, confiance.
+    expect(g.map((x) => x.intent)).toEqual(["comparative", "locale"]);
+  });
+
+  it("une seule intention ne fait pas une bande", () => {
+    const questions = [q("q1", 1, "comparative"), q("q2", 2, "comparative")];
+    const reponses = [reponse("q1", "ChatGPT"), reponse("q2", "ChatGPT")];
+    expect(intentionsDeLaMatrice(construireMatrice(questions, reponses, []))).toEqual([]);
+  });
+
+  it("la portée n'affirme jamais plus que l'échantillon ne montre", () => {
+    expect(phrasePortee({ ville: "Paris", locales: 5, posees: 24 })).toBe(
+      "Portée locale : 5 des 24 questions nomment Paris.",
+    );
+    // Une ville déclarée mais aucune question locale : on le dit, on ne fait
+    // pas semblant d'avoir mesuré une portée locale.
+    expect(phrasePortee({ ville: "Paris", locales: 0, posees: 24 })).toContain("aucune question");
+    expect(phrasePortee({ ville: null, locales: 0, posees: 20 })).toBe(
+      "Portée nationale : aucune question ne nomme de ville.",
+    );
+  });
+
+  it("la tonalité compte des RÉPONSES, et le négatif prime sur le positif", () => {
+    const mentions = [
+      // Même réponse, deux sentiments : elle ne compte qu'une fois, au pire.
+      mention("q1", "ChatGPT", "Moi", { is_target: true, sentiment: "positif" }),
+      { ...mention("q1", "ChatGPT", "Moi", { is_target: true, sentiment: "negatif" }) },
+      mention("q2", "Gemini", "Moi", { is_target: true, sentiment: "positif" }),
+      // Le sentiment d'un concurrent ne nous concerne pas.
+      mention("q3", "Gemini", "Rival A", { sentiment: "positif" }),
+    ];
+    expect(tonaliteDeLaMarque(mentions)).toEqual({
+      positives: 1,
+      neutres: 0,
+      negatives: 1,
+      total: 2,
+    });
+    expect(tonaliteDeLaMarque([])).toBeNull();
+  });
+
+  it("compte les réponses où une marque est EXPLICITEMENT recommandée", () => {
+    const mentions = [
+      mention("q1", "ChatGPT", "Wojo", { recommended: true }),
+      // Deux mentions recommandées dans la même réponse : une seule réponse.
+      mention("q1", "ChatGPT", "Wojo", { recommended: true }),
+      mention("q2", "Gemini", "wojo.com", { recommended: true }),
+      mention("q3", "Gemini", "Wojo", { recommended: false }),
+      mention("q4", "Gemini", "Moi", { is_target: true, recommended: true }),
+    ];
+    // Les variantes d'écriture sont regroupées, comme partout ailleurs.
+    expect(reponsesRecommandees(mentions, "Wojo", { "wojo.com": "Wojo" })).toBe(2);
+    expect(reponsesRecommandees(mentions, null, {}, true)).toBe(1);
   });
 });

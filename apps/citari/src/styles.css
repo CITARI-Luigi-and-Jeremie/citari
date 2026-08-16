@@ -82,7 +82,12 @@
   /* ── Héritage du site d'origine, pour les pages non encore redessinées ── */
   --paper-3: #eeece5;
   --surface: #ffffff;
-  --ink-3: #7a756b;
+  /* 4,92:1 sur le papier. À #7a756b il tombait à 4,39:1, sous le seuil de
+     4,5 que DESIGN.md §11 impose au TEXTE (les marques graphiques se
+     contentent de 3:1, pas les mots). Il porte 249 éléments du document de
+     mesure, dont des labels de 10px : c'est la règle que la charte avait
+     déjà payée une fois, en fonçant l'ancien `--ink-faint`. */
+  --ink-3: #726d64;
   --accent: #8b5a2b;
   --accent-wash: #f5eee4;
   --danger: #b3261e;
@@ -1337,6 +1342,16 @@
   :root {
     --paper: #ffffff;
     --paper-2: #f7f6f3;
+  }
+
+  /* SANS CECI, LE DOCUMENT IMPRIMÉ MENT. Le navigateur ne rend pas les
+     aplats de fond par défaut : les cases encrées de la carte, les barres
+     du duel et de la part de voix disparaîtraient, et la convention de
+     surface s'inverserait sur papier — « tenu par vous » deviendrait du
+     vide. Les deux hachures le déclaraient déjà ; il le faut partout. */
+  * {
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
   }
 
   .no-print {

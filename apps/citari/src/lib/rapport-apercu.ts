@@ -95,7 +95,7 @@ export function reponsesRetenues(reponses: LigneReponse[]): number {
   return reponses.filter((r) => !r.error && r.raw_text).length;
 }
 
-export type LignePdv = { nom: string; reponses: number; cible: boolean };
+export type LignePdv = { nom: string; reponses: number; cible: boolean; rang: number };
 
 /**
  * La part de voix, comptée en RÉPONSES. Les variantes d'écriture sont
@@ -130,8 +130,14 @@ export function partDeVoix(
     // classement affiché ne doit pas changer d'une ouverture à l'autre.
     .sort((a, b) => b.reponses - a.reponses || a.nom.localeCompare(b.nom));
 
-  const tete = toutes.slice(0, max);
-  const cible = toutes.find((l) => l.cible);
+  // Le RANG RÉEL, posé avant toute troncature : la ligne du client est
+  // garantie présente même hors du haut de tableau, et elle était alors
+  // poussée en fin de liste. Un affichage qui numérotait les lignes par leur
+  // ordre annonçait donc « 09 » à une marque classée 47e — un chiffre faux
+  // dans un document de mesure.
+  const classees = toutes.map((l, i) => ({ ...l, rang: i + 1 }));
+  const tete = classees.slice(0, max);
+  const cible = classees.find((l) => l.cible);
   if (cible && !tete.some((l) => l.cible)) tete.push(cible);
   return tete;
 }
