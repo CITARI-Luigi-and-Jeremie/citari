@@ -225,15 +225,19 @@ function Visio() {
       </header>
 
       {/* ---------------------------------------------------- l'écran */}
-      <main key={index} className="anim-panel relative z-10 min-h-0 flex-1 px-[7vw] py-[4.5vh]">
-        <div className="grid h-full grid-rows-[auto_1fr] gap-[3.5vh]">
-          <div>
+      <main key={index} className="anim-panel relative z-10 min-h-0 flex-1 px-[7vw] py-[4vh]">
+        {/* Le titre et sa pièce descendent ENSEMBLE : un seul bloc centré
+            verticalement, à écart fixe. Un titre cloué en haut pendant que
+            l'exhibit flotte au centre laissait un vide entre les deux dès
+            que la pièce était courte : tout semblait « collé vers le haut ». */}
+        <div className="flex h-full min-h-0 flex-col justify-center gap-[3vh]">
+          <div className="shrink-0">
             <p className="v-kick">{ecran.kicker}</p>
             <h2 className="v-msg">
               <TitreChiffre texte={fr(ecran.message)} />
             </h2>
           </div>
-          <div className="min-h-0 self-center">
+          <div className="min-h-0">
             <Piece ecran={ecran} />
           </div>
         </div>
