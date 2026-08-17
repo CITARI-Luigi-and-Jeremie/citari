@@ -284,20 +284,67 @@ export async function buildScanInsights(scanId: string): Promise<ScanInsights> {
   }
 
   // Le verbatim qui fait mal : concurrent cité en tête, marque absente.
+  //
+  // L'ordre de parcours est imposé ici, et ce n'est pas cosmétique. La requête
+  // sur `responses` n'a pas d'ORDER BY : Postgres ne promet donc aucun ordre,
+  // et cette boucle prend la PREMIÈRE réponse trouvée avant de s'arrêter. Le
+  // même scan désignait ainsi un concurrent différent d'une exécution à
+  // l'autre — l'email disait « Kardynal est nommé » quand le rapport ouvert
+  // par le prospect pouvait citer Dougs. Deux pièces qui se contredisent
+  // détruisent la seule chose que nous vendons, un chiffre non négociable.
+  //
+  // Le tri suit le rang de la question, celui de l'intention d'achat, puis le
+  // moteur par ordre alphabétique pour lever les égalités. Le verbatim retenu
+  // est donc le plus déterminant commercialement, et il est stable.
+  // Un ordre stable ne suffit pas : il doit désigner le verbatim le plus
+  // vendeur, sinon la stabilité s'achète au prix de la qualité. Trier par rang
+  // de question rendait « Claude sur la question 1 » pour tout le monde, et
+  // faisait perdre à Archipel Lyon un rival local nommé avec son adresse au
+  // profit d'un Pennylane générique.
+  //
+  // Deux critères viennent du dépôt lui-même. `estRival` d'abord, avec son
+  // commentaire de la ligne 211 : nommer Deloitte à une PME ne prouve rien,
+  // c'est le concurrent atteignable qui fait mal. L'intention `locale`
+  // ensuite : une question posée avec la ville est celle que le dirigeant
+  // reconnaît comme la sienne, et celle que le sprint peut gagner en trois
+  // semaines (voir gagnabilite.ts). Le rang et le moteur ne servent plus qu'à
+  // départager, pour que le résultat reste reproductible.
+  const rangDeQuestion = new Map(queries.map((q, n) => [q.id, n]));
+  const intentDeQuestion = new Map(queries.map((q) => [q.id, q.intent]));
+
+  const candidats = responses
+    .filter((r) => r.raw_text && !targetCited(r.id))
+    .map((r) => {
+      const rival = (byResponse.get(r.id) ?? [])
+        .filter((m) => !m.is_target)
+        // À position égale, l'ordre alphabétique départage : sans ce second
+        // critère, deux marques citées au même rang se choisissaient au hasard
+        // de l'ordre des lignes.
+        .sort((a, b) => (a.position ?? 99) - (b.position ?? 99) || a.brand.localeCompare(b.brand))[0];
+      return { r, rival };
+    })
+    .filter((c): c is { r: (typeof responses)[number]; rival: (typeof mentions)[number] } => Boolean(c.rival))
+    .sort(
+      (a, b) =>
+        Number(estRival(b.rival.brand)) - Number(estRival(a.rival.brand)) ||
+        Number(intentDeQuestion.get(b.r.query_id) === "locale") -
+          Number(intentDeQuestion.get(a.r.query_id) === "locale") ||
+        (a.rival.position ?? 99) - (b.rival.position ?? 99) ||
+        (rangDeQuestion.get(a.r.query_id) ?? 9999) - (rangDeQuestion.get(b.r.query_id) ?? 9999) ||
+        a.r.engine.localeCompare(b.r.engine) ||
+        a.r.id.localeCompare(b.r.id),
+    );
+
   let killerQuote: ScanInsights["killerQuote"] = null;
-  for (const r of responses) {
-    if (!r.raw_text) continue;
-    const ms = byResponse.get(r.id) ?? [];
-    if (targetCited(r.id)) continue;
-    const firstCompetitor = ms
-      .filter((m) => !m.is_target)
-      .sort((a, b) => (a.position ?? 99) - (b.position ?? 99))[0];
-    if (!firstCompetitor) continue;
+  for (const { r, rival: firstCompetitor } of candidats.slice(0, 1)) {
     const q = queries.find((x) => x.id === r.query_id);
+    // Le filtre en amont a déjà écarté les réponses sans texte ; le repli à
+    // vide n'est là que pour le compilateur.
+    const texte = r.raw_text ?? "";
     killerQuote = {
       query: q?.text ?? "",
       engine: r.engine,
-      excerpt: r.raw_text.length > 400 ? r.raw_text.slice(0, 400) + "…" : r.raw_text,
+      excerpt: texte.length > 400 ? texte.slice(0, 400) + "…" : texte,
       competitor: firstCompetitor.brand,
     };
     break;
