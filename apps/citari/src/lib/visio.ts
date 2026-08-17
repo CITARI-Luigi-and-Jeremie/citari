@@ -11,124 +11,226 @@ import type { LigneMention, LigneQuestion } from "@/lib/rapport-apercu";
 import type { AnalyseIa } from "@/lib/analyse.server";
 
 /**
- * LA VISIO : le support de présentation du scan complet.
+ * LA VISIO : le dossier posé sur la table (17/08/2026, cinquième et
+ * définitive direction, synthèse d'un panel produit/design/vente/dataviz/
+ * honnêteté après quatre rejets).
  *
- * Refonte de CONTENU du 17/08/2026, sur le document étalon de Luigi. La règle
- * de composition est désormais un GABARIT EN TROIS BLOCS, identique sur les
- * dix-sept écrans :
+ * LA RÈGLE QUI TRANCHE TOUT : le PAPIER ne porte que ce qu'une machine a
+ * réellement écrit (réponses, listes de sources ordonnées, questions,
+ * verbatims, miroirs), reproduit mot pour mot avec sa chaîne de possession
+ * (numéro de pièce, moteur, version figée du modèle, question, date) et ses
+ * coupes annoncées en mots comptés. L'ENCRE porte tout ce que NOUS avons
+ * compté. Le papier est un événement, pas un thème : quand il apparaît,
+ * une machine a écrit ça.
  *
- *   LE MESSAGE — ce que le consultant dit à voix haute, une phrase.
- *   LA DONNÉE  — les chiffres bruts, cités, vérifiables dans le scan.
- *   LE SENS    — l'enseignement stratégique, jamais une paraphrase du chiffre.
+ * Le gabarit MESSAGE / DONNÉE / SENS survit ici comme discipline
+ * d'écriture : le `message` est la ligne dite à voix haute (affichée en
+ * légende serif), le `sens` est le TEXTE ORAL du consultant, il ne
+ * s'affiche JAMAIS (l'écrire volerait la parole et ferait une diapositive).
  *
- * Un écran sans les trois n'est pas terminé, et un écran dont la donnée
- * manque sort du déroulé. Tout est assemblé ici, en fonctions pures : la
- * page ne fait qu'afficher.
- *
- * Ce que le passage sur données réelles a corrigé du document étalon, et qui
- * ne doit pas revenir : les comptages en CITATIONS (« Wojo 92, Morning 91 »)
- * sont ceux de `share_of_voice`, la colonne que la maison interdit ; l'unité
- * est la réponse (Wojo 86, Morning 83). Et la somme des rivaux double-compte
- * les réponses où ils coexistent : on affiche leur UNION.
+ * Comme partout : aucune donnée inventée, l'unité est la RÉPONSE, une
+ * réponse en erreur ne compte dans aucun dénominateur, un écran sans donnée
+ * sort du déroulé.
  */
+
+/** Les versions FIGÉES des modèles, pour la chaîne de possession des
+ *  pièces. La liste est verrouillée par `packages/toolkit/tests/modeles.test.ts`. */
+export const MODELES: Record<string, string> = {
+  ChatGPT: "gpt-5.6-terra",
+  Claude: "claude-sonnet-5",
+  Gemini: "gemini-3.6-flash",
+  Perplexity: "sonar",
+  Grok: "grok-4.5",
+  "Le Chat": "mistral-large-2512",
+};
 
 type EtatCellule = "cite" | "absent" | "erreur";
 
-/** Le socle commun à tous les écrans : les trois blocs du gabarit. */
+/** La chaîne de possession d'une pièce papier. */
+export type Possession = {
+  numero: number;
+  moteur: string | null;
+  modele: string | null;
+  rangQ: number | null;
+  totalQ: number;
+  date: string;
+  libelle?: string;
+};
+
 export type Socle = {
-  /** Le rôle de l'écran, en mono capitales : nomme le contenu, jamais le bloc. */
   kicker: string;
-  /** La phrase dite à voix haute. */
+  /** La légende serif, dite à voix haute. 40 mots max. */
   message: string;
-  /** L'enseignement. Deux à trois lignes, français courant, zéro jargon. */
+  /** Le texte ORAL du consultant. Jamais affiché. */
   sens: string;
 };
 
 export type EcranVisio = Socle &
   (
     | {
-        type: "score";
+        type: "verdict";
         score: number;
         vosReponses: number;
         lues: number;
-        /** Les rivaux, et surtout l'UNION de leurs réponses (jamais la somme). */
         rivaux: { nom: string; reponses: number }[];
         unionRivaux: number;
-        partDeVoix: number | null;
         apercu: { score: number; date: string } | null;
       }
-    | { type: "sommaire"; points: string[] }
     | {
-        type: "demandes";
+        /** PIÈCE A : une vraie réponse, entière, où l'absence se voit. */
+        type: "piece-reponse";
+        possession: Possession;
+        question: string;
+        texte: string;
+        coupe: boolean;
+        motsTotal: number;
+        motsExtrait: number;
+        variantes: string[];
+        clientCite: boolean;
+        marque: string;
+      }
+    | {
+        /** LE MUR : les 134 réponses, une case chacune, questions en rail. */
+        type: "mur";
+        moteurs: string[];
+        lignes: { rang: number; texte: string; etats: EtatCellule[] }[];
+        reponsesLues: number;
+        vosReponses: number;
+      }
+    | {
+        /** L'INVENTAIRE DU DOSSIER : les tranches vues sur chant. */
+        type: "inventaire";
+        tranches: { compte: number; etiquette: string }[];
+      }
+    | {
+        type: "moments";
         lignes: { titre: string; posees: number; citees: number; exemple: string }[];
-        total: number;
       }
     | {
         type: "vocabulaire";
-        termes: { terme: string; reponses: number; questions: number; camp: string }[];
+        termes: { terme: string; reponses: number; questions: number }[];
         lues: number;
+        extraits: { moteur: string; phrase: string; terme: string }[];
       }
     | {
+        /** Le bordereau des questions du dernier moment, en pièce. */
         type: "risque";
-        sujets: string[];
-        posees: number;
-        total: number;
+        possession: Possession;
+        questions: { rang: number; texte: string; marques: string[]; vousAbsent: boolean }[];
         citees: number;
       }
     | {
-        type: "podium";
-        lignes: { nom: string; reponses: number; reco: number; cible: boolean }[];
+        /** Le décompte en unités : un trait = une réponse. */
+        type: "tally";
+        lignes: { nom: string; reponses: number; cible: boolean }[];
         lues: number;
-        positionMoyenne: number | null;
+        union: number;
       }
     | {
-        /** L'écran le plus fort du dossier : le site du client est LU comme
-         *  source, et la réponse ne le nomme pas. */
-        type: "lu-pas-cite";
-        hote: string;
-        reponsesQuiLisent: number;
-        sansCitation: { question: string; moteur: string; rang: number; premiere: boolean }[];
-        premiereSource: number;
+        /** PIÈCE B : la liste de lecture + la réponse qu'elle a produite. */
+        type: "piece-lecture";
+        possessionGauche: Possession;
+        possessionDroite: Possession;
+        question: string;
+        sources: { rang: number; hote: string; chemin: string; votre: boolean }[];
+        totalSources: number;
+        rangClient: number;
+        texte: string;
+        coupe: boolean;
+        motsTotal: number;
+        motsExtrait: number;
+        variantes: string[];
+        clientCite: boolean;
+        marque: string;
       }
     | {
-        type: "portes";
+        /** La bibliothèque des moteurs : lectures en traits-unités. */
+        type: "bibliotheque";
         lignes: { hote: string; lectures: number; genre: "vous" | "concurrent" | "tiers" }[];
         totalLectures: number;
         totalDomaines: number;
-        lecturesVotreSite: number;
         exAequo: string | null;
       }
     | {
-        type: "moteurs";
-        lignes: { moteur: string; score: number | null; citations: number; sources: number }[];
-        sansSource: string[];
+        /** PIÈCE C : deux miroirs face à face, le meilleur et le pire. */
+        type: "piece-miroir";
+        bon: { possession: Possession; texte: string; phrase: string } | null;
+        mauvais: { possession: Possession; texte: string; phrase: string } | null;
       }
     | {
-        type: "inventions";
-        lignes: { moteur: string; phrase: string; nature: string }[];
-        secteurDeclare: string | null;
+        /** L'invention : le fait précis qu'aucune source ne soutient. */
+        type: "piece-invention";
+        possession: Possession;
+        texte: string;
+        phrase: string;
+        sansSource: boolean;
       }
     | {
+        /** Les têtes de pont : la machine sait déjà vous choisir. */
         type: "percees";
-        lignes: { question: string; moteur: string; position: number; verbatim: string }[];
+        cartes: {
+          possession: Possession;
+          position: number;
+          verbatim: string;
+          coupe: boolean;
+          question: string;
+        }[];
         questionsPortantes: number;
-        total: number;
-        moteursQuiCitent: string[];
+        marque: string;
       }
     | {
-        type: "territoires";
-        lignes: { titre: string; detail: string }[];
+        /** Six juges, une question : la place à écrire. */
+        type: "six-juges";
+        question: string;
+        rangQ: number;
+        totalQ: number;
+        date: string;
+        faces: {
+          moteur: string;
+          modele: string;
+          erreur: boolean;
+          extrait: string | null;
+          marques: string[];
+          statut: string;
+        }[];
       }
-    | { type: "portes5"; cibles: { hote: string; lectures: number }[]; totalLectures: number }
-    | { type: "contenus"; pages: { titre: string; lus: string[] }[] }
-    | { type: "gratuit"; gestes: { titre: string; detail: string }[] }
-    | { type: "bascule"; rival: string; reponsesRival: number; lues: number }
+    | {
+        /** Le bon de commande éditorial : cinq pages, cinq questions. */
+        type: "bon-commande";
+        possession: Possession;
+        pages: { titre: string; lus: string[] }[];
+      }
+    | {
+        type: "portes-sprint";
+        lignes: { hote: string; lectures: number }[];
+        note: string;
+      }
+    | {
+        /** Trois artefacts, pas trois consignes. */
+        type: "gestes";
+        panneaux: { entete: string; lignes: string[]; creux: boolean; minium: string | null }[];
+      }
+    | { type: "bascule"; rival: string; reponses: number; lues: number }
     | {
         type: "sprint";
         chantiers: { titre: string; seul: string; avecNous: string[] }[];
         preuve: string[];
       }
-    | { type: "decision"; dateRemesure: string; vosReponses: number; lues: number; places: number | null }
+    | {
+        /** La pièce à venir : le panneau vide de la remesure. */
+        type: "piece-a-venir";
+        date: string;
+        vosReponses: number;
+        lues: number;
+        questions: number;
+        moteurs: number;
+      }
+    | {
+        type: "decision";
+        dateRemesure: string;
+        rappel: { moteur: string; rangQ: number; marque: string } | null;
+        places: number | null;
+      }
   );
 
 export type ActeVisio = { nom: string; debut: number };
@@ -151,9 +253,9 @@ export function dateRemesure(completedAt: string): string {
 
 /**
  * Les domaines où une citation est POSSIBLE : on écarte les sites détenus
- * par un rival ou un géant (on ne sera jamais inscrit sur deskeo.com), en
- * rapprochant l'hôte des noms de marques classées. Heuristique assumée :
- * elle peut laisser passer un domaine concurrent inconnu, jamais en inventer.
+ * par un rival ou un géant, en rapprochant l'hôte des noms de marques
+ * classées. Heuristique assumée : elle peut laisser passer un domaine
+ * concurrent inconnu, jamais en inventer.
  */
 export function domainesCitables(
   domaines: { hote: string; lectures: number; votreSite: boolean }[],
@@ -212,11 +314,169 @@ export function sourcesParQuestion(
 }
 
 /**
- * LE FAIT LE PLUS VENDEUR DU DOSSIER : les réponses qui ont LU le site du
- * client sans jamais le nommer. Deux mesures, toutes deux pures : combien de
- * réponses l'ont lu, et parmi elles lesquelles ne le citent pas — avec le
- * rang de la source dans la liste, parce que « première source lue, marque
- * absente du texte » est le constat qui fait taire une salle.
+ * Nettoie un texte de moteur pour l'EXPOSITION en pièce : le markdown saute
+ * (gras, titres, puces décoratives), les paragraphes restent. On reproduit
+ * notre document de mesure, jamais l'interface d'un chatbot.
+ */
+export function nettoyerTexte(texte: string): string {
+  return texte
+    .replace(/\*\*(.+?)\*\*/g, "$1")
+    .replace(/^#{1,4}\s*/gm, "")
+    .replace(/^[-*]\s+/gm, "· ")
+    .replace(/[*_`]/g, "")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}
+
+/** Le nombre de mots d'un texte, pour les coupes annoncées. */
+export function compterMots(texte: string): number {
+  const t = texte.trim();
+  return t ? t.split(/\s+/).length : 0;
+}
+
+export type PieceReponse = {
+  moteur: string;
+  question: string;
+  rang: number;
+  texte: string;
+  coupe: boolean;
+  marques: string[];
+  variantes: string[];
+  clientCite: boolean;
+};
+
+/**
+ * LA RÉPONSE À EXPOSER : une vraie réponse, entière, où l'absence du client
+ * se voit dans le texte. On choisit celle qui cite le plus de concurrents
+ * (le marché entier dans un paragraphe) tout en tenant à l'écran.
+ */
+export function reponseExposable(
+  questions: LigneQuestion[],
+  reponses: LigneSourceReponse[],
+  mentions: LigneMention[],
+  alias: Record<string, string>,
+  options: { queryId?: string; maxLongueur?: number } = {},
+): PieceReponse | null {
+  const maxLongueur = options.maxLongueur ?? 1500;
+  const qParId = new Map(questions.map((q) => [q.id, q]));
+  const candidates = reponses.filter(
+    (r) => !r.error && r.raw_text && (options.queryId ? r.query_id === options.queryId : true),
+  );
+  if (!candidates.length) return null;
+
+  const notee = candidates
+    .map((r) => {
+      const siennes = mentions.filter((m) => m.response_id === r.id);
+      const concurrents = siennes.filter((m) => !m.is_target);
+      const texte = nettoyerTexte(String(r.raw_text));
+      return {
+        r,
+        concurrents,
+        clientCite: siennes.some((m) => m.is_target),
+        texte,
+        note: concurrents.length - Math.max(0, texte.length - maxLongueur) / 400,
+      };
+    })
+    .sort((a, b) => b.note - a.note)[0];
+  if (!notee || !notee.concurrents.length) return null;
+
+  const q = qParId.get(notee.r.query_id);
+  const coupe = notee.texte.length > maxLongueur;
+  const texte = coupe ? extrait(notee.texte, maxLongueur).texte : notee.texte;
+  const canoniques = [...new Set(notee.concurrents.map((m) => alias[m.brand] ?? m.brand))];
+  const variantes = [...new Set(notee.concurrents.map((m) => m.brand))];
+  return {
+    moteur: notee.r.engine,
+    question: q?.text ?? "",
+    rang: q?.rank ?? 0,
+    texte,
+    coupe,
+    marques: canoniques,
+    variantes,
+    clientCite: notee.clientCite,
+  };
+}
+
+export type LectureExposee = {
+  responseId: string;
+  moteur: string;
+  question: string;
+  rang: number;
+  clientCite: boolean;
+  rangClient: number | null;
+  sources: { rang: number; hote: string; chemin: string; votre: boolean }[];
+  totalSources: number;
+};
+
+/**
+ * LA LISTE DE LECTURE à exposer : la réponse où le site du client est le
+ * mieux placé dans les sources, avec chaque URL à son rang. C'est la pièce
+ * qui rend « lu en premier, jamais cité » VISIBLE au lieu de raconté.
+ */
+export function listeDeLecture(
+  questions: LigneQuestion[],
+  reponses: LigneSourceReponse[],
+  mentions: LigneMention[],
+  site: string | null,
+  max = 8,
+): LectureExposee | null {
+  const client = hoteClient(site);
+  if (!client) return null;
+  const qParId = new Map(questions.map((q) => [q.id, q]));
+  const citee = new Set(mentions.filter((m) => m.is_target).map((m) => m.response_id));
+
+  let choisie: { r: LigneSourceReponse; rangClient: number; urls: string[] } | null = null;
+  for (const r of reponses) {
+    if (r.error) continue;
+    const urls = (Array.isArray(r.sources) ? (r.sources as { url?: unknown }[]) : [])
+      .map((x) => x?.url)
+      .filter((u): u is string => typeof u === "string");
+    const rangClient = urls.findIndex((u) => {
+      const hote = hoteDeSource(u);
+      return Boolean(hote && (hote === client || hote.endsWith(`.${client}`)));
+    });
+    if (rangClient < 0) continue;
+    const meilleure =
+      !choisie ||
+      rangClient < choisie.rangClient ||
+      (rangClient === choisie.rangClient && citee.has(choisie.r.id) && !citee.has(r.id));
+    if (meilleure) choisie = { r, rangClient, urls };
+  }
+  if (!choisie) return null;
+
+  const q = qParId.get(choisie.r.query_id);
+  const sources = choisie.urls.slice(0, max).map((u, i) => {
+    const hote = hoteDeSource(u) ?? "";
+    let chemin = "";
+    try {
+      chemin = new URL(u.startsWith("http") ? u : `https://${u}`).pathname;
+    } catch {
+      chemin = "";
+    }
+    if (chemin === "/") chemin = "";
+    return {
+      rang: i + 1,
+      hote,
+      chemin: chemin.length > 46 ? `${chemin.slice(0, 46)}…` : chemin,
+      votre: Boolean(hote && (hote === client || hote.endsWith(`.${client}`))),
+    };
+  });
+  return {
+    responseId: choisie.r.id,
+    moteur: choisie.r.engine,
+    question: q?.text ?? "",
+    rang: q?.rank ?? 0,
+    clientCite: citee.has(choisie.r.id),
+    rangClient: choisie.rangClient + 1,
+    sources,
+    totalSources: choisie.urls.length,
+  };
+}
+
+/**
+ * Les réponses qui ont LU le site du client, et celles qui ne le nomment
+ * pas. Deux mesures pures ; « première source lue, marque absente » est le
+ * constat qui fait taire une salle.
  */
 export function luSansEtreCite(
   reponses: LigneSourceReponse[],
@@ -272,8 +532,7 @@ export function luSansEtreCite(
 
 /**
  * Le vocabulaire du marché : le modèle a PROPOSÉ les termes, le code les
- * COMPTE. Unité : la réponse (un terme employé trois fois dans une réponse
- * compte pour une). Un terme jamais employé sort de la liste.
+ * COMPTE. Unité : la réponse. Un terme jamais employé sort de la liste.
  */
 export function compterLexique(
   termes: { terme: string; camp: string }[],
@@ -289,7 +548,9 @@ export function compterLexique(
       .replace(/[̀-ͯ]/g, "")
       .replace(/(\w)[sx]\b/g, "$1")
       .replace(/\s+/g, " ");
-  const textes = reponses.filter((r) => !r.error && r.raw_text).map((r) => normal(String(r.raw_text)));
+  const textes = reponses
+    .filter((r) => !r.error && r.raw_text)
+    .map((r) => normal(String(r.raw_text)));
   const textesQ = questions.map((q) => normal(q.text));
 
   return termes
@@ -304,6 +565,28 @@ export function compterLexique(
     })
     .filter((t) => t.reponses > 0)
     .sort((a, b) => b.reponses - a.reponses || a.terme.localeCompare(b.terme));
+}
+
+/**
+ * Une phrase RÉELLE où un moteur emploie le terme : la preuve que le
+ * vocabulaire vient du terrain. Recherche pure, aucune reformulation.
+ */
+export function phraseAvecTerme(
+  terme: string,
+  reponses: LigneSourceReponse[],
+): { moteur: string; phrase: string } | null {
+  const cible = terme.toLowerCase();
+  for (const r of reponses) {
+    if (r.error || !r.raw_text) continue;
+    const phrases = nettoyerTexte(String(r.raw_text)).split(/(?:\.\s+|\n+)/);
+    for (const p of phrases) {
+      const propre = p.trim();
+      if (propre.length >= 40 && propre.length <= 170 && propre.toLowerCase().includes(cible)) {
+        return { moteur: r.engine, phrase: propre };
+      }
+    }
+  }
+  return null;
 }
 
 /** Le libellé « moment d'achat » d'une intention, en langage courant. */
@@ -322,7 +605,6 @@ function momentDe(intent: string, ville: string | null): string {
   }
 }
 
-/** Accord au pluriel, sans encombrer les gabarits. */
 const s_ = (n: number) => (n > 1 ? "s" : "");
 
 export function construireVisio(entree: {
@@ -337,7 +619,6 @@ export function construireVisio(entree: {
   score: number;
   reponses: LigneSourceReponse[];
   analyse: AnalyseIa | null;
-  /** Le secteur DÉCLARÉ au scan : affiché tel quel, sans jugement. */
   secteur: string | null;
   places: number | null;
 }): { ecrans: EcranVisio[]; actes: ActeVisio[] } {
@@ -345,9 +626,29 @@ export function construireVisio(entree: {
   const lues = donnees.echantillon.reponsesLues;
   const vous = donnees.voix.vosReponses;
   const marque = donnees.marque;
+  const totalQ = donnees.echantillon.questions;
   const ecrans: EcranVisio[] = [];
   const actes: ActeVisio[] = [];
   const ouvrirActe = (n: number) => actes.push({ nom: ACTES[n]!, debut: ecrans.length });
+
+  // La chaîne de possession : chaque pièce papier reçoit son numéro.
+  let compteurPieces = 0;
+  const possession = (
+    moteur: string | null,
+    rangQ: number | null,
+    libelle?: string,
+  ): Possession => {
+    compteurPieces += 1;
+    return {
+      numero: compteurPieces,
+      moteur,
+      modele: moteur ? (MODELES[moteur] ?? null) : null,
+      rangQ,
+      totalQ,
+      date: entree.date,
+      libelle,
+    };
+  };
 
   const gagnables = questionsGagnables(
     donnees.matrice,
@@ -359,8 +660,6 @@ export function construireVisio(entree: {
   const citables = domainesCitables(donnees.sources.domaines, entree.classes, entree.alias);
   const quand = dateRemesure(entree.completedAt);
 
-  // Les rivaux : les trois premiers concurrents atteignables, comptés en
-  // réponses, et surtout l'UNION de leurs réponses.
   const rivaux = donnees.voix.lignes
     .filter((l) => !l.cible && (l.classe === "rival" || l.classe === null))
     .slice(0, 3);
@@ -372,41 +671,89 @@ export function construireVisio(entree: {
   ).size;
   const rival0 = rivaux[0] ?? null;
 
-  /* ---------------------------------------------- acte 1 · le verdict */
+  /* ================================================= ACTE I · LE VERDICT */
   ouvrirActe(0);
 
   ecrans.push({
-    type: "score",
-    kicker: `mesure du ${entree.date} · ${donnees.echantillon.questions} questions · ${donnees.echantillon.moteurs} moteurs`,
-    message: `${score} sur 100. Et ce chiffre est presque optimiste.`,
-    sens:
-      unionRivaux > 0
-        ? `Vous n'êtes pas en retard dans une course, vous êtes absent du récit que les IA font de votre marché. Quand un dirigeant leur demande vers qui aller, la conversation se passe sans vous ${lues - vous} fois sur ${lues}.`
-        : `Vous n'êtes pas en retard dans une course, vous êtes absent du récit que les IA font de votre marché.`,
+    type: "verdict",
+    kicker: `mesure du ${entree.date} · ${totalQ} questions · ${donnees.echantillon.moteurs} moteurs · conservée mot pour mot`,
+    message:
+      rivaux.length >= 2
+        ? `${score} sur 100. Sur les ${lues} réponses lues, vous êtes dans ${vous}. ${rivaux.map((r) => r.nom).join(", ")}, à eux ${rivaux.length}, dans ${unionRivaux}.`
+        : `${score} sur 100. Sur les ${lues} réponses lues, vous êtes dans ${vous}.`,
+    sens: "Vous n'êtes pas en retard dans une course : vous êtes absent du récit. Je vais vous montrer les pièces, une par une.",
     score,
     vosReponses: vous,
     lues,
     rivaux: rivaux.map((r) => ({ nom: r.nom, reponses: r.reponses })),
     unionRivaux,
-    partDeVoix: donnees.voix.marquesTotal ? vous / lues : null,
     apercu: entree.apercu,
   });
 
+  // PIÈCE A : la réponse où l'absence se voit.
+  const pieceA = reponseExposable(entree.questions, entree.reponses, entree.mentions, entree.alias);
+  let possessionA: Possession | null = null;
+  if (pieceA) {
+    possessionA = possession(pieceA.moteur, pieceA.rang);
+    const brutA = entree.reponses.find(
+      (r) =>
+        r.engine === pieceA.moteur &&
+        !r.error &&
+        r.raw_text &&
+        entree.questions.find((q) => q.id === r.query_id)?.rank === pieceA.rang,
+    );
+    const motsTotal = compterMots(nettoyerTexte(String(brutA?.raw_text ?? pieceA.texte)));
+    ecrans.push({
+      type: "piece-reponse",
+      kicker: "la première pièce du dossier",
+      message:
+        "Voici, mot pour mot, ce qu'un acheteur a reçu le jour de la mesure. Prenez dix secondes. Cherchez-vous.",
+      sens: "Dix secondes de silence. Le prospect se cherche et ne se trouve pas : c'est lui qui pose le diagnostic.",
+      possession: possessionA,
+      question: pieceA.question,
+      texte: pieceA.texte,
+      coupe: pieceA.coupe,
+      motsTotal,
+      motsExtrait: compterMots(pieceA.texte),
+      variantes: pieceA.variantes,
+      clientCite: pieceA.clientCite,
+      marque,
+    });
+  }
+
+  // LE MUR : la matrice complète avec le rail des questions.
   ecrans.push({
-    type: "sommaire",
-    kicker: "le déroulé",
-    message: "Quatre choses, dans l'ordre.",
-    sens:
-      "Rien de ce qui suit ne vient d'une étude de marché : tout est relevé dans vos propres réponses, et chaque chiffre se retrouve dans le document de mesure.",
-    points: [
-      "Qui pose ces questions, et avec quels mots",
-      `Pourquoi ce sont ${rival0 ? rival0.nom : "vos concurrents"} et pas vous qui y répondez`,
-      "Comment reprendre la place, question par question",
-      "Ce que vous pouvez faire seul dès cette semaine",
-    ],
+    type: "mur",
+    kicker: `les ${lues} réponses mesurées · une case par réponse`,
+    message: `Ce n'était pas une réponse malchanceuse. Voici les ${lues}. Chaque case vide est une conversation qui se passe sans vous.`,
+    sens: "La rareté se voit, on ne la raconte pas. Les cases barrées sont les pannes, sorties des comptes : on ne compte jamais une panne contre vous.",
+    moteurs: donnees.matrice.moteurs,
+    lignes: donnees.matrice.lignes.map((l) => ({
+      rang: l.rang,
+      texte: l.texte,
+      etats: donnees.matrice.moteurs.map((m) => l.cellules[m]?.etat ?? "erreur"),
+    })),
+    reponsesLues: lues,
+    vosReponses: vous,
   });
 
-  /* ------------------------------------------- acte 2 · vos acheteurs */
+  // L'INVENTAIRE : tout ce qui suit sort de ce dossier.
+  ecrans.push({
+    type: "inventaire",
+    kicker: "le dossier",
+    message:
+      "Tout ce que je vais vous montrer sort de ce dossier. Et avant de parler d'un devis, je vous donnerai ce que vous pouvez faire seul.",
+    sens: "L'annonce du cadeau désarme la défiance : ce n'est pas un pitch, c'est une instruction.",
+    tranches: [
+      { compte: lues, etiquette: "réponses lues, conservées mot pour mot" },
+      { compte: entree.mentions.length, etiquette: "mentions de marques relevées, une à une" },
+      { compte: donnees.sources.totalLectures, etiquette: "lectures de sources, URL par URL" },
+      { compte: totalQ, etiquette: "questions d'acheteur posées" },
+      { compte: donnees.miroir.length, etiquette: "interrogatoires miroir, hors score" },
+    ].filter((t) => t.compte > 0),
+  });
+
+  /* ============================================ ACTE II · VOS ACHETEURS */
   ouvrirActe(1);
 
   const moments = donnees.intentions
@@ -420,227 +767,243 @@ export function construireVisio(entree: {
         titre: momentDe(i.intent, donnees.portee.ville),
         posees: i.posees - i.nonMesurees,
         citees: i.citees,
-        exemple: extrait(perdue?.texte ?? premiere?.text ?? "", 120).texte,
+        exemple: extrait(perdue?.texte ?? premiere?.text ?? "", 110).texte,
       };
     })
     .filter((m) => m.posees > 0);
   if (moments.length) {
-    const pire = [...moments].sort((a, b) => a.citees - b.citees || b.posees - a.posees)[0]!;
     ecrans.push({
-      type: "demandes",
-      kicker: `les ${donnees.echantillon.questions} questions posées pendant votre mesure`,
-      message: "Votre marché ne pose pas de questions sur vous. Il pose des questions de comparaison.",
-      sens: `L'acheteur ne demande plus « qui est ${marque} », il demande « lequel choisir ». Si vous n'existez pas dans les réponses-listes, vous n'entrez jamais dans la considération, quelle que soit la qualité de votre offre.${pire.citees === 0 ? ` Sur « ${pire.titre.toLowerCase()} », vous êtes absent des ${pire.posees} questions.` : ""}`,
+      type: "moments",
+      kicker: `les ${totalQ} questions posées pendant votre mesure, par moment d'achat`,
+      message:
+        "Voici les questions exactes que nous avons posées. Ce sont celles de vos prospects, aux quatre moments où ils choisissent.",
+      sens: `L'acheteur ne demande plus « qui est ${marque} », il demande « lequel choisir ». Le chiffre en face de chaque moment dit où vous existez.`,
       lignes: moments,
-      total: donnees.echantillon.questions,
     });
   }
 
-  // Le vocabulaire : proposé par le modèle, compté par le code.
   const lexique = compterLexique(entree.analyse?.lexique ?? [], entree.reponses, entree.questions);
   if (lexique.length >= 3) {
-    const roi = lexique[0]!;
-    const sousExploite = lexique.find((t) => t.questions === 0 || t.reponses / lues > 0.3);
+    const troisTermes = lexique.slice(0, 3);
+    const extraits = troisTermes
+      .slice(0, 2)
+      .map((t) => {
+        const p = phraseAvecTerme(t.terme, entree.reponses);
+        return p ? { ...p, terme: t.terme } : null;
+      })
+      .filter((x): x is { moteur: string; phrase: string; terme: string } => x !== null);
     ecrans.push({
       type: "vocabulaire",
-      kicker: `les mots employés dans vos ${lues} réponses`,
-      message: `Le mot qui décide, sur votre marché, c'est « ${roi.terme} ».`,
-      sens: `Les moteurs emploient ce vocabulaire spontanément : c'est la porte d'entrée de votre marché. Celui qui possède la définition de ces termes possède la première réponse.${sousExploite && sousExploite.questions === 0 ? ` « ${sousExploite.terme} » revient dans ${sousExploite.reponses} réponses sans qu'aucune question ne l'emploie : les moteurs l'ajoutent d'eux-mêmes.` : ""}`,
-      termes: lexique.slice(0, 6),
+      kicker: `les mots employés dans vos ${lues} réponses · comptés à l'unité réponse`,
+      message:
+        "Vos acheteurs et les machines parlent la même langue. Celui qui possède la définition de ces mots possède la première réponse.",
+      sens: "Le vocabulaire vient du terrain : les phrases à droite sont réelles. La définition de ces termes est un territoire, et il est pris.",
+      termes: troisTermes.map(({ terme, reponses, questions }) => ({ terme, reponses, questions })),
       lues,
+      extraits,
     });
   }
 
-  // Les questions de risque et de vérification : le moment tardif.
-  const intentionsRisque = donnees.intentions.filter(
-    (i) => i.intent === "probleme" || i.intent === "confiance",
-  );
-  const poseesRisque = intentionsRisque.reduce((s, i) => s + (i.posees - i.nonMesurees), 0);
-  const citeesRisque = intentionsRisque.reduce((s, i) => s + i.citees, 0);
-  const sujetsRisque = donnees.matrice.lignes
-    .filter((l) => (l.intent === "probleme" || l.intent === "confiance") && l.mesuree)
-    .slice(0, 6)
-    .map((l) => extrait(l.texte, 110).texte);
-  if (poseesRisque > 0 && sujetsRisque.length) {
+  // Le bordereau du dernier moment : les questions de pièges, en pièce.
+  const lignesRisque = donnees.matrice.lignes.filter((l) => l.intent === "probleme" && l.mesuree);
+  if (lignesRisque.length) {
+    const citeesRisque = lignesRisque.filter((l) => l.citee).length;
+    const questionsRisque = lignesRisque.slice(0, 6).map((l) => {
+      const parMarque = new Map<string, Set<string>>();
+      for (const m of entree.mentions) {
+        if (m.query_id !== l.id || m.is_target) continue;
+        const nom = entree.alias[m.brand] ?? m.brand;
+        const vu = parMarque.get(nom) ?? new Set<string>();
+        vu.add(m.response_id);
+        parMarque.set(nom, vu);
+      }
+      const marques = [...parMarque.entries()]
+        .sort((a, b) => b[1].size - a[1].size || a[0].localeCompare(b[0]))
+        .slice(0, 3)
+        .map(([nom]) => nom);
+      return { rang: l.rang, texte: l.texte, marques, vousAbsent: !l.citee };
+    });
     ecrans.push({
       type: "risque",
-      kicker: "les questions du dernier moment",
-      message: `${poseesRisque} de vos ${donnees.echantillon.questions} questions portent sur le risque et la vérification.`,
-      sens: `L'IA est consultée jusque dans la dernière ligne droite, quand votre offre est déjà sur la table. Être absent de ces réponses-là, c'est laisser vos concurrents souffler les critères de décision à votre prospect pendant qu'il vous compare.`,
-      sujets: sujetsRisque,
-      posees: poseesRisque,
-      total: donnees.echantillon.questions,
+      kicker: "le dernier moment avant la signature",
+      message: `Au moment où votre devis est déjà sur la table, votre prospect demande les pièges à éviter. ${lignesRisque.length} questions. ${citeesRisque === 0 ? "Zéro présence." : `Vous êtes dans ${citeesRisque}.`}`,
+      sens: "Être absent ici, c'est laisser vos concurrents souffler les critères de décision pendant qu'il compare VOS offres.",
+      possession: possession(
+        null,
+        null,
+        `INTENTION PIÈGES · ${lignesRisque.length} QUESTIONS · ${citeesRisque} PRÉSENCE${s_(citeesRisque)}`,
+      ),
+      questions: questionsRisque,
       citees: citeesRisque,
     });
   }
 
-  /* --------------------------------------------- acte 3 · pourquoi eux */
+  /* ============================================ ACTE III · POURQUOI EUX */
   ouvrirActe(2);
 
-  const podium = donnees.voix.lignes
-    .filter((l) => !l.cible)
-    .slice(0, 5)
-    .map((l) => ({
-      nom: l.nom,
-      reponses: l.reponses,
-      reco: 0,
-      cible: false,
-    }));
   const vousLigne = donnees.voix.lignes.find((l) => l.cible);
-  if (podium.length && vousLigne) {
-    const geants = podium.filter((p) => {
-      const classe = entree.classes[p.nom];
-      return classe === "geant";
-    }).length;
+  if (rivaux.length && vousLigne) {
     ecrans.push({
-      type: "podium",
-      kicker: `présence comptée en réponses, sur ${lues}`,
-      message:
-        geants < podium.length
-          ? "Ce ne sont pas les géants qui vous prennent vos clients. Ce sont des maisons de votre taille."
-          : "Voici qui occupe les réponses de votre marché.",
-      sens: `La place de tête n'est pas achetée par la taille : elle est prise par ce qui est publié et lisible. C'est une mauvaise nouvelle pour l'ego et une excellente pour la stratégie, parce que ce qu'une maison comparable a pris, vous pouvez le prendre.`,
-      lignes: [...podium, { nom: marque, reponses: vous, reco: 0, cible: true }],
+      type: "tally",
+      kicker: `présence comptée en réponses, sur ${lues} · un trait = une réponse`,
+      message: `Ce ne sont pas des géants. ${rivaux.map((r) => `${r.nom} ${r.reponses}`).join(", ")} : des maisons de votre taille, qui publient.`,
+      sens: "Ce qu'une maison comparable a pris, vous pouvez le prendre. Les traits se comptent : rien n'est une impression.",
+      lignes: [
+        ...rivaux.map((r) => ({ nom: r.nom, reponses: r.reponses, cible: false })),
+        { nom: marque, reponses: vous, cible: true },
+      ],
       lues,
-      positionMoyenne: donnees.composantes?.rang ?? null,
+      union: unionRivaux,
     });
   }
 
-  // Lu, et pas cité : le fait le plus fort du dossier.
-  const luPasCite = luSansEtreCite(
-    entree.reponses,
-    entree.mentions,
-    donnees.domaine,
-    entree.questions,
-  );
-  if (luPasCite && luPasCite.sansCitation.length) {
-    const premieresSansCitation = luPasCite.sansCitation.filter((s) => s.premiere).length;
+  // PIÈCE B : la liste de lecture et la réponse qu'elle a produite.
+  const lecture = listeDeLecture(entree.questions, entree.reponses, entree.mentions, donnees.domaine);
+  if (lecture && lecture.rangClient !== null) {
+    const rep = entree.reponses.find((r) => r.id === lecture.responseId);
+    const texteBrut = rep?.raw_text ? nettoyerTexte(String(rep.raw_text)) : "";
+    const coupe = texteBrut.length > 900;
+    const texte = coupe ? extrait(texteBrut, 900).texte : texteBrut;
+    const variantes = [
+      ...new Set(
+        entree.mentions
+          .filter((m) => m.response_id === lecture.responseId && !m.is_target)
+          .map((m) => m.brand),
+      ),
+    ];
     ecrans.push({
-      type: "lu-pas-cite",
-      kicker: `votre site dans les sources lues par les moteurs`,
+      type: "piece-lecture",
+      kicker: "la pièce centrale du dossier",
       message:
-        premieresSansCitation > 0
-          ? `Ils ont lu votre site en premier. Et ils ne vous ont pas cité.`
-          : `Ils ont lu votre site. Et ils ne vous ont pas cité.`,
-      sens: `Votre page a la bonne réponse : elle a été retenue comme source. Ce qui manque n'est pas la qualité, c'est ce qui permet à une machine de faire le lien entre le texte qu'elle lit et une entreprise qu'elle peut nommer. C'est exactement ce que corrige le premier chantier.`,
-      hote: luPasCite.hote,
-      reponsesQuiLisent: luPasCite.reponsesQuiLisent,
-      sansCitation: luPasCite.sansCitation
-        .slice(0, 4)
-        .map((s) => ({ ...s, question: extrait(s.question, 100).texte })),
-      premiereSource: luPasCite.premiereSource,
+        lecture.rangClient === 1
+          ? `Ils ont ouvert ${lecture.sources.find((s) => s.votre)?.hote ?? "votre site"} en première source. Ils ont lu votre page. ${lecture.clientCite ? "Voici ce qu'ils en ont fait." : "Et la réponse ne vous nomme pas."}`
+          : `Ils ont lu votre site en ${lecture.rangClient}ᵉ source. ${lecture.clientCite ? "Voici ce qu'ils en ont fait." : "Et la réponse ne vous nomme pas."}`,
+      sens: "Votre page a la bonne réponse : elle a été retenue. Ce qui manque n'est pas la qualité, c'est ce qui permet à une machine de relier votre texte à une entreprise nommable. C'est le chantier 1.",
+      possessionGauche: possession(lecture.moteur, lecture.rang, "LISTE DE LECTURE"),
+      possessionDroite: possession(lecture.moteur, lecture.rang, "LA RÉPONSE PRODUITE"),
+      question: lecture.question,
+      sources: lecture.sources,
+      totalSources: lecture.totalSources,
+      rangClient: lecture.rangClient,
+      texte,
+      coupe,
+      motsTotal: compterMots(texteBrut),
+      motsExtrait: compterMots(texte),
+      variantes,
+      clientCite: lecture.clientCite,
+      marque,
     });
   }
 
+  // La bibliothèque : ce que les moteurs lisent, en traits-unités.
   if (donnees.sources.totalLectures) {
     const citableSet = new Set(citables.map((c) => c.hote));
     const genreDe = (d: { hote: string; votreSite: boolean }): "vous" | "concurrent" | "tiers" =>
       d.votreSite ? "vous" : citableSet.has(d.hote) ? "tiers" : "concurrent";
-    const tete = donnees.sources.domaines.slice(0, 6);
+    const tete = donnees.sources.domaines.slice(0, 8);
     const lignes = tete.map((d) => ({ hote: d.hote, lectures: d.lectures, genre: genreDe(d) }));
     if (!lignes.some((l) => l.genre === "vous")) {
       const votre = donnees.sources.domaines.find((d) => d.votreSite);
       if (votre) lignes.push({ hote: votre.hote, lectures: votre.lectures, genre: "vous" });
       else if (donnees.domaine) lignes.push({ hote: donnees.domaine, lectures: 0, genre: "vous" });
     }
-    // L'honnêteté du classement : si le dernier affiché a des ex aequo hors
-    // écran, on le dit, sinon le prospect qui recompte trouve le trou.
     const dernier = tete[tete.length - 1];
     const exAequo = dernier
-      ? donnees.sources.domaines.filter(
-          (d) => d.lectures === dernier.lectures && !tete.includes(d),
-        ).length
+      ? donnees.sources.domaines.filter((d) => d.lectures === dernier.lectures && !tete.includes(d))
+          .length
       : 0;
-    const tiers = lignes.filter((l) => l.genre === "tiers").length;
     ecrans.push({
-      type: "portes",
-      kicker: `${donnees.sources.totalLectures} lectures faites pour vous répondre`,
-      message: "Voici ce que les moteurs lisent avant de répondre.",
-      sens: `C'est la carte des endroits où il faut exister. Les sites de vos concurrents en occupent une partie, mais ${tiers > 0 ? `les adresses neutres, elles, sont ouvertes : une inscription suffit` : `les adresses restantes sont ouvertes`}. Rien ici n'est une supposition : ce sont les sources que vos propres réponses ont consultées.`,
+      type: "bibliotheque",
+      kicker: `${donnees.sources.totalLectures} lectures avant d'écrire une ligne · un trait = une lecture`,
+      message: `Avant de répondre, les moteurs ont fait ${donnees.sources.totalLectures} lectures. Voici leur bibliothèque, classée, et votre rang dedans.`,
+      sens: "Les adresses tierces soulignées sont les portes ouvertes : une inscription suffit. Les sites concurrents, eux, ne vous accueilleront jamais.",
       lignes,
       totalLectures: donnees.sources.totalLectures,
       totalDomaines: donnees.sources.totalDomaines,
-      lecturesVotreSite: donnees.sources.lecturesVotreSite,
-      exAequo: exAequo > 0 ? `${exAequo} autre${s_(exAequo)} domaine${s_(exAequo)} à égalité hors écran` : null,
+      exAequo: exAequo > 0 ? `${exAequo} domaine${s_(exAequo)} à égalité hors écran` : null,
     });
   }
 
-  // Le problème n'est pas uniforme : moteur par moteur.
-  const parMoteur = donnees.matrice.moteurs.map((m) => {
-    const cle = `score_${m.toLowerCase().replace(/[^a-z]/g, "")}`;
-    const mesures = donnees.matrice.totaux[m];
-    const sources = entree.reponses.filter(
-      (r) => r.engine === m && !r.error && Array.isArray(r.sources) && r.sources.length,
-    ).length;
-    return {
-      moteur: m,
-      score: null as number | null,
-      citations: mesures?.citees ?? 0,
-      sources,
-      cle,
-    };
-  });
-  const sansSource = parMoteur.filter((m) => m.sources === 0).map((m) => m.moteur);
-  const meilleur = [...parMoteur].sort((a, b) => b.citations - a.citations)[0];
-  const zero = parMoteur.filter((m) => m.citations === 0).map((m) => m.moteur);
-  if (meilleur && zero.length) {
-    ecrans.push({
-      type: "moteurs",
-      kicker: "votre présence, moteur par moteur",
-      message: `${meilleur.moteur} vous cite. ${zero[0]} ne sait pas que vous existez.`,
-      sens: `Les moteurs qui vont lire le web au moment de répondre vous trouvent ; ceux qui répondent de mémoire vous ignorent. Votre visibilité ne vit aujourd'hui que dans la couche « lecture en direct » : la mémoire des modèles, celle qui répond en premier et sans source, appartient encore à vos concurrents.${sansSource.length ? ` ${sansSource.join(" et ")} n'${sansSource.length > 1 ? "ont" : "a"} consulté aucune source de tout le scan.` : ""}`,
-      lignes: parMoteur.map(({ moteur, score, citations, sources }) => ({
-        moteur,
-        score,
-        citations,
-        sources,
-      })),
-      sansSource,
-    });
-  }
-
-  // Ce que les IA racontent quand on leur donne le nom.
+  // PIÈCE C : le meilleur et le pire miroir, face à face.
   const verdicts = entree.analyse?.verdicts ?? [];
-  if (verdicts.length >= 2) {
-    const inventions = verdicts.filter((v) => v.nature === "invention").length;
-    const doutes = verdicts.filter((v) => v.nature === "doute").length;
+  const miroirDe = (moteur: string) => donnees.miroir.find((m) => m.moteur === moteur);
+  const bonV = verdicts.find((v) => v.nature === "confiance" && miroirDe(v.moteur));
+  const mauvaisV = verdicts.find((v) => v.nature === "doute" && miroirDe(v.moteur));
+  if (bonV || mauvaisV) {
     ecrans.push({
-      type: "inventions",
-      kicker: "quand on leur donne votre nom · hors score",
+      type: "piece-miroir",
+      kicker: "question miroir, hors méthodologie · on a donné votre nom aux moteurs",
       message:
-        doutes > 0
-          ? "En l'absence de votre version, les IA écrivent la leur."
-          : "Voici ce qu'ils racontent de vous, mot pour mot.",
-      sens: `Le vide n'est pas neutre : il est rempli.${doutes ? ` ${doutes} moteur${s_(doutes)} sur ${verdicts.length} vous répond${doutes > 1 ? "ent" : ""} par la méfiance` : ""}${inventions ? `, et ${inventions} avance${s_(inventions) ? "nt" : ""} des faits que personne n'a publiés` : ""}. Chaque semaine sans version officielle de votre histoire, ce sont ces phrases-là que lisent des dirigeants.`,
-      lignes: verdicts.map((v) => ({
-        moteur: v.moteur,
-        phrase: extrait(v.phrase, 115).texte,
-        nature: v.nature,
-      })),
-      secteurDeclare: entree.secteur,
+        bonV && mauvaisV
+          ? "Même question, même jour, deux machines. L'une vous vend. L'autre vous enterre. Aucune des deux ne ment : l'une a pu vous lire, l'autre pas."
+          : mauvaisV
+            ? "On a donné votre nom aux machines. Voici, mot pour mot, ce que la plus méfiante a répondu."
+            : "On a donné votre nom aux machines. Voici, mot pour mot, la plus confiante. Les autres n'ont pas su trancher.",
+      sens: "Le vide n'est pas neutre : il est rempli par la méfiance. Votre visibilité ne vit que dans la couche lecture ; la mémoire des modèles appartient encore à vos concurrents.",
+      bon: bonV
+        ? {
+            possession: possession(bonV.moteur, null, "MIROIR"),
+            texte: miroirDe(bonV.moteur)!.extrait,
+            phrase: bonV.phrase,
+          }
+        : null,
+      mauvais: mauvaisV
+        ? {
+            possession: possession(mauvaisV.moteur, null, "MIROIR"),
+            texte: miroirDe(mauvaisV.moteur)!.extrait,
+            phrase: mauvaisV.phrase,
+          }
+        : null,
     });
   }
 
-  /* ------------------------------------------------ acte 4 · le plan */
+  // L'invention : le fait précis qu'aucune source ne soutient. GARDE-FOU
+  // STRUCTUREL, dans le code : le verdict « invention » du modèle n'est
+  // recevable QUE si le moteur n'a consulté aucune source de tout le scan
+  // (il parle de mémoire). Un moteur qui source ses réponses a pu lire le
+  // fait quelque part, y compris chez le client : on ne l'accuse jamais
+  // d'inventer.
+  const sourcesParMoteur = (moteur: string) =>
+    entree.reponses.filter(
+      (r) => r.engine === moteur && !r.error && Array.isArray(r.sources) && r.sources.length,
+    ).length;
+  const inventionV = verdicts.find(
+    (v) => v.nature === "invention" && miroirDe(v.moteur) && sourcesParMoteur(v.moteur) === 0,
+  );
+  if (inventionV) {
+    const sourcesDuMoteur = sourcesParMoteur(inventionV.moteur);
+    ecrans.push({
+      type: "piece-invention",
+      kicker: "question miroir, hors méthodologie",
+      message: `${inventionV.moteur} avance sur vous des faits que vous n'avez jamais publiés. Et vos prospects les lisent.`,
+      sens: "La seule façon de couvrir une invention est de publier la version officielle : une page que les machines peuvent lire et citer.",
+      possession: possession(inventionV.moteur, null, "MIROIR"),
+      texte: miroirDe(inventionV.moteur)!.extrait,
+      phrase: inventionV.phrase,
+      sansSource: sourcesDuMoteur === 0,
+    });
+  }
+
+  /* ================================================ ACTE IV · LE PLAN */
   ouvrirActe(3);
 
-  // Où vous percez déjà : les meilleures positions réelles.
+  // Les têtes de pont : la machine sait déjà vous choisir.
   const percees = entree.mentions
     .filter((m) => m.is_target && m.position !== null && m.verbatim)
     .sort((a, b) => (a.position ?? 99) - (b.position ?? 99))
     .slice(0, 3)
     .map((m) => {
       const q = entree.questions.find((x) => x.id === m.query_id);
+      const verbatimPropre = nettoyerTexte(String(m.verbatim));
+      const e = extrait(verbatimPropre, 220);
       return {
-        question: extrait(q?.text ?? "", 110).texte,
-        moteur: m.engine,
+        possession: possession(m.engine, q?.rank ?? null, "EXTRAIT"),
         position: m.position ?? 0,
-        verbatim: extrait(String(m.verbatim), 200).texte,
+        verbatim: e.texte,
+        coupe: e.coupe,
+        question: extrait(q?.text ?? "", 100).texte,
       };
     });
-  const moteursQuiCitent = [
-    ...new Set(entree.mentions.filter((m) => m.is_target).map((m) => m.engine)),
-  ];
   const questionsPortantes = new Set(
     entree.mentions.filter((m) => m.is_target).map((m) => m.query_id),
   ).size;
@@ -648,186 +1011,201 @@ export function construireVisio(entree: {
     ecrans.push({
       type: "percees",
       kicker: "vos têtes de pont, relevées dans la mesure",
-      message: `Vous percez déjà sur ${questionsPortantes} question${s_(questionsPortantes)}. Voilà par où on commence.`,
-      sens: `On n'attaque pas d'abord les forteresses de vos concurrents : on consolide les endroits où une machine vous a déjà choisi, parce que la preuve que ça fonctionne pour vous existe. Ces réponses-là montrent aussi le ton qui vous fait gagner.`,
-      lignes: percees,
+      message: `La preuve que la machine sait vous choisir existe déjà : elle est dans vos ${vous} réponses. On ne part pas de zéro, on part d'ici.`,
+      sens: "On consolide d'abord ce qui est acquis : ces pages-là montrent le ton qui vous fait gagner.",
+      cartes: percees,
       questionsPortantes,
-      total: donnees.echantillon.questions,
-      moteursQuiCitent,
+      marque,
     });
   }
 
-  const territoires: { titre: string; detail: string }[] = [];
-  if (percees[0]) {
-    territoires.push({
-      titre: "Consolider où vous percez déjà",
-      detail: `${percees[0].moteur} vous place ${percees[0].position}ᵉ sur « ${percees[0].question} ». On étend cette page et on la fait lire ailleurs.`,
-    });
-  }
-  if (gagnables[0]) {
-    territoires.push({
-      titre: "Occuper le terrain vacant",
-      detail: `${gagnables.length} question${s_(gagnables.length)} où aucune marque n'est installée partout, à commencer par « ${extrait(gagnables[0].texte, 90).texte} ».`,
-    });
-  }
-  if (lexique[0]) {
-    territoires.push({
-      titre: `Reprendre la définition de « ${lexique[0].terme} »`,
-      detail: `Le terme revient dans ${lexique[0].reponses} de vos ${lues} réponses. Celui qui écrit sa définition la voit récitée.`,
-    });
-  }
-  if (territoires.length >= 2) {
+  // Six juges, une question.
+  if (donnees.questionCle) {
     ecrans.push({
-      type: "territoires",
-      kicker: "trois territoires, par ordre de rentabilité",
-      message: "Où attaquer d'abord.",
-      sens: `L'ordre compte autant que la liste : on part de ce qui est déjà acquis, on prend ensuite ce que personne ne tient, et on ne s'attaque au terrain occupé qu'en dernier, quand la marque a de quoi être citée.`,
-      lignes: territoires,
+      type: "six-juges",
+      kicker: "une même question, six juges",
+      message:
+        "Une même question, six moteurs, et personne ne défend votre place. Voilà la première page qu'on écrit.",
+      sens: "Chaque juge a rendu sa copie : les noms en pastilles occupent votre place. La page qui répond à cette question est le premier livrable.",
+      question: donnees.questionCle.texte,
+      rangQ: donnees.questionCle.rang,
+      totalQ,
+      date: entree.date,
+      faces: donnees.questionCle.faces.map((f) => ({
+        moteur: f.moteur,
+        modele: MODELES[f.moteur] ?? "",
+        erreur: f.erreur,
+        extrait: f.extrait ? extrait(f.extrait, 210).texte : null,
+        marques: f.marques,
+        statut: f.statut,
+      })),
     });
   }
 
-  if (citables.length >= 3) {
-    ecrans.push({
-      type: "portes5",
-      kicker: "les adresses tierces de votre mesure",
-      message: "Les portes où votre nom doit apparaître.",
-      sens: `Ce ne sont pas des « backlinks » : ce sont les pages que les moteurs ont ouvertes pour construire vos réponses. Une inscription, une fiche ou un comparatif suffit à y entrer, et chacune est vérifiable après coup.`,
-      cibles: citables.slice(0, 5),
-      totalLectures: donnees.sources.totalLectures,
-    });
-  }
-
+  // Le bon de commande éditorial.
   const pages = gagnables.slice(0, 5).map((g) => ({
     titre: extrait(g.texte, 120).texte,
     lus: sourcesParQuestion(entree.reponses, g.id),
   }));
   if (pages.length) {
     ecrans.push({
-      type: "contenus",
+      type: "bon-commande",
       kicker: "un titre = une question où vous étiez absent",
-      message: "Les pages à écrire, nommées.",
-      sens: `Ce n'est pas un calendrier éditorial : c'est la liste des réponses que les moteurs cherchent déjà et ne trouvent pas chez vous. Sous chaque ligne, les sites qu'ils ont lus à votre place.`,
+      message: `${pages.length} pages à écrire, pas une de plus. Ce sont les questions où les moteurs ont cherché, et lu quelqu'un d'autre.`,
+      sens: "Ce n'est pas un calendrier éditorial : c'est la liste des réponses que les machines cherchent déjà et ne trouvent pas chez vous.",
+      possession: possession(null, null, "BON DE COMMANDE ÉDITORIAL"),
       pages,
     });
   }
 
-  /* ---------------------------------------------- acte 5 · vous, seul */
+  const ciblesSprint = citables.slice(3, 11).map(({ hote, lectures }) => ({ hote, lectures }));
+  if (ciblesSprint.length >= 3) {
+    ecrans.push({
+      type: "portes-sprint",
+      kicker: "les adresses relevées dans vos propres sources",
+      message:
+        "Et huit adresses où votre nom doit figurer. Pas des backlinks : les portes que vos propres réponses ont ouvertes.",
+      sens: "Chaque adresse vient des lectures de VOTRE mesure, et chaque inscription obtenue sera recrawlée : si le nom n'y figure pas, elle ne compte pas.",
+      lignes: ciblesSprint.slice(0, 8),
+      note: "hors les trois adresses qu'on vous offre à l'écran suivant",
+    });
+  }
+
+  /* ============================================== ACTE V · VOUS, SEUL */
   ouvrirActe(4);
 
-  const gestes: { titre: string; detail: string }[] = [];
-  if (donnees.technique && !donnees.technique.llmstxt) {
-    gestes.push({
-      titre: "Posez un fichier llms.txt à la racine",
-      detail:
-        "absent lors de la mesure : une page de texte brut qui dit aux machines qui vous êtes, ce que vous vendez et à qui",
-    });
-  }
   const offerts = citables.slice(0, 3);
-  if (offerts.length >= 2) {
-    gestes.push({
-      titre: `Demandez votre inscription sur ${offerts.map((o) => o.hote).join(", ")}`,
-      detail: `les adresses tierces les plus lues de votre mesure, ${offerts.reduce((s, o) => s + o.lectures, 0)} lectures à elles ${offerts.length}`,
+  const panneauxGestes: { entete: string; lignes: string[]; creux: boolean; minium: string | null }[] =
+    [];
+  if (donnees.technique && !donnees.technique.llmstxt && donnees.domaine) {
+    panneauxGestes.push({
+      entete: `${donnees.domaine}/llms.txt`,
+      lignes: [],
+      creux: true,
+      minium: "FICHIER ABSENT LORS DE LA MESURE",
     });
   }
-  const inventionPrix = verdicts.find((v) => v.nature === "invention");
-  if (inventionPrix) {
-    gestes.push({
-      titre: "Publiez une page de tarifs officielle",
-      detail: `${inventionPrix.moteur} avance déjà des chiffres que vous n'avez jamais publiés : c'est la seule façon de couvrir une invention`,
+  if (offerts.length >= 2) {
+    panneauxGestes.push({
+      entete: "INSCRIPTIONS À DEMANDER",
+      lignes: offerts.map((o) => `${o.hote} · lu ${o.lectures} fois pendant votre mesure`),
+      creux: false,
+      minium: null,
+    });
+  }
+  if (inventionV) {
+    panneauxGestes.push({
+      entete: "PAGE TARIFS OFFICIELLE",
+      lignes: [
+        `${inventionV.moteur} avance déjà des chiffres à votre place`,
+        "publier la vôtre est la seule correction possible",
+      ],
+      creux: false,
+      minium: null,
     });
   } else if (gagnables[0]) {
-    gestes.push({
-      titre: `Publiez la page qui répond à : « ${extrait(gagnables[0].texte, 80).texte} »`,
-      detail: gagnables[0].raison,
+    panneauxGestes.push({
+      entete: "LA PREMIÈRE PAGE DU PLAN",
+      lignes: [extrait(gagnables[0].texte, 110).texte],
+      creux: false,
+      minium: null,
     });
   }
-  if (gestes.length >= 2) {
+  if (panneauxGestes.length >= 2) {
     ecrans.push({
-      type: "gratuit",
-      kicker: "avant tout devis · à faire vous-même",
-      message: `${gestes.length === 3 ? "Trois" : "Deux"} gestes, cette semaine, sans nous.`,
-      sens: `Ils sont tirés de vos données et ils sont à vous, que vous travailliez avec nous ou non. Comptez une demi-journée de développeur pour le premier, deux courriels pour le deuxième.`,
-      gestes,
+      type: "gestes",
+      kicker: "avant tout devis · à faire vous-même, cette semaine",
+      message: `${panneauxGestes.length === 3 ? "Trois" : "Deux"} gestes, sans nous, tirés de vos propres données. Ils sont à vous, que vous signiez ou non.`,
+      sens: "Le cadeau est réel et vérifiable : une demi-journée de développeur, deux courriels. C'est aussi la preuve qu'on ne vend pas du vent.",
+      panneaux: panneauxGestes,
     });
     if (rival0) {
       ecrans.push({
         type: "bascule",
-        kicker: "la limite de ces trois gestes",
+        kicker: "la limite de ces gestes",
         message: "Lisible n'est pas premier.",
-        sens: `Ces gestes vous rendent lisible par les machines. Ils ne vous mettent pas devant : ${rival0.nom} occupe ${rival0.reponses} réponses sur ${lues} parce qu'il publie depuis des années. Déloger une marque installée demande du contenu, des relances et de la mesure, c'est-à-dire un chantier suivi.`,
+        sens: `${rival0.nom} tient ${rival0.reponses} réponses parce qu'il publie depuis des années. Déloger une position installée demande du contenu, des relances et de la mesure : un chantier suivi.`,
         rival: rival0.nom,
-        reponsesRival: rival0.reponses,
+        reponses: rival0.reponses,
         lues,
       });
     }
   }
 
-  /* -------------------------------------------- acte 6 · la décision */
+  /* ============================================ ACTE VI · LA DÉCISION */
   ouvrirActe(5);
 
-  // Le Sprint, chantier par chantier : à gauche ce qu'il fait seul, à droite
-  // ce que nous livrons. Les volumes viennent de proposition.ts, qui fait foi.
-  const chantiers = [
-    {
-      titre: "Chantier 1 · votre site parle aux machines",
-      seul: "vous posez le llms.txt et ouvrez le robots.txt",
-      avecNous: [
-        "audit technique complet, lu comme un robot d'IA le lit",
-        "robots.txt, llms.txt et balisage schema.org posés et vérifiés EN LIGNE",
-        "identité verrouillée partout : mêmes nom, adresse, téléphone, fiche Wikidata",
-        "comptage des passages réels de GPTBot, ClaudeBot et PerplexityBot dans vos logs",
-      ],
-    },
-    {
-      titre: "Chantier 2 · les pages qui manquent",
-      seul: gagnables[0] ? "vous écrivez la première page" : "vous écrivez une page",
-      avecNous: [
-        "5 contenus rédigés et livrés, en Markdown et en HTML prêts à intégrer",
-        "sujets classés par gagnabilité, validés avec vous avant rédaction",
-        "chaque page signalée à Bing le jour de sa publication : indexée en heures, pas en semaines",
-        "recontrôle en ligne : elle répond, elle porte son balisage, sinon elle ne compte pas",
-      ],
-    },
-    {
-      titre: "Chantier 3 · exister là où ils lisent",
-      seul: `vous demandez ${offerts.length || 3} inscriptions`,
-      avecNous: [
-        "8 cibles prioritaires : annuaires, comparateurs, presse spécialisée, fiches",
-        "inscriptions réalisées, pitchs presse écrits, envoyés et relancés deux fois",
-        "chaque citation obtenue est recrawlée : si votre nom n'y figure pas, elle est reclassée",
-        "kit « dix avis en trente jours » : tonalité et recommandation pèsent près d'un tiers du score",
-      ],
-    },
-  ];
   ecrans.push({
     type: "sprint",
     kicker: "le sprint geo · 4 semaines de travail, 90 jours de mesure",
-    message: "Le même plan, exécuté.",
-    sens: `Ce que vous faites seul est partiel, lent et sans mesure. Ce que le Sprint ajoute, ce n'est pas de l'ambition : c'est l'exécution, la vérification en ligne de chaque livrable, et la preuve écrite chaque semaine.`,
-    chantiers,
+    message:
+      "Le même plan, exécuté : cinq contenus livrés, huit citations obtenues, les accès réparés, et la preuve chaque vendredi.",
+    sens: "Ce que vous faites seul est partiel, lent et sans mesure. Le Sprint ajoute l'exécution, la vérification en ligne de chaque livrable, et la preuve écrite.",
+    chantiers: [
+      {
+        titre: "Technique",
+        seul: "vous posez le llms.txt",
+        avecNous: [
+          "audit complet, lu comme un robot d'IA le lit",
+          "robots.txt, llms.txt, schema.org posés et vérifiés EN LIGNE",
+          "identité verrouillée : mêmes nom, adresse, téléphone partout, fiche Wikidata",
+          "passages réels de GPTBot, ClaudeBot, PerplexityBot comptés dans vos logs",
+        ],
+      },
+      {
+        titre: "Pages",
+        seul: "vous écrivez la première",
+        avecNous: [
+          "5 contenus rédigés, livrés en Markdown et en HTML prêts à intégrer",
+          "sujets classés par gagnabilité, validés avec vous avant rédaction",
+          "chaque page signalée à Bing le jour J : indexée en heures, pas en semaines",
+          "recontrôle en ligne : elle répond et porte son balisage, sinon elle ne compte pas",
+        ],
+      },
+      {
+        titre: "Citations",
+        seul: `vous demandez ${offerts.length || 3} inscriptions`,
+        avecNous: [
+          "8 cibles : annuaires, comparateurs, presse spécialisée, fiches",
+          "inscriptions réalisées, pitchs écrits, envoyés, relancés deux fois",
+          "chaque citation obtenue recrawlée : le nom y figure, ou elle est reclassée",
+          "kit « dix avis en trente jours » : près d'un tiers du score",
+        ],
+      },
+    ],
     preuve: [
-      "un email de preuve chaque vendredi pendant les 4 semaines, avec liens et captures",
-      "un rapport d'étape au jour 30, un contrôle interne au jour 45 (jamais présenté comme un score)",
-      `la remesure du ${quand} incluse : mêmes ${donnees.echantillon.questions} questions, mêmes ${donnees.echantillon.moteurs} moteurs, même formule`,
+      "un email de preuve chaque vendredi pendant 4 semaines, liens et captures",
+      "rapport d'étape au jour 30 · contrôle interne au jour 45, jamais présenté comme un score",
       "le call de restitution a lieu même si le résultat est mauvais",
     ],
   });
 
   ecrans.push({
-    type: "decision",
-    kicker: "la décision · une seule offre, sans abonnement",
-    message: "Un seul client par secteur, trois sprints par mois.",
-    sens: `On garantit les actions livrées et la remesure, jamais un rang : personne ne contrôle ce que répondront les moteurs. Si votre score est bon, on vous le dit et on ne vous vend rien.`,
-    dateRemesure: quand,
+    type: "piece-a-venir",
+    kicker: "la dernière pièce du dossier",
+    message: `La dernière pièce n'existe pas encore. Le ${quand}, on repose exactement ces ${totalQ} questions, aux mêmes moteurs, mêmes versions, même formule.`,
+    sens: "Le seul engagement du dossier : la remesure datée. On garantit les actions livrées et cette pièce-là, jamais un rang.",
+    date: quand,
     vosReponses: vous,
     lues,
+    questions: totalQ,
+    moteurs: donnees.echantillon.moteurs,
+  });
+
+  ecrans.push({
+    type: "decision",
+    kicker: "une seule offre · sans abonnement",
+    message: `2 900 euros hors taxes, 90 jours, un seul client par secteur. Si c'est vous, ce n'est pas ${rival0 ? rival0.nom : "votre concurrent"}. Si votre score est bon, on vous le dit et on ne vous vend rien.`,
+    sens: "La boucle se ferme sur la pièce 01 : la conversation qui se passait sans lui. La signature n'achète pas une promesse de rang, elle achète l'exécution et la remesure.",
+    dateRemesure: quand,
+    rappel: pieceA && possessionA ? { moteur: pieceA.moteur, rangQ: pieceA.rang, marque } : null,
     places: entree.places,
   });
 
   return { ecrans, actes };
 }
 
-/** L'acte d'un écran, pour le chrome (« ACTE 2 · VOS ACHETEURS »). */
+/** L'acte d'un écran, pour le chrome (« ACTE 3 · POURQUOI EUX »). */
 export function acteDe(actes: ActeVisio[], index: number): { nom: string; numero: number } {
   let courant = { nom: actes[0]?.nom ?? "", numero: 1 };
   actes.forEach((a, i) => {

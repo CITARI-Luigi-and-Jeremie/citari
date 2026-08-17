@@ -545,6 +545,45 @@ describe("la visio : l'assemblage du support de présentation", () => {
     ]);
   });
 
+  it("choisit la réponse à exposer : la plus riche en concurrents, texte nettoyé, coupe annoncée", async () => {
+    const { reponseExposable } = await import("@/lib/visio");
+    const questions = [
+      { id: "q1", rank: 1, text: "Bureau opéré ou bail ?", intent: "comparative" },
+    ];
+    const reponses = [
+      { id: "r1", query_id: "q1", engine: "Claude", raw_text: "**Wojo** et **Deskeo** dominent.\n\n### Détail\n- point", error: null, sources: [] },
+      { id: "r2", query_id: "q1", engine: "Grok", raw_text: "Réponse sans marque.", error: null, sources: [] },
+    ];
+    const mentions = [
+      { id: "m1", response_id: "r1", query_id: "q1", engine: "Claude", brand: "Wojo", is_target: false, position: 1, recommended: true, sentiment: null, verbatim: null },
+      { id: "m2", response_id: "r1", query_id: "q1", engine: "Claude", brand: "Deskeo Flex", is_target: false, position: 2, recommended: false, sentiment: null, verbatim: null },
+    ] as never[];
+    const piece = reponseExposable(questions, reponses, mentions, { "Deskeo Flex": "Deskeo" });
+    expect(piece?.moteur).toBe("Claude");
+    // Le markdown saute, les paragraphes restent, rien n'est inventé.
+    expect(piece?.texte).toBe("Wojo et Deskeo dominent.\n\nDétail\n· point");
+    expect(piece?.coupe).toBe(false);
+    expect(piece?.marques).toEqual(["Wojo", "Deskeo"]);
+    expect(piece?.clientCite).toBe(false);
+  });
+
+  it("expose la liste de lecture où le site du client est le mieux placé", async () => {
+    const { listeDeLecture } = await import("@/lib/visio");
+    const questions = [{ id: "q1", rank: 3, text: "Une question", intent: "comparative" }];
+    const reponses = [
+      { id: "r1", query_id: "q1", engine: "Perplexity", raw_text: "…", error: null,
+        sources: [{ url: "https://www.monsite.fr/article-long" }, { url: "https://wojo.com/blog" }] },
+      { id: "r2", query_id: "q1", engine: "Claude", raw_text: "…", error: null,
+        sources: [{ url: "https://ubiq.fr/x" }, { url: "https://monsite.fr/y" }] },
+    ];
+    const lecture = listeDeLecture(questions, reponses, [] as never[], "https://monsite.fr");
+    expect(lecture?.moteur).toBe("Perplexity");
+    expect(lecture?.rangClient).toBe(1);
+    expect(lecture?.clientCite).toBe(false);
+    expect(lecture?.sources[0]).toEqual({ rang: 1, hote: "monsite.fr", chemin: "/article-long", votre: true });
+    expect(lecture?.sources[1]?.votre).toBe(false);
+  });
+
   it("relève le site du client lu en source sans que la réponse le cite", async () => {
     const { luSansEtreCite } = await import("@/lib/visio");
     const rep = (id: string, urls: string[], error: string | null = null) => ({

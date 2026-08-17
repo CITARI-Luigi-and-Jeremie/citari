@@ -6,37 +6,30 @@ import { chargerVisio } from "@/lib/scan.functions";
 import { construireDocument, type LigneSourceReponse } from "@/lib/rapport-complet";
 import { TitreChiffre } from "@/components/rapport-complet";
 import { GrilleFond } from "@/components/jeremie/rapport/GrilleFond";
-import { acteDe, construireVisio, type EcranVisio } from "@/lib/visio";
+import { acteDe, construireVisio, type EcranVisio, type Possession } from "@/lib/visio";
 import type { LigneMention, LigneQuestion } from "@/lib/rapport-apercu";
 import { dateFr, fr, NBSP } from "@/lib/typo";
 import { cn } from "@/lib/utils";
 
 /**
- * LA VISIO — le support de présentation du scan complet, plein écran.
+ * LA VISIO — le dossier posé sur la table, plein écran.
  *
- * LE GABARIT EN TROIS BANDES (17/08/2026). Chaque écran est une grille
- * `auto / 1fr / auto` : le MESSAGE en haut (toujours au même y), LA DONNÉE au
- * milieu (seule bande élastique : c'est là que le vide se ramasse), LE SENS
- * en bas (toujours au même y, précédé d'un filet court). Pendant vingt
- * minutes de partage d'écran, l'oeil apprend cette géographie en deux écrans
- * et cesse de la rescanner.
+ * La scène est l'ENCRE (grille sombre, chrome constant, six actes). Les
+ * PIÈCES sont en PAPIER : des panneaux clairs qui reproduisent mot pour mot
+ * ce qu'une machine a écrit, chacun avec sa chaîne de possession (numéro,
+ * moteur, version figée, question, date) et ses coupes annoncées en mots.
+ * L'encre porte ce que NOUS avons compté. Le papier est un événement : quand
+ * il apparaît, une machine a écrit ça.
  *
- * Les trois blocs ne se distinguent ni par une carte, ni par une icône, ni
- * par une couleur nouvelle, mais par les trois familles du projet, chacune
- * dans son métier : Newsreader ÉNONCE (le message), IBM Plex Mono COMPTE (la
- * donnée), Archivo EXPLIQUE (le sens).
- *
- * Sur l'encre, le minium est rationné à UN objet par écran, et il ne dit
- * qu'une chose : le manque. Le contenu est assemblé dans `lib/visio.ts` ;
- * cette page ne fait qu'afficher.
+ * Le SENS de chaque écran n'est JAMAIS affiché : c'est le texte oral du
+ * consultant (`ecran.sens`, consigné dans lib/visio.ts). L'écran montre la
+ * pièce ; le consultant parle.
  */
 
 const CSS_SCENE = `
 .visio-scene{
   background: var(--ink);
   color: var(--paper);
-  /* Une unité unique : 1vw en 16:9, qui rétrécit sur un écran écrasé pour
-     que le déroulé ne déborde jamais (il ne se scrolle pas). */
   --u: min(1vw, 1.78vh);
   --v-fil: color-mix(in srgb, var(--paper) 16%, transparent);
   --v-mut: color-mix(in srgb, var(--paper) 68%, var(--ink));
@@ -48,26 +41,38 @@ const CSS_SCENE = `
 .visio-scene .text-ink-3{color:var(--v-mut2)}
 .visio-scene .text-signal{color:var(--v-minium)}
 .visio-scene .bg-ink{background-color:var(--paper)}
-.visio-scene .bg-signal{background-color:var(--v-minium)}
 .visio-scene .border-rule{border-color:var(--v-fil)}
-.visio-scene .border-ink{border-color:var(--paper)}
 .visio-scene .conduite{border-bottom-color:color-mix(in srgb, var(--paper) 30%, transparent)}
 
-/* Les trois bandes du gabarit. */
-.v-ecran{display:grid;height:100%;grid-template-rows:auto 1fr auto;gap:2vh}
+/* La légende : kicker mono + message serif, sur l'encre. */
 .v-kick{font-family:var(--font-mono,"IBM Plex Mono",monospace);
-  font-size:max(11px, calc(var(--u) * 0.62));text-transform:uppercase;
-  letter-spacing:0.2em;color:var(--v-mut2);max-width:72ch}
+  font-size:max(11px, calc(var(--u) * 0.6));text-transform:uppercase;
+  letter-spacing:0.2em;color:var(--v-mut2);max-width:80ch}
 .v-msg{font-family:var(--font-serif,Newsreader,serif);
-  font-size:calc(var(--u) * 2.55);line-height:1.12;max-width:26ch;
-  margin-top:calc(var(--u) * 0.9)}
-.v-msg-long{font-size:calc(var(--u) * 2);max-width:32ch}
-.v-donnee{align-self:center;min-height:0;width:100%}
-.v-sens{font-size:calc(var(--u) * 1.02);line-height:1.5;color:var(--v-mut);
-  max-width:56ch;padding-top:calc(var(--u) * 0.8);
-  border-top:1px solid var(--v-fil)}
-/* Le filet du sens ne fait que la largeur de son bloc : un filet plein cadre
-   se lirait comme un pied de page. */
+  font-size:calc(var(--u) * 1.9);line-height:1.16;max-width:52ch;
+  margin-top:calc(var(--u) * 0.7)}
+
+/* LE PAPIER : la pièce à conviction. Texte encre réelle, jamais les
+   utilitaires retournés de la scène. */
+.v-papier{background:var(--paper);color:var(--ink);
+  border:1px solid color-mix(in srgb, var(--ink) 18%, var(--paper));
+  padding:calc(var(--u) * 1.4) calc(var(--u) * 1.6)}
+.v-possession{font-family:var(--font-mono,"IBM Plex Mono",monospace);
+  font-size:max(10px, calc(var(--u) * 0.55));text-transform:uppercase;
+  letter-spacing:0.14em;color:#726d64;
+  border-bottom:1px solid color-mix(in srgb, var(--ink) 15%, transparent);
+  padding-bottom:calc(var(--u) * 0.5);margin-bottom:calc(var(--u) * 0.9)}
+.v-corps{font-size:calc(var(--u) * 0.98);line-height:1.55;color:var(--ink)}
+.v-corps p + p{margin-top:calc(var(--u) * 0.7)}
+.v-coupe{font-family:var(--font-mono,"IBM Plex Mono",monospace);
+  font-size:max(10px, calc(var(--u) * 0.55));color:#726d64;
+  border-top:1px solid color-mix(in srgb, var(--ink) 15%, transparent);
+  padding-top:calc(var(--u) * 0.5);margin-top:calc(var(--u) * 0.9)}
+/* La pastille : un nom de concurrent surligné à l'encre, dans le texte. */
+.v-pastille{background:var(--ink);color:var(--paper);
+  padding:0 0.35em;white-space:nowrap}
+/* Le minium sur papier : le manque, pleine puissance. */
+.v-papier .v-manque{color:var(--signal)}
 `;
 
 const RechercheVisio = z.object({
@@ -209,18 +214,17 @@ function Visio() {
       </header>
 
       {/* ---------------------------------------------------- l'écran */}
-      <main key={index} className="anim-panel relative z-10 min-h-0 flex-1 px-[7vw] py-[4vh]">
-        <div className="v-ecran">
+      <main key={index} className="anim-panel relative z-10 min-h-0 flex-1 px-[6vw] py-[3.5vh]">
+        <div className="grid h-full grid-rows-[auto_1fr] gap-[2.5vh]">
           <div>
             <p className="v-kick">{ecran.kicker}</p>
-            <h2 className={cn("v-msg", ecran.message.length > 62 && "v-msg-long")}>
+            <h2 className="v-msg">
               <TitreChiffre texte={fr(ecran.message)} />
             </h2>
           </div>
-          <div className="v-donnee">
-            <Donnee ecran={ecran} />
+          <div className="min-h-0 self-center">
+            <Piece ecran={ecran} />
           </div>
-          <p className="v-sens">{fr(ecran.sens)}</p>
         </div>
 
         {/* Zones de clic discrètes, pour présenter au trackpad. */}
@@ -228,13 +232,13 @@ function Visio() {
           type="button"
           aria-label="Écran précédent"
           onClick={() => aller(index - 1)}
-          className="absolute inset-y-0 left-0 w-[6%] cursor-w-resize opacity-0"
+          className="absolute inset-y-0 left-0 w-[5%] cursor-w-resize opacity-0"
         />
         <button
           type="button"
           aria-label="Écran suivant"
           onClick={() => aller(index + 1)}
-          className="absolute inset-y-0 right-0 w-[6%] cursor-e-resize opacity-0"
+          className="absolute inset-y-0 right-0 w-[5%] cursor-e-resize opacity-0"
         />
       </main>
 
@@ -253,152 +257,241 @@ function Visio() {
 }
 
 /* ==================================================================== */
-/*  LA DONNÉE de chaque écran : la bande du milieu, la seule qui varie.  */
+/*  Les composants du dossier.                                          */
 /* ==================================================================== */
 
-/** Une ligne de bordereau : libellé à gauche, valeur à droite, points entre. */
-function Ligne({
-  libelle,
-  valeur,
-  note,
-  manque,
-  serif = true,
-}: {
-  libelle: string;
-  valeur: React.ReactNode;
-  note?: string;
-  manque?: boolean;
-  serif?: boolean;
-}) {
+/** L'en-tête de possession d'une pièce papier. */
+function EntetePiece({ p }: { p: Possession }) {
   return (
-    <div className="border-b border-rule py-[1.35vh]">
-      <div className="flex items-baseline gap-4">
-        <span
-          className={cn(
-            "min-w-0 flex-1 truncate",
-            serif ? "serif-roman" : "num",
-            manque ? "text-signal" : "text-ink",
-          )}
-          style={{ fontSize: "calc(var(--u) * 1.45)" }}
-        >
-          {libelle}
-        </span>
-        <span className="conduite" aria-hidden />
-        <span
-          className={cn("num shrink-0 tabular-nums", manque && "text-signal")}
-          style={{ fontSize: "calc(var(--u) * 1.45)" }}
-        >
-          {valeur}
-        </span>
-      </div>
-      {note ? <p className="num mt-1 text-[11px] text-ink-3">{note}</p> : null}
+    <div className="v-possession">
+      pièce {String(p.numero).padStart(2, "0")}
+      {p.libelle ? ` · ${p.libelle}` : ""}
+      {p.moteur ? ` · ${p.moteur}${p.modele ? ` ${p.modele}` : ""}` : ""}
+      {p.rangQ ? ` · question ${String(p.rangQ).padStart(2, "0")}/${p.totalQ}` : ""}
+      {` · ${p.date}`}
     </div>
   );
 }
 
-/** Un très grand chiffre avec sa légende. */
-function Chiffre({
-  valeur,
-  legende,
-  manque,
-  taille = 7.5,
+/** Un panneau papier : la pièce à conviction. */
+function Panneau({
+  possession,
+  pied,
+  className,
+  children,
 }: {
-  valeur: number;
-  legende: string;
-  manque?: boolean;
-  taille?: number;
+  possession?: Possession;
+  pied?: React.ReactNode;
+  className?: string;
+  children: React.ReactNode;
 }) {
   return (
-    <div>
-      <div
-        className={cn("num leading-[0.85] tracking-[-0.05em]", manque && "text-signal")}
-        style={{ fontSize: `calc(var(--u) * ${taille})` }}
-      >
-        <Compteur valeur={valeur} />
-      </div>
-      <p
-        className={cn("num mt-3 border-t border-rule pt-2", manque && "text-signal")}
-        style={{ fontSize: "calc(var(--u) * 0.72)", maxWidth: "22ch" }}
-      >
-        {legende}
-      </p>
+    <div className={cn("v-papier", className)}>
+      {possession ? <EntetePiece p={possession} /> : null}
+      {children}
+      {pied ? <div className="v-coupe">{pied}</div> : null}
     </div>
   );
 }
 
-function Donnee({ ecran }: { ecran: EcranVisio }) {
+/** Le corps d'une réponse, paragraphes conservés, concurrents en pastilles. */
+function CorpsMarque({ texte, variantes }: { texte: string; variantes: string[] }) {
+  const tries = [...variantes].filter((v) => v.length >= 3).sort((a, b) => b.length - a.length);
+  const motif = tries.length
+    ? new RegExp(`(${tries.map((v) => v.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|")})`, "gi")
+    : null;
+  return (
+    <div className="v-corps">
+      {texte.split(/\n+/).map((par, i) => (
+        <p key={i}>
+          {motif
+            ? par.split(motif).map((bout, j) =>
+                j % 2 === 1 ? (
+                  <span key={j} className="v-pastille">
+                    {bout}
+                  </span>
+                ) : (
+                  <span key={j}>{bout}</span>
+                ),
+              )
+            : par}
+        </p>
+      ))}
+    </div>
+  );
+}
+
+/** La coupe annoncée, en mots comptés. */
+function Coupe({ total, extrait }: { total: number; extrait: number }) {
+  if (extrait >= total) return <>réponse intégrale · {total} mots</>;
+  return (
+    <>
+      réponse intégrale {total} mots · extrait {extrait} mots
+    </>
+  );
+}
+
+/** Le décompte en traits-unités : un trait = une réponse (ou une lecture). */
+function Traits({ n, manque }: { n: number; manque?: boolean }) {
+  const groupes: number[] = [];
+  let reste = n;
+  while (reste > 0) {
+    groupes.push(Math.min(10, reste));
+    reste -= 10;
+  }
+  return (
+    <span className="inline-flex flex-wrap items-center gap-[0.55vw]" aria-label={`${n}`}>
+      {groupes.map((g, i) => (
+        <span key={i} className="inline-flex gap-[2.5px]">
+          {Array.from({ length: g }, (_, j) => (
+            <span
+              key={j}
+              className="inline-block h-[1.6vh] w-[3px]"
+              style={{ background: manque ? "var(--v-minium)" : "var(--paper)" }}
+            />
+          ))}
+        </span>
+      ))}
+    </span>
+  );
+}
+
+/* ==================================================================== */
+/*  La pièce de chaque écran.                                           */
+/* ==================================================================== */
+
+function Piece({ ecran }: { ecran: EcranVisio }) {
   switch (ecran.type) {
-    /* ------------------------------------------------ 01 · le score */
-    case "score":
+    /* --------------------------------------------- 01 · le verdict */
+    case "verdict":
       return (
         <div className="flex items-center gap-[6vw]">
-          <div className="min-w-0 flex-1">
-            <div className="max-w-[52vw]">
-              <Ligne
-                libelle={`vos réponses, sur ${ecran.lues}`}
-                valeur={ecran.vosReponses}
-                manque
-                serif={false}
-              />
-              {ecran.rivaux.map((r) => (
-                <Ligne key={r.nom} libelle={r.nom} valeur={r.reponses} serif={false} />
-              ))}
-              {ecran.unionRivaux > 0 ? (
-                <Ligne
-                  libelle={`ces ${ecran.rivaux.length} marques réunies`}
-                  valeur={`${ecran.unionRivaux} / ${ecran.lues}`}
-                  note="réponses distinctes où au moins l'une d'elles apparaît · jamais une somme"
-                  serif={false}
-                />
-              ) : null}
-            </div>
-            {ecran.apercu ? (
-              <p className="num mt-[2.5vh] text-[11px] text-ink-3">
-                de mémoire (aperçu du {dateFr(ecran.apercu.date)}, 2 moteurs) : {ecran.apercu.score}
-                {NBSP}· en lisant le web : {ecran.score}
-              </p>
-            ) : null}
-          </div>
-          <div className="shrink-0 text-right">
+          <div className="shrink-0">
             <div
               className="num leading-[0.8] tracking-[-0.06em]"
-              style={{ fontSize: "calc(var(--u) * 16)" }}
+              style={{ fontSize: "calc(var(--u) * 15)" }}
             >
               <Compteur valeur={ecran.score} />
             </div>
             <div className="num mt-2 text-[12px] text-ink-3">sur 100</div>
           </div>
+          <div className="min-w-0 max-w-[46vw] flex-1">
+            <Ligne libelle={`vos réponses, sur ${ecran.lues}`} valeur={ecran.vosReponses} manque />
+            {ecran.rivaux.map((r) => (
+              <Ligne key={r.nom} libelle={r.nom} valeur={r.reponses} />
+            ))}
+            {ecran.unionRivaux > 0 ? (
+              <Ligne
+                libelle={`eux ${ecran.rivaux.length} réunis`}
+                valeur={`${ecran.unionRivaux} / ${ecran.lues}`}
+                note="réponses distinctes où au moins l'un d'eux apparaît · jamais une somme"
+              />
+            ) : null}
+            {ecran.apercu ? (
+              <p className="num mt-3 text-[11px] text-ink-3">
+                de mémoire (aperçu du {dateFr(ecran.apercu.date)}, 2 moteurs) : {ecran.apercu.score}
+                {NBSP}· en lisant le web : {ecran.score}
+              </p>
+            ) : null}
+          </div>
         </div>
       );
 
-    /* ---------------------------------------------- 02 · le sommaire */
-    case "sommaire":
+    /* ------------------------------------------- 02 · la pièce A */
+    case "piece-reponse":
       return (
-        <div className="max-w-[62vw]">
-          {ecran.points.map((p, i) => (
-            <div key={p} className="flex items-baseline gap-6 border-b border-rule py-[2vh]">
-              <span className="num shrink-0 text-[13px] text-ink-3">
-                {String(i + 1).padStart(2, "0")}
+        <div className="mx-auto max-w-[62vw]">
+          <p className="serif-roman mb-[1.2vh] text-ink-2" style={{ fontSize: "calc(var(--u) * 1.15)" }}>
+            «{NBSP}{ecran.question}{NBSP}»
+          </p>
+          <Panneau
+            possession={ecran.possession}
+            pied={
+              <span>
+                <Coupe total={ecran.motsTotal} extrait={ecran.motsExtrait} />
+                {!ecran.clientCite ? (
+                  <span className="v-manque">
+                    {NBSP}·{NBSP}{ecran.marque} : 0 occurrence dans cette réponse
+                  </span>
+                ) : null}
               </span>
-              <p className="serif-roman" style={{ fontSize: "calc(var(--u) * 1.7)" }}>
-                {fr(p)}
-              </p>
+            }
+          >
+            <div style={{ columnCount: ecran.texte.length > 700 ? 2 : 1, columnGap: "calc(var(--u) * 2)" }}>
+              <CorpsMarque texte={ecran.texte} variantes={ecran.variantes} />
+            </div>
+          </Panneau>
+        </div>
+      );
+
+    /* ------------------------------------------------ 03 · le mur */
+    case "mur":
+      return (
+        <div className="mx-auto max-w-[80vw]">
+          <div className="flex items-baseline gap-[1vw]">
+            <span className="w-[24vw] shrink-0" />
+            {ecran.moteurs.map((m) => (
+              <span key={m} className="num flex-1 text-center text-[10px] uppercase tracking-[0.12em] text-ink-3">
+                {m}
+              </span>
+            ))}
+          </div>
+          {ecran.lignes.map((l) => (
+            <div key={l.rang} className="flex items-center gap-[1vw] py-[0.28vh]">
+              <span className="num w-[24vw] shrink-0 truncate text-[10px] text-ink-3">
+                {String(l.rang).padStart(2, "0")}{NBSP}{l.texte}
+              </span>
+              {l.etats.map((e, i) => (
+                <span
+                  key={i}
+                  className={cn(
+                    "h-[2.5vh] flex-1",
+                    e === "cite" && "bg-ink",
+                    e === "absent" && "border border-rule",
+                    e === "erreur" && "border border-rule opacity-30",
+                  )}
+                />
+              ))}
+            </div>
+          ))}
+          <p className="num mt-3 text-[11px] text-ink-3">
+            case pleine : votre marque présente ·{" "}
+            <span className="text-signal">{ecran.vosReponses} sur {ecran.reponsesLues}</span> · case
+            estompée : réponse en erreur, sortie des comptes
+          </p>
+        </div>
+      );
+
+    /* ------------------------------------------ 04 · l'inventaire */
+    case "inventaire":
+      return (
+        <div className="mx-auto max-w-[56vw]">
+          {ecran.tranches.map((t) => (
+            <div
+              key={t.etiquette}
+              className="v-papier mb-[1vh] flex items-baseline justify-between gap-6"
+              style={{ padding: "calc(var(--u) * 0.9) calc(var(--u) * 1.4)" }}
+            >
+              <span className="num tabular-nums" style={{ fontSize: "calc(var(--u) * 2.2)", color: "var(--ink)" }}>
+                <Compteur valeur={t.compte} />
+              </span>
+              <span style={{ fontSize: "calc(var(--u) * 0.95)", color: "#5c5a52" }}>{t.etiquette}</span>
             </div>
           ))}
         </div>
       );
 
-    /* ------------------------------------------- 03 · les demandes */
-    case "demandes":
+    /* -------------------------------------------- 05 · les moments */
+    case "moments":
       return (
-        <div className="max-w-[64vw]">
+        <div className="mx-auto max-w-[64vw]">
           {ecran.lignes.map((l) => (
-            <div key={l.titre} className="border-b border-rule py-[1.5vh]">
+            <div key={l.titre} className="border-b border-rule py-[1.6vh]">
               <div className="flex items-baseline justify-between gap-6">
-                <span className="serif-roman" style={{ fontSize: "calc(var(--u) * 1.6)" }}>
+                <span className="serif-roman" style={{ fontSize: "calc(var(--u) * 1.7)" }}>
                   {fr(l.titre)}
                 </span>
-                <span className="num shrink-0 tabular-nums" style={{ fontSize: "calc(var(--u) * 1.6)" }}>
+                <span className="num shrink-0 tabular-nums" style={{ fontSize: "calc(var(--u) * 1.7)" }}>
                   <span className={cn(l.citees === 0 && "text-signal")}>{l.citees}</span>
                   <span className="text-ink-3"> / {l.posees}</span>
                 </span>
@@ -416,380 +509,421 @@ function Donnee({ ecran }: { ecran: EcranVisio }) {
         </div>
       );
 
-    /* ----------------------------------------- 04 · le vocabulaire */
+    /* --------------------------------------- 06 · le vocabulaire */
     case "vocabulaire":
       return (
-        <div className="max-w-[62vw]">
-          {ecran.termes.map((t) => (
-            <div key={t.terme} className="flex items-center gap-[2vw] border-b border-rule py-[1.3vh]">
-              <span
-                className="w-[20vw] shrink-0 truncate serif-roman"
-                style={{ fontSize: "calc(var(--u) * 1.5)" }}
-              >
-                «{NBSP}{t.terme}{NBSP}»
-              </span>
-              <span className="h-[2.2vh] flex-1">
-                <span
-                  className="block h-full bg-ink"
-                  style={{ width: `${Math.max(2, (t.reponses / ecran.lues) * 100)}%` }}
-                />
-              </span>
-              <span className="num w-[22ch] shrink-0 text-right text-[12px] text-ink-3">
-                {t.reponses} réponses · {t.questions} question{t.questions > 1 ? "s" : ""}
-                {t.camp === "vous" ? (
-                  <span className="text-ink"> · votre catégorie</span>
-                ) : t.camp === "eux" ? (
-                  <span> · l'alternative</span>
-                ) : null}
-              </span>
+        <div className="flex items-center gap-[4vw]">
+          <div className="min-w-0 flex-1">
+            {ecran.termes.map((t) => (
+              <div key={t.terme} className="border-b border-rule py-[1.4vh]">
+                <div className="serif-roman" style={{ fontSize: "calc(var(--u) * 2.6)" }}>
+                  {t.terme}
+                </div>
+                <div className="num mt-1 text-[12px] text-ink-3">
+                  dans {t.reponses} réponses sur {ecran.lues} · {t.questions} question
+                  {t.questions > 1 ? "s" : ""} posée{t.questions > 1 ? "s" : ""}
+                </div>
+              </div>
+            ))}
+          </div>
+          {ecran.extraits.length ? (
+            <div className="w-[30vw] shrink-0">
+              {ecran.extraits.map((e) => (
+                <Panneau key={e.terme} className="mb-[1.2vh]" pied={<span>{e.moteur} · phrase réelle de la mesure</span>}>
+                  <p className="serif-ital" style={{ fontSize: "calc(var(--u) * 0.95)", color: "var(--ink)" }}>
+                    «{NBSP}{e.phrase}{NBSP}»
+                  </p>
+                </Panneau>
+              ))}
             </div>
-          ))}
-          <p className="num mt-2 text-[11px] text-ink-3">
-            termes relevés dans vos réponses, comptés à l'unité réponse
-          </p>
+          ) : null}
         </div>
       );
 
-    /* -------------------------------------------- 05 · le risque */
+    /* ------------------------------------------------ 07 · le risque */
     case "risque":
       return (
-        <div className="flex items-start gap-[5vw]">
-          <Chiffre
-            valeur={ecran.posees}
-            legende={`questions de risque et de vérification, sur ${ecran.total}`}
-          />
-          <div className="min-w-0 flex-1 max-w-[46vw]">
-            {ecran.sujets.map((s) => (
-              <p
-                key={s}
-                className="serif-roman border-b border-rule py-[1.1vh]"
-                style={{ fontSize: "calc(var(--u) * 1.15)" }}
+        <div className="mx-auto max-w-[64vw]">
+          <Panneau possession={ecran.possession}>
+            {ecran.questions.map((q) => (
+              <div
+                key={q.rang}
+                className="flex items-baseline gap-4 border-b py-[0.9vh] last:border-b-0"
+                style={{ borderColor: "color-mix(in srgb, var(--ink) 12%, transparent)" }}
               >
-                «{NBSP}{s}{NBSP}»
-              </p>
+                <span className="num shrink-0 text-[10px]" style={{ color: "#726d64" }}>
+                  Q{String(q.rang).padStart(2, "0")}
+                </span>
+                <span className="min-w-0 flex-1" style={{ fontSize: "calc(var(--u) * 0.92)" }}>
+                  {q.texte}
+                </span>
+                <span className="num shrink-0 text-[10px]" style={{ color: "#726d64" }}>
+                  {q.marques.length ? q.marques.join(" · ") : "personne"}
+                </span>
+                {q.vousAbsent ? (
+                  <span className="num v-manque shrink-0 text-[10px] uppercase tracking-[0.12em]">
+                    vous : absent
+                  </span>
+                ) : null}
+              </div>
             ))}
-            <p className="num mt-2 text-[11px] text-ink-3">
-              votre marque apparaît dans {ecran.citees} de ces réponses
-            </p>
-          </div>
+          </Panneau>
         </div>
       );
 
-    /* -------------------------------------------- 06 · le podium */
-    case "podium": {
-      const maxi = Math.max(...ecran.lignes.map((l) => l.reponses), 1);
+    /* ------------------------------------------------ 08 · le tally */
+    case "tally":
       return (
-        <div className="max-w-[70vw]">
+        <div className="mx-auto max-w-[70vw]">
           {ecran.lignes.map((l) => (
-            <div key={l.nom} className="flex items-center gap-[2vw] border-b border-rule py-[1.3vh]">
+            <div key={l.nom} className="flex items-center gap-[2vw] border-b border-rule py-[1.6vh]">
               <span
-                className={cn("w-[16vw] shrink-0 truncate", l.cible ? "font-semibold text-signal" : "")}
+                className={cn("w-[14vw] shrink-0 truncate", l.cible && "font-semibold text-signal")}
                 style={{ fontSize: "calc(var(--u) * 1.4)" }}
               >
                 {l.nom}
               </span>
-              <span className="h-[2.4vh] flex-1">
-                <span
-                  className={cn("block h-full", l.cible ? "bg-signal" : "bg-ink")}
-                  style={{ width: `${Math.max(1, (l.reponses / maxi) * 100)}%` }}
-                />
+              <span className="min-w-0 flex-1">
+                <Traits n={l.reponses} manque={l.cible} />
               </span>
               <span
-                className={cn("num w-[5ch] shrink-0 text-right tabular-nums", l.cible && "text-signal")}
+                className={cn("num w-[6ch] shrink-0 text-right tabular-nums", l.cible && "text-signal")}
                 style={{ fontSize: "calc(var(--u) * 1.4)" }}
               >
                 {l.reponses}
               </span>
             </div>
           ))}
-          <p className="num mt-2 text-[11px] text-ink-3">
-            réponses distinctes où la marque apparaît, sur {ecran.lues} · variantes regroupées
-            {ecran.positionMoyenne !== null
-              ? ` · votre position moyenne quand vous apparaissez : ${ecran.positionMoyenne.toFixed(1)}ᵉ`
-              : ""}
+          <p className="num mt-3 text-[11px] text-ink-3">
+            eux trois réunis : {ecran.union} réponses sur {ecran.lues} · variantes d'écriture regroupées
           </p>
         </div>
       );
-    }
 
-    /* --------------------------------------- 07 · lu, et pas cité */
-    case "lu-pas-cite":
+    /* -------------------------------------------- 09 · la pièce B */
+    case "piece-lecture":
       return (
-        <div className="flex items-start gap-[5vw]">
-          <div className="shrink-0">
-            <Chiffre
-              valeur={ecran.reponsesQuiLisent}
-              legende={`réponses ont lu ${ecran.hote} pour se construire`}
-            />
-            <div className="mt-[3vh]">
-              <Chiffre
-                valeur={ecran.sansCitation.length}
-                legende="ne vous nomment nulle part"
-                manque
-                taille={5}
-              />
-            </div>
-          </div>
-          <div className="min-w-0 flex-1">
-            {ecran.sansCitation.map((s, i) => (
-              <div key={`${s.moteur}-${i}`} className="border-b border-rule py-[1.2vh]">
-                <p className="serif-roman" style={{ fontSize: "calc(var(--u) * 1.2)" }}>
-                  «{NBSP}{s.question}{NBSP}»
-                </p>
-                <p className="num mt-1 text-[11px] text-ink-3">
-                  {s.moteur} · votre page lue en {s.rang}
-                  {s.rang === 1 ? "ʳᵉ" : "ᵉ"} position des sources
-                  {s.premiere ? <span className="text-signal"> · première source lue</span> : null}
-                </p>
+        <div className="mx-auto flex max-w-[80vw] items-stretch gap-[2vw]">
+          <Panneau
+            className="w-[38vw] shrink-0"
+            possession={ecran.possessionGauche}
+            pied={<span>{ecran.totalSources} sources lues au total</span>}
+          >
+            <p className="mb-2" style={{ fontSize: "calc(var(--u) * 0.85)", color: "#5c5a52" }}>
+              «{NBSP}{ecran.question}{NBSP}»
+            </p>
+            {ecran.sources.map((s) => (
+              <div
+                key={s.rang}
+                className="flex items-baseline gap-3 border-b py-[0.55vh] last:border-b-0"
+                style={{ borderColor: "color-mix(in srgb, var(--ink) 10%, transparent)" }}
+              >
+                <span className="num w-[2ch] shrink-0 text-right text-[11px]" style={{ color: "#726d64" }}>
+                  {s.rang}
+                </span>
+                <span className="num min-w-0 flex-1 truncate text-[12px]">
+                  <span className={cn(s.votre && "font-bold")}>{s.hote}</span>
+                  <span style={{ color: "#726d64" }}>{s.chemin}</span>
+                </span>
+                {s.votre ? <span className="v-pastille num shrink-0 text-[10px]">VOTRE PAGE</span> : null}
               </div>
             ))}
-          </div>
+          </Panneau>
+          <Panneau
+            className="min-w-0 flex-1"
+            possession={ecran.possessionDroite}
+            pied={
+              <span>
+                <Coupe total={ecran.motsTotal} extrait={ecran.motsExtrait} />
+                {!ecran.clientCite ? (
+                  <span className="v-manque">
+                    {NBSP}·{NBSP}{ecran.marque} : absent de la réponse
+                  </span>
+                ) : null}
+              </span>
+            }
+          >
+            <CorpsMarque texte={ecran.texte} variantes={ecran.variantes} />
+          </Panneau>
         </div>
       );
 
-    /* --------------------------------------------- 08 · les portes */
-    case "portes":
+    /* --------------------------------------- 10 · la bibliothèque */
+    case "bibliotheque":
       return (
-        <div className="max-w-[60vw]">
+        <div className="mx-auto max-w-[66vw]">
           {ecran.lignes.map((l) => (
-            <div key={l.hote} className="flex items-baseline gap-4 border-b border-rule py-[1.2vh]">
+            <div key={l.hote} className="flex items-center gap-[1.5vw] border-b border-rule py-[1vh]">
               <span
-                className={cn("num", l.genre === "vous" && "text-signal")}
-                style={{ fontSize: "calc(var(--u) * 1.4)" }}
+                className={cn("num w-[13vw] shrink-0 truncate", l.genre === "vous" && "text-signal")}
+                style={{ fontSize: "calc(var(--u) * 1.05)" }}
               >
                 {l.hote}
               </span>
-              <span className="num shrink-0 text-[10px] uppercase tracking-[0.14em] text-ink-3">
-                {l.genre === "vous"
-                  ? "votre site"
-                  : l.genre === "concurrent"
-                    ? "site concurrent"
-                    : "adresse tierce"}
+              <span className="num w-[9ch] shrink-0 text-[9px] uppercase tracking-[0.12em] text-ink-3">
+                {l.genre === "vous" ? "votre site" : l.genre === "concurrent" ? "concurrent" : "tierce"}
               </span>
-              <span className="conduite" aria-hidden />
+              <span className="min-w-0 flex-1">
+                <Traits n={l.lectures} manque={l.genre === "vous"} />
+              </span>
               <span
-                className={cn("num shrink-0 tabular-nums", l.genre === "vous" && "text-signal")}
-                style={{ fontSize: "calc(var(--u) * 1.25)" }}
+                className={cn("num w-[4ch] shrink-0 text-right tabular-nums", l.genre === "vous" && "text-signal")}
+                style={{ fontSize: "calc(var(--u) * 1.05)" }}
               >
                 {l.lectures}
               </span>
             </div>
           ))}
           <p className="num mt-2 text-[11px] text-ink-3">
-            {ecran.totalLectures} lectures sur {ecran.totalDomaines} domaines · chez vous :{" "}
-            {ecran.lecturesVotreSite}
+            {ecran.totalLectures} lectures sur {ecran.totalDomaines} domaines
             {ecran.exAequo ? ` · ${ecran.exAequo}` : ""}
           </p>
         </div>
       );
 
-    /* -------------------------------------------- 09 · les moteurs */
-    case "moteurs":
+    /* -------------------------------------------- 11 · la pièce C */
+    case "piece-miroir":
       return (
-        <div className="max-w-[62vw]">
-          {ecran.lignes.map((l) => (
-            <Ligne
-              key={l.moteur}
-              libelle={l.moteur}
-              serif={false}
-              manque={l.citations === 0}
-              valeur={
-                <>
-                  {l.citations}
-                  <span className="text-[11px] text-ink-3">
-                    {" "}
-                    question{l.citations > 1 ? "s" : ""} · {l.sources} réponse
-                    {l.sources > 1 ? "s" : ""} avec sources
-                  </span>
-                </>
-              }
-            />
-          ))}
-          <p className="num mt-2 text-[11px] text-ink-3">
-            questions où ce moteur vous cite au moins une fois
-          </p>
-        </div>
-      );
-
-    /* ----------------------------------------- 10 · les inventions */
-    case "inventions":
-      return (
-        <div className="max-w-[68vw]">
-          {ecran.lignes.map((l) => (
-            <div key={l.moteur} className="flex items-baseline gap-[2vw] border-b border-rule py-[1vh]">
-              <span className="num w-[9vw] shrink-0 text-[12px] text-ink-3">{l.moteur}</span>
-              <p
-                className={cn("serif-ital min-w-0 flex-1", l.nature !== "confiance" && "text-signal")}
-                style={{ fontSize: "calc(var(--u) * 1.1)" }}
+        <div className="mx-auto flex max-w-[80vw] items-stretch gap-[2vw]">
+          {[ecran.bon, ecran.mauvais].map((cote, i) =>
+            cote ? (
+              <Panneau
+                key={i}
+                className="min-w-0 flex-1"
+                possession={cote.possession}
+                pied={<span>extrait · question miroir, hors méthodologie</span>}
               >
-                «{NBSP}{l.phrase}{NBSP}»
-              </p>
-              <span className="num w-[10ch] shrink-0 text-right text-[10px] uppercase tracking-[0.14em] text-ink-3">
-                {l.nature}
-              </span>
-            </div>
-          ))}
-          <p className="num mt-2 text-[11px] text-ink-3">
-            phrases recopiées mot pour mot, hors méthodologie du score
-            {ecran.secteurDeclare ? ` · secteur déclaré au scan : ${ecran.secteurDeclare}` : ""}
-          </p>
+                <p
+                  className="serif-ital mb-3"
+                  style={{
+                    fontSize: "calc(var(--u) * 1.25)",
+                    color: i === 0 ? "var(--ink)" : "var(--signal)",
+                    borderBottom: `2px solid ${i === 0 ? "var(--ink)" : "var(--signal)"}`,
+                    paddingBottom: "0.4em",
+                  }}
+                >
+                  «{NBSP}{cote.phrase}{NBSP}»
+                </p>
+                <div className="v-corps" style={{ fontSize: "calc(var(--u) * 0.85)" }}>
+                  {cote.texte}
+                </div>
+              </Panneau>
+            ) : null,
+          )}
         </div>
       );
 
-    /* -------------------------------------------- 11 · les percées */
+    /* --------------------------------------- 12 · l'invention */
+    case "piece-invention":
+      return (
+        <div className="mx-auto max-w-[46vw]">
+          <Panneau
+            possession={ecran.possession}
+            pied={<span>extrait · question miroir, hors méthodologie</span>}
+          >
+            <p
+              className="serif-ital v-manque mb-3"
+              style={{
+                fontSize: "calc(var(--u) * 1.35)",
+                borderBottom: "2px solid var(--signal)",
+                paddingBottom: "0.4em",
+              }}
+            >
+              «{NBSP}{ecran.phrase}{NBSP}»
+            </p>
+            <div className="v-corps" style={{ fontSize: "calc(var(--u) * 0.9)" }}>{ecran.texte}</div>
+          </Panneau>
+          {ecran.sansSource ? (
+            <p className="num mt-3 text-[12px] text-ink-2">
+              {ecran.possession.moteur} n'a consulté aucune source de tout le scan : ces chiffres
+              sortent de sa mémoire, pas d'une page.
+            </p>
+          ) : null}
+        </div>
+      );
+
+    /* ----------------------------------------- 13 · les percées */
     case "percees":
       return (
-        <div className="max-w-[68vw]">
-          {ecran.lignes.map((l, i) => (
-            <div key={`${l.moteur}-${i}`} className="border-b border-rule py-[1.4vh]">
-              <div className="flex items-baseline gap-4">
-                <span className="num shrink-0 text-[12px] text-ink-3">
-                  {l.moteur} · {l.position}
-                  {l.position === 1 ? "ʳᵉ" : "ᵉ"} position
-                </span>
-                <span className="serif-roman min-w-0 flex-1 truncate" style={{ fontSize: "calc(var(--u) * 1.1)" }}>
-                  «{NBSP}{l.question}{NBSP}»
+        <div className="mx-auto flex max-w-[80vw] items-stretch gap-[1.6vw]">
+          {ecran.cartes.map((c, i) => (
+            <Panneau
+              key={i}
+              className="min-w-0 flex-1"
+              possession={c.possession}
+              pied={<span>{c.coupe ? "extrait" : "verbatim intégral"}</span>}
+            >
+              <div className="flex items-start justify-between gap-3">
+                <p style={{ fontSize: "calc(var(--u) * 0.8)", color: "#5c5a52" }}>
+                  «{NBSP}{c.question}{NBSP}»
+                </p>
+                <span className="num shrink-0 tabular-nums" style={{ fontSize: "calc(var(--u) * 2.6)" }}>
+                  {c.position}
+                  <span className="text-[10px]" style={{ color: "#726d64" }}>
+                    {c.position === 1 ? "ʳᵉ" : "ᵉ"}
+                  </span>
                 </span>
               </div>
-              <p className="serif-ital mt-1" style={{ fontSize: "calc(var(--u) * 1.2)" }}>
-                «{NBSP}{l.verbatim}{NBSP}»
+              <p className="serif-ital mt-2" style={{ fontSize: "calc(var(--u) * 0.98)" }}>
+                «{NBSP}<TexteSouligne texte={c.verbatim} cible={ecran.marque} />{NBSP}»
               </p>
-            </div>
+            </Panneau>
           ))}
-          <p className="num mt-2 text-[11px] text-ink-3">
-            moteurs qui vous citent : {ecran.moteursQuiCitent.join(" · ")} · {ecran.questionsPortantes}{" "}
-            question{ecran.questionsPortantes > 1 ? "s" : ""} sur {ecran.total}
-          </p>
         </div>
       );
 
-    /* ----------------------------------------- 12 · les territoires */
-    case "territoires":
+    /* -------------------------------------------- 14 · six juges */
+    case "six-juges":
       return (
-        <div className="max-w-[66vw]">
-          {ecran.lignes.map((l, i) => (
-            <div key={l.titre} className="flex items-baseline gap-5 border-b border-rule py-[1.8vh]">
-              <span className="num shrink-0 text-[13px] text-ink-3">
-                {String(i + 1).padStart(2, "0")}
-              </span>
-              <div className="min-w-0">
-                <p className="serif-roman" style={{ fontSize: "calc(var(--u) * 1.6)" }}>
-                  {fr(l.titre)}
-                </p>
-                <p className="mt-1 text-ink-2" style={{ fontSize: "calc(var(--u) * 1) " }}>
-                  {fr(l.detail)}
-                </p>
+        <div className="mx-auto max-w-[82vw]">
+          <p className="serif-roman mb-[1.2vh] text-ink-2" style={{ fontSize: "calc(var(--u) * 1.1)" }}>
+            «{NBSP}{ecran.question}{NBSP}» · question {String(ecran.rangQ).padStart(2, "0")}/{ecran.totalQ}
+          </p>
+          <div className="flex items-stretch gap-[1vw]">
+            {ecran.faces.map((f) => (
+              <div key={f.moteur} className={cn("min-w-0 flex-1", f.erreur && "opacity-40")}>
+                <div className="v-papier h-full" style={{ padding: "calc(var(--u) * 0.8)" }}>
+                  <div className="v-possession" style={{ marginBottom: "calc(var(--u) * 0.5)" }}>
+                    {f.moteur}
+                  </div>
+                  {f.erreur ? (
+                    <p className="num text-[11px]" style={{ color: "#726d64" }}>
+                      réponse en erreur · hors mesure
+                    </p>
+                  ) : (
+                    <>
+                      <p style={{ fontSize: "max(10px, calc(var(--u) * 0.62))", lineHeight: 1.5 }}>
+                        {f.extrait}
+                      </p>
+                      {f.marques.length ? (
+                        <p className="mt-2 flex flex-wrap gap-1">
+                          {f.marques.slice(0, 4).map((m) => (
+                            <span key={m} className="v-pastille num text-[9px]">
+                              {m}
+                            </span>
+                          ))}
+                        </p>
+                      ) : null}
+                      <p className="v-manque num mt-2 text-[9px] uppercase tracking-[0.1em]">
+                        {f.statut}
+                      </p>
+                    </>
+                  )}
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
-      );
-
-    /* ------------------------------------------ 13 · les 5 portes */
-    case "portes5":
-      return (
-        <div className="max-w-[56vw]">
-          {ecran.cibles.map((c) => (
-            <Ligne
-              key={c.hote}
-              libelle={c.hote}
-              serif={false}
-              valeur={
-                <>
-                  {c.lectures} <span className="text-[11px] text-ink-3">lectures</span>
-                </>
-              }
-            />
-          ))}
-          <p className="num mt-2 text-[11px] text-ink-3">
-            sur les {ecran.totalLectures} lectures faites pendant votre mesure
-          </p>
-        </div>
-      );
-
-    /* -------------------------------------------- 14 · les contenus */
-    case "contenus":
-      return (
-        <div className="max-w-[66vw]">
-          {ecran.pages.map((p, i) => (
-            <div key={p.titre} className="border-b border-rule py-[1.3vh]">
-              <p style={{ fontSize: "calc(var(--u) * 1.25)" }}>
-                <span className="num mr-3 text-[12px] text-ink-3">
-                  {String(i + 1).padStart(2, "0")}
-                </span>
-                {fr(`Une page qui répond à : « ${p.titre} »`)}
-              </p>
-              {p.lus.length ? (
-                <p className="num mt-1 pl-[2.4vw] text-[11px] text-ink-3">
-                  lu à la place{NBSP}: {p.lus.join(" · ")}
-                </p>
-              ) : null}
-            </div>
-          ))}
-        </div>
-      );
-
-    /* --------------------------------------------- 15 · les gestes */
-    case "gratuit":
-      return (
-        <div className="max-w-[64vw]">
-          {ecran.gestes.map((g, i) => (
-            <div key={g.titre} className="border-b border-rule py-[1.7vh]">
-              <p className="font-semibold" style={{ fontSize: "calc(var(--u) * 1.45)" }}>
-                <span className="num mr-3 text-[12px] font-normal text-ink-3">
-                  {String(i + 1).padStart(2, "0")}
-                </span>
-                {fr(g.titre)}
-              </p>
-              <p className="num mt-1 pl-[2.4vw] text-[11px] text-ink-3">{fr(g.detail)}</p>
-            </div>
-          ))}
-        </div>
-      );
-
-    /* -------------------------------------------- 16 · la bascule */
-    case "bascule":
-      return (
-        <div className="flex items-end gap-[6vw]">
-          <Chiffre
-            valeur={ecran.reponsesRival}
-            legende={`réponses tenues par ${ecran.rival}, sur ${ecran.lues}`}
-          />
-          <div className="pb-2">
-            <p className="serif-ital text-ink-2" style={{ fontSize: "calc(var(--u) * 1.3)", maxWidth: "34ch" }}>
-              {fr(
-                "Une position installée ne se reprend pas avec trois gestes : elle se reprend avec un chantier suivi et mesuré.",
-              )}
-            </p>
+            ))}
           </div>
         </div>
       );
 
-    /* ---------------------------------------------- 17 · le sprint */
-    case "sprint":
+    /* ----------------------------------- 15 · le bon de commande */
+    case "bon-commande":
       return (
-        <div className="max-w-[76vw]">
-          {ecran.chantiers.map((c) => (
-            <div key={c.titre} className="border-b border-rule py-[1.5vh]">
-              <div className="flex items-baseline gap-[2vw]">
-                <span className="serif-roman w-[19vw] shrink-0" style={{ fontSize: "calc(var(--u) * 1.15)" }}>
-                  {fr(c.titre)}
-                </span>
-                <span className="num w-[13vw] shrink-0 text-[11px] text-ink-3">
-                  seul{NBSP}: {c.seul}
-                </span>
-                <ul className="min-w-0 flex-1">
-                  {c.avecNous.map((a) => (
-                    <li key={a} className="flex gap-2" style={{ fontSize: "calc(var(--u) * 0.95)" }}>
-                      <span className="text-ink-3">·</span>
-                      <span>{fr(a)}</span>
-                    </li>
-                  ))}
-                </ul>
+        <div className="mx-auto max-w-[60vw]">
+          <Panneau possession={ecran.possession}>
+            {ecran.pages.map((p, i) => (
+              <div
+                key={p.titre}
+                className="border-b py-[1vh] last:border-b-0"
+                style={{ borderColor: "color-mix(in srgb, var(--ink) 12%, transparent)" }}
+              >
+                <p style={{ fontSize: "calc(var(--u) * 0.98)" }}>
+                  <span className="num mr-3 text-[11px]" style={{ color: "#726d64" }}>
+                    {String(i + 1).padStart(2, "0")}
+                  </span>
+                  «{NBSP}{p.titre}{NBSP}»
+                </p>
+                {p.lus.length ? (
+                  <p className="num mt-1 pl-[2.2vw] text-[10px]" style={{ color: "#726d64" }}>
+                    lu à votre place{NBSP}: {p.lus.join(" · ")}
+                  </p>
+                ) : null}
+              </div>
+            ))}
+          </Panneau>
+        </div>
+      );
+
+    /* -------------------------------------- 16 · les portes du sprint */
+    case "portes-sprint":
+      return (
+        <div className="mx-auto max-w-[60vw]">
+          {ecran.lignes.map((l) => (
+            <div key={l.hote} className="flex items-center gap-[1.5vw] border-b border-rule py-[1.1vh]">
+              <span className="num w-[16vw] shrink-0 truncate" style={{ fontSize: "calc(var(--u) * 1.15)" }}>
+                {l.hote}
+              </span>
+              <span className="min-w-0 flex-1">
+                <Traits n={l.lectures} />
+              </span>
+              <span className="num w-[4ch] shrink-0 text-right text-[12px] tabular-nums">{l.lectures}</span>
+            </div>
+          ))}
+          <p className="num mt-2 text-[11px] text-ink-3">{ecran.note}</p>
+        </div>
+      );
+
+    /* ------------------------------------------------ 17 · les gestes */
+    case "gestes":
+      return (
+        <div className="mx-auto flex max-w-[78vw] items-stretch gap-[1.6vw]">
+          {ecran.panneaux.map((p) => (
+            <div key={p.entete} className="min-w-0 flex-1">
+              <div className="v-papier h-full">
+                <div className="v-possession">{p.entete}</div>
+                {p.creux ? (
+                  <div className="flex h-[14vh] items-center justify-center">
+                    <span className="v-manque num text-[11px] uppercase tracking-[0.14em]">
+                      {p.minium}
+                    </span>
+                  </div>
+                ) : (
+                  p.lignes.map((l) => (
+                    <p key={l} className="py-1" style={{ fontSize: "calc(var(--u) * 0.9)" }}>
+                      {fr(l)}
+                    </p>
+                  ))
+                )}
               </div>
             </div>
           ))}
-          <div className="mt-[1.5vh] flex flex-wrap gap-x-[3vw] gap-y-1">
+        </div>
+      );
+
+    /* ---------------------------------------------- 18 · la bascule */
+    case "bascule":
+      return (
+        <div>
+          <p className="serif-roman" style={{ fontSize: "calc(var(--u) * 3.4)" }}>
+            {fr("Lisible n'est pas premier.")}
+          </p>
+          <p className="num mt-[3vh] text-[14px] text-ink-2">
+            {ecran.rival} · {ecran.reponses} réponses sur {ecran.lues}
+          </p>
+        </div>
+      );
+
+    /* ------------------------------------------------ 19 · le sprint */
+    case "sprint":
+      return (
+        <div className="mx-auto max-w-[80vw]">
+          {ecran.chantiers.map((c) => (
+            <div key={c.titre} className="flex items-baseline gap-[2vw] border-b border-rule py-[1.4vh]">
+              <span className="serif-roman w-[9vw] shrink-0" style={{ fontSize: "calc(var(--u) * 1.3)" }}>
+                {c.titre}
+              </span>
+              <span className="num w-[15vw] shrink-0 text-[11px] text-ink-3">seul : {c.seul}</span>
+              <ul className="min-w-0 flex-1">
+                {c.avecNous.map((a) => (
+                  <li key={a} className="flex gap-2" style={{ fontSize: "calc(var(--u) * 0.9)" }}>
+                    <span className="text-ink-3">·</span>
+                    <span>{fr(a)}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+          <div className="mt-[1.5vh] flex flex-wrap gap-x-[2.5vw] gap-y-1">
             {ecran.preuve.map((p) => (
               <span key={p} className="num text-[11px] text-ink-3">
                 · {fr(p)}
@@ -799,40 +933,129 @@ function Donnee({ ecran }: { ecran: EcranVisio }) {
         </div>
       );
 
-    /* ------------------------------------------- 18 · la décision */
+    /* --------------------------------------- 20 · la pièce à venir */
+    case "piece-a-venir":
+      return (
+        <div className="mx-auto flex max-w-[76vw] items-center gap-[4vw]">
+          <div className="min-w-0 flex-1">
+            <p className="num text-[1.3vw]">
+              la ligne qui sera comparée{NBSP}: votre nom dans {ecran.vosReponses} réponses sur{" "}
+              {ecran.lues}
+              {NBSP}<span className="text-ink-3">→</span>{NBSP}
+              <span className="text-signal">?</span>
+            </p>
+            <p className="num mt-3 text-[11px] text-ink-3">
+              mêmes questions, mêmes moteurs, mêmes versions, même formule · chiffres publiés
+            </p>
+          </div>
+          <div className="w-[32vw] shrink-0">
+            <div className="v-papier" style={{ minHeight: "26vh" }}>
+              <div className="v-possession">
+                pièce à venir · remesure du {ecran.date} · {ecran.questions} questions ·{" "}
+                {ecran.moteurs} moteurs
+              </div>
+              {/* Le corps reste NU : la seule pièce vide autorisée, parce
+                  qu'elle est datée et promise, jamais simulée. */}
+            </div>
+          </div>
+        </div>
+      );
+
+    /* ------------------------------------------- 21 · la décision */
     default:
       return (
-        <div>
-          <div className="num tracking-[-0.03em]" style={{ fontSize: "calc(var(--u) * 5)" }}>
-            2{NBSP}900{NBSP}€ <span className="text-[1.1vw] text-ink-3">HT · une fois</span>
-          </div>
-          <div className="mt-[3vh] flex max-w-[60vw] flex-wrap items-baseline gap-x-[3vw] gap-y-2 border-t border-rule pt-[2vh]">
-            {[
-              "5 contenus livrés",
-              "8 cibles de citation",
-              "audit et correctifs",
-              "preuve chaque vendredi",
-              `remesure du ${ecran.dateRemesure} incluse`,
-            ].map((x) => (
-              <span key={x} className="num" style={{ fontSize: "calc(var(--u) * 1.15)" }}>
-                {x}
-              </span>
-            ))}
-          </div>
-          <p className="num mt-[3vh] text-[12px] text-ink-2">
-            la ligne qui sera comparée{NBSP}: votre nom dans {ecran.vosReponses} réponses sur{" "}
-            {ecran.lues}
-            {NBSP}<span className="text-ink-3">→</span>{NBSP}
-            <span className="text-signal">?</span>
+        <div className="flex items-center gap-[5vw]">
+          {ecran.rappel ? (
+            <div className="w-[24vw] shrink-0 opacity-80">
+              <div className="v-papier" style={{ padding: "calc(var(--u) * 0.9)" }}>
+                <div className="v-possession" style={{ marginBottom: "calc(var(--u) * 0.4)" }}>
+                  pièce 01 · {ecran.rappel.moteur} · question{" "}
+                  {String(ecran.rappel.rangQ).padStart(2, "0")}
+                </div>
+                <p className="v-manque num text-[11px] uppercase tracking-[0.12em]">
+                  {ecran.rappel.marque} : 0 occurrence
+                </p>
+              </div>
+            </div>
+          ) : null}
+          <div className="min-w-0 flex-1">
+            <div className="num tracking-[-0.03em]" style={{ fontSize: "calc(var(--u) * 4.6)" }}>
+              2{NBSP}900{NBSP}€ <span className="text-[1.1vw] text-ink-3">HT · une fois</span>
+            </div>
+            <div className="mt-[2.5vh] flex max-w-[46vw] flex-wrap items-baseline gap-x-[2.5vw] gap-y-2 border-t border-rule pt-[2vh]">
+              {[
+                "5 contenus livrés",
+                "8 citations obtenues",
+                "audit et correctifs",
+                "preuve chaque vendredi",
+                `remesure du ${ecran.dateRemesure} incluse`,
+              ].map((x) => (
+                <span key={x} className="num" style={{ fontSize: "calc(var(--u) * 1.05)" }}>
+                  {x}
+                </span>
+              ))}
+            </div>
             {ecran.places !== null ? (
-              <span>
-                {NBSP}· places restantes ce mois-ci{NBSP}: {ecran.places}
-              </span>
+              <p className="num mt-[2.5vh] text-[12px] text-ink-2">
+                places restantes ce mois-ci{NBSP}: {ecran.places}
+              </p>
             ) : null}
-          </p>
+          </div>
         </div>
       );
   }
+}
+
+/** Une ligne de bordereau sur l'encre : libellé, points de conduite, valeur. */
+function Ligne({
+  libelle,
+  valeur,
+  note,
+  manque,
+}: {
+  libelle: string;
+  valeur: React.ReactNode;
+  note?: string;
+  manque?: boolean;
+}) {
+  return (
+    <div className="border-b border-rule py-[1.2vh]">
+      <div className="flex items-baseline gap-4">
+        <span
+          className={cn("num min-w-0 flex-1 truncate", manque && "text-signal")}
+          style={{ fontSize: "calc(var(--u) * 1.35)" }}
+        >
+          {libelle}
+        </span>
+        <span className="conduite" aria-hidden />
+        <span
+          className={cn("num shrink-0 tabular-nums", manque && "text-signal")}
+          style={{ fontSize: "calc(var(--u) * 1.35)" }}
+        >
+          {valeur}
+        </span>
+      </div>
+      {note ? <p className="num mt-1 text-[11px] text-ink-3">{note}</p> : null}
+    </div>
+  );
+}
+
+/** Le nom de la marque souligné dans un verbatim (présence, en encre). */
+function TexteSouligne({ texte, cible }: { texte: string; cible: string }) {
+  const motif = new RegExp(`(${cible.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")})`, "gi");
+  return (
+    <>
+      {texte.split(motif).map((bout, i) =>
+        i % 2 === 1 ? (
+          <span key={i} className="font-semibold not-italic" style={{ borderBottom: "2px solid var(--ink)" }}>
+            {bout}
+          </span>
+        ) : (
+          <span key={i}>{bout}</span>
+        ),
+      )}
+    </>
+  );
 }
 
 /**

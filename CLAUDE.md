@@ -133,38 +133,27 @@ deux endroits est le piège déjà payé avec les deux comparatifs. En `complet`
 moteur qu'on vient d'interroger et de facturer serait un mensonge : ne jamais
 rendre cet aiguillage configurable.
 
-**La VISIO est le troisième artefact du scan complet**, et son contenu suit
-un GABARIT EN TROIS BLOCS depuis le 17/08/2026 (document étalon de Luigi,
-architecture passée au panel de juges) : chaque écran porte LE MESSAGE (ce
-que le consultant dit à voix haute), LA DONNÉE (brute, citée, vérifiable) et
-LE SENS (l'enseignement stratégique, jamais une paraphrase du chiffre). Un
-écran sans les trois n'est pas terminé ; un écran dont la donnée manque sort
-du déroulé. `/visio/$jeton`, plein écran sur l'encre, 18 écrans en six actes
-(le verdict, vos acheteurs, pourquoi eux, le plan, vous seul, la décision),
-pilotés aux flèches ou à la télécommande. Son seul lien est le bouton
-« ouvrir la visio » de `/equipe`, derrière le mot de passe admin.
-
-Trois règles de composition, apprises à l'écran : la grille est
-`auto/1fr/auto` (le message commence toujours au même y, le sens finit
-toujours au même y, seule la donnée respire) ; l'unité de taille est
-`--u: min(1vw, 1.78vh)` pour qu'un vidéoprojecteur ne déplace pas les
-rapports ; le minium est rationné à UN objet par écran et ne dit que le
-manque (même le fil de progression est en papier).
-
-**L'écran qui fait taire une salle** : `luSansEtreCite`. Les réponses qui ont
-LU le site du client sans le nommer, avec le rang de la source. Sur Snapdesk :
-7 réponses lisent snapdesk.co, 4 ne le citent pas, et deux fois la page était
-la PREMIÈRE source lue. C'est le pont vers le chantier 1 : la page a la bonne
-réponse, il manque ce qui permet à une machine de nommer l'entreprise.
-
-**Ce que le passage sur données réelles a corrigé du document étalon**, et qui
-ne doit pas revenir : les comptages en CITATIONS (« Wojo 92, Morning 91 »)
-viennent de `share_of_voice`, la colonne que la maison interdit — l'unité est
-la réponse (Wojo 86, Morning 83, Snapdesk 10). Et la SOMME des rivaux
-double-compte les réponses où ils coexistent : on affiche leur UNION (111 des
-134 réponses de Snapdesk). Le vocabulaire du marché est un calcul pur : le
-modèle PROPOSE les termes, le code les COMPTE (`compterLexique`, pluriels en
-`s`/`x` compris, unité réponse).
+**La VISIO est LE DOSSIER POSÉ SUR LA TABLE** (17/08/2026, direction
+définitive après cinq itérations, panel produit/design/vente/dataviz/
+honnêteté) : `/visio/$jeton`, 21 écrans en six actes (le verdict, vos
+acheteurs, pourquoi eux, le plan, vous seul, la décision). La règle qui
+tranche tout : **le PAPIER ne porte que ce qu'une machine a réellement
+écrit** (réponse intégrale, liste de sources ordonnée, verbatim, miroir),
+avec sa chaîne de possession (numéro de pièce, moteur, version FIGÉE du
+modèle, question, date) et ses coupes annoncées en mots comptés ;
+**l'ENCRE porte ce que NOUS avons compté**. Le papier est un événement,
+pas un thème. Le SENS de chaque écran ne s'affiche JAMAIS : c'est le texte
+oral du consultant (`ecran.sens`, consigné mais non rendu). Pièces
+maîtresses : la réponse intégrale où l'absence se voit (pastilles d'encre
+sur les concurrents, pied minium « 0 occurrence »), la liste de lecture
+avec « VOTRE PAGE » tamponnée à son rang, les six juges, l'invention du
+moteur sans sources, le llms.txt exposé en panneau vide, la pièce À VENIR
+de la remesure (panneau nu daté, seule pièce vide autorisée). Garde-fou
+structurel : un verdict « invention » n'est recevable que si le moteur n'a
+consulté AUCUNE source du scan. Son seul lien est « ouvrir la visio » sur
+`/equipe`. L'assemblage vit dans `lib/visio.ts` (fonctions pures :
+`reponseExposable`, `listeDeLecture`, `luSansEtreCite`, `compterLexique`,
+`nettoyerTexte`), l'écart aperçu → complet vient de `visioParJeton`.
 
 **L'ANALYSE COMPLÉMENTAIRE nourrit les deux écrans les plus vendeurs de la
 visio** (16/08/2026) : `lib/analyse.server.ts`, cache dans
@@ -430,7 +419,7 @@ du toolkit et les colonnes réelles vit dans
 
 ```bash
 pnpm install
-pnpm -r test                        # 284 tests
+pnpm -r test                        # 286 tests
 pnpm -r typecheck                   # paquets + fichiers du site importés par les tests
 npm --prefix apps/citari run typecheck   # TOUT le site (ajouté le 14/08/2026)
 npm --prefix apps/citari run build

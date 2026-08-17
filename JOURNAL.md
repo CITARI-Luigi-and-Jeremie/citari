@@ -5,6 +5,58 @@ d'une nouvelle session, après `CLAUDE.md`.
 
 ---
 
+## 2026-08-17 — Le dossier posé sur la table : la direction définitive
+
+Cinquième rejet le matin (« on n'exploite pas le potentiel du scan complet,
+même le scan gratuit donne plus d'information »). Le diagnostic qui a tout
+débloqué : le déroulé RACONTAIT des agrégats, jamais il ne MONTRAIT une
+vraie réponse, une vraie liste de sources. L'aperçu paraissait plus riche
+avec trois fois moins de données parce qu'il expose ses pièces.
+
+**La direction, adoptée à l'unanimité d'un panel de six agents (produit
+façon premiers principes, design keynote, closer B2B, dataviz NYT,
+honnêteté, synthèse COO) : LE DOSSIER POSÉ SUR LA TABLE.** Ses règles :
+
+- **Le PAPIER ne porte que ce qu'une machine a réellement écrit** (réponse,
+  liste de sources ordonnée, verbatim, miroir), reproduit mot pour mot.
+  **L'ENCRE porte ce que NOUS avons compté.** Le papier est un événement :
+  quand il apparaît, une machine a écrit ça.
+- **Chaîne de possession sur chaque pièce** : numéro, moteur, VERSION FIGÉE
+  du modèle, question k/24, date. Coupes annoncées en mots comptés
+  (« réponse intégrale 176 mots · extrait 142 »).
+- **Le SENS ne s'affiche plus jamais** : c'est le texte oral du consultant
+  (consigné dans `ecran.sens`, jamais rendu). L'écrire volait la parole et
+  fabriquait une diapositive. Le gabarit MESSAGE/DONNÉE/SENS survit comme
+  discipline d'écriture dans visio.ts, pas comme mise en page.
+
+**21 écrans, 6 actes.** Les pièces maîtresses : PIÈCE A (une vraie réponse
+INTÉGRALE, 11 marques en pastilles d'encre, pied minium « Snapdesk : 0
+occurrence » — le CEO se cherche dix secondes et ne se trouve pas), LE MUR
+(les 134 cases avec le rail des 24 questions), PIÈCE B (la liste de lecture
+réelle avec « VOTRE PAGE » tamponnée en position 1, face à la réponse qui ne
+le nomme pas), les SIX JUGES (six panneaux, six « SNAPDESK : ABSENT »),
+l'INVENTION (les prix inventés du Chat cernés de minium), le llms.txt
+exposé en panneau VIDE, et la PIÈCE À VENIR (le panneau nu de la remesure
+datée, seule pièce vide autorisée parce que promise, jamais simulée).
+
+**Le garde-fou structurel né de cette séance** : le verdict « invention »
+du modèle n'est recevable QUE si le moteur n'a consulté AUCUNE source de
+tout le scan (il parle de mémoire). Payé en direct : la v2 avait classé
+« invention » une phrase de Perplexity, qui source ses réponses (le fait
+venait peut-être du site du client). Le code rejette désormais ce cas ;
+Le Chat (zéro source sur tout le scan) passe, avec la ligne factuelle
+« ces chiffres sortent de sa mémoire, pas d'une page ». Et la pièce miroir
+accepte un panneau seul : un déroulé ne doit jamais perdre un écran parce
+qu'une extraction n'a pas trouvé de « confiance ».
+
+Nouvelles fonctions pures testées : `reponseExposable` (la réponse la plus
+riche en concurrents qui tient à l'écran), `listeDeLecture` (la réponse où
+le site client est le mieux placé dans les sources), `nettoyerTexte` (le
+markdown saute, les paragraphes restent : on reproduit NOTRE document de
+mesure, jamais l'interface d'un chatbot), `compterMots`, `phraseAvecTerme`.
+
+---
+
 ## 2026-08-17 — Le gabarit en trois blocs, et ce que la vraie base a corrigé
 
 Luigi a rédigé un document ÉTALON de 17 écrans, chacun en trois blocs : LE

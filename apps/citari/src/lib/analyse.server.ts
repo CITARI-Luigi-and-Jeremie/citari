@@ -32,7 +32,7 @@ export type AnalyseVerdict = {
   nature: "doute" | "confiance" | "invention";
 };
 export type AnalyseIa = {
-  version: 2;
+  version: 3;
   genere_le: string;
   identites: AnalyseIdentite[];
   rival: { nom: string; arguments: AnalyseArgument[] } | null;
@@ -193,7 +193,8 @@ async function extraireVerdicts(
 Pour chaque moteur, lis ce qu'il répond au sujet de « ${marque} » et relève UNE phrase, recopiée MOT POUR MOT (8 à 30 mots), celle qui tranche le plus :
 - "doute" : il se méfie, ne trouve rien, refuse de recommander ;
 - "confiance" : il recommande ou confirme l'entreprise ;
-- "invention" : il avance un fait précis et invérifiable (un prix, une adresse, une taille) qu'aucune source ne soutient.
+- "invention" : il avance un fait chiffré précis (un prix, une adresse, un effectif, un nombre de sites) sans citer d'où il le tient.
+Si un moteur avance un fait chiffré précis non sourcé, choisis "invention" en priorité, même s'il recommande par ailleurs.
 Une seule phrase par moteur, celle qui compte. Si le moteur ne tranche pas, ne mets pas de ligne pour lui.
 Réponds en JSON strict : {"verdicts":[{"moteur":"…","phrase":"…","nature":"doute|confiance|invention"}]}`,
     entrees.map((e) => `### ${e.moteur}\n${e.texte}`).join("\n\n"),
@@ -233,7 +234,7 @@ export async function analyseComplementaire(entree: {
   echantillon: string[];
 }): Promise<AnalyseIa | null> {
   const cache = entree.cacheExistant as AnalyseIa | null;
-  if (cache && cache.version === 2) return cache;
+  if (cache && cache.version === 3) return cache;
 
   try {
     const rival = adversairePrincipal(
@@ -265,7 +266,7 @@ export async function analyseComplementaire(entree: {
     ]);
 
     const analyse: AnalyseIa = {
-      version: 2,
+      version: 3,
       genere_le: new Date().toISOString(),
       identites,
       rival: rival && argumentsRival.length ? { nom: rival.nom, arguments: argumentsRival } : null,
