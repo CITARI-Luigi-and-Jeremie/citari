@@ -1019,6 +1019,12 @@ export async function visioParJeton(jeton: string) {
     classes: (scanBase.concurrent_classes ?? {}) as Record<string, string>,
     alias: (scanBase.brand_aliases ?? {}) as Record<string, string>,
     cacheExistant: scanBase.analyse_ia ?? null,
+    metier: (base.scan as { sector?: string }).sector ?? "",
+    questions: base.questions.map((q) => q.text),
+    echantillon: base.reponses
+      .filter((r) => !r.error && r.raw_text)
+      .slice(0, 6)
+      .map((r) => String(r.raw_text).slice(0, 900)),
   });
 
   return { ...base, apercu, analyse };

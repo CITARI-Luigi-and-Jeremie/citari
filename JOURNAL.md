@@ -5,6 +5,68 @@ d'une nouvelle session, après `CLAUDE.md`.
 
 ---
 
+## 2026-08-17 — Le gabarit en trois blocs, et ce que la vraie base a corrigé
+
+Luigi a rédigé un document ÉTALON de 17 écrans, chacun en trois blocs : LE
+MESSAGE (ce qu'il dit en visio), LA DONNÉE (brute, citée), CE QUE ÇA VEUT
+DIRE (l'enseignement). C'est le niveau de référence du diagnostic, et le
+gabarit est désormais dans le type : `Socle = {kicker, message, sens}`,
+commun à tous les écrans.
+
+**Quatre enquêtes ont passé chaque chiffre de l'étalon contre la vraie
+base.** Ce qu'elles ont corrigé, et qui vaut règle :
+
+- **« Wojo 92, Morning 91, Deskeo 88 » compte en CITATIONS**, recopié de
+  `share_of_voice` — la colonne que CLAUDE.md interdit. En réponses : 86,
+  83, 80. L'étalon s'était trompé sur Morning (92, pas 91) en oubliant la
+  variante `morning.fr`.
+- **« 271 mentions à eux trois » n'existe pas**, et la SOMME serait fausse
+  de toute façon : elle double-compte les réponses où deux rivaux
+  coexistent. Le chiffre honnête est leur UNION : **111 réponses sur 134**.
+  Il est aussi plus vendeur.
+- **« 6 questions de due diligence » : chiffre juste, étiquette fausse.**
+  6 = intention `probleme` (les pièges) ; la vraie pré-signature est
+  `confiance` = 3. L'écran affiche donc l'union « risque et vérification »,
+  9 sur 24.
+- **« La question n°1 du marché » invente une donnée** : `queries.rank` est
+  l'ordre de génération, pas un volume de recherche. Ne jamais l'écrire.
+- **« 15 à 50 collaborateurs » attribué à Claude est le texte de NOTRE
+  question**, pas son verbatim. Le pire accident possible en visio, parce
+  que le document imprimable affiche les deux côte à côte.
+
+**Le fait le plus fort du dossier n'était pas dans l'étalon** :
+`luSansEtreCite`. Sur les 7 réponses qui ont LU snapdesk.co, 4 ne nomment
+jamais la marque, et deux fois la page était la PREMIÈRE source lue. « Ils
+ont lu votre site en premier, et ils ne vous ont pas cité » : la preuve que
+la page a la bonne réponse, et que ce qui manque est le lien entre le texte
+et une entreprise nommable. C'est le pont vers le chantier 1, et c'est un
+calcul pur.
+
+**Le vocabulaire du marché : le modèle PROPOSE, le code COMPTE.** Nouvelle
+extraction `lexique` dans `analyse.server.ts` (v2) : le modèle relève les
+expressions qui structurent le choix, sans jamais avancer un chiffre ;
+`compterLexique` les compte sur les réponses, à l'unité réponse. Piège payé
+tout de suite : sans singularisation, « bureau opéré » ne voyait pas
+« bureaux opérés » et sous-comptait d'un cinquième. Deuxième extraction,
+`verdicts` : la phrase où chaque moteur tranche sur la marque (doute,
+confiance, invention), vérifiée mot pour mot par `citationProuvee`.
+
+**Le Sprint est enfin vendu.** L'écran ne dit plus « 5 contenus, 8
+citations » : il déplie les trois chantiers, ce que le dirigeant fait seul
+en face de ce que nous livrons, et la preuve (un email chaque vendredi
+pendant 4 semaines, rapport à J+30, contrôle interne à J+45 jamais présenté
+comme un score, remesure datée incluse, call de restitution même si le
+résultat est mauvais). Tout vient de `proposition.ts`, qui fait foi.
+
+**Design.** Grille `auto/1fr/auto` : le message commence toujours au même y,
+le sens finit toujours au même y, seule la donnée respire — c'est ce qui
+fait passer le déroulé de « suite de slides » à « instrument ». Unité
+`--u: min(1vw, 1.78vh)`, pour qu'un vidéoprojecteur ne déplace pas les
+rapports de taille. Minium rationné à un objet par écran : même le fil de
+progression est passé en papier.
+
+---
+
 ## 2026-08-16 — L'exclusivité se déclenche au contrat, pas au premier mail
 
 Le manuel de vente se contredisait depuis le début et personne ne l'avait vu :

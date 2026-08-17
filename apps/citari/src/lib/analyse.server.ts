@@ -21,11 +21,23 @@ import { adversairePrincipal, type LigneMention } from "@/lib/rapport-apercu";
 
 export type AnalyseIdentite = { moteur: string; metier: string; citation: string };
 export type AnalyseArgument = { resume: string; citation: string; moteur: string };
+/** Un terme du vocabulaire du marché, PROPOSÉ par le modèle et COMPTÉ par le
+ *  code : le modèle n'a pas le droit d'avancer un chiffre. */
+export type AnalyseTerme = { terme: string; camp: "vous" | "eux" | "neutre" };
+/** Ce qu'un moteur dit de la marque quand on lui donne son nom : la phrase
+ *  exacte, vérifiée présente dans le texte source. */
+export type AnalyseVerdict = {
+  moteur: string;
+  phrase: string;
+  nature: "doute" | "confiance" | "invention";
+};
 export type AnalyseIa = {
-  version: 1;
+  version: 2;
   genere_le: string;
   identites: AnalyseIdentite[];
   rival: { nom: string; arguments: AnalyseArgument[] } | null;
+  lexique: AnalyseTerme[];
+  verdicts: AnalyseVerdict[];
 };
 
 /** Normalisation tolérante pour vérifier qu'une citation vient bien du texte. */
@@ -131,6 +143,74 @@ Réponds en JSON strict : {"arguments":[{"resume":"…","citation":"…","moteur
 }
 
 /**
+ * LE VOCABULAIRE DU MARCHÉ. Le modèle PROPOSE les termes qui structurent le
+ * débat (il lit les questions et des réponses) ; il n'avance aucun chiffre.
+ * Le comptage est fait par le code, sur les réponses, à l'unité RÉPONSE :
+ * une réponse qui emploie trois fois le terme compte pour une.
+ */
+async function extraireLexique(
+  metier: string,
+  questions: string[],
+  echantillon: string[],
+): Promise<AnalyseTerme[]> {
+  if (!questions.length) return [];
+  const brut = await extraireJson(
+    `Tu es un lexicographe. Tu ne comptes RIEN, tu ne juges RIEN : tu relèves des expressions.
+Voici les questions posées à des IA sur le marché de « ${metier} », puis des extraits de leurs réponses.
+Relève 5 à 8 EXPRESSIONS (2 à 4 mots) qui structurent le choix sur ce marché : les catégories d'offre qui s'opposent, les termes que le client emploierait pour décrire ce qu'il achète. Recopie-les telles qu'elles apparaissent, au singulier, sans article.
+Pour chacune, "camp" : "vous" si l'expression désigne la catégorie d'offre moderne/flexible, "eux" si elle désigne l'alternative traditionnelle ou une catégorie voisine, "neutre" sinon.
+Réponds en JSON strict : {"termes":[{"terme":"…","camp":"vous|eux|neutre"}]}`,
+    `### questions\n${questions.join("\n")}\n\n### extraits de réponses\n${echantillon.join("\n\n").slice(0, 6000)}`,
+  );
+  const lignes = (brut as { termes?: AnalyseTerme[] })?.termes ?? [];
+  return lignes
+    .filter((l) => l && typeof l.terme === "string" && l.terme.trim().length >= 4)
+    .map((l) => ({
+      terme: l.terme.trim().slice(0, 40),
+      camp: (["vous", "eux", "neutre"] as const).includes(l.camp) ? l.camp : "neutre",
+    }))
+    .slice(0, 8);
+}
+
+/**
+ * LES VERDICTS DU MIROIR. Quand on donne le nom de la marque à un moteur, la
+ * phrase où il tranche : doute, confiance, ou fait inventé (un prix, une
+ * adresse). Chaque phrase est vérifiée présente dans le texte source.
+ */
+async function extraireVerdicts(
+  marque: string,
+  miroir: { moteur?: string; texte?: string }[],
+): Promise<AnalyseVerdict[]> {
+  const entrees = miroir
+    .filter((m): m is { moteur: string; texte: string } =>
+      Boolean(m?.moteur && typeof m?.texte === "string" && m.texte.length > 60),
+    )
+    .map((m) => ({ moteur: m.moteur, texte: m.texte.slice(0, 1800) }));
+  if (!entrees.length) return [];
+
+  const brut = await extraireJson(
+    `Tu es un extracteur. Tu n'inventes JAMAIS, tu recopies.
+Pour chaque moteur, lis ce qu'il répond au sujet de « ${marque} » et relève UNE phrase, recopiée MOT POUR MOT (8 à 30 mots), celle qui tranche le plus :
+- "doute" : il se méfie, ne trouve rien, refuse de recommander ;
+- "confiance" : il recommande ou confirme l'entreprise ;
+- "invention" : il avance un fait précis et invérifiable (un prix, une adresse, une taille) qu'aucune source ne soutient.
+Une seule phrase par moteur, celle qui compte. Si le moteur ne tranche pas, ne mets pas de ligne pour lui.
+Réponds en JSON strict : {"verdicts":[{"moteur":"…","phrase":"…","nature":"doute|confiance|invention"}]}`,
+    entrees.map((e) => `### ${e.moteur}\n${e.texte}`).join("\n\n"),
+  );
+
+  const lignes = (brut as { verdicts?: AnalyseVerdict[] })?.verdicts ?? [];
+  return lignes
+    .filter((l) => l && typeof l.moteur === "string" && typeof l.phrase === "string")
+    .filter((l) => (["doute", "confiance", "invention"] as const).includes(l.nature))
+    .filter((l) => {
+      const source = entrees.find((e) => e.moteur === l.moteur)?.texte ?? "";
+      return citationProuvee(l.phrase, source);
+    })
+    .slice(0, 6);
+}
+
+/**
  * Calcule (ou relit) l'analyse complémentaire d'un scan. Idempotente : le
  * résultat est mis en cache dans `scans.analyse_ia`, l'extraction ne tourne
  * qu'une fois par scan. En cas d'échec du modèle, on renvoie null et on
@@ -145,9 +225,15 @@ export async function analyseComplementaire(entree: {
   classes: Record<string, string>;
   alias: Record<string, string>;
   cacheExistant: unknown;
+  /** Le métier déduit, pour situer le lexique. */
+  metier: string;
+  /** Les questions posées, texte brut. */
+  questions: string[];
+  /** Quelques réponses réelles, pour que le lexique vienne du terrain. */
+  echantillon: string[];
 }): Promise<AnalyseIa | null> {
   const cache = entree.cacheExistant as AnalyseIa | null;
-  if (cache && cache.version === 1) return cache;
+  if (cache && cache.version === 2) return cache;
 
   try {
     const rival = adversairePrincipal(
@@ -170,16 +256,21 @@ export async function analyseComplementaire(entree: {
           .map((m) => ({ moteur: m.engine, texte: m.verbatim as string }))
       : [];
 
-    const [identites, argumentsRival] = await Promise.all([
-      extraireIdentites(entree.marque, Array.isArray(entree.miroir) ? entree.miroir : []),
+    const miroir = Array.isArray(entree.miroir) ? entree.miroir : [];
+    const [identites, argumentsRival, lexique, verdicts] = await Promise.all([
+      extraireIdentites(entree.marque, miroir),
       rival ? extraireArgumentsRival(rival.nom, verbatimsRival) : Promise.resolve([]),
+      extraireLexique(entree.metier, entree.questions, entree.echantillon),
+      extraireVerdicts(entree.marque, miroir),
     ]);
 
     const analyse: AnalyseIa = {
-      version: 1,
+      version: 2,
       genere_le: new Date().toISOString(),
       identites,
       rival: rival && argumentsRival.length ? { nom: rival.nom, arguments: argumentsRival } : null,
+      lexique,
+      verdicts,
     };
 
     await supabaseAdmin.from("scans").update({ analyse_ia: analyse }).eq("id", entree.scanId);

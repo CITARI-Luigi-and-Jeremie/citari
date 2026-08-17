@@ -509,6 +509,74 @@ describe("la visio : l'assemblage du support de présentation", () => {
     expect(dateRemesure("2026-08-15T21:13:57+00:00")).toBe("13 novembre 2026");
   });
 
+  it("compte le lexique à l'unité réponse, pluriels compris, termes absents écartés", async () => {
+    const { compterLexique } = await import("@/lib/visio");
+    const r = (id: string, texte: string | null, error: string | null = null) => ({
+      id,
+      query_id: "q1",
+      engine: "ChatGPT",
+      raw_text: texte,
+      error,
+      sources: [],
+    });
+    const reponses = [
+      // Trois emplois dans UNE réponse comptent pour une seule.
+      r("a", "Le bureau opéré, le bureau opéré, encore le bureau opéré."),
+      // Le pluriel doit être vu : c'est le bug qui sous-comptait d'un cinquième.
+      r("b", "Les bureaux opérés sont une alternative au bail 3/6/9."),
+      // Une réponse en erreur ne compte dans aucun dénominateur.
+      r("c", "bureau opéré partout", "indisponible"),
+    ];
+    const questions = [
+      { id: "q1", rank: 1, text: "Bureau opéré ou bail commercial ?", intent: "comparative" },
+    ];
+    const compte = compterLexique(
+      [
+        { terme: "bureau opéré", camp: "vous" },
+        { terme: "bail 3/6/9", camp: "eux" },
+        { terme: "flex office", camp: "neutre" },
+      ],
+      reponses,
+      questions,
+    );
+    expect(compte.map((c) => [c.terme, c.reponses, c.questions])).toEqual([
+      ["bureau opéré", 2, 1],
+      ["bail 3/6/9", 1, 0],
+    ]);
+  });
+
+  it("relève le site du client lu en source sans que la réponse le cite", async () => {
+    const { luSansEtreCite } = await import("@/lib/visio");
+    const rep = (id: string, urls: string[], error: string | null = null) => ({
+      id,
+      query_id: "q1",
+      engine: "Perplexity",
+      raw_text: error ? null : "…",
+      error,
+      sources: urls.map((url) => ({ url })),
+    });
+    const reponses = [
+      // Le site est PREMIÈRE source, et la marque n'est pas citée.
+      rep("r1", ["https://monsite.fr/guide", "https://ubiq.fr/x"]),
+      // Lu en 3e position, et cité : ne compte pas comme manque.
+      rep("r2", ["https://ubiq.fr/a", "https://wojo.com/b", "https://monsite.fr/c"]),
+      // Réponse en erreur : hors comptage.
+      rep("r3", ["https://monsite.fr/d"], "indisponible"),
+    ];
+    const mentions = [
+      { response_id: "r2", is_target: true, brand: "Moi", engine: "Perplexity", query_id: "q1" },
+    ] as never[];
+    const vu = luSansEtreCite(reponses, mentions, "https://www.monsite.fr", [
+      { id: "q1", rank: 1, text: "Une question", intent: "comparative" },
+    ]);
+    expect(vu?.hote).toBe("monsite.fr");
+    expect(vu?.reponsesQuiLisent).toBe(2);
+    expect(vu?.premiereSource).toBe(1);
+    expect(vu?.sansCitation).toEqual([
+      { question: "Une question", moteur: "Perplexity", rang: 1, premiere: true },
+    ]);
+  });
+
   it("relève les sites lus sur UNE question, réponses en erreur exclues", async () => {
     const { sourcesParQuestion } = await import("@/lib/visio");
     const r = (query_id: string, error: string | null, urls: string[]) => ({

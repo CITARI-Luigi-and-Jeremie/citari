@@ -133,34 +133,38 @@ deux endroits est le piège déjà payé avec les deux comparatifs. En `complet`
 moteur qu'on vient d'interroger et de facturer serait un mensonge : ne jamais
 rendre cet aiguillage configurable.
 
-**La VISIO est le troisième artefact du scan complet** (16/08/2026, théâtre
-sombre puis refonte de CONTENU le soir même, architecture passée au panel
-de juges et validée par Luigi) : `/visio/$jeton`, plein écran SUR L'ENCRE,
-**20 écrans en SIX actes** (le verdict, vos acheteurs, pourquoi eux, le
-plan, cette semaine, la décision), pilotés aux flèches ou à la
-télécommande. C'est le support que LUIGI commente en partage d'écran pour
-vendre le Sprint ; son seul lien est le bouton « ouvrir la visio » de
-`/equipe`, derrière le mot de passe admin (17/08/2026 : sans lui, personne
-ne trouvait l'adresse — « nulle part » avait été pris trop à la lettre).
-Aucune surface publique ne la mentionne. La règle au-dessus des
-autres : chaque écran porte une donnée propre à CE prospect ET un
-enseignement stratégique, jamais une reformulation du chiffre ; zéro écran
-de méthode, zéro promesse de résultat (la remesure datée est le seul
-engagement, et elle FERME le déroulé, après l'offre). Pièces maîtresses :
-la règle du jeu annoncée AVANT le verdict (« si votre score est bon, on ne
-vous vend rien »), le score aux DEUX protocoles étiquetés (l'écart
-mémoire/web n'est pas à périmètre constant : on l'affiche tel quel), la
-carte des 134 réponses (anti-« montage d'extraits »), les moments d'achat
-avec leur score, le classement unifié des sources lues (annuaire > site
-concurrent > votre site, la porte robots innocentée), le pivot « cité 8
-fois moins, recommandé au même taux » (chaque moitié gardée par sa
-donnée), le retournement du 86 (« 48 réponses se jouent sans Wojo »), les
-3 gestes OFFERTS dédupliqués des livrables du Sprint, et le Sprint ligne
-par ligne (constat mesuré → livrable). Sur l'encre le minium (éclairci au
-`color-mix`) reste réservé au manque. `?places=N` affiche les places
-restantes du mois : un chiffre réel saisi par Luigi, jamais déduit.
-L'assemblage vit dans `lib/visio.ts`, l'écart aperçu → complet vient de
-`visioParJeton`.
+**La VISIO est le troisième artefact du scan complet**, et son contenu suit
+un GABARIT EN TROIS BLOCS depuis le 17/08/2026 (document étalon de Luigi,
+architecture passée au panel de juges) : chaque écran porte LE MESSAGE (ce
+que le consultant dit à voix haute), LA DONNÉE (brute, citée, vérifiable) et
+LE SENS (l'enseignement stratégique, jamais une paraphrase du chiffre). Un
+écran sans les trois n'est pas terminé ; un écran dont la donnée manque sort
+du déroulé. `/visio/$jeton`, plein écran sur l'encre, 18 écrans en six actes
+(le verdict, vos acheteurs, pourquoi eux, le plan, vous seul, la décision),
+pilotés aux flèches ou à la télécommande. Son seul lien est le bouton
+« ouvrir la visio » de `/equipe`, derrière le mot de passe admin.
+
+Trois règles de composition, apprises à l'écran : la grille est
+`auto/1fr/auto` (le message commence toujours au même y, le sens finit
+toujours au même y, seule la donnée respire) ; l'unité de taille est
+`--u: min(1vw, 1.78vh)` pour qu'un vidéoprojecteur ne déplace pas les
+rapports ; le minium est rationné à UN objet par écran et ne dit que le
+manque (même le fil de progression est en papier).
+
+**L'écran qui fait taire une salle** : `luSansEtreCite`. Les réponses qui ont
+LU le site du client sans le nommer, avec le rang de la source. Sur Snapdesk :
+7 réponses lisent snapdesk.co, 4 ne le citent pas, et deux fois la page était
+la PREMIÈRE source lue. C'est le pont vers le chantier 1 : la page a la bonne
+réponse, il manque ce qui permet à une machine de nommer l'entreprise.
+
+**Ce que le passage sur données réelles a corrigé du document étalon**, et qui
+ne doit pas revenir : les comptages en CITATIONS (« Wojo 92, Morning 91 »)
+viennent de `share_of_voice`, la colonne que la maison interdit — l'unité est
+la réponse (Wojo 86, Morning 83, Snapdesk 10). Et la SOMME des rivaux
+double-compte les réponses où ils coexistent : on affiche leur UNION (111 des
+134 réponses de Snapdesk). Le vocabulaire du marché est un calcul pur : le
+modèle PROPOSE les termes, le code les COMPTE (`compterLexique`, pluriels en
+`s`/`x` compris, unité réponse).
 
 **L'ANALYSE COMPLÉMENTAIRE nourrit les deux écrans les plus vendeurs de la
 visio** (16/08/2026) : `lib/analyse.server.ts`, cache dans
@@ -426,7 +430,7 @@ du toolkit et les colonnes réelles vit dans
 
 ```bash
 pnpm install
-pnpm -r test                        # 277 tests
+pnpm -r test                        # 284 tests
 pnpm -r typecheck                   # paquets + fichiers du site importés par les tests
 npm --prefix apps/citari run typecheck   # TOUT le site (ajouté le 14/08/2026)
 npm --prefix apps/citari run build
