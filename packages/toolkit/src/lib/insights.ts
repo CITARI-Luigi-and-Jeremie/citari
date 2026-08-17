@@ -415,3 +415,44 @@ export function coupePhrase(texte: string, max: number): string {
   const dernierEspace = fenetre.lastIndexOf(" ");
   return (dernierEspace > max * 0.6 ? fenetre.slice(0, dernierEspace) : fenetre).replace(/[,;:]$/, "") + "…";
 }
+
+/** Comparaison souple : sans casse ni accents, pour chercher un nom dans un texte. */
+function aplati(s: string): string {
+  return s
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
+}
+
+/**
+ * L'extrait qui contient RÉELLEMENT le nom du concurrent.
+ *
+ * Le défaut corrigé ici : la citation partait du début de la réponse et
+ * s'arrêtait à 320 caractères, or les moteurs posent d'abord le contexte et
+ * ne nomment qu'ensuite. Le mail affirmait donc « Dougs est nommé » sous une
+ * citation où Dougs n'apparaissait pas. Une preuve qui ne prouve pas est pire
+ * que pas de preuve : c'est la seule phrase du message que le prospect peut
+ * vérifier d'un coup d'œil.
+ *
+ * On garde la tête de réponse quand elle suffit, sinon on ouvre la fenêtre à
+ * l'endroit où le nom apparaît, en démarrant sur une frontière de phrase.
+ */
+export function citationAutourDe(texte: string, marque: string, max = 320): string {
+  const tete = coupePhrase(texte, max);
+  if (aplati(tete).includes(aplati(marque))) return tete;
+
+  const propre = coupePhrase(texte, Number.MAX_SAFE_INTEGER);
+  const pos = aplati(propre).indexOf(aplati(marque));
+  if (pos < 0) return tete;
+
+  const planche = Math.max(0, pos - Math.floor(max / 3));
+  const finPhrase = propre.lastIndexOf(". ", pos);
+  const debut = finPhrase >= planche ? finPhrase + 2 : planche;
+  const morceau = coupePhrase(propre.slice(debut), max);
+  return debut > 0 ? `…${morceau}` : morceau;
+}
+
+/** Le nom figure-t-il dans ce texte, accents et casse mis de côté ? */
+export function contientNom(texte: string, nom: string): boolean {
+  return aplati(texte).includes(aplati(nom));
+}

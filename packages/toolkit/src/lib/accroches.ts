@@ -1,4 +1,4 @@
-import { coupePhrase, pct, type ScanInsights } from "./insights.js";
+import { citationAutourDe, contientNom, coupePhrase, pct, type ScanInsights } from "./insights.js";
 
 /**
  * Ce qui, dans un scan, donne le plus envie d'appeler.
@@ -102,7 +102,16 @@ export function accrochesClassees(i: ScanInsights): Accroche[] {
       sujet: `La phrase où une IA recommande votre concurrent`,
       // La coupe finit sur une phrase : un « mot pour mot » tronqué en plein
       // mot ruine exactement ce qu'il prétend prouver.
-      ouverture: `Voici ce que ${i.killerQuote.engine} répond, mot pour mot, à la question « ${i.killerQuote.query} » :\n\n« ${coupePhrase(i.killerQuote.excerpt, 300)} »\n\n${i.killerQuote.competitor} est nommé. ${i.brand} n'apparaît pas.`,
+      // L'extrait s'ouvre là où le concurrent est nommé : sinon la citation
+      // s'arrête avant lui et la phrase qui suit affirme une preuve que le
+      // lecteur ne voit pas. Même règle que dans emails.ts, même fonction.
+      ouverture: (() => {
+        const extrait = citationAutourDe(i.killerQuote.excerpt, i.killerQuote.competitor, 300);
+        const constat = contientNom(extrait, i.killerQuote.competitor)
+          ? `${i.killerQuote.competitor} est nommé. ${i.brand} n'apparaît pas.`
+          : `${i.brand} n'y apparaît pas.`;
+        return `Voici ce que ${i.killerQuote.engine} répond, mot pour mot, à la question « ${i.killerQuote.query} » :\n\n« ${extrait} »\n\n${constat}`;
+      })(),
     });
   }
 

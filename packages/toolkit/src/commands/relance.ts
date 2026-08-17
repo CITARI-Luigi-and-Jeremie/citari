@@ -40,7 +40,7 @@ export async function relance(leadRef: string, opts: { all?: boolean } = {}): Pr
 
   for (const lead of leads) {
     const insights = await buildScanInsights(lead.scan_id);
-    const emails = tousLesEmails(insights);
+    const emails = tousLesEmails(insights, { prenom: lead.first_name });
     const createdAt = new Date(lead.created_at ?? Date.now());
 
     // Le classement des accroches est affiché avant les messages : c'est la

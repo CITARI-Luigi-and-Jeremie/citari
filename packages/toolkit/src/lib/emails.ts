@@ -1,4 +1,4 @@
-import { coupePhrase, pct, type ScanInsights } from "./insights.js";
+import { citationAutourDe, contientNom, coupePhrase, pct, type ScanInsights } from "./insights.js";
 import { meilleureAccroche, type TypeAccroche } from "./accroches.js";
 
 /**
@@ -72,6 +72,22 @@ export function situationDuScan(i: ScanInsights): Situation {
 const lienRapport = (i: ScanInsights) =>
   i.reportUrl ? `Votre rapport complet est ici :\n${i.reportUrl}` : "";
 
+/** Ce qu'on sait de la personne à qui on écrit. Rien n'est obligatoire. */
+export type Contact = { prenom?: string | null };
+
+/**
+ * « Bonjour Mickael, » plutôt que « Bonjour, ».
+ *
+ * Le manuel de vente prévoyait « Bonjour {prénom} » depuis le début, mais la
+ * salutation était codée en dur : les quarante messages d'un lot sortaient
+ * tous anonymes. Le prénom n'est jamais deviné — sans lui en base, on garde
+ * la formule neutre, qui reste correcte.
+ */
+function salutation(contact?: Contact): string {
+  const prenom = (contact?.prenom ?? "").trim();
+  return prenom ? `Bonjour ${prenom},` : `Bonjour,`;
+}
+
 /** Le concurrent nommé, ou une formule neutre si aucun ne ressort. */
 const rival = (i: ScanInsights) => i.topCompetitor?.name ?? "vos concurrents";
 
@@ -98,12 +114,15 @@ function citation(texte: string, max = 320): string {
 function verbatim(i: ScanInsights): string {
   if (!i.killerQuote) return "";
   const { engine, query, excerpt, competitor } = i.killerQuote;
-  const extrait = citation(excerpt);
+  const extrait = citationAutourDe(excerpt, competitor);
+  // Le nom reste introuvable (le moteur l'écrit autrement, ou il vient d'une
+  // autre réponse) : on affirme seulement ce que la citation montre.
+  const prouve = contientNom(extrait, competitor);
   return `Voici ce que ${engine} répond, mot pour mot, à la question « ${query} » :
 
 « ${extrait} »
 
-${competitor} est nommé. ${i.brand} n'apparaît pas.`;
+${prouve ? `${competitor} est nommé. ${i.brand} n'apparaît pas.` : `${i.brand} n'y apparaît pas.`}`;
 }
 
 /**
@@ -259,7 +278,7 @@ const bloc = (...parties: string[]) => parties.filter((p) => p.trim()).join("\n\
  * et le prospect vient de voir son score. Deux jours plus tard, l'émotion est
  * retombée et l'ouverture avec elle.
  */
-export function emailImmediat(i: ScanInsights): Email {
+export function emailImmediat(i: ScanInsights, contact?: Contact): Email {
   const situation = situationDuScan(i);
   const base = { step: 0, offsetDays: 0 };
 
@@ -278,7 +297,7 @@ export function emailImmediat(i: ScanInsights): Email {
       ...base,
       subject: a?.sujet ?? `${i.brand} : ${i.score}/100 de visibilité dans les IA`,
       body: bloc(
-        `Bonjour,`,
+        salutation(contact),
         `Votre scan est terminé : ${i.score}/100.`,
         lienRapport(i),
         a?.ouverture ?? "",
@@ -341,7 +360,7 @@ export function emailImmediat(i: ScanInsights): Email {
     ...base,
     subject: `${i.brand} : ${i.score}/100, et je n'ai rien à vous vendre`,
     body: bloc(
-      `Bonjour,`,
+      salutation(contact),
       `Votre scan est terminé : ${i.score}/100.`,
       lienRapport(i),
       `Je vais être direct : c'est un bon score, et je n'ai rien à vous vendre.`,
@@ -369,7 +388,7 @@ export function emailImmediat(i: ScanInsights): Email {
  * répéter le même argument plus fort ne convainc personne. Chacune de ces trois
  * relances apporte donc autre chose, et la dernière sait s'arrêter.
  */
-export function emailsDeRelance(i: ScanInsights): Email[] {
+export function emailsDeRelance(i: ScanInsights, contact?: Contact): Email[] {
   const situation = situationDuScan(i);
 
   // Aucune relance quand le score est bon.
@@ -390,7 +409,7 @@ export function emailsDeRelance(i: ScanInsights): Email[] {
       offsetDays: 2,
       subject: `Une question sur ${i.brand}`,
       body: bloc(
-        `Bonjour,`,
+        salutation(contact),
         `Vous avez mesuré la visibilité IA de ${i.brand} il y a deux jours.`,
         situation === "bloque"
           ? `Une question, sincèrement : saviez-vous que votre site interdisait l'accès à ${i.botsBloques[0]} ?`
@@ -409,7 +428,7 @@ export function emailsDeRelance(i: ScanInsights): Email[] {
       offsetDays: 7,
       subject: `Une action à faire vous-même pour ${i.brand}`,
       body: bloc(
-        `Bonjour,`,
+        salutation(contact),
         `Je reviens sans relancer sur notre offre, avec quelque chose que vous pouvez faire sans nous.`,
         i.botsBloques.length > 0
           ? `Priorité absolue dans votre cas : votre robots.txt bloque ${i.botsBloques.join(", ")}. Tant que ce n'est pas levé, aucun autre effort ne peut porter. Dix minutes pour votre développeur.`
@@ -433,7 +452,7 @@ export function emailsDeRelance(i: ScanInsights): Email[] {
       offsetDays: 21,
       subject: `Je clos votre dossier ${i.brand} ?`,
       body: bloc(
-        `Bonjour,`,
+        salutation(contact),
         `Sans nouvelles, je pars du principe que le sujet n'est pas prioritaire en ce moment, ce qui est parfaitement légitime.`,
         `Je clos donc votre dossier, sans relance supplémentaire. Trois choses avant :`,
         `1. Votre rapport reste accessible${i.reportUrl ? ` : ${i.reportUrl}` : ""}.
@@ -450,8 +469,8 @@ Vous ne recevrez plus d'email de ma part concernant ce scan.`,
 }
 
 /** Les quatre messages d'un lead, dans l'ordre. */
-export function tousLesEmails(i: ScanInsights): Email[] {
-  return [emailImmediat(i), ...emailsDeRelance(i)];
+export function tousLesEmails(i: ScanInsights, contact?: Contact): Email[] {
+  return [emailImmediat(i, contact), ...emailsDeRelance(i, contact)];
 }
 
 /* ─────────────────────────── la version HTML ─────────────────────────── */

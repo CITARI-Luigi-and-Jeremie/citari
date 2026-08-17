@@ -274,3 +274,56 @@ describe("les blocs de personnalisation du 14/08", () => {
     expect(a.ouverture).toContain("Sur les 40 réponses obtenues, Cabinet Vaurel apparaît dans 11. In Extenso, dans 27.");
   });
 });
+
+describe("le verbatim doit contenir le nom qu'il affirme", () => {
+  /** Les moteurs posent le contexte d'abord et ne nomment qu'ensuite. */
+  const longuePreface = (marque: string) =>
+    "Pour régulariser rapidement, il faut d'abord faire un diagnostic flash avec un expert-comptable, puis traiter les exercices du plus ancien au plus récent en récupérant toutes les pièces et relevés bancaires, avant de déposer les liasses et déclarations manquantes. Concrètement, demandez au cabinet un calendrier écrit et un devis ferme. " +
+    `Sur ce type de dossier, ${marque} est souvent cité pour sa réactivité.`;
+
+  it("ouvre la fenêtre à l'endroit du concurrent quand il arrive après la coupe", () => {
+    const e = emailImmediat(
+      scan({
+        killerQuote: { query: "Comment régulariser un retard ?", engine: "Perplexity", excerpt: longuePreface("Dougs"), competitor: "Dougs" },
+      }),
+    );
+    // Le nom doit figurer DANS la citation, pas seulement dans l'affirmation.
+    const citation = e.body.split("«")[2]?.split("»")[0] ?? "";
+    expect(citation).toContain("Dougs");
+    expect(e.body).toContain("Dougs est nommé.");
+  });
+
+  it("n'affirme pas qu'un concurrent est nommé quand l'extrait ne le contient pas", () => {
+    const e = emailImmediat(
+      scan({
+        killerQuote: { query: "Quel cabinet ?", engine: "Claude", excerpt: "Une réponse entièrement générique, sans le moindre nom propre dedans.", competitor: "Numbr" },
+      }),
+    );
+    expect(e.body).not.toContain("Numbr est nommé.");
+    expect(e.body).toContain("n'y apparaît pas.");
+  });
+
+  it("garde la tête de réponse quand le nom y figure déjà", () => {
+    const e = emailImmediat(
+      scan({
+        killerQuote: { query: "Quel cabinet ?", engine: "Claude", excerpt: "Numbr Lyon est très bien noté sur ce segment.", competitor: "Numbr" },
+      }),
+    );
+    expect(e.body).not.toContain("…Numbr");
+  });
+});
+
+describe("la salutation", () => {
+  it("nomme le dirigeant quand son prénom est connu", () => {
+    expect(emailImmediat(scan(), { prenom: "Mickael" }).body.startsWith("Bonjour Mickael,")).toBe(true);
+    for (const e of emailsDeRelance(scan(), { prenom: "Mickael" })) {
+      expect(e.body).toContain("Bonjour Mickael,");
+    }
+  });
+
+  it("reste neutre sans prénom, et ne laisse jamais d'espace en trop", () => {
+    for (const contact of [undefined, { prenom: null }, { prenom: "  " }]) {
+      expect(emailImmediat(scan(), contact).body.startsWith("Bonjour,")).toBe(true);
+    }
+  });
+});
