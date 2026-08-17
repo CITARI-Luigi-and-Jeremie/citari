@@ -504,6 +504,24 @@ describe("la visio : l'assemblage du support de présentation", () => {
     expect(citables.map((c) => c.hote)).toEqual(["ubiq.fr", "bureauxlocaux.com"]);
   });
 
+  it("n'offre jamais une adresse d'infrastructure comme cible de citation", async () => {
+    const { domainesCitables, estInfrastructure } = await import("@/lib/visio");
+    expect(estInfrastructure("vertexaisearch.cloud.google.com")).toBe(true);
+    expect(estInfrastructure("webcache.googleusercontent.com")).toBe(true);
+    expect(estInfrastructure("ubiq.fr")).toBe(false);
+    // Un proxy de recherche lu 40 fois ne devient jamais une cible : on ne
+    // s'y inscrit pas, et le proposer en visio ruine la liste entière.
+    const citables = domainesCitables(
+      [
+        { hote: "vertexaisearch.cloud.google.com", lectures: 40, votreSite: false },
+        { hote: "ubiq.fr", lectures: 3, votreSite: false },
+      ],
+      {},
+      {},
+    );
+    expect(citables.map((c) => c.hote)).toEqual(["ubiq.fr"]);
+  });
+
   it("la remesure se calcule depuis la date du scan, jamais depuis l'horloge", async () => {
     const { dateRemesure } = await import("@/lib/visio");
     expect(dateRemesure("2026-08-15T21:13:57+00:00")).toBe("13 novembre 2026");

@@ -380,7 +380,7 @@ function Piece({ ecran }: { ecran: EcranVisio }) {
           <div className="shrink-0">
             <div
               className="num leading-[0.8] tracking-[-0.06em]"
-              style={{ fontSize: "calc(var(--u) * 15)" }}
+              style={{ fontSize: "calc(var(--u) * 12.5)" }}
             >
               <Compteur valeur={ecran.score} />
             </div>
@@ -411,7 +411,7 @@ function Piece({ ecran }: { ecran: EcranVisio }) {
     /* ------------------------------------------- 02 · la pièce A */
     case "piece-reponse":
       return (
-        <div className="mx-auto max-w-[62vw]">
+        <div className="max-w-[62vw]">
           <p className="serif-roman mb-[1.2vh] text-ink-2" style={{ fontSize: "calc(var(--u) * 1.15)" }}>
             «{NBSP}{ecran.question}{NBSP}»
           </p>
@@ -442,7 +442,7 @@ function Piece({ ecran }: { ecran: EcranVisio }) {
     /* ------------------------------------------ 04 · l'inventaire */
     case "inventaire":
       return (
-        <div className="mx-auto max-w-[56vw]">
+        <div className="max-w-[56vw]">
           {ecran.tranches.map((t) => (
             <div
               key={t.etiquette}
@@ -461,7 +461,7 @@ function Piece({ ecran }: { ecran: EcranVisio }) {
     /* -------------------------------------------- 05 · les moments */
     case "moments":
       return (
-        <div className="mx-auto max-w-[64vw]">
+        <div className="max-w-[64vw]">
           {ecran.lignes.map((l) => (
             <div key={l.titre} className="border-b border-rule py-[1.6vh]">
               <div className="flex items-baseline justify-between gap-6">
@@ -520,7 +520,7 @@ function Piece({ ecran }: { ecran: EcranVisio }) {
     /* ------------------------------------------------ 07 · le risque */
     case "risque":
       return (
-        <div className="mx-auto max-w-[64vw]">
+        <div className="max-w-[64vw]">
           <Panneau possession={ecran.possession}>
             {ecran.questions.map((q) => (
               <div
@@ -551,7 +551,7 @@ function Piece({ ecran }: { ecran: EcranVisio }) {
     /* ------------------------------------------------ 08 · le tally */
     case "tally":
       return (
-        <div className="mx-auto max-w-[70vw]">
+        <div className="max-w-[70vw]">
           {ecran.lignes.map((l) => (
             <div key={l.nom} className="flex items-center gap-[2vw] border-b border-rule py-[1.6vh]">
               <span
@@ -580,7 +580,7 @@ function Piece({ ecran }: { ecran: EcranVisio }) {
     /* -------------------------------------------- 09 · la pièce B */
     case "piece-lecture":
       return (
-        <div className="mx-auto flex max-w-[80vw] items-stretch gap-[2vw]">
+        <div className="flex max-w-[80vw] items-stretch gap-[2vw]">
           <Panneau
             className="w-[38vw] shrink-0"
             possession={ecran.possessionGauche}
@@ -628,7 +628,7 @@ function Piece({ ecran }: { ecran: EcranVisio }) {
     /* --------------------------------------- 10 · la bibliothèque */
     case "bibliotheque":
       return (
-        <div className="mx-auto max-w-[66vw]">
+        <div className="max-w-[66vw]">
           {ecran.lignes.map((l) => (
             <div key={l.hote} className="flex items-center gap-[1.5vw] border-b border-rule py-[1vh]">
               <span
@@ -661,7 +661,10 @@ function Piece({ ecran }: { ecran: EcranVisio }) {
     /* -------------------------------------------- 11 · la pièce C */
     case "piece-miroir":
       return (
-        <div className="mx-auto flex max-w-[80vw] items-stretch gap-[2vw]">
+        <div
+          className="flex items-stretch gap-[2vw]"
+          style={{ maxWidth: ecran.bon && ecran.mauvais ? "80vw" : "46vw" }}
+        >
           {[ecran.bon, ecran.mauvais].map((cote, i) =>
             cote ? (
               <Panneau
@@ -693,7 +696,7 @@ function Piece({ ecran }: { ecran: EcranVisio }) {
     /* --------------------------------------- 12 · l'invention */
     case "piece-invention":
       return (
-        <div className="mx-auto max-w-[46vw]">
+        <div className="max-w-[46vw]">
           <Panneau
             possession={ecran.possession}
             pied={<span>extrait · question miroir, hors méthodologie</span>}
@@ -722,7 +725,10 @@ function Piece({ ecran }: { ecran: EcranVisio }) {
     /* ----------------------------------------- 13 · les percées */
     case "percees":
       return (
-        <div className="mx-auto flex max-w-[80vw] items-stretch gap-[1.6vw]">
+        <div
+          className="flex items-stretch gap-[1.6vw]"
+          style={{ maxWidth: `${Math.min(80, ecran.cartes.length * 26)}vw` }}
+        >
           {ecran.cartes.map((c, i) => (
             <Panneau
               key={i}
@@ -756,7 +762,7 @@ function Piece({ ecran }: { ecran: EcranVisio }) {
     /* ----------------------------------- 15 · le bon de commande */
     case "bon-commande":
       return (
-        <div className="mx-auto max-w-[60vw]">
+        <div className="max-w-[60vw]">
           <Panneau possession={ecran.possession}>
             {ecran.pages.map((p, i) => (
               <div
@@ -782,28 +788,38 @@ function Piece({ ecran }: { ecran: EcranVisio }) {
       );
 
     /* -------------------------------------- 16 · les portes du sprint */
+    // Volontairement DIFFÉRENT de la bibliothèque (écran 10) : là on lisait
+    // un classement en traits, ici on lit un bordereau de travail. Rejouer
+    // le même graphique deux fois donnait au déroulé son air de redite.
     case "portes-sprint":
       return (
-        <div className="mx-auto max-w-[60vw]">
-          {ecran.lignes.map((l) => (
-            <div key={l.hote} className="flex items-center gap-[1.5vw] border-b border-rule py-[1.1vh]">
-              <span className="num w-[16vw] shrink-0 truncate" style={{ fontSize: "calc(var(--u) * 1.15)" }}>
-                {l.hote}
-              </span>
-              <span className="min-w-0 flex-1">
-                <Traits n={l.lectures} />
-              </span>
-              <span className="num w-[4ch] shrink-0 text-right text-[12px] tabular-nums">{l.lectures}</span>
-            </div>
-          ))}
-          <p className="num mt-2 text-[11px] text-ink-3">{ecran.note}</p>
+        <div className="max-w-[72vw]">
+          <div className="grid grid-cols-2 gap-x-[3vw]">
+            {ecran.lignes.map((l, i) => (
+              <div
+                key={l.hote}
+                className="flex items-baseline gap-[1vw] border-b border-rule py-[1.5vh]"
+              >
+                <span className="num w-[3ch] shrink-0 text-ink-3" style={{ fontSize: "max(10px, calc(var(--u) * 0.58))" }}>
+                  {String(i + 1).padStart(2, "0")}
+                </span>
+                <span className="num min-w-0 flex-1 truncate" style={{ fontSize: "calc(var(--u) * 1.2)" }}>
+                  {l.hote}
+                </span>
+                <span className="num shrink-0 text-ink-3" style={{ fontSize: "max(10px, calc(var(--u) * 0.58))" }}>
+                  {l.lectures} lecture{l.lectures > 1 ? "s" : ""}
+                </span>
+              </div>
+            ))}
+          </div>
+          <p className="v-source">{ecran.note} · chaque inscription obtenue est recrawlée</p>
         </div>
       );
 
     /* ------------------------------------------------ 17 · les gestes */
     case "gestes":
       return (
-        <div className="mx-auto flex max-w-[78vw] items-stretch gap-[1.6vw]">
+        <div className="flex max-w-[78vw] items-stretch gap-[1.6vw]">
           {ecran.panneaux.map((p) => (
             <div key={p.entete} className="min-w-0 flex-1">
               <div className="v-papier h-full">
@@ -828,22 +844,49 @@ function Piece({ ecran }: { ecran: EcranVisio }) {
       );
 
     /* ---------------------------------------------- 18 · la bascule */
-    case "bascule":
-      return (
-        <div>
-          <p className="serif-roman" style={{ fontSize: "calc(var(--u) * 3.4)" }}>
-            {fr("Lisible n'est pas premier.")}
+    case "bascule": {
+      const colonne = (
+        titre: string,
+        lignes: { compte: number; libelle: string }[],
+        fort: boolean,
+      ) => (
+        <div className={cn("min-w-0 flex-1", !fort && "opacity-100")}>
+          <p className="num border-b border-rule pb-[1vh] uppercase tracking-[0.16em] text-ink-3"
+             style={{ fontSize: "max(10px, calc(var(--u) * 0.58))" }}>
+            {titre}
           </p>
-          <p className="num mt-[3vh] text-[14px] text-ink-2">
-            {ecran.rival} · {ecran.reponses} réponses sur {ecran.lues}
+          {lignes.map((l) => (
+            <div key={l.libelle} className="flex items-baseline gap-[1.2vw] py-[1.5vh]">
+              <span
+                className={cn("num shrink-0 tabular-nums", fort ? "text-signal" : "text-paper")}
+                style={{ fontSize: "calc(var(--u) * 3.2)", lineHeight: 1 }}
+              >
+                {l.compte}
+              </span>
+              <span className="min-w-0" style={{ fontSize: "calc(var(--u) * 0.95)" }}>
+                {fr(l.libelle)}
+              </span>
+            </div>
+          ))}
+        </div>
+      );
+      return (
+        <div className="max-w-[72vw]">
+          <div className="flex items-start gap-[5vw]">
+            {colonne("ce que vous faites seul", ecran.seul, false)}
+            {colonne("ce que le terrain demande", ecran.terrain, true)}
+          </div>
+          <p className="v-source">
+            volumes relevés dans votre mesure · aucun impact projeté, aucune estimation
           </p>
         </div>
       );
+    }
 
     /* ------------------------------------------------ 19 · le sprint */
     case "sprint":
       return (
-        <div className="mx-auto max-w-[80vw]">
+        <div className="max-w-[80vw]">
           {ecran.chantiers.map((c) => (
             <div key={c.titre} className="flex items-baseline gap-[2vw] border-b border-rule py-[1.4vh]">
               <span className="serif-roman w-[9vw] shrink-0" style={{ fontSize: "calc(var(--u) * 1.3)" }}>
@@ -873,7 +916,7 @@ function Piece({ ecran }: { ecran: EcranVisio }) {
     /* --------------------------------------- 20 · la pièce à venir */
     case "piece-a-venir":
       return (
-        <div className="mx-auto flex max-w-[76vw] items-center gap-[4vw]">
+        <div className="flex max-w-[76vw] items-center gap-[4vw]">
           <div className="min-w-0 flex-1">
             <p className="num text-[1.3vw]">
               la ligne qui sera comparée{NBSP}: votre nom dans {ecran.vosReponses} réponses sur{" "}
@@ -967,7 +1010,7 @@ function Mur({
   const choisie = colonne !== null ? ecran.lignes[colonne] : null;
 
   return (
-    <div className="mx-auto w-full max-w-[74vw]">
+    <div className="w-full max-w-[74vw]">
       {/* La grille : moteurs en lignes, questions en colonnes. */}
       <div className="flex flex-col gap-[0.5vh]" onMouseLeave={() => setSurvol(null)}>
         {ecran.moteurs.map((m, iM) => (
@@ -1092,7 +1135,7 @@ function SixJuges({
   const face = ecran.faces[ouvert];
 
   return (
-    <div className="mx-auto w-full max-w-[76vw]">
+    <div className="w-full max-w-[76vw]">
       <p
         className="serif-roman mb-[2vh] text-ink-2"
         style={{ fontSize: "calc(var(--u) * 1.2)", maxWidth: "70ch" }}

@@ -5,6 +5,47 @@ d'une nouvelle session, après `CLAUDE.md`.
 
 ---
 
+## 2026-08-17 — L'audit d'écran par écran : l'axe, l'écran 18, l'infrastructure
+
+Retour de Luigi : « slide 18 tu m'expliques ? il y a encore pas mal
+d'imperfections, des slides pas symétriques, un peu bizarres, pas
+pertinentes ou inutiles ». Quatre défauts réels trouvés et corrigés.
+
+**1. L'AXE, la cause de « pas symétrique ».** Dix exhibits étaient centrés
+(`mx-auto`) alors que TOUS les titres sont calés à gauche à 7vw. D'un écran
+à l'autre, le bloc de données glissait sous un titre immobile : l'oeil
+lisait un décalage sans savoir le nommer. Tous les exhibits partagent
+désormais l'axe gauche du titre. C'est la correction qui change le plus la
+perception, et elle ne coûte qu'un mot par écran.
+
+**2. L'écran 18 écrivait sa propre phrase DEUX FOIS** : « Lisible n'est pas
+premier » en légende, puis en grand dans la zone de données, avec pour tout
+contenu une ligne mono. C'était un écran vide déguisé. Il porte maintenant
+l'arithmétique du fossé, en volumes réels des deux côtés : 3 gestes à sa
+main, face à 5 pages à écrire, 8 adresses et 86 réponses déjà tenues.
+Aucune projection, aucun impact estimé — la ligne de provenance le dit.
+
+**3. Deux écrans rejouaient le même graphique.** La bibliothèque (10) et
+les portes du Sprint (16) affichaient toutes deux « hôte + traits +
+compte ». Le 16 devient un bordereau de travail numéroté sur deux colonnes :
+on lit un classement à l'écran 10, une liste de tâches à l'écran 16.
+
+**4. LE DÉFAUT DE PERTINENCE, le plus grave** :
+`vertexaisearch.cloud.google.com` figurait parmi les « adresses où votre nom
+doit figurer ». C'est un proxy interne de Google, on ne s'y inscrit pas.
+Proposer ça à un dirigeant ruine la crédibilité de la liste entière.
+`estInfrastructure` écarte désormais les proxys de recherche, caches,
+traducteurs et redirecteurs, avec son test. Règle générale : une adresse
+n'est une cible que si une inscription y est concevable.
+
+Note pour plus tard : `immobilier.cushmanwakefield.fr` reste dans la liste
+alors que Cushman est un courtier concurrent. La cause est connue et
+documentée (l'heuristique de `domainesCitables` ne connaît que les marques
+présentes dans `concurrent_classes`) ; le remède est `pnpm toolkit
+concurrents <marque> --corriger`, à passer avant une vraie visio.
+
+---
+
 ## 2026-08-17 — Les exhibits deviennent interactifs (retour « slides moches »)
 
 Retour de Luigi sur la première version du dossier : « c'est une blague les

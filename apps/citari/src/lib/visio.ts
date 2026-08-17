@@ -210,7 +210,13 @@ export type EcranVisio = Socle &
         type: "gestes";
         panneaux: { entete: string; lignes: string[]; creux: boolean; minium: string | null }[];
       }
-    | { type: "bascule"; rival: string; reponses: number; lues: number }
+    | {
+        /** La bascule : l'arithmétique du fossé entre ce qu'il fait seul et
+         *  ce que le terrain demande. Des volumes réels des deux côtés. */
+        type: "bascule";
+        seul: { compte: number; libelle: string }[];
+        terrain: { compte: number; libelle: string }[];
+      }
     | {
         type: "sprint";
         chantiers: { titre: string; seul: string; avecNous: string[] }[];
@@ -252,10 +258,38 @@ export function dateRemesure(completedAt: string): string {
 }
 
 /**
+ * Les hôtes d'INFRASTRUCTURE : des adresses techniques que les moteurs
+ * traversent (proxys de recherche, caches, traducteurs, redirecteurs). On
+ * ne s'inscrit pas dessus, et les proposer comme cible de citation détruit
+ * la crédibilité de la liste devant un dirigeant. Vu en réel :
+ * `vertexaisearch.cloud.google.com` classé parmi les adresses à conquérir.
+ */
+const INFRASTRUCTURE = [
+  "vertexaisearch.cloud.google.com",
+  "googleusercontent.com",
+  "webcache.googleusercontent.com",
+  "translate.google.com",
+  "google.com",
+  "bing.com",
+  "duckduckgo.com",
+  "search.marcia.com",
+  "r.jina.ai",
+  "web.archive.org",
+  "t.co",
+  "lnkd.in",
+];
+
+/** true si l'hôte est une adresse technique, jamais une cible de citation. */
+export function estInfrastructure(hote: string): boolean {
+  const h = hote.toLowerCase();
+  return INFRASTRUCTURE.some((i) => h === i || h.endsWith(`.${i}`));
+}
+
+/**
  * Les domaines où une citation est POSSIBLE : on écarte les sites détenus
  * par un rival ou un géant, en rapprochant l'hôte des noms de marques
- * classées. Heuristique assumée : elle peut laisser passer un domaine
- * concurrent inconnu, jamais en inventer.
+ * classées, ET les hôtes d'infrastructure. Heuristique assumée : elle peut
+ * laisser passer un domaine concurrent inconnu, jamais en inventer.
  */
 export function domainesCitables(
   domaines: { hote: string; lectures: number; votreSite: boolean }[],
@@ -277,6 +311,7 @@ export function domainesCitables(
   return domaines
     .filter((d) => {
       if (d.votreSite) return false;
+      if (estInfrastructure(d.hote)) return false;
       const racine = (d.hote.split(".")[0] ?? "").toLowerCase().replace(/[^a-z0-9]/g, "");
       if (!racine) return false;
       for (const nom of noms) {
@@ -1120,14 +1155,23 @@ export function construireVisio(entree: {
       panneaux: panneauxGestes,
     });
     if (rival0) {
+      // Les deux colonnes ne comparent que des volumes RÉELS : à gauche ce
+      // qu'on vient d'offrir, à droite ce que la mesure a relevé. Aucune
+      // projection, aucun « impact estimé ».
+      const terrain = [
+        { compte: pages.length, libelle: "pages à écrire, relevées dans vos questions perdues" },
+        { compte: ciblesSprint.length, libelle: "adresses où votre nom doit figurer" },
+        { compte: rival0.reponses, libelle: `réponses déjà tenues par ${rival0.nom}` },
+      ].filter((x) => x.compte > 0);
       ecrans.push({
         type: "bascule",
         kicker: "la limite de ces gestes",
         message: "Lisible n'est pas premier.",
         sens: `${rival0.nom} tient ${rival0.reponses} réponses parce qu'il publie depuis des années. Déloger une position installée demande du contenu, des relances et de la mesure : un chantier suivi.`,
-        rival: rival0.nom,
-        reponses: rival0.reponses,
-        lues,
+        seul: [
+          { compte: panneauxGestes.length, libelle: "gestes cette semaine, à votre main" },
+        ],
+        terrain,
       });
     }
   }
