@@ -49,8 +49,19 @@ const CSS_SCENE = `
   font-size:max(11px, calc(var(--u) * 0.6));text-transform:uppercase;
   letter-spacing:0.2em;color:var(--v-mut2);max-width:80ch}
 .v-msg{font-family:var(--font-serif,Newsreader,serif);
-  font-size:calc(var(--u) * 1.9);line-height:1.16;max-width:52ch;
-  margin-top:calc(var(--u) * 0.7)}
+  font-size:calc(var(--u) * 2.05);line-height:1.14;max-width:48ch;
+  margin-top:calc(var(--u) * 0.75)}
+
+/* La ligne de provenance de l'exhibit : la signature d'un vrai livrable. */
+.v-source{font-family:var(--font-mono,"IBM Plex Mono",monospace);
+  font-size:max(10px, calc(var(--u) * 0.54));letter-spacing:0.08em;
+  color:var(--v-mut2);margin-top:calc(var(--u) * 1.1);
+  padding-top:calc(var(--u) * 0.5);border-top:1px solid var(--v-fil)}
+
+/* Ce qui est cliquable pendant la visio se voit, sans devenir un bouton. */
+.v-cliquable{cursor:pointer;transition:opacity 140ms ease}
+.v-cliquable:hover{opacity:1}
+.v-eteint{opacity:0.38;transition:opacity 200ms ease}
 
 /* LE PAPIER : la pièce à conviction. Texte encre réelle, jamais les
    utilitaires retournés de la scène. */
@@ -214,8 +225,8 @@ function Visio() {
       </header>
 
       {/* ---------------------------------------------------- l'écran */}
-      <main key={index} className="anim-panel relative z-10 min-h-0 flex-1 px-[6vw] py-[3.5vh]">
-        <div className="grid h-full grid-rows-[auto_1fr] gap-[2.5vh]">
+      <main key={index} className="anim-panel relative z-10 min-h-0 flex-1 px-[7vw] py-[4.5vh]">
+        <div className="grid h-full grid-rows-[auto_1fr] gap-[3.5vh]">
           <div>
             <p className="v-kick">{ecran.kicker}</p>
             <h2 className="v-msg">
@@ -264,8 +275,8 @@ function Visio() {
 function EntetePiece({ p }: { p: Possession }) {
   return (
     <div className="v-possession">
-      pièce {String(p.numero).padStart(2, "0")}
-      {p.libelle ? ` · ${p.libelle}` : ""}
+      {p.numero > 0 ? `pièce ${String(p.numero).padStart(2, "0")}` : ""}
+      {p.libelle ? `${p.numero > 0 ? " · " : ""}${p.libelle}` : ""}
       {p.moteur ? ` · ${p.moteur}${p.modele ? ` ${p.modele}` : ""}` : ""}
       {p.rangQ ? ` · question ${String(p.rangQ).padStart(2, "0")}/${p.totalQ}` : ""}
       {` · ${p.date}`}
@@ -426,41 +437,7 @@ function Piece({ ecran }: { ecran: EcranVisio }) {
 
     /* ------------------------------------------------ 03 · le mur */
     case "mur":
-      return (
-        <div className="mx-auto max-w-[80vw]">
-          <div className="flex items-baseline gap-[1vw]">
-            <span className="w-[24vw] shrink-0" />
-            {ecran.moteurs.map((m) => (
-              <span key={m} className="num flex-1 text-center text-[10px] uppercase tracking-[0.12em] text-ink-3">
-                {m}
-              </span>
-            ))}
-          </div>
-          {ecran.lignes.map((l) => (
-            <div key={l.rang} className="flex items-center gap-[1vw] py-[0.28vh]">
-              <span className="num w-[24vw] shrink-0 truncate text-[10px] text-ink-3">
-                {String(l.rang).padStart(2, "0")}{NBSP}{l.texte}
-              </span>
-              {l.etats.map((e, i) => (
-                <span
-                  key={i}
-                  className={cn(
-                    "h-[2.5vh] flex-1",
-                    e === "cite" && "bg-ink",
-                    e === "absent" && "border border-rule",
-                    e === "erreur" && "border border-rule opacity-30",
-                  )}
-                />
-              ))}
-            </div>
-          ))}
-          <p className="num mt-3 text-[11px] text-ink-3">
-            case pleine : votre marque présente ·{" "}
-            <span className="text-signal">{ecran.vosReponses} sur {ecran.reponsesLues}</span> · case
-            estompée : réponse en erreur, sortie des comptes
-          </p>
-        </div>
-      );
+      return <Mur ecran={ecran} />;
 
     /* ------------------------------------------ 04 · l'inventaire */
     case "inventaire":
@@ -774,47 +751,7 @@ function Piece({ ecran }: { ecran: EcranVisio }) {
 
     /* -------------------------------------------- 14 · six juges */
     case "six-juges":
-      return (
-        <div className="mx-auto max-w-[82vw]">
-          <p className="serif-roman mb-[1.2vh] text-ink-2" style={{ fontSize: "calc(var(--u) * 1.1)" }}>
-            «{NBSP}{ecran.question}{NBSP}» · question {String(ecran.rangQ).padStart(2, "0")}/{ecran.totalQ}
-          </p>
-          <div className="flex items-stretch gap-[1vw]">
-            {ecran.faces.map((f) => (
-              <div key={f.moteur} className={cn("min-w-0 flex-1", f.erreur && "opacity-40")}>
-                <div className="v-papier h-full" style={{ padding: "calc(var(--u) * 0.8)" }}>
-                  <div className="v-possession" style={{ marginBottom: "calc(var(--u) * 0.5)" }}>
-                    {f.moteur}
-                  </div>
-                  {f.erreur ? (
-                    <p className="num text-[11px]" style={{ color: "#726d64" }}>
-                      réponse en erreur · hors mesure
-                    </p>
-                  ) : (
-                    <>
-                      <p style={{ fontSize: "max(10px, calc(var(--u) * 0.62))", lineHeight: 1.5 }}>
-                        {f.extrait}
-                      </p>
-                      {f.marques.length ? (
-                        <p className="mt-2 flex flex-wrap gap-1">
-                          {f.marques.slice(0, 4).map((m) => (
-                            <span key={m} className="v-pastille num text-[9px]">
-                              {m}
-                            </span>
-                          ))}
-                        </p>
-                      ) : null}
-                      <p className="v-manque num mt-2 text-[9px] uppercase tracking-[0.1em]">
-                        {f.statut}
-                      </p>
-                    </>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      );
+      return <SixJuges ecran={ecran} />;
 
     /* ----------------------------------- 15 · le bon de commande */
     case "bon-commande":
@@ -1004,6 +941,241 @@ function Piece({ ecran }: { ecran: EcranVisio }) {
         </div>
       );
   }
+}
+
+/**
+ * LE MUR, exhibit interactif. La grille se lit d'un coup parce qu'elle ne
+ * porte AUCUN libellé : 6 moteurs en lignes, les questions en colonnes, une
+ * case par réponse. Le détail vient à la demande — Luigi survole ou clique
+ * une colonne pendant qu'il parle, et la question s'écrit en clair sous la
+ * grille avec qui a répondu quoi. La densité devient un instrument au lieu
+ * d'un mur de texte de 10 pixels.
+ */
+function Mur({
+  ecran,
+}: {
+  ecran: Extract<EcranVisio, { type: "mur" }>;
+}) {
+  // Deux états distincts : le survol PRÉVISUALISE (l'oeil suit la souris),
+  // le clic ÉPINGLE (la question reste à l'écran pendant qu'on la commente,
+  // même si la souris repart). Sans cette séparation, un clic sur la colonne
+  // déjà survolée refermait le panneau : le geste le plus naturel annulait
+  // l'action voulue.
+  const [survol, setSurvol] = useState<number | null>(null);
+  const [epingle, setEpingle] = useState<number | null>(null);
+  const colonne = epingle ?? survol;
+  const choisie = colonne !== null ? ecran.lignes[colonne] : null;
+
+  return (
+    <div className="mx-auto w-full max-w-[74vw]">
+      {/* La grille : moteurs en lignes, questions en colonnes. */}
+      <div className="flex flex-col gap-[0.5vh]" onMouseLeave={() => setSurvol(null)}>
+        {ecran.moteurs.map((m, iM) => (
+          <div key={m} className="flex items-center gap-[1.2vw]">
+            <span
+              className="num w-[8vw] shrink-0 text-right uppercase tracking-[0.12em] text-ink-3"
+              style={{ fontSize: "max(10px, calc(var(--u) * 0.58))" }}
+            >
+              {m}
+            </span>
+            <div className="flex flex-1 gap-[0.3vw]">
+              {ecran.lignes.map((l, iQ) => {
+                const etat = l.etats[iM];
+                const active = colonne === iQ;
+                return (
+                  <button
+                    key={l.rang}
+                    type="button"
+                    aria-label={`Question ${l.rang}, ${m}`}
+                    onMouseEnter={() => setSurvol(iQ)}
+                    onFocus={() => setSurvol(iQ)}
+                    onClick={() => setEpingle(epingle === iQ ? null : iQ)}
+                    className={cn(
+                      "v-cliquable h-[4.6vh] flex-1",
+                      etat === "cite" && "bg-ink",
+                      etat === "absent" && "border border-rule",
+                      etat === "erreur" && "border border-rule opacity-25",
+                      colonne !== null && !active && "v-eteint",
+                    )}
+                  />
+                );
+              })}
+            </div>
+          </div>
+        ))}
+        {/* Le rail des numéros : discret, il ne devient lisible qu'au survol. */}
+        <div className="flex items-center gap-[1.2vw]">
+          <span className="w-[8vw] shrink-0" />
+          <div className="flex flex-1 gap-[0.3vw]">
+            {ecran.lignes.map((l, iQ) => (
+              <span
+                key={l.rang}
+                className={cn(
+                  "num flex-1 text-center tabular-nums transition-colors",
+                  colonne === iQ ? "text-paper" : "text-ink-3",
+                )}
+                style={{ fontSize: "max(9px, calc(var(--u) * 0.5))" }}
+              >
+                {l.rang}
+              </span>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* L'inspection : la question en clair, à la demande. Hauteur réservée,
+          pour que la grille ne saute jamais pendant la présentation. */}
+      <div className="mt-[2.5vh] flex min-h-[9vh] items-start gap-[1.2vw]">
+        <span className="w-[8vw] shrink-0" />
+        {choisie ? (
+          <div className="min-w-0 flex-1 border-l border-rule pl-[1.2vw]">
+            <p className="num text-ink-3" style={{ fontSize: "max(10px, calc(var(--u) * 0.55))" }}>
+              question {String(choisie.rang).padStart(2, "0")} sur {ecran.lignes.length}
+            </p>
+            <p
+              className="serif-roman mt-1"
+              style={{ fontSize: "calc(var(--u) * 1.35)", maxWidth: "58ch" }}
+            >
+              «{NBSP}{choisie.texte}{NBSP}»
+              {epingle !== null ? (
+                <span className="num ml-3 align-middle text-[10px] uppercase tracking-[0.14em] text-ink-3">
+                  épinglée
+                </span>
+              ) : null}
+            </p>
+            <p className="num mt-2" style={{ fontSize: "max(10px, calc(var(--u) * 0.58))" }}>
+              {choisie.etats.filter((e) => e === "cite").length > 0 ? (
+                <span>
+                  vous y êtes chez{" "}
+                  {ecran.moteurs
+                    .filter((_, i) => choisie.etats[i] === "cite")
+                    .join(", ")}
+                </span>
+              ) : (
+                <span className="text-signal">aucun moteur ne vous cite sur cette question</span>
+              )}
+            </p>
+          </div>
+        ) : (
+          <p
+            className="num flex-1 text-ink-3"
+            style={{ fontSize: "max(10px, calc(var(--u) * 0.58))" }}
+          >
+            survolez une colonne pour lire la question · cliquez pour l'épingler
+          </p>
+        )}
+      </div>
+
+      <p className="v-source">
+        case pleine : votre marque présente ({ecran.vosReponses} sur {ecran.reponsesLues}) · case
+        vide : absente · case estompée : réponse en erreur, sortie des comptes
+      </p>
+    </div>
+  );
+}
+
+/**
+ * LES SIX JUGES, exhibit interactif. Six copies d'examen ne se lisent pas
+ * en 10 pixels côte à côte : on montre les six VERDICTS en grand, et le
+ * texte de la copie s'ouvre au clic, une à la fois. Luigi ouvre celle qu'il
+ * veut commenter, quand il la commente.
+ */
+function SixJuges({
+  ecran,
+}: {
+  ecran: Extract<EcranVisio, { type: "six-juges" }>;
+}) {
+  // La première copie lisible est ouverte d'entrée : un écran de présentation
+  // ne doit jamais attendre un clic pour dire quelque chose.
+  const premier = ecran.faces.findIndex((f) => !f.erreur && f.extrait);
+  const [ouvert, setOuvert] = useState<number>(premier >= 0 ? premier : 0);
+  const face = ecran.faces[ouvert];
+
+  return (
+    <div className="mx-auto w-full max-w-[76vw]">
+      <p
+        className="serif-roman mb-[2vh] text-ink-2"
+        style={{ fontSize: "calc(var(--u) * 1.2)", maxWidth: "70ch" }}
+      >
+        «{NBSP}{ecran.question}{NBSP}» · question {String(ecran.rangQ).padStart(2, "0")}/
+        {ecran.totalQ}
+      </p>
+
+      {/* Les six verdicts, en grand : l'image que le CEO retient. */}
+      <div className="flex items-stretch gap-[1vw]">
+        {ecran.faces.map((f, i) => {
+          const actif = ouvert === i;
+          return (
+            <button
+              key={f.moteur}
+              type="button"
+              onClick={() => setOuvert(i)}
+              disabled={f.erreur}
+              className={cn(
+                "v-cliquable flex min-w-0 flex-1 flex-col border-t-2 pt-[1.2vh] text-left",
+                actif ? "border-paper" : "border-rule",
+                f.erreur && "cursor-default opacity-30",
+                !actif && !f.erreur && "v-eteint",
+              )}
+            >
+              <span
+                className="num block uppercase tracking-[0.12em] text-ink-3"
+                style={{ fontSize: "max(10px, calc(var(--u) * 0.55))" }}
+              >
+                {f.moteur}
+              </span>
+              <span
+                className={cn(
+                  "serif-roman mt-[0.8vh] block leading-[1.05]",
+                  f.erreur ? "text-ink-3" : "text-signal",
+                )}
+                style={{ fontSize: "calc(var(--u) * 1.55)" }}
+              >
+                {f.erreur ? "hors mesure" : f.statut}
+              </span>
+              <span
+                className="num mt-[1vh] block overflow-hidden text-ink-3"
+                style={{
+                  fontSize: "max(10px, calc(var(--u) * 0.55))",
+                  height: "calc(var(--u) * 2.4)",
+                  lineHeight: 1.4,
+                }}
+              >
+                {f.marques.slice(0, 3).join(" · ")}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* La copie ouverte : une seule à la fois, en papier. */}
+      <div className="mt-[2.5vh]">
+        {face && !face.erreur && face.extrait ? (
+          <Panneau
+            possession={{
+              numero: 0,
+              moteur: face.moteur,
+              modele: face.modele,
+              rangQ: ecran.rangQ,
+              totalQ: ecran.totalQ,
+              date: ecran.date,
+              libelle: "COPIE",
+            }}
+            pied={<span>extrait de la réponse conservée</span>}
+          >
+            <p className="v-corps">{face.extrait}</p>
+          </Panneau>
+        ) : (
+          <p className="num text-ink-3" style={{ fontSize: "max(10px, calc(var(--u) * 0.58))" }}>
+            cette réponse est en erreur, elle est sortie de la mesure
+          </p>
+        )}
+        <p className="v-source">
+          cliquez un moteur pour ouvrir sa copie · extraits conservés mot pour mot
+        </p>
+      </div>
+    </div>
+  );
 }
 
 /** Une ligne de bordereau sur l'encre : libellé, points de conduite, valeur. */

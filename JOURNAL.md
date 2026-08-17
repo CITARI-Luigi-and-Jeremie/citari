@@ -5,6 +5,41 @@ d'une nouvelle session, après `CLAUDE.md`.
 
 ---
 
+## 2026-08-17 — Les exhibits deviennent interactifs (retour « slides moches »)
+
+Retour de Luigi sur la première version du dossier : « c'est une blague les
+slides ? elles sont moches, pas pratique... slide 3 tu peux faire un truc
+interactif pour que ça soit moins encombré... comporte-toi comme un cabinet
+type BCG Bain ». Il avait raison sur l'exemple : LE MUR portait 24 libellés
+de questions tronqués à 10 px le long d'une grille de 144 cases. Personne ne
+lit ça ; ça se subit.
+
+**La règle qui en sort : la densité doit devenir un instrument, jamais un
+mur.** Quand un exhibit porte plus d'informations qu'un écran n'en supporte,
+on ne rétrécit pas le texte — on retire les libellés de la vue d'ensemble et
+on les rend disponibles À LA DEMANDE.
+
+- **LE MUR** : la grille se lit maintenant d'un coup (6 moteurs en lignes,
+  24 questions en colonnes, zéro libellé, cases quatre fois plus grandes) —
+  Grok et Le Chat sautent aux yeux comme deux lignes entièrement vides. Le
+  survol PRÉVISUALISE la question, le clic l'ÉPINGLE. Les deux états sont
+  séparés dans le code, et c'est une correction payée en direct : avec un
+  seul état, cliquer la colonne déjà survolée REFERMAIT le panneau, donc le
+  geste le plus naturel annulait l'action voulue.
+- **LES SIX JUGES** : six copies d'examen ne se lisent pas en 10 px côte à
+  côte. On montre les six VERDICTS en grand (six « SNAPDESK : ABSENT » en
+  minium, l'image que le CEO retient), et la copie s'ouvre au clic, une à la
+  fois. La première copie lisible est ouverte d'entrée : un écran de
+  présentation ne doit jamais attendre un clic pour dire quelque chose.
+- **Hauteurs réservées** : le panneau d'inspection occupe sa place même
+  vide, et les listes de marques ont une hauteur fixe. Sans ça, la grille
+  sautait sous la souris pendant la présentation, et les six cartes se
+  décalaient les unes par rapport aux autres.
+- **La ligne de provenance** (`.v-source`) ferme chaque exhibit, comme la
+  ligne « Source : » d'une planche de cabinet.
+
+---
+
 ## 2026-08-17 — Le dossier posé sur la table : la direction définitive
 
 Cinquième rejet le matin (« on n'exploite pas le potentiel du scan complet,
