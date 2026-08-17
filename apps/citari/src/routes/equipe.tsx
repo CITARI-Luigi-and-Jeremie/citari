@@ -266,14 +266,27 @@ function PageEquipe() {
                       {!l.premium ? (
                         <span className="mono text-[13px] text-ink-3">pas lancé</span>
                       ) : premiumFini ? (
-                        <a
-                          href={`/rapport/${l.premium.report_token}`}
-                          target="_blank"
-                          rel="noopener"
-                          className="num text-[14px] underline underline-offset-4 hover:text-signal"
-                        >
-                          {l.premium.score_global ?? "?"}/100 · rapport
-                        </a>
+                        <>
+                          <a
+                            href={`/rapport/${l.premium.report_token}`}
+                            target="_blank"
+                            rel="noopener"
+                            className="num text-[14px] underline underline-offset-4 hover:text-signal"
+                          >
+                            {l.premium.score_global ?? "?"}/100 · rapport
+                          </a>
+                          {/* Le support de la visio : lié ICI et nulle part
+                              ailleurs. La page est derrière le mot de passe,
+                              donc le prospect ne peut pas tomber dessus. */}
+                          <a
+                            href={`/visio/${l.premium.report_token}`}
+                            target="_blank"
+                            rel="noopener"
+                            className="mono block text-[13px] text-signal underline underline-offset-4"
+                          >
+                            ouvrir la visio
+                          </a>
+                        </>
                       ) : (
                         <a
                           href={`/scan/${l.premium.id}`}

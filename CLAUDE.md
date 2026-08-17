@@ -139,7 +139,10 @@ de juges et validée par Luigi) : `/visio/$jeton`, plein écran SUR L'ENCRE,
 **20 écrans en SIX actes** (le verdict, vos acheteurs, pourquoi eux, le
 plan, cette semaine, la décision), pilotés aux flèches ou à la
 télécommande. C'est le support que LUIGI commente en partage d'écran pour
-vendre le Sprint ; l'URL n'est liée nulle part. La règle au-dessus des
+vendre le Sprint ; son seul lien est le bouton « ouvrir la visio » de
+`/equipe`, derrière le mot de passe admin (17/08/2026 : sans lui, personne
+ne trouvait l'adresse — « nulle part » avait été pris trop à la lettre).
+Aucune surface publique ne la mentionne. La règle au-dessus des
 autres : chaque écran porte une donnée propre à CE prospect ET un
 enseignement stratégique, jamais une reformulation du chiffre ; zéro écran
 de méthode, zéro promesse de résultat (la remesure datée est le seul
