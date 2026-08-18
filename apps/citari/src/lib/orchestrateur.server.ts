@@ -1,5 +1,7 @@
 import { createHash } from "node:crypto";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
+import { avecPlancher, socleGeo } from "@/lib/socle";
+import { hoteClient, hoteDeSource } from "@/lib/rapport-complet";
 import {
   interroger,
   analyser,
@@ -86,7 +88,9 @@ function lotDuMode(mode: ModeScan): number {
  * fenêtre, tout le monde voit exactement le même score et les mêmes réponses,
  * puisqu'on renvoie le scan existant et non une nouvelle mesure.
  */
-const CACHE_JOURS = 3;
+/** Fenêtre de REPRISE d'un scan en cours ou en erreur. Le cache de résultat
+ *  a été retiré le 18/08/2026 (décision Luigi) : un scan fini se remesure. */
+const REPRISE_JOURS = 3;
 
 function moteursDuMode(mode: ModeScan): readonly Moteur[] {
   if (mode === "apercu") return MOTEURS_APERCU;
@@ -170,22 +174,20 @@ export function hacherIp(ip: string) {
 }
 
 /**
- * Le scan déjà mesuré pour ce domaine, s'il est dans la fenêtre de cache.
- *
- * Extrait de `creerScan` pour que l'appelant puisse savoir qu'un résultat
- * existe AVANT d'appliquer le quota : resservir une mesure déjà payée ne
- * consomme aucune API, donc refuser ce visiteur au motif du plafond n'aurait
- * aucun sens.
+ * Le scan EN COURS pour ce domaine, s'il existe. Ce n'est pas un cache :
+ * deux lancements pendant la même mesure ne doivent pas payer deux fois, et
+ * le second navigateur rejoint la mesure en train de se faire. Un scan FINI
+ * n'est plus jamais resservi (18/08/2026) : relancer, c'est remesurer.
  */
 export async function chercherCache(domaine: string, mode: ModeScan) {
-  const depuis = new Date(Date.now() - CACHE_JOURS * 86400000).toISOString();
+  const depuis = new Date(Date.now() - REPRISE_JOURS * 86400000).toISOString();
   const { data } = await supabaseAdmin
     .from("scans")
     .select("id, report_token, status, created_at")
     .eq("domain_key", domaine)
     .eq("mode", mode)
     .gte("created_at", depuis)
-    .in("status", ["done", "running"])
+    .eq("status", "running")
     .order("created_at", { ascending: false })
     .limit(1)
     .maybeSingle();
@@ -218,12 +220,9 @@ export async function creerScan(input: {
   const mode: ModeScan = input.mode ?? "apercu";
   const domaine = cleDomaine(input.url, input.marque, input.secteur, input.ville);
 
-  // Cache : même domaine, même mode, moins de 3 jours → on renvoie le scan
-  // existant, donc le même score ET les mêmes réponses, partout.
-  // Trois effets voulus : le chiffre ne bouge pas d'un rechargement à l'autre
-  // (la crédibilité de la mesure), les curieux qui rescannent ne coûtent rien,
-  // et l'abus est borné. Un re-scan J+90 (previousScanId) court-circuite
-  // le cache : c'est une nouvelle mesure par définition.
+  // Un scan EN COURS sur le même domaine se rejoint au lieu de se doubler.
+  // Le cache des scans finis a été retiré le 18/08/2026 : chaque lancement
+  // est une mesure neuve, payée. Le quota par IP reste le garde-fou du coût.
   if (!input.previousScanId) {
     const existant = await chercherCache(domaine, mode);
     if (existant) return { id: existant.id, report_token: existant.report_token, cached: true };
@@ -560,7 +559,7 @@ export async function avancerScan(id: string) {
   // fenêtre de cache : au-delà, la mesure serait un patchwork de deux époques.
   if (scan.status === "error") {
     const age = Date.now() - new Date(scan.created_at as string).getTime();
-    if (age > CACHE_JOURS * 86400000) return;
+    if (age > REPRISE_JOURS * 86400000) return;
     const { data: repris } = await supabaseAdmin
       .from("scans")
       .update({ status: "running", error_message: null })
@@ -779,9 +778,13 @@ async function finaliser(id: string) {
   if (!obtenu) return;
 
   const [{ data: reponses }, { data: mentions }, { data: scan }] = await Promise.all([
-    supabaseAdmin.from("responses").select("id, engine, error, raw_text").eq("scan_id", id),
+    supabaseAdmin.from("responses").select("id, engine, error, raw_text, sources").eq("scan_id", id),
     supabaseAdmin.from("mentions").select("*").eq("scan_id", id),
-    supabaseAdmin.from("scans").select("brand_name, sector, city, competitors").eq("id", id).single(),
+    supabaseAdmin
+      .from("scans")
+      .select("brand_name, sector, city, competitors, website_url, miroir, audit")
+      .eq("id", id)
+      .single(),
   ]);
   const lignes = (mentions ?? []) as unknown as LigneMention[];
   const s = calculerScore(mesurees(reponses ?? []), lignes);
@@ -849,7 +852,35 @@ async function finaliser(id: string) {
     return { saisi, releve, citations: releve ? (comptesParNom.get(releve) ?? 0) : 0 };
   });
 
-  const actions = await genererActions(scan?.brand_name ?? "", scan?.sector ?? "", s.global, pdv);
+  // LE PLANCHER DU SOCLE (formule v2, 18/08/2026) : une entreprise jamais
+  // citée mais prête à l'être ne vaut pas zéro. Voir lib/socle.ts.
+  const client = hoteClient((scan as { website_url?: string | null })?.website_url ?? null);
+  let lecturesVotreSite = 0;
+  let sourcesCollectees = false;
+  for (const r of reponses ?? []) {
+    if (r.error) continue;
+    const liste = Array.isArray((r as { sources?: unknown }).sources)
+      ? ((r as { sources: { url?: unknown }[] }).sources)
+      : [];
+    if (liste.length) sourcesCollectees = true;
+    if (!client) continue;
+    for (const src of liste) {
+      if (typeof src?.url !== "string") continue;
+      const hote = hoteDeSource(src.url);
+      if (hote && (hote === client || hote.endsWith(`.${client}`))) lecturesVotreSite += 1;
+    }
+  }
+  const socle = socleGeo({
+    audit: (scan as { audit?: unknown })?.audit ?? null,
+    miroir: Array.isArray((scan as { miroir?: unknown })?.miroir)
+      ? ((scan as { miroir: { moteur?: string; texte?: string }[] }).miroir)
+      : null,
+    lecturesVotreSite,
+    sourcesCollectees,
+  });
+  const scoreFinal = avecPlancher(s.global, socle);
+
+  const actions = await genererActions(scan?.brand_name ?? "", scan?.sector ?? "", scoreFinal, pdv);
 
   await supabaseAdmin
     .from("scans")
@@ -858,7 +889,7 @@ async function finaliser(id: string) {
       phase: "termine",
       progress: 100,
       completed_at: new Date().toISOString(),
-      score_global: s.global,
+      score_global: scoreFinal,
       score_chatgpt: s.parMoteur["ChatGPT"],
       score_claude: s.parMoteur["Claude"],
       score_gemini: s.parMoteur["Gemini"],

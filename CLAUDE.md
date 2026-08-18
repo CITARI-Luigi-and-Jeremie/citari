@@ -371,7 +371,17 @@ Trois choses ne doivent plus bouger, parce que la promesse vendue est une
 comparaison : « voici votre score, voici celui de J+90 ».
 
 1. **La formule du score** : présence 50 %, rang 20 %, recommandation explicite
-   20 %, tonalité 10 %. Et son unité est la RÉPONSE : une marque citée trois
+   20 %, tonalité 10 %, avec depuis le 18/08/2026 (v2, décision Luigi) un
+   PLANCHER DE SOCLE : une entreprise jamais citée mais prête à l'être vaut
+   jusqu'à 5 points (`avecPlancher` dans `lib/socle.ts`, prorata des quatre
+   critères mesurables : robots autorisés, llms.txt, identité reconnue au
+   miroir, site lu comme source). C'est un `max()`, jamais une somme : dès que
+   la visibilité réelle dépasse le plancher, lui seul compte, donc une
+   entreprise citée passe toujours devant les invisibles. La v2 a été
+   appliquée RÉTROACTIVEMENT aux 112 mesures le jour même (74 zéros relevés
+   entre 2 et 5, 3 restés à 0) : J0 et J+90 restent comparables. Règle pour
+   toute évolution future : versionner, recalculer TOUTE la base, publier
+   sur /methode. Et son unité est la RÉPONSE : une marque citée trois
    fois dans une réponse compte UNE présence. Compter les lignes de mention a
    produit un 123/100 sur Apple (15/08/2026, corrigé) : les grandes marques
    sont multi-citées par réponse, et chaque ratio doit être borné à 1 par
@@ -397,7 +407,11 @@ ne publiant aucune version datée.
 | `complet` | 24 × 6 | oui | ~1,06 € | 3 € |
 | `controle` | 24 × 4 | oui | ~0,84 € | 1,50 € |
 
-**2 scans par jour et par IP**, résultat mis en cache **3 jours**. Le navigateur
+**2 scans par jour et par IP**. Le cache de résultat a été RETIRÉ le
+18/08/2026 (décision Luigi) : un scan fini se remesure et compte au quota ;
+seuls un scan EN COURS (on le rejoint) et un scan en erreur (reprise sous
+3 jours) sont réutilisés. Conséquences assumées : relancer coûte, et le
+chiffre peut bouger entre deux mesures du même domaine. Le navigateur
 pilote la mesure en sondant le serveur ; chaque réponse est écrite
 individuellement, donc une requête coupée ne perd rien.
 
@@ -439,7 +453,7 @@ du toolkit et les colonnes réelles vit dans
 
 ```bash
 pnpm install
-pnpm -r test                        # 293 tests
+pnpm -r test                        # 297 tests
 pnpm -r typecheck                   # paquets + fichiers du site importés par les tests
 npm --prefix apps/citari run typecheck   # TOUT le site (ajouté le 14/08/2026)
 npm --prefix apps/citari run build

@@ -263,6 +263,22 @@ function MethodePage() {
                 </CardGrid>
                 <div className="border-l border-ink pl-5">
                   <span className={`${mono} block uppercase text-ink-2`}>
+                    Le plancher du socle (v2, 18 août 2026)
+                  </span>
+                  <p className="mt-2">
+                    Une entreprise jamais citée mais techniquement prête à l'être ne vaut
+                    pas zéro : quatre critères de socle (robots d'IA autorisés, fichier
+                    llms.txt, identité reconnue par les moteurs, site lu comme source)
+                    lui donnent un plancher de 5 points au plus, au prorata des critères
+                    mesurables sur son scan. C'est un maximum, jamais une somme : dès que
+                    la visibilité réelle dépasse le plancher, lui seul compte, et une
+                    entreprise réellement citée passe devant toutes les invisibles. La
+                    v2 a été appliquée à toutes les mesures existantes le même jour :
+                    chaque re-scan reste comparable à son point de départ.
+                  </p>
+                </div>
+                <div className="mt-6 border-l border-ink pl-5">
+                  <span className={`${mono} block uppercase text-ink-2`}>
                     Une précision qui compte
                   </span>
                   <p className="mt-2">

@@ -64,8 +64,9 @@ export const lancerScan = createServerFn({ method: "POST" })
       "inconnue";
     const ipHash = hacherIp(ip);
 
-    // Le plafond ne s'applique qu'aux mesures réellement nouvelles. Un scan
-    // déjà en cache est resservi tel quel, sans coût et sans compter.
+    // Le plafond ne s'applique qu'aux mesures réellement nouvelles. Rejoindre
+    // un scan EN COURS ne coûte rien et ne compte pas ; un scan fini, lui, se
+    // remesure et compte (le cache de résultat a été retiré le 18/08/2026).
     const enCache = await chercherCache(
       cleDomaine(data.url ?? null, data.marque, data.secteur, data.ville ?? null),
       data.mode

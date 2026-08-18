@@ -255,29 +255,16 @@ export function CarteScore({
         </div>
       ) : null}
 
-      {/* Le socle, en une ligne : il ne s'additionne jamais au score et ne
-          se présente jamais comme une note. À 0 de visibilité, c'est lui qui
-          dit s'il y a un chantier technique ou seulement un chantier de
-          contenu. */}
-      {socle && socle.rang !== null ? (
+      {/* La formule v2 : quand le score EST le plancher du socle (jamais
+          cité, mais prêt à l'être), on le dit, sinon les composantes à 0 %
+          au-dessus d'un score positif seraient incompréhensibles. */}
+      {socle && composantes && composantes.presence === 0 && score > 0 ? (
         <div style={{ marginTop: 14, borderTop: `1px solid ${HAIR}`, paddingTop: 12 }}>
-          <span style={{ fontSize: 12, color: INK, opacity: 0.62, letterSpacing: "0.02em" }}>
-            Votre socle technique : {socle.points} critère{socle.points > 1 ? "s" : ""} sur{" "}
-            {socle.mesures} en place · {motSocle(socle)}
+          <span style={{ fontSize: 12, color: INK, opacity: 0.62 }}>
+            Jamais cité pour l'instant : ce score est le plancher de votre socle technique
+            ({socle.points} critère{socle.points > 1 ? "s" : ""} sur {socle.mesures} en place,{" "}
+            {motSocle(socle)}). Il s'efface dès que la visibilité réelle le dépasse.
           </span>
-          <div style={{ marginTop: 8, display: "flex", flexDirection: "column", gap: 4 }}>
-            {socle.criteres
-              .filter((c) => c.mesure)
-              .map((c) => (
-                <span key={c.cle} style={{ fontSize: 12, color: INK, opacity: 0.62 }}>
-                  <span style={{ color: c.atteint ? INK : RED, fontWeight: 600 }}>
-                    {c.atteint ? "en place" : "manquant"}
-                  </span>
-                  {" · "}
-                  {c.libelle} ({c.detail})
-                </span>
-              ))}
-          </div>
         </div>
       ) : null}
     </div>

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { motSocle, socleGeo } from "@/lib/socle";
+import { avecPlancher, motSocle, PLANCHER_MAX, socleGeo } from "@/lib/socle";
 
 /**
  * LE SOCLE : le second axe qui départage les entreprises toutes à 0 de
@@ -103,5 +103,35 @@ describe("socleGeo", () => {
     expect(lu.mesures).toBe(3);
     expect(lu.points).toBe(2);
     expect(jamaisLu.points).toBe(1);
+  });
+});
+
+
+describe("avecPlancher (formule v2)", () => {
+  const socleDe = (points: number, mesures: number) =>
+    ({ criteres: [], points, mesures, rang: mesures ? Math.round((points / mesures) * 100) : null });
+
+  it("donne un plancher aux jamais-cités, au prorata des critères mesurés", () => {
+    expect(avecPlancher(0, socleDe(3, 3))).toBe(5);
+    expect(avecPlancher(0, socleDe(2, 3))).toBe(3);
+    expect(avecPlancher(0, socleDe(1, 2))).toBe(3);
+    expect(avecPlancher(0, socleDe(0, 3))).toBe(0);
+  });
+
+  it("s'efface dès que la visibilité réelle le dépasse : max, jamais une somme", () => {
+    // Une seule présence neutre vaut déjà ~6 : la citée reste devant toutes
+    // les invisibles, même parfaitement préparées. C'est ce qui rend le
+    // plancher juste là où un bonus additif inverserait le classement.
+    expect(avecPlancher(6, socleDe(3, 3))).toBe(6);
+    expect(avecPlancher(13, socleDe(3, 3))).toBe(13);
+    expect(avecPlancher(4, socleDe(3, 3))).toBe(5);
+  });
+
+  it("sans critère mesurable, le score ne bouge pas", () => {
+    expect(avecPlancher(0, socleDe(0, 0))).toBe(0);
+  });
+
+  it("ne dépasse jamais PLANCHER_MAX", () => {
+    expect(avecPlancher(0, socleDe(4, 4))).toBe(PLANCHER_MAX);
   });
 });

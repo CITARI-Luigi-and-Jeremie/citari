@@ -5,6 +5,51 @@ d'une nouvelle session, après `CLAUDE.md`.
 
 ---
 
+## 2026-08-18 — La formule v2 : le plancher du socle, et la fin du cache
+
+Deux décisions de Luigi, exécutées ensemble.
+
+**1. Le cache de 3 jours est retiré.** Il a scanné easton.fr, résultat
+instantané : le système resservait la mesure de la veille, sans le dire.
+Désormais un scan FINI se remesure (et compte au quota) ; seuls un scan en
+cours (on le rejoint au lieu de payer deux fois) et un scan en erreur
+(reprise sous 3 jours) se réutilisent. Conséquences assumées et notées :
+relancer coûte de l'API, et le chiffre peut bouger entre deux mesures du
+même domaine — c'était le prix de la fraîcheur, Luigi l'a choisi.
+
+**2. La formule passe en v2 : le plancher du socle.** 77 mesures sur 112 à
+exactement 0 : le score ne départageait plus rien sur le segment vendu.
+Luigi a refusé le socle comme second chiffre séparé (« il faut pas corriger
+le socle mais le score ») et demandé d'élever légèrement les zéros « de
+manière pertinente et fair ». La réponse qui reste juste est un `max()`,
+jamais une somme : score = max(visibilité v1, plancher), où le plancher
+vaut jusqu'à 5 points au prorata des critères de socle MESURABLES (robots
+autorisés, llms.txt, identité reconnue au miroir, site lu comme source —
+règle du dénominateur : en aperçu, sans recherche web, le 4e critère sort
+du comptage). Pourquoi le max est la clef : une seule présence neutre vaut
+déjà ~6, donc une entreprise réellement citée reste devant TOUTES les
+invisibles ; un bonus additif aurait inversé ce classement, c'était
+l'objection au relèvement naïf du plancher.
+
+**La comparabilité est préservée par la rétroactivité** : la v2 a été
+appliquée en SQL aux 112 mesures le jour même (74 zéros relevés : 14 à 5,
+2 à 4, 48 à 3, 10 à 2 ; 3 restés à 0 car rien en place). J0 et J+90
+parlent la même langue. La règle de la maison évolue donc : la formule
+n'est plus « intouchable », elle est « versionnée, recalculée sur toute la
+base, publiée sur /methode » — les trois ensemble, sinon rien.
+
+À l'écran : quand le score EST le plancher (jamais cité, composantes à
+0 %), la carte du score le dit en une ligne, sinon un 3/100 au-dessus de
+quatre composantes à zéro serait incompréhensible. Le détail du socle en
+quatre lignes de la veille a été retiré au passage (Luigi n'en voulait
+pas comme axe séparé).
+
+Reste à savoir : easton.fr passe de 0 à 3 en complet — si une visio est
+présentée sur un scan à plancher, le verdict « 3 sur 100 » au-dessus de
+« vous êtes dans 0 réponse » se commente à l'oral avec /methode à l'appui.
+
+---
+
 ## 2026-08-17 — L'audit d'écran par écran : l'axe, l'écran 18, l'infrastructure
 
 Retour de Luigi : « slide 18 tu m'expliques ? il y a encore pas mal

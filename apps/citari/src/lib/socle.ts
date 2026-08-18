@@ -145,6 +145,32 @@ export function socleGeo(entree: {
   };
 }
 
+/**
+ * LE PLANCHER DU SOCLE : la formule v2 (18/08/2026, décision Luigi).
+ *
+ * 70 % des mesures sortaient à exactement 0 : le score ne départageait plus
+ * rien sur le segment vendu. La v2 donne un PLANCHER au score : une
+ * entreprise jamais citée mais prête à l'être ne vaut pas zéro, elle vaut
+ * jusqu'à 5 points, au prorata des critères de socle mesurés. Le max() est
+ * la clef de la justesse : dès que la visibilité réelle dépasse le plancher,
+ * lui seul compte, et une entreprise réellement citée (une seule présence
+ * neutre vaut déjà ~6) reste devant toutes les invisibles. Le plancher ne
+ * s'additionne jamais : il n'y a pas de « bonus technique ».
+ *
+ * La formule reste versionnée et comparable : la v2 a été appliquée
+ * RÉTROACTIVEMENT à toute la base le 18/08/2026, donc J0 et J+90 parlent la
+ * même langue. Toute évolution future suit la même règle : versionner,
+ * recalculer toute la base, publier sur /methode.
+ */
+export const PLANCHER_MAX = 5;
+
+export function avecPlancher(visibilite: number, socle: Socle): number {
+  const v = Math.round(visibilite);
+  if (socle.mesures === 0) return v;
+  const plancher = Math.round((socle.points / socle.mesures) * PLANCHER_MAX);
+  return Math.max(v, plancher);
+}
+
 /** Le mot du socle, pour l'afficher sans jamais ressembler à une note. */
 export function motSocle(s: Socle): string {
   if (s.rang === null) return "non relevé";
