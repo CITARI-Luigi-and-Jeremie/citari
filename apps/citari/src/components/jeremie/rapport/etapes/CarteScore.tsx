@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { motSocle, type Socle } from "@/lib/socle";
 
 import { BODY, HAIR, INK, MONO, RED, SUFFIX, labelStyle } from "../theme";
 
@@ -9,6 +10,7 @@ export function CarteScore({
   date,
   moteurs,
   composantes,
+  socle,
   wide,
   part,
 }: {
@@ -31,6 +33,12 @@ export function CarteScore({
     reponsesRetenues: number;
     reponsesEnErreur: number;
   } | null;
+  /**
+   * LE SOCLE : le second axe. À zéro de visibilité, il départage l'entreprise
+   * lisible par les machines de celle qui ne l'est pas — c'est ce que le
+   * score, figé et honnête, ne peut pas dire.
+   */
+  socle?: Socle | null;
   wide: boolean;
   part: "recit" | "preuve";
 }) {
@@ -244,6 +252,32 @@ export function CarteScore({
               la formule
             </a>
           </span>
+        </div>
+      ) : null}
+
+      {/* Le socle, en une ligne : il ne s'additionne jamais au score et ne
+          se présente jamais comme une note. À 0 de visibilité, c'est lui qui
+          dit s'il y a un chantier technique ou seulement un chantier de
+          contenu. */}
+      {socle && socle.rang !== null ? (
+        <div style={{ marginTop: 14, borderTop: `1px solid ${HAIR}`, paddingTop: 12 }}>
+          <span style={{ fontSize: 12, color: INK, opacity: 0.62, letterSpacing: "0.02em" }}>
+            Votre socle technique : {socle.points} critère{socle.points > 1 ? "s" : ""} sur{" "}
+            {socle.mesures} en place · {motSocle(socle)}
+          </span>
+          <div style={{ marginTop: 8, display: "flex", flexDirection: "column", gap: 4 }}>
+            {socle.criteres
+              .filter((c) => c.mesure)
+              .map((c) => (
+                <span key={c.cle} style={{ fontSize: 12, color: INK, opacity: 0.62 }}>
+                  <span style={{ color: c.atteint ? INK : RED, fontWeight: 600 }}>
+                    {c.atteint ? "en place" : "manquant"}
+                  </span>
+                  {" · "}
+                  {c.libelle} ({c.detail})
+                </span>
+              ))}
+          </div>
         </div>
       ) : null}
     </div>

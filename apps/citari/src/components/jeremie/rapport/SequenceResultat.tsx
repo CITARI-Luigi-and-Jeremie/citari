@@ -174,6 +174,7 @@ export function SequenceResultat({
             date={data.date}
             moteurs={data.moteurs}
             composantes={data.composantes}
+            socle={data.socle}
             wide={wide}
             part={part}
           />

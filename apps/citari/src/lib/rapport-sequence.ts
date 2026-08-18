@@ -1,4 +1,5 @@
 import { dateFr } from "@/lib/typo";
+import { socleGeo, type Socle } from "@/lib/socle";
 import {
   adversairePrincipal,
   partDeVoix,
@@ -71,6 +72,13 @@ export interface DonneesSequence {
     reponsesRetenues: number;
     reponsesEnErreur: number;
   } | null;
+  /**
+   * LE SOCLE : le second axe (18/08/2026). Le score dit si on vous cite ;
+   * le socle dit si vous êtes en état d'être cité. Il départage les 70 %
+   * de scans à zéro, sans jamais toucher à la formule figée ni s'additionner
+   * avec elle.
+   */
+  socle: Socle;
   /**
    * La question miroir : ce qu'une IA répond quand on lui donne le nom de la
    * marque. Hors méthodologie et assumée comme telle (c'est la seule question
@@ -352,6 +360,16 @@ export function construireSequence(entree: {
     laPlusDure,
     voix,
     composantes,
+    socle: socleGeo({
+      audit: entree.audit,
+      miroir: Array.isArray(entree.miroir)
+        ? (entree.miroir as { moteur?: string; texte?: string }[])
+        : null,
+      // L'aperçu n'active pas la recherche web : aucune source n'est
+      // collectée, le critère de la matière lue n'est pas mesurable.
+      lecturesVotreSite: 0,
+      sourcesCollectees: false,
+    }),
     miroir,
     technique,
     voixMeta: {

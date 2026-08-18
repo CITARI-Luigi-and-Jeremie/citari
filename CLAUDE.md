@@ -345,6 +345,26 @@ Les résidus Lovable qui pointaient vers une base étrangère (`apps/citari/.env
 versionné, `client.ts`, `auth-attacher.ts`, `auth-middleware.ts`) ont été
 supprimés le 06/08/2026.
 
+**LE SOCLE : le second axe qui départage les invisibles** (18/08/2026).
+Constat de Luigi, vérifié en base : **77 de nos 110 mesures sont à
+exactement 0**, dont 70 aperçus. Le score est juste (zéro mention vaut
+zéro), mais sur le segment vendu il ne départage plus rien. La formule
+n'a PAS été touchée, et ne doit jamais l'être pour cette raison : cinq
+points offerts pour un `llms.txt` feraient passer une entreprise
+invisible mais rangée (5) devant une entreprise réellement citée une fois
+sur quarante (3) — le classement s'inverserait, et les 110 scans en base
+deviendraient incomparables à leurs re-scans J+90.
+
+`lib/socle.ts` mesure donc l'AUTRE chose : êtes-vous en état d'être cité.
+Quatre critères (robots d'IA non bloqués, llms.txt posé, les moteurs
+savent dire qui vous êtes dans le miroir, votre site a été lu comme
+source), avec la règle du dénominateur : un critère non mesurable sort du
+comptage au lieu de compter comme un échec (en aperçu, sans recherche
+web, « votre site a-t-il été lu » n'est pas mesurable). Il ne s'additionne
+JAMAIS au score et ne se présente jamais comme une note sur 100. Sur les
+77 zéros réels, il les répartit en 14 à 100, 27 à 67, 23 à 50, 10 à 33 et
+3 à 0. Affiché sous le score dans la séquence d'aperçu.
+
 ## Ce qui est FIGÉ, et pourquoi
 
 Trois choses ne doivent plus bouger, parce que la promesse vendue est une
@@ -419,7 +439,7 @@ du toolkit et les colonnes réelles vit dans
 
 ```bash
 pnpm install
-pnpm -r test                        # 286 tests
+pnpm -r test                        # 293 tests
 pnpm -r typecheck                   # paquets + fichiers du site importés par les tests
 npm --prefix apps/citari run typecheck   # TOUT le site (ajouté le 14/08/2026)
 npm --prefix apps/citari run build
